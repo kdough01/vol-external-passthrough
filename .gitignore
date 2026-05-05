@@ -1,0 +1,16 @@
+build/
+*.o
+*.a
+*.so
+*.exe
+
+*.h5
+
+.vscode/
+
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+
+.DS_Store

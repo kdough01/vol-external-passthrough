@@ -1,10 +1,10 @@
 #Your HDF5 install path
 #HDF5_DIR=../build_hdf5/hdf5
-HDF5_DIR=/Users/koziol/HDF5/github/hpc-io/async_vol_register_optional/build_parallel_debug/hdf5
+HDF5_DIR=/home/kevindougherty.guest/dev/hdf5/src
 #MPI_DIR=/usr/local
 
-CC=mpicc
-#CC=gcc-9
+# CC=mpicc
+CC=gcc
 AR=ar
 
 DEBUG=-DENABLE_EXT_PASSTHRU_LOGGING -g -O0
@@ -14,18 +14,18 @@ CFLAGS = $(DEBUG) -fPIC $(INCLUDES) -Wall
 #LIBS=-L$(HDF5_DIR)/lib -L$(MPI_DIR)/lib -lhdf5 -lz
 LIBS=-L$(HDF5_DIR)/lib -lhdf5 -lz
 # Uncomment this line Linux builds:
-# DYNLDFLAGS = $(DEBUG) -shared -fPIC $(LIBS)
+DYNLDFLAGS = $(DEBUG) -shared -fPIC $(LIBS)
 # Uncomment this line MacOS builds:
-DYNLDFLAGS = $(DEBUG) -dynamiclib -current_version 1.0 -fPIC $(LIBS)
+# DYNLDFLAGS = $(DEBUG) -dynamiclib -current_version 1.0 -fPIC $(LIBS)
 LDFLAGS = $(DEBUG) $(LIBS)
 ARFLAGS = rs
 
 DYNSRC = H5VLpassthru_ext.c
 DYNOBJ = $(DYNSRC:.c=.o)
 # Uncomment this line Linux builds:
-# DYNLIB = libh5passthrough_vol.so
+DYNLIB = libh5passthrough_vol.so
 # Uncomment this line MacOS builds:
-DYNLIB = libh5passthrough_vol.dylib
+# DYNLIB = libh5passthrough_vol.dylib
 DYNDBG = libh5passthrough_vol.dylib.dSYM
 
 STATSRC = new_h5api.c

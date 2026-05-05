@@ -26,11 +26,16 @@ if (NOT HDF5_FOUND)
   message (FATAL_ERROR "HDF5 was not found on the system")
 endif ()
 
-add_library(hdf5_vol_passthrough SHARED ${HDF5_VOL_PASSTHROUGH_SRCS})
+add_library(hdf5_vol_passthrough SHARED ${HDF5_VOL_PASSTHROUGH_SRCS}
+  gpu_transform.c)
+target_compile_definitions(hdf5_vol_passthrough PRIVATE ENABLE_EXT_PASSTHRU_LOGGING)
 target_include_directories(hdf5_vol_passthrough 
   PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
   PUBLIC "${HDF5_INCLUDE_DIRS}"
 )
+
+add_executable(test_write test_write.c)
+target_link_libraries(test_write PRIVATE hdf5::hdf5)
 
 target_link_libraries(hdf5_vol_passthrough PRIVATE "${HDF5_LIBRARIES}")
 

@@ -1237,11 +1237,17 @@ H5VL_pass_through_ext_dataset_read(size_t count, void *dset[],
     /* Populate the array of under objects */
     under_vol_id = ((H5VL_pass_through_ext_t *)(dset[0]))->under_vol_id;
     for(size_t u = 0; u < count; u++) {
+        hssize_t nelem = H5Sget_select_npoints(mem_space_id[u]);
+        size_t type_size = H5Tget_size(mem_type_id[u]);
+        size_t total_bytes = nelem * type_size;
+        printf("Total bytes: %zu\n", total_bytes);
         o_arr[u] = ((H5VL_pass_through_ext_t *)(dset[u]))->under_object;
         assert(under_vol_id == ((H5VL_pass_through_ext_t *)(dset[u]))->under_vol_id);
     }
 
     ret_value = H5VLdataset_read(count, o_arr, under_vol_id, mem_type_id, mem_space_id, file_space_id, plist_id, buf, req);
+
+    printf("Return %i", ret_value);
 
     /* Check for async request */
     if(req && *req)
@@ -1277,9 +1283,18 @@ H5VL_pass_through_ext_dataset_write(size_t count, void *dset[],
     /* Populate the array of under objects */
     under_vol_id = ((H5VL_pass_through_ext_t *)(dset[0]))->under_vol_id;
     for(size_t u = 0; u < count; u++) {
+        hssize_t nelem;
+        nelem = H5Sget_select_npoints(mem_space_id[u]);
+        size_t type_size = H5Tget_size(mem_type_id[u]);
+        // printf("Total bytes: %zu\n", nelem * type_size);
         o_arr[u] = ((H5VL_pass_through_ext_t *)(dset[u]))->under_object;
         assert(under_vol_id == ((H5VL_pass_through_ext_t *)(dset[u]))->under_vol_id);
     }
+
+    /*
+    Any GPU work will be done here -- it may be possible to put it in the prior for loop,
+    but I can start with them separate for a clearer picture of the data movement.
+    */
 
     ret_value = H5VLdataset_write(count, o_arr, under_vol_id, mem_type_id, mem_space_id, file_space_id, plist_id, buf, req);
 
@@ -1693,6 +1708,8 @@ H5VL_pass_through_ext_file_create(const char *name, unsigned flags, hid_t fcpl_i
 
     /* Get copy of our VOL info from FAPL */
     H5Pget_vol_info(fapl_id, (void **)&info);
+
+    printf("Info: %s", info);
 
     /* Make sure we have info about the underlying VOL to be used */
     if (!info)
