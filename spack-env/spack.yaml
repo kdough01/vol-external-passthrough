@@ -1,0 +1,33 @@
+spack:
+  specs:
+  - libpressio
+  - hdf5
+  - openmpi
+  - cmake
+  packages:
+    gcc:
+      externals:
+      - spec: gcc@14.3.1 languages:='c,c++,fortran'
+        prefix: /usr
+        extra_attributes:
+          compilers:
+            c: /usr/bin/gcc-14
+            cxx: /usr/bin/g++-14
+            fortran: /usr/bin/gfortran-14
+      - spec: gcc@15.2.1 languages:='c,c++,fortran'
+        prefix: /usr
+        extra_attributes:
+          compilers:
+            c: /usr/bin/gcc
+            cxx: /usr/bin/g++
+            fortran: /usr/bin/gfortran
+    berkeley-db:
+      require: cflags=-Wno-incompatible-pointer-types
+  toolchains:
+    gcc_toolchain:
+    - spec: '%c=gcc@14'
+      when: '%c'
+    - spec: '%cxx=gcc@14'
+      when: '%cxx'
+    - spec: '%fortran=gcc@14'
+      when: '%fortran'
