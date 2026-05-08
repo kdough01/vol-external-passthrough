@@ -1,0 +1,22 @@
+#!/bin/bash
+#PBS -N vol_test
+#PBS -l select=1:ncpus=1:mpiprocs=1
+#PBS -l walltime=00:01:00
+#PBS -j oe
+#PBS -A YOUR_PROJECT_ALLOCATION
+
+cd $PBS_O_WORKDIR
+
+echo "Job started on $(date)"
+echo "Running on: $(hostname)"
+
+mkdir -p build
+cd build
+
+cmake ..
+make -j8
+
+echo "Running small test..."
+./test_write
+
+echo "Job finished on $(date)"

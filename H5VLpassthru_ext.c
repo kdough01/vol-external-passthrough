@@ -1283,9 +1283,16 @@ H5VL_pass_through_ext_dataset_write(size_t count, void *dset[],
     /* Populate the array of under objects */
     under_vol_id = ((H5VL_pass_through_ext_t *)(dset[0]))->under_vol_id;
     for(size_t u = 0; u < count; u++) {
+        // say we have 5 datasets, we can process them all at the same time
+        // by specifying the number of GPUs we have access to - no reason this can't
+        // just use MPI to use multiple processors
         hssize_t nelem;
         nelem = H5Sget_select_npoints(mem_space_id[u]);
         size_t type_size = H5Tget_size(mem_type_id[u]);
+
+        // ------ GPU COMPRESSION CALL ------
+        H5VL_pass_through_ext_gpu_transfer_compress(nelem, mem_type_id[u], buf[u]);
+        
         // printf("Total bytes: %zu\n", nelem * type_size);
         o_arr[u] = ((H5VL_pass_through_ext_t *)(dset[u]))->under_object;
         assert(under_vol_id == ((H5VL_pass_through_ext_t *)(dset[u]))->under_vol_id);
