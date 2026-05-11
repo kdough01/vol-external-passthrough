@@ -8,6 +8,54 @@
 /* Public HDF5 headers */
 #include "hdf5.h"
 
+// Metadata structs -- will need to be moved to H5VLpassthru_ext.c file later, keeping here for simplicity
+
+typedef struct datatype_ctx {
+    int datatype_size; // if this is all the information we need, this can probably be removed
+} datatype_ctx;
+
+typedef struct chunking_ctx {
+    int chunk_size; // I'm not sure yet what information we will need for chunking, this is just a placeholder
+} chunking_ctx;
+
+typedef struct compression_metadata {
+    int library; // I need to read about libpressio to know what this struct should contain, but any information related to that function call goes here
+    int compression_level;
+} compression_metadata;
+
+// any other information we want can go here
+typedef struct config_params {
+    int conf; // placeholder
+} config_params;
+
+typedef struct gpu_context_t {
+    int device_id;
+    cudaStream_t stream;
+    void *d_in; // pointer to input buffer in GPU
+    size_t d_in_capacity; // size of input buffer
+    void *d_out;
+    size_t d_out_capacity;
+}
+
+typedef struct gpu_vol_dataset_t {
+    void* under_dataset;
+    hid_t under_dataset;
+    datatype_ctx* datatype_info;
+    chunking_ctx* chunking_info;
+    compression_metadata* compression_metadata;
+} gpu_vol_dataset_t;
+
+typedef struct gpu_vol_file_t {
+    void* under_file;
+    hid_t under_vol_id;
+    gpu_context_t* gpu_ctx;
+    config_params* config_params;
+} gpu_vol_file_t;
+
+// Wrapper functions to fill in structs
+
+datatype_ctx* datatype_ctx_create()
+
 // COMPRESSION
 
 __global__ void gpu_compress(hid_t *d_dset[], size_t count) {
