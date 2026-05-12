@@ -1291,8 +1291,15 @@ H5VL_pass_through_ext_dataset_write(size_t count, void *dset[],
         size_t type_size = H5Tget_size(mem_type_id[u]);
 
         // ------ GPU COMPRESSION CALL ------
+        printf("BEFORE GPU:\n");
+        for (int i = 0; i < 10; i++)
+            printf("%d ", ((int*)buf[u])[i]);
+        printf("\n");
         H5VL_pass_through_ext_gpu_transfer_compress(nelem, mem_type_id[u], buf[u]);
-        
+        printf("AFTER GPU:\n");
+        for (int i = 0; i < 10; i++)
+            printf("%d ", ((int*)buf[u])[i]);
+        printf("\n");
         // printf("Total bytes: %zu\n", nelem * type_size);
         o_arr[u] = ((H5VL_pass_through_ext_t *)(dset[u]))->under_object;
         assert(under_vol_id == ((H5VL_pass_through_ext_t *)(dset[u]))->under_vol_id);

@@ -14,6 +14,11 @@ int main() {
     hid_t dset_id_open = H5Dopen2(file_id, "data", H5P_DEFAULT);
     H5Dread(dset_id_open, H5T_NATIVE_INT, space_id, space_id, H5P_DEFAULT, buf);
 
+    for (int i = 0; i < 20; i++) {
+        printf("%d ", buf[i]);
+    }
+    printf("\n");
+
     H5Dclose(dset_id);
     H5Sclose(space_id);
     H5Fclose(file_id);

@@ -25,7 +25,7 @@ typedef struct chunking_ctx {
 typedef struct compression_ctx {
     int block_sizes;
     int compressed_chunk_size;
-}
+} compression_ctx;
 
 // any other static information we want can go here
 typedef struct config_params {
@@ -43,14 +43,14 @@ typedef struct gpu_context_t {
     size_t d_in_capacity; // size of input buffer
     void *d_out;
     size_t d_out_capacity;
-}
+} gpu_context_t;
 
 typedef struct gpu_vol_dataset_t {
     void* under_dataset;
-    hid_t under_dataset;
+    hid_t under_vol_id;
     datatype_ctx* datatype_info;
     chunking_ctx* chunking_info;
-    compression_ctx* compression_ctx;
+    compression_ctx* comp_ctx;
 } gpu_vol_dataset_t;
 
 typedef struct gpu_vol_file_t {
@@ -71,87 +71,107 @@ config_params* config_params_create(hid_t fapl_id)
         return NULL;
     }
 
-    p->device_id;
-    p->min_size_for_gpu;
-    p->max_device_memory_bytes;
-    p->compression_library;
-    p->compression_level;
+    p->device_id = 0;
+    p->min_size_for_gpu = 256 * 1024;
+    p->max_device_memory_bytes = 2ULL * 1024 * 1024 * 1024;
+    p->compression_library = 0;
+    p->compression_level = 1;
 
     return p;
 }
 
-gpu_context_t* gpu_context_create(config_params conf_params)
+gpu_context_t* gpu_context_create(config_params *conf_params)
 {
     gpu_context_t *gpu_ctx = (gpu_context_t*)calloc(1, sizeof(gpu_context_t));
 
     gpu_ctx->device_id = conf_params->device_id;
-    cudaSetDevice(ctx->device_id);
+    cudaSetDevice(gpu_ctx->device_id);
 
     cudaStreamCreate(&gpu_ctx->stream);
 
     gpu_ctx->d_in_capacity = conf_params->max_device_memory_bytes;
     gpu_ctx->d_out_capacity = conf_params->max_device_memory_bytes;
 
-    cudaMalloc(&ctx->d_in, gpu_ctx->d_in_capacity);
-    cudaMalloc(&ctx->d_out, gpu_ctx->d_out_capacity);
+    cudaMalloc(&gpu_ctx->d_in, gpu_ctx->d_in_capacity);
+    cudaMalloc(&gpu_ctx->d_out, gpu_ctx->d_out_capacity);
 
     return gpu_ctx;
 }
 
-datatype_ctx* datatype_ctx_create()
+datatype_ctx* datatype_ctx_create(hid_t dataset_id)
 {
     datatype_ctx *dt_ctx = (datatype_ctx*)calloc(1, sizeof(datatype_ctx));
 
-    dt_ctx->H5Dget_type();
+    hid_t dtype = H5Dget_type(dataset_id);
+
+    dt_ctx->datatype_size = H5Tget_size(dtype);
+    dt_ctx->datatype = H5Tget_class(dtype);
+
+    H5Tclose(dtype);
 
     return dt_ctx;
 }
 
-chunking_ctx* chunking_ctx_create()
+chunking_ctx* chunking_ctx_create(hid_t dataset_id)
 {
     chunking_ctx *chunk_ctx = (chunking_ctx*)calloc(1, sizeof(chunking_ctx));
 
-    chunk_ctx->H5Dget_space();
-    chunk_ctx->H5Dget_layout();
-    chunk_ctx->H5Pget_chunk();
+    hid_t space = H5Dget_space(dataset_id);
+    hid_t dcpl = H5Dget_create_plist(dataset_id);
+
+    chunk_ctx->layout_type = H5Dget_layout(dataset_id);
+
+    if (chunk_ctx->layout_type == H5D_CHUNKED) {
+        H5Pget_chunk(dcpl, 2, chunk_ctx->chunk_dims);
+    }
+
+    chunk_ctx->chunk_size = H5Sget_simple_extent_npoints(space);
+
+    H5Pclose(dcpl);
+    H5Sclose(space);
 
     return chunk_ctx;
 }
 
-compression_ctx* compression_ctx_create()
+compression_ctx* compression_ctx_create(hid_t dataset_id)
 {
     compression_ctx *comp_ctx = (compression_ctx*)calloc(1, sizeof(compression_ctx));
     
-    compression_ctx->block_sizes;
-    compression_ctx->compressed_chunk_size;
+    comp_ctx->block_sizes = 0;
+    comp_ctx->compressed_chunk_size = 0;
 
     return comp_ctx;
 }
 
-gpu_vol_dataset_t* gpu_vol_dataset_wrap()
+gpu_vol_dataset_t* gpu_vol_dataset_wrap(void *under_dataset, hid_t dataset_id, hid_t under_vol_id)
 {
     gpu_vol_dataset_t *gpu_dataset_ctx = (gpu_vol_dataset_t*)calloc(1, sizeof(gpu_vol_dataset_t));
 
-    gpu_dataset_ctx.datatype_ctx -> datatype_context_create();
-    gpu_dataset_ctx.chunking_ctx -> chunking_ctx_create();
-    gpu_dataset_ctx.compression_ctx -> compression_ctx_create();
+    gpu_dataset_ctx->under_dataset = under_dataset;
+    gpu_dataset_ctx->under_vol_id = under_vol_id;
+    gpu_dataset_ctx->datatype_info = datatype_ctx_create(dataset_id);
+    gpu_dataset_ctx->chunking_info = chunking_ctx_create(dataset_id);
+    gpu_dataset_ctx->comp_ctx = compression_ctx_create(dataset_id);
 
     return gpu_dataset_ctx;
 }
 
-gpu_vol_file_t* gpu_vol_file_wrap()
+gpu_vol_file_t* gpu_vol_file_wrap(hid_t fapl_id, hid_t under_vol_id, void *under_file)
 {
     gpu_vol_file_t *gpu_vol_file_ctx = (gpu_vol_file_t*)calloc(1, sizeof(gpu_vol_file_t));
 
-    gpu_vol_file_ctx->gpu_context_create();
-    gpu_vol_file_ctx->config_params_crate();
+    gpu_vol_file_ctx->under_file = under_file;
+    gpu_vol_file_ctx->under_vol_id = under_vol_id;
+
+    gpu_vol_file_ctx->config_params = config_params_create(fapl_id);
+    gpu_vol_file_ctx->gpu_ctx = gpu_context_create(gpu_vol_file_ctx->config_params);
 
     return gpu_vol_file_ctx;
 }
 
 // COMPRESSION
-
-__global__ void gpu_compress(hid_t *d_dset[], size_t count) {
+template <typename T>
+__global__ void gpu_compress(T* d_dset, size_t count) {
     /* 
     V1.0 this will just pass the data through the GPU and add 1 to show
     that the data is actually being passed, but not doing anything useful.
@@ -159,8 +179,8 @@ __global__ void gpu_compress(hid_t *d_dset[], size_t count) {
     but that is with filters
     */
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
-    if (idx < n) {
-        d_dset[idx] += 1.0f;
+    if (idx < count) {
+        d_dset[idx] += 1;
     }
 }
 
@@ -195,50 +215,83 @@ H5VL_pass_through_ext_gpu_transfer_compress(size_t nelem, hid_t dtype, void *buf
     */
 
     #ifdef ENABLE_EXT_PASSTHRU_LOGGING
-        printf("------- EXT PASS THROUGH VOL DATASET GPU TRRANSFER\n");
+        printf("GPU TRANSFORM CALLED: nelem=%zu dtype=%d\n", nelem, dtype);
     #endif
 
     // copy dset to device
     // is mem_type_id the type of data stored???
-    hid_t *d_dset;
-    cudaMalloc(&d_dset, m * sizeof(hid_t));
-    cudaMemcpy(d_dset, dset, m * sizeof(hid_t), cudaMemcpyHostToDevice);
+    void *d_dset;
+    H5T_class_t cls = H5Tget_class(dtype);
+    size_t size = H5Tget_size(dtype);
+    size_t bytes = nelem * H5Tget_size(dtype);
 
-    gpu_compress<<<blocks, threads>>>(d_dset, count);
+    cudaMalloc(&d_dset, bytes);
+    cudaMemcpy(d_dset, dset, bytes, cudaMemcpyHostToDevice);
+
+    int threads = 256;
+    int blocks = (nelem + threads - 1) / threads;
+
+    switch (cls) {
+        case H5T_INTEGER:
+            if (size==4) {
+                gpu_compress<int><<<blocks, threads>>>((int*)d_dset, nelem);
+            }
+            break;
+        case FLOAT:
+            if (size==4) {
+                gpu_compress<float><<<blocks, threads>>>((float*)d_dset, nelem);
+            }
+            break;
+        default:
+
+    }
+    cudaDeviceSynchronize();
 
     // when we compress the data, the size will be different when returned
     // need to figure out how to handle that
-    cudaMemcpy(dset, d_dset, m * sizeof(hid_t), cudaMemcpyDeviceToHost);
+    cudaMemcpy(buf[0], d_dset, bytes, cudaMemcpyDeviceToHost);
     cudaFree(d_dset);
+
+    return 0;
 }
 
 // DECOMPRESSION
 
-__global__ void gpu_decompress(hid_t *d_dset[], size_t count) {
+__global__ void gpu_decompress(float *d_dset, size_t count)
+{
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
-    if (idx < n) {
+    if(idx < count) {
         d_dset[idx] += 1.0f;
     }
 }
 
 static herr_t
-H5VL_pass_through_ext_gpu_transfer_decompress(size_t count, void *dset[],
-    hid_t mem_type_id[], hid_t mem_space_id[],
-    hid_t file_space_id[], hid_t plist_id, void *buf[], void **req)
+H5VL_pass_through_ext_gpu_transfer_decompress(size_t count, void *dset[], void *buf[])
 {
 
     #ifdef ENABLE_EXT_PASSTHRU_LOGGING
-        printf("------- EXT PASS THROUGH VOL DATASET GPU TRRANSFER\n");
+        printf("GPU TRANSFORM CALLED: nelem=%zu dtype=%d\n", nelem, dtype);
     #endif
 
     // copy dset to device
     // is mem_type_id the type of data stored???
-    hid_t *d_dset;
-    cudaMalloc(&d_dset, m * sizeof(hid_t));
-    cudaMemcpy(d_dset, dset, m * sizeof(hid_t), cudaMemcpyHostToDevice);
+
+    (void)dset;
+
+    size_t bytes = count * sizeof(float);
+
+    int threads = 256;
+    int blocks = (count + threads - 1) / threads;
+
+    float *d_dset;
+    cudaMalloc(&d_dset, bytes);
+    cudaMemcpy(d_dset, buf[0], bytes, cudaMemcpyHostToDevice);
 
     gpu_decompress<<<blocks, threads>>>(d_dset, count);
+    cudaDeviceSynchronize();
 
-    cudaMemcpy(dset, d_dset, m * sizeof(hid_t), cudaMemcpyDeviceToHost);
+    cudaMemcpy(buf[0], d_dset, bytes, cudaMemcpyDeviceToHost);
     cudaFree(d_dset);
+
+    return 0;
 }
