@@ -10,7 +10,6 @@
 
 // Metadata structs -- will need to be moved to H5VLpassthru_ext.c file later, keeping here for simplicity
 
-// comes from H5Dget_type()
 typedef struct datatype_ctx {
     int datatype;
     int datatype_size; // if this is all the information we need, this can probably be removed
@@ -135,9 +134,19 @@ gpu_vol_dataset_t* gpu_vol_dataset_wrap()
 
     gpu_dataset_ctx.datatype_ctx -> datatype_context_create();
     gpu_dataset_ctx.chunking_ctx -> chunking_ctx_create();
-    gpu_dataset_ctx.compression_ctx -> compression_ctx_create();    
+    gpu_dataset_ctx.compression_ctx -> compression_ctx_create();
 
     return gpu_dataset_ctx;
+}
+
+gpu_vol_file_t* gpu_vol_file_wrap()
+{
+    gpu_vol_file_t *gpu_vol_file_ctx = (gpu_vol_file_t*)calloc(1, sizeof(gpu_vol_file_t));
+
+    gpu_vol_file_ctx->gpu_context_create();
+    gpu_vol_file_ctx->config_params_crate();
+
+    return gpu_vol_file_ctx;
 }
 
 // COMPRESSION
