@@ -10,22 +10,31 @@
 
 // Metadata structs -- will need to be moved to H5VLpassthru_ext.c file later, keeping here for simplicity
 
+// comes from H5Dget_type()
 typedef struct datatype_ctx {
+    int datatype;
     int datatype_size; // if this is all the information we need, this can probably be removed
 } datatype_ctx;
 
 typedef struct chunking_ctx {
     int chunk_size; // I'm not sure yet what information we will need for chunking, this is just a placeholder
+    int chunk_dims[2]; // how should we specify dimensions, I put in an array here but idk if that's the best way
+    int layout_type;
+    int mapping;
 } chunking_ctx;
 
-typedef struct compression_metadata {
-    int library; // I need to read about libpressio to know what this struct should contain, but any information related to that function call goes here
-    int compression_level;
-} compression_metadata;
+typedef struct compression_ctx {
+    int block_sizes;
+    int compressed_chunk_size;
+}
 
-// any other information we want can go here
+// any other static information we want can go here
 typedef struct config_params {
-    int conf; // placeholder
+    int device_id;
+    int min_size_for_gpu;
+    int max_device_memory_bytes;
+    int compression_library;
+    int compression_level;
 } config_params;
 
 typedef struct gpu_context_t {
@@ -42,7 +51,7 @@ typedef struct gpu_vol_dataset_t {
     hid_t under_dataset;
     datatype_ctx* datatype_info;
     chunking_ctx* chunking_info;
-    compression_metadata* compression_metadata;
+    compression_ctx* compression_ctx;
 } gpu_vol_dataset_t;
 
 typedef struct gpu_vol_file_t {
@@ -54,7 +63,82 @@ typedef struct gpu_vol_file_t {
 
 // Wrapper functions to fill in structs
 
+config_params* config_params_create(hid_t fapl_id)
+{
+    (void)fapl_id;
+
+    config_params *p = (config_params*)calloc(1, sizeof(config_params));
+    if (!p) {
+        return NULL;
+    }
+
+    p->device_id;
+    p->min_size_for_gpu;
+    p->max_device_memory_bytes;
+    p->compression_library;
+    p->compression_level;
+
+    return p;
+}
+
+gpu_context_t* gpu_context_create(config_params conf_params)
+{
+    gpu_context_t *gpu_ctx = (gpu_context_t*)calloc(1, sizeof(gpu_context_t));
+
+    gpu_ctx->device_id = conf_params->device_id;
+    cudaSetDevice(ctx->device_id);
+
+    cudaStreamCreate(&gpu_ctx->stream);
+
+    gpu_ctx->d_in_capacity = conf_params->max_device_memory_bytes;
+    gpu_ctx->d_out_capacity = conf_params->max_device_memory_bytes;
+
+    cudaMalloc(&ctx->d_in, gpu_ctx->d_in_capacity);
+    cudaMalloc(&ctx->d_out, gpu_ctx->d_out_capacity);
+
+    return gpu_ctx;
+}
+
 datatype_ctx* datatype_ctx_create()
+{
+    datatype_ctx *dt_ctx = (datatype_ctx*)calloc(1, sizeof(datatype_ctx));
+
+    dt_ctx->H5Dget_type();
+
+    return dt_ctx;
+}
+
+chunking_ctx* chunking_ctx_create()
+{
+    chunking_ctx *chunk_ctx = (chunking_ctx*)calloc(1, sizeof(chunking_ctx));
+
+    chunk_ctx->H5Dget_space();
+    chunk_ctx->H5Dget_layout();
+    chunk_ctx->H5Pget_chunk();
+
+    return chunk_ctx;
+}
+
+compression_ctx* compression_ctx_create()
+{
+    compression_ctx *comp_ctx = (compression_ctx*)calloc(1, sizeof(compression_ctx));
+    
+    compression_ctx->block_sizes;
+    compression_ctx->compressed_chunk_size;
+
+    return comp_ctx;
+}
+
+gpu_vol_dataset_t* gpu_vol_dataset_wrap()
+{
+    gpu_vol_dataset_t *gpu_dataset_ctx = (gpu_vol_dataset_t*)calloc(1, sizeof(gpu_vol_dataset_t));
+
+    gpu_dataset_ctx.datatype_ctx -> datatype_context_create();
+    gpu_dataset_ctx.chunking_ctx -> chunking_ctx_create();
+    gpu_dataset_ctx.compression_ctx -> compression_ctx_create();    
+
+    return gpu_dataset_ctx;
+}
 
 // COMPRESSION
 
