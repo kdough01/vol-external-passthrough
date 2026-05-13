@@ -3,20 +3,23 @@
 #PBS -l select=1:ncpus=1:mpiprocs=1
 #PBS -l walltime=00:01:00
 #PBS -j oe
-#PBS -A YOUR_PROJECT_ALLOCATION
+#PBS -A ECP-EZ
 
 cd $PBS_O_WORKDIR
 
 echo "Job started on $(date)"
 echo "Running on: $(hostname)"
 
-mkdir -p build
-cd build
+echo "Loading modules"
+module load nvhpc/21.3-kbdsk4i
+module load openmpi/4.1.1-zs4byuy
+module load hdf5/1.10.7-dvfgfdt
 
-cmake ..
-make -j8
+echo "Building"
+cmake -S . -B build
+cmake --build build -j8
 
 echo "Running small test..."
-./test_write
+./build/test_write
 
 echo "Job finished on $(date)"

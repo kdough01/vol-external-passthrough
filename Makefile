@@ -1,6 +1,6 @@
 #Your HDF5 install path
 #HDF5_DIR=../build_hdf5/hdf5
-HDF5_DIR=/home/kevindougherty.guest/spack/opt/spack/linux-m1/hdf5-1.14.6-wulcdf6scirrbv5slmvczpdudzchageg
+# HDF5_DIR=/home/kevindougherty.guest/spack/opt/spack/linux-m1/hdf5-1.14.6-wulcdf6scirrbv5slmvczpdudzchageg
 #MPI_DIR=/usr/local
 
 CC=mpicc
@@ -9,10 +9,10 @@ AR=ar
 
 DEBUG=-DENABLE_EXT_PASSTHRU_LOGGING -g -O0
 #INCLUDES=-I$(MPI_DIR)/include -I$(HDF5_DIR)/include
-INCLUDES=-I$(HDF5_DIR)/include
+INCLUDES=#-I$(HDF5_DIR)/include
 CFLAGS = $(DEBUG) -fPIC $(INCLUDES) -Wall
 #LIBS=-L$(HDF5_DIR)/lib -L$(MPI_DIR)/lib -lhdf5 -lz
-LIBS=-L$(HDF5_DIR)/lib -lhdf5 -lz
+LIBS=#-L$(HDF5_DIR)/lib -lhdf5 -lz
 # Uncomment this line Linux builds:
 DYNLDFLAGS = $(DEBUG) -shared -fPIC $(LIBS)
 # Uncomment this line MacOS builds:

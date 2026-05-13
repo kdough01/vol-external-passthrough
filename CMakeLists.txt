@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.12)
-project(HDF5_VOL_PASSTHROUGH VERSION 0.0.1 LANGUAGES C)
+project(HDF5_VOL_PASSTHROUGH VERSION 0.0.1 LANGUAGES C CUDA)
 
 if(NOT HDF5_VOL_PASSTHROUGH_INSTALL_BIN_DIR)
   set(HDF5_VOL_PASSTHROUGH_INSTALL_BIN_DIR ${CMAKE_INSTALL_PREFIX}/bin)
@@ -21,13 +21,17 @@ set(HDF5_VOL_PASSTHROUGH_HEADERS
 set(HDF5_VOL_PASSTHROUGH_SRCS
     ${CMAKE_CURRENT_SOURCE_DIR}/H5VLpassthru_ext.c)
 
+find_packages(MPI REQUIRED)
+target_link_libraries(hdf5_vol_passthrough PRIVATE MPI::MPI_C)
+target link_libraries(test_write PRIVATE MPI::MPI_c)
+    
 find_package(HDF5)
 if (NOT HDF5_FOUND)
   message (FATAL_ERROR "HDF5 was not found on the system")
 endif ()
 
 add_library(hdf5_vol_passthrough SHARED ${HDF5_VOL_PASSTHROUGH_SRCS}
-  gpu_transform.c)
+  gpu_transform.cu)
 target_compile_definitions(hdf5_vol_passthrough PRIVATE ENABLE_EXT_PASSTHRU_LOGGING)
 target_include_directories(hdf5_vol_passthrough 
   PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
@@ -35,7 +39,8 @@ target_include_directories(hdf5_vol_passthrough
 )
 
 add_executable(test_write test_write.c)
-target_link_libraries(test_write PRIVATE hdf5::hdf5)
+target_link_libraries(test_write PRIVATE ${HDF5_LIBRARIES})
+target_include_directories(test_write PRIVATE ${HDF5_INCLUDE_DIRS})
 
 target_link_libraries(hdf5_vol_passthrough PRIVATE "${HDF5_LIBRARIES}")
 
