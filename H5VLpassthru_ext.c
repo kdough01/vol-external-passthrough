@@ -193,6 +193,9 @@ static herr_t H5VL_pass_through_ext_token_from_str(void *obj, H5I_type_t obj_typ
 /* Generic optional callback */
 static herr_t H5VL_pass_through_ext_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_id, void **req);
 
+/* GPU Compression Functions */
+herr_t H5VL_pass_through_ext_gpu_transfer_compress(size_t nelem, hid_t dtype, void *buf[]);
+
 /*******************/
 /* Local variables */
 /*******************/
@@ -1288,14 +1291,13 @@ H5VL_pass_through_ext_dataset_write(size_t count, void *dset[],
         // just use MPI to use multiple processors
         hssize_t nelem;
         nelem = H5Sget_select_npoints(mem_space_id[u]);
-        size_t type_size = H5Tget_size(mem_type_id[u]);
 
         // ------ GPU COMPRESSION CALL ------
         printf("BEFORE GPU:\n");
         for (int i = 0; i < 10; i++)
             printf("%d ", ((int*)buf[u])[i]);
         printf("\n");
-        H5VL_pass_through_ext_gpu_transfer_compress(nelem, mem_type_id[u], buf[u]);
+        H5VL_pass_through_ext_gpu_transfer_compress(nelem, mem_type_id[u], (void *)buf[u]);
         printf("AFTER GPU:\n");
         for (int i = 0; i < 10; i++)
             printf("%d ", ((int*)buf[u])[i]);

@@ -184,8 +184,8 @@ __global__ void gpu_compress(T* d_dset, size_t count) {
     }
 }
 
-static herr_t
-H5VL_pass_through_ext_gpu_transfer_compress(size_t nelem, hid_t dtype, void *buf[])
+herr_t
+H5VL_pass_through_ext_gpu_transfer_compress(size_t nelem, hid_t dtype, void *buf)
 {
 
     /* 
@@ -226,7 +226,7 @@ H5VL_pass_through_ext_gpu_transfer_compress(size_t nelem, hid_t dtype, void *buf
     size_t bytes = nelem * H5Tget_size(dtype);
 
     cudaMalloc(&d_dset, bytes);
-    cudaMemcpy(d_dset, dset, bytes, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_dset, buf[0], bytes, cudaMemcpyHostToDevice);
 
     int threads = 256;
     int blocks = (nelem + threads - 1) / threads;
@@ -234,11 +234,13 @@ H5VL_pass_through_ext_gpu_transfer_compress(size_t nelem, hid_t dtype, void *buf
     switch (cls) {
         case H5T_INTEGER:
             if (size==4) {
+                // printf("GPU INT TRANSFORM CALLED: nelem=%zu dtype=%ld\n", nelem, dtype);
                 gpu_compress<int><<<blocks, threads>>>((int*)d_dset, nelem);
             }
             break;
-        case FLOAT:
+        case H5T_FLOAT:
             if (size==4) {
+                // printf("GPU FLOAT TRANSFORM CALLED: nelem=%zu dtype=%d\n", nelem, dtype);
                 gpu_compress<float><<<blocks, threads>>>((float*)d_dset, nelem);
             }
             break;

@@ -1,10 +1,10 @@
 #Your HDF5 install path
 #HDF5_DIR=../build_hdf5/hdf5
-HDF5_DIR=/home/kevindougherty.guest/dev/hdf5/src
+HDF5_DIR=/home/kevindougherty.guest/spack/opt/spack/linux-m1/hdf5-1.14.6-wulcdf6scirrbv5slmvczpdudzchageg
 #MPI_DIR=/usr/local
 
-# CC=mpicc
-CC=gcc
+CC=mpicc
+# CC=gcc
 AR=ar
 
 DEBUG=-DENABLE_EXT_PASSTHRU_LOGGING -g -O0
@@ -20,7 +20,7 @@ DYNLDFLAGS = $(DEBUG) -shared -fPIC $(LIBS)
 LDFLAGS = $(DEBUG) $(LIBS)
 ARFLAGS = rs
 
-DYNSRC = H5VLpassthru_ext.c
+DYNSRC = H5VLpassthru_ext.c gpu_transform.c
 DYNOBJ = $(DYNSRC:.c=.o)
 # Uncomment this line Linux builds:
 DYNLIB = libh5passthrough_vol.so
