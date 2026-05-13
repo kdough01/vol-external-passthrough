@@ -38,11 +38,10 @@ target_link_libraries(hdf5_vol_passthrough PRIVATE "${HDF5_LIBRARIES}")
 target_link_libraries(hdf5_vol_passthrough PRIVATE MPI::MPI_C)
 
 
-
 add_executable(test_write test_write.c)
 target_link_libraries(test_write PRIVATE ${HDF5_LIBRARIES})
 target_include_directories(test_write PRIVATE ${HDF5_INCLUDE_DIRS})
-target_link_libraries(test_write PRIVATE MPI::MPI_C)
+target_link_libraries(test_write PRIVATE MPI::MPI_C)`
 
 install(
   FILES

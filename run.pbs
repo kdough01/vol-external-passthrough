@@ -16,7 +16,10 @@ module load openmpi/4.1.1-zs4byuy
 module load hdf5/1.10.7-dvfgfdt
 
 echo "Building"
-cmake -S . -B build
+rm -rf build
+cmake -S . -B build \
+    -DCMAKE_C_COMPILER=mpicc \
+    -DCMAK_CUDA_COMPILER=nvcc
 cmake --build build -j8
 
 echo "Running small test..."
