@@ -11,9 +11,10 @@ echo "Job started on $(date)"
 echo "Running on: $(hostname)"
 
 echo "Loading modules"
-module load nvhpc/21.3-kbdsk4i
-module load openmpi/4.1.1-zs4byuy
-module load hdf5/1.10.7-dvfgfdt
+module load gcc/8.5.0-ede2bck
+module load openmpi/4.1.1-by6rv67
+module load hdf5/1.10.7-zjwj3y2
+module load cuda/12.3.0-gcc-9.3.0
 
 echo "Building"
 rm -rf build
