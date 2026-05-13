@@ -21,10 +21,7 @@ set(HDF5_VOL_PASSTHROUGH_HEADERS
 set(HDF5_VOL_PASSTHROUGH_SRCS
     ${CMAKE_CURRENT_SOURCE_DIR}/H5VLpassthru_ext.c)
 
-find_packages(MPI REQUIRED)
-target_link_libraries(hdf5_vol_passthrough PRIVATE MPI::MPI_C)
-target link_libraries(test_write PRIVATE MPI::MPI_c)
-    
+find_package(MPI REQUIRED)    
 find_package(HDF5)
 if (NOT HDF5_FOUND)
   message (FATAL_ERROR "HDF5 was not found on the system")
@@ -37,12 +34,15 @@ target_include_directories(hdf5_vol_passthrough
   PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
   PUBLIC "${HDF5_INCLUDE_DIRS}"
 )
+target_link_libraries(hdf5_vol_passthrough PRIVATE "${HDF5_LIBRARIES}")
+target_link_libraries(hdf5_vol_passthrough PRIVATE MPI::MPI_C)
+
+
 
 add_executable(test_write test_write.c)
 target_link_libraries(test_write PRIVATE ${HDF5_LIBRARIES})
 target_include_directories(test_write PRIVATE ${HDF5_INCLUDE_DIRS})
-
-target_link_libraries(hdf5_vol_passthrough PRIVATE "${HDF5_LIBRARIES}")
+target_link_libraries(test_write PRIVATE MPI::MPI_C)
 
 install(
   FILES
