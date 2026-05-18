@@ -28,7 +28,8 @@ if (NOT HDF5_FOUND)
 endif ()
 
 add_library(hdf5_vol_passthrough SHARED ${HDF5_VOL_PASSTHROUGH_SRCS}
-  gpu_transform.cu)
+  gpu_transform.cu
+  cpu_compress.c)
 target_compile_definitions(hdf5_vol_passthrough PRIVATE ENABLE_EXT_PASSTHRU_LOGGING)
 target_include_directories(hdf5_vol_passthrough 
   PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}

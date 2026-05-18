@@ -75,6 +75,68 @@ typedef struct H5VL_pass_through_ext_wrap_ctx_t {
 } H5VL_pass_through_ext_wrap_ctx_t;
 
 
+/************/
+/* Metadata structs */
+/************/
+
+typedef struct datatype_ctx {
+    int datatype;
+    int datatype_size; // if this is all the information we need, this can probably be removed
+} datatype_ctx;
+
+typedef struct chunking_ctx {
+    int chunk_size; // I'm not sure yet what information we will need for chunking, this is just a placeholder
+    int chunk_dims[2]; // how should we specify dimensions, I put in an array here but idk if that's the best way
+    int layout_type;
+    int mapping;
+} chunking_ctx;
+
+typedef struct block_dims {
+    int x;
+    int y;
+    int z;
+} block_dims;
+
+typedef struct compression_ctx {
+    char *compressor_id;
+    struct pressio_options *compressor_opts;
+    struct block_dims dims;
+    int compressed_chunk_size;
+} compression_ctx;
+
+// any other static information we want can go here
+typedef struct config_params {
+    int device_id;
+    int min_size_for_gpu;
+    int max_device_memory_bytes;
+    int compression_library;
+    int compression_level;
+} config_params;
+
+typedef struct gpu_context_t {
+    int device_id;
+    cudaStream_t stream;
+    void *d_in; // pointer to input buffer in GPU
+    size_t d_in_capacity; // size of input buffer
+    void *d_out;
+    size_t d_out_capacity;
+} gpu_context_t;
+
+typedef struct gpu_vol_dataset_t {
+    void* under_dataset;
+    hid_t under_vol_id;
+    datatype_ctx* datatype_info;
+    chunking_ctx* chunking_info;
+    compression_ctx* comp_ctx;
+} gpu_vol_dataset_t;
+
+typedef struct gpu_vol_file_t {
+    void* under_file;
+    hid_t under_vol_id;
+    gpu_context_t* gpu_ctx;
+    config_params* config_params;
+} gpu_vol_file_t;
+
 /********************* */
 /* Function prototypes */
 /********************* */
@@ -195,6 +257,7 @@ static herr_t H5VL_pass_through_ext_optional(void *obj, H5VL_optional_args_t *ar
 
 /* GPU Compression Functions */
 herr_t H5VL_pass_through_ext_gpu_transfer_compress(size_t nelem, hid_t dtype, void *buf[]);
+herr_t H5VL_pass_through_ext_cpu_transfer_compress(size_t nelem, hid_t dtype, void *buf[]);
 
 /*******************/
 /* Local variables */
@@ -328,6 +391,117 @@ static int H5VL_passthru_group_fiddle_op_g = -1;
  */
 H5PL_type_t H5PLget_plugin_type(void) {return H5PL_TYPE_VOL;}
 const void *H5PLget_plugin_info(void) {return &H5VL_pass_through_ext_g;}
+
+/*******************/
+/* Wrapper functions for compression metadata */
+/*******************/
+
+config_params* config_params_create(hid_t fapl_id)
+{
+    (void)fapl_id;
+
+    config_params *p = (config_params*)calloc(1, sizeof(config_params));
+    if (!p) {
+        return NULL;
+    }
+
+    p->device_id = 0;
+    p->min_size_for_gpu = 256 * 1024;
+    p->max_device_memory_bytes = 2ULL * 1024 * 1024 * 1024;
+    p->compression_library = 0;
+    p->compression_level = 1;
+
+    return p;
+}
+
+gpu_context_t* gpu_context_create(config_params *conf_params)
+{
+    gpu_context_t *gpu_ctx = (gpu_context_t*)calloc(1, sizeof(gpu_context_t));
+
+    gpu_ctx->device_id = conf_params->device_id;
+    cudaSetDevice(gpu_ctx->device_id);
+
+    cudaStreamCreate(&gpu_ctx->stream);
+
+    gpu_ctx->d_in_capacity = conf_params->max_device_memory_bytes;
+    gpu_ctx->d_out_capacity = conf_params->max_device_memory_bytes;
+
+    cudaMalloc(&gpu_ctx->d_in, gpu_ctx->d_in_capacity);
+    cudaMalloc(&gpu_ctx->d_out, gpu_ctx->d_out_capacity);
+
+    return gpu_ctx;
+}
+
+datatype_ctx* datatype_ctx_create(hid_t dataset_id)
+{
+    datatype_ctx *dt_ctx = (datatype_ctx*)calloc(1, sizeof(datatype_ctx));
+
+    hid_t dtype = H5Dget_type(dataset_id);
+
+    dt_ctx->datatype_size = H5Tget_size(dtype);
+    dt_ctx->datatype = H5Tget_class(dtype);
+
+    H5Tclose(dtype);
+
+    return dt_ctx;
+}
+
+chunking_ctx* chunking_ctx_create(hid_t dataset_id)
+{
+    chunking_ctx *chunk_ctx = (chunking_ctx*)calloc(1, sizeof(chunking_ctx));
+
+    hid_t space = H5Dget_space(dataset_id);
+    hid_t dcpl = H5Dget_create_plist(dataset_id);
+
+    chunk_ctx->layout_type = H5Dget_layout(dataset_id);
+
+    if (chunk_ctx->layout_type == H5D_CHUNKED) {
+        H5Pget_chunk(dcpl, 2, chunk_ctx->chunk_dims);
+    }
+
+    chunk_ctx->chunk_size = H5Sget_simple_extent_npoints(space);
+
+    H5Pclose(dcpl);
+    H5Sclose(space);
+
+    return chunk_ctx;
+}
+
+compression_ctx* compression_ctx_create(hid_t dataset_id)
+{
+    compression_ctx *comp_ctx = (compression_ctx*)calloc(1, sizeof(compression_ctx));
+    
+    comp_ctx->block_sizes = 0;
+    comp_ctx->compressed_chunk_size = 0;
+
+    return comp_ctx;
+}
+
+gpu_vol_dataset_t* gpu_vol_dataset_wrap(void *under_dataset, hid_t dataset_id, hid_t under_vol_id)
+{
+    gpu_vol_dataset_t *gpu_dataset_ctx = (gpu_vol_dataset_t*)calloc(1, sizeof(gpu_vol_dataset_t));
+
+    gpu_dataset_ctx->under_dataset = under_dataset;
+    gpu_dataset_ctx->under_vol_id = under_vol_id;
+    gpu_dataset_ctx->datatype_info = datatype_ctx_create(dataset_id);
+    gpu_dataset_ctx->chunking_info = chunking_ctx_create(dataset_id);
+    gpu_dataset_ctx->comp_ctx = compression_ctx_create(dataset_id);
+
+    return gpu_dataset_ctx;
+}
+
+gpu_vol_file_t* gpu_vol_file_wrap(hid_t fapl_id, hid_t under_vol_id, void *under_file)
+{
+    gpu_vol_file_t *gpu_vol_file_ctx = (gpu_vol_file_t*)calloc(1, sizeof(gpu_vol_file_t));
+
+    gpu_vol_file_ctx->under_file = under_file;
+    gpu_vol_file_ctx->under_vol_id = under_vol_id;
+
+    gpu_vol_file_ctx->config_params = config_params_create(fapl_id);
+    gpu_vol_file_ctx->gpu_ctx = gpu_context_create(gpu_vol_file_ctx->config_params);
+
+    return gpu_vol_file_ctx;
+}
 
 
 /*-------------------------------------------------------------------------
@@ -1292,16 +1466,14 @@ H5VL_pass_through_ext_dataset_write(size_t count, void *dset[],
         hssize_t nelem;
         nelem = H5Sget_select_npoints(mem_space_id[u]);
 
-        // ------ GPU COMPRESSION CALL ------
-        printf("BEFORE GPU:\n");
-        for (int i = 0; i < 10; i++)
-            printf("%d ", ((int*)buf[u])[i]);
-        printf("\n");
-        H5VL_pass_through_ext_gpu_transfer_compress(nelem, mem_type_id[u], (void *)buf[u]);
-        printf("AFTER GPU:\n");
-        for (int i = 0; i < 10; i++)
-            printf("%d ", ((int*)buf[u])[i]);
-        printf("\n");
+        int cpu_compression = 0;
+        // ------ COMPRESSION CALL ------
+        if (cpu_compression==0) {
+            H5VL_pass_through_ext_cpu_transfer_compress(nelem, mem_type_id[u], (void *)buf[u]);
+        } else {
+            H5VL_pass_through_ext_gpu_transfer_compress(nelem, mem_type_id[u], (void *)buf[u]);
+        }
+
         // printf("Total bytes: %zu\n", nelem * type_size);
         o_arr[u] = ((H5VL_pass_through_ext_t *)(dset[u]))->under_object;
         assert(under_vol_id == ((H5VL_pass_through_ext_t *)(dset[u]))->under_vol_id);
