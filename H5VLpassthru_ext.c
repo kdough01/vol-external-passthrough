@@ -85,23 +85,21 @@ typedef struct datatype_ctx {
 } datatype_ctx;
 
 typedef struct chunking_ctx {
-    int chunk_size; // I'm not sure yet what information we will need for chunking, this is just a placeholder
-    int chunk_dims[2]; // how should we specify dimensions, I put in an array here but idk if that's the best way
-    int layout_type;
-    int mapping;
+    size_t ndims; // I'm not sure yet what information we will need for chunking, this is just a placeholder
+    hsize_t *chunk_dims; // how should we specify dimensions, I put in an array here but idk if that's the best way
+    H5D_layout_t layout;
 } chunking_ctx;
-
-typedef struct block_dims {
-    int x;
-    int y;
-    int z;
-} block_dims;
 
 typedef struct compression_ctx {
     char *compressor_id;
     struct pressio_options *compressor_opts;
-    struct block_dims dims;
-    int compressed_chunk_size;
+    struct pressio *library;
+    struct pressio_compressor *compressor;
+    size_t ndims;
+    size_t *dims;
+    size_t element_size;
+    void *compressed_buf;
+    size_t compressed_chunk_size;
 } compression_ctx;
 
 // any other static information we want can go here
@@ -109,7 +107,7 @@ typedef struct config_params {
     int device_id;
     int min_size_for_gpu;
     int max_device_memory_bytes;
-    int compression_library;
+    char *default_compression_id;
     int compression_level;
 } config_params;
 
@@ -467,14 +465,76 @@ chunking_ctx* chunking_ctx_create(hid_t dataset_id)
     return chunk_ctx;
 }
 
-compression_ctx* compression_ctx_create(hid_t dataset_id)
+compression_ctx* compression_ctx_create(hid_t dataset_id, hid_t dcpl_id, config_params *defaults)
 {
     compression_ctx *comp_ctx = (compression_ctx*)calloc(1, sizeof(compression_ctx));
     
-    comp_ctx->block_sizes = 0;
+    hid_t space = H5Dget_space(dataset_id);
+    int rank = H5Sget_simple_extent_ndims(space);
+    hsize_t *h5dims = (hsize_t*)malloc(rank * sizeof(hsize_t));
+    H5Sget_simple_extent_dims(space, h5dims, NULL);
+
+    comp_ctx->ndims = (size_t)rank;
+    comp_ctx->dims = (size_t*)malloc(rank * sizeof(size_t));
+    for (int i=0;i<rank;i++) {
+        comp_ctx->dims[i] = (size_t)h5dims[i];
+    }
+    free(h5dims);
+    H5Sclose(space);
+
+    hid_t dtype = H5Dget_type(dataset_id);
+    comp_ctx->element_size = H5Tget_size(dtype);
+    H5Tclose(dtype);
+
+    if (H5Pexist(dcpl_id, "pressio:compressor") > 0) {
+        size_t len;
+        H5Pget_size(dcpl_id, "pressio:compressor", &len);
+        comp_ctx->compressor_id = (char*)malloc(len);
+        H5Pget(dcpl_id, "pressio:compressor", comp_ctx->compressor_id);
+    } else {
+        comp_ctx->compressor_id = strdup(defaults->default_compression_id);
+    }
+
+
+    // most of this follows the "basics.c" file in the libpressio tutorial with a few modifications like error handling
+    // get the compressor
+    comp_ctx->library = pressio_instance();
+    comp_ctx->compressor = pressio_get_compressor(comp_ctx->library, comp_ctx->compressor_id);
+
+    // make sure the compressor specified exists and is known by libpressio
+    if (!comp_ctx->compressor) {
+        fprintf(stderr, "unknown compressor '%s': %s\n",
+            comp_ctx->compressor_id, pressio_error_msg(comp_ctx->library));
+        compression_ctx_destroy(comp_ctx);
+        return NULL;
+    }
+
+    // configure metrics for the compressor
+    comp_ctx->compressor_opts = pressio_options_new();
+    char level_key[128];
+    snprintf(level_key, sizeof(level_key), "%s:compression_level", comp_ctx->compressor_id);
+    pressio_options_set_integer(comp_ctx->compressor_opts, level_key, defaults->compression_level);
+
+    if(pressio_compressor_set_options(comp_ctx->compressor, comp_ctx->compressor_opts)) {
+        fprintf(stderr, "%s\n", pressio_compressor_error_msg(comp_ctx->compressor));
+        return pressio_compressor_error_code(comp_ctx->compressor);
+    }
+
+    comp_ctx->compressed_buf = NULL;
     comp_ctx->compressed_chunk_size = 0;
 
     return comp_ctx;
+}
+
+void compression_ctx_destroy(compression_ctx *comp_ctx) {
+    if (!comp_ctx) return;
+    if (comp_ctx->compressor) pressio_compressor_release(comp_ctx->compressor);
+    if (comp_ctx->library) pressio_release(comp_ctx->library);
+    if (comp_ctx->compressor_opts) pressio_options_free(comp_ctx->compressor_opts);
+    free(comp_ctx->compressor_id);
+    free(comp_ctx->dims);
+    free(comp_ctx->compressed_buf);
+    free(comp_ctx);
 }
 
 gpu_vol_dataset_t* gpu_vol_dataset_wrap(void *under_dataset, hid_t dataset_id, hid_t under_vol_id)
