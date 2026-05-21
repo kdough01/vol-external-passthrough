@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "hdf5.h"
 
 int main() {
@@ -8,20 +9,21 @@ int main() {
                                 H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     int buf[20];
-    for (int i=0;i<20;i++) {buf[i]=i;}
-    H5Dwrite(dset_id, H5T_NATIVE_INT, space_id, space_id, H5P_DEFAULT, buf);
+    for (int i = 0; i < 20; i++) { buf[i] = i; }
+    H5Dwrite(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
+
+    H5Dclose(dset_id);
+    H5Sclose(space_id);
 
     hid_t dset_id_open = H5Dopen2(file_id, "data", H5P_DEFAULT);
-    H5Dread(dset_id_open, H5T_NATIVE_INT, space_id, space_id, H5P_DEFAULT, buf);
+    H5Dread(dset_id_open, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
 
     for (int i = 0; i < 20; i++) {
         printf("%d ", buf[i]);
     }
     printf("\n");
 
-    H5Dclose(dset_id);
-    H5Sclose(space_id);
-    H5Fclose(file_id);
     H5Dclose(dset_id_open);
+    H5Fclose(file_id);
     return 0;
 }

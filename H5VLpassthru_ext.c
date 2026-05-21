@@ -41,6 +41,7 @@
 
 /* This connector's private header */
 #include "H5VLpassthru_ext_private.h"
+#include <libpressio/libpressio.h>
 
 
 /**********/
@@ -50,6 +51,7 @@
 /* Whether to display log messge when callback is invoked */
 /* (Uncomment to enable) */
 /* #define ENABLE_EXT_PASSTHRU_LOGGING */
+#define ENABLE_EXT_PASSTHRU_LOGGING
 
 /* Hack for missing va_copy() in old Visual Studio editions
  * (from H5win2_defs.h - used on VS2012 and earlier)
@@ -66,6 +68,7 @@
 typedef struct H5VL_pass_through_ext_t {
     hid_t  under_vol_id;        /* ID for underlying VOL connector */
     void   *under_object;       /* Underlying VOL connector's object */
+    void   *custom_data;      /* configuration parameters for the GPU */
 } H5VL_pass_through_ext_t;
 
 /* The pass through VOL wrapper context */
@@ -90,34 +93,24 @@ typedef struct chunking_ctx {
     H5D_layout_t layout;
 } chunking_ctx;
 
-typedef struct compression_ctx {
-    char *compressor_id;
-    struct pressio_options *compressor_opts;
-    struct pressio *library;
-    struct pressio_compressor *compressor;
-    size_t ndims;
-    size_t *dims;
-    size_t element_size;
-    void *compressed_buf;
-    size_t compressed_chunk_size;
-} compression_ctx;
-
 // any other static information we want can go here
 typedef struct config_params {
     int device_id;
-    int min_size_for_gpu;
-    int max_device_memory_bytes;
-    char *default_compression_id;
-    int compression_level;
+    int min_size_for_gpu; // remove
+    int max_device_memory_bytes; // remove
+    char *default_compression_id; // std::string
+    int compression_level; // pressio_options libpressio_options
 } config_params;
 
 typedef struct gpu_context_t {
     int device_id;
+#ifdef USE_CUDA
     cudaStream_t stream;
     void *d_in; // pointer to input buffer in GPU
     size_t d_in_capacity; // size of input buffer
     void *d_out;
     size_t d_out_capacity;
+#endif
 } gpu_context_t;
 
 typedef struct gpu_vol_dataset_t {
@@ -253,7 +246,7 @@ static herr_t H5VL_pass_through_ext_token_from_str(void *obj, H5I_type_t obj_typ
 /* Generic optional callback */
 static herr_t H5VL_pass_through_ext_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_id, void **req);
 
-/* GPU Compression Functions */
+/* Compression Functions */
 herr_t H5VL_pass_through_ext_gpu_transfer_compress(size_t nelem, hid_t dtype, void *buf[]);
 herr_t H5VL_pass_through_ext_cpu_transfer_compress(size_t nelem, hid_t dtype, void *buf[]);
 
@@ -406,7 +399,7 @@ config_params* config_params_create(hid_t fapl_id)
     p->device_id = 0;
     p->min_size_for_gpu = 256 * 1024;
     p->max_device_memory_bytes = 2ULL * 1024 * 1024 * 1024;
-    p->compression_library = 0;
+    p->default_compression_id = strdup("noop");
     p->compression_level = 1;
 
     return p;
@@ -414,6 +407,7 @@ config_params* config_params_create(hid_t fapl_id)
 
 gpu_context_t* gpu_context_create(config_params *conf_params)
 {
+#ifdef USE_CUDA
     gpu_context_t *gpu_ctx = (gpu_context_t*)calloc(1, sizeof(gpu_context_t));
 
     gpu_ctx->device_id = conf_params->device_id;
@@ -428,6 +422,8 @@ gpu_context_t* gpu_context_create(config_params *conf_params)
     cudaMalloc(&gpu_ctx->d_out, gpu_ctx->d_out_capacity);
 
     return gpu_ctx;
+#endif
+    return NULL;
 }
 
 datatype_ctx* datatype_ctx_create(hid_t dataset_id)
@@ -451,13 +447,15 @@ chunking_ctx* chunking_ctx_create(hid_t dataset_id)
     hid_t space = H5Dget_space(dataset_id);
     hid_t dcpl = H5Dget_create_plist(dataset_id);
 
-    chunk_ctx->layout_type = H5Dget_layout(dataset_id);
+    chunk_ctx->layout = H5Pget_layout(dataset_id);
 
-    if (chunk_ctx->layout_type == H5D_CHUNKED) {
+    if (chunk_ctx->layout == H5D_CHUNKED) {
         H5Pget_chunk(dcpl, 2, chunk_ctx->chunk_dims);
     }
 
-    chunk_ctx->chunk_size = H5Sget_simple_extent_npoints(space);
+    int rank = H5Sget_simple_extent_ndims(space);
+    chunk_ctx->chunk_dims = (hsize_t *)malloc(rank * sizeof(hsize_t));
+    H5Sget_simple_extent_dims(space, chunk_ctx->chunk_dims, NULL);
 
     H5Pclose(dcpl);
     H5Sclose(space);
@@ -465,26 +463,30 @@ chunking_ctx* chunking_ctx_create(hid_t dataset_id)
     return chunk_ctx;
 }
 
-compression_ctx* compression_ctx_create(hid_t dataset_id, hid_t dcpl_id, config_params *defaults)
+void compression_ctx_destroy(compression_ctx *comp_ctx) {
+    if (!comp_ctx) return;
+    if (comp_ctx->compressor) pressio_compressor_release(comp_ctx->compressor);
+    if (comp_ctx->library) pressio_release(comp_ctx->library);
+    if (comp_ctx->compressor_opts) pressio_options_free(comp_ctx->compressor_opts);
+    free(comp_ctx->compressor_id);
+    free(comp_ctx->dims);
+    free(comp_ctx->compressed_buf);
+    free(comp_ctx);
+}
+
+compression_ctx* compression_ctx_create(int rank, hsize_t *h5dims, size_t element_size, hid_t dcpl_id, config_params *defaults)
 {
+#ifdef ENABLE_EXT_PASSTHRU_LOGGING
+    printf("------- EXT PASS THROUGH COMPRESSION CTX\n");
+#endif
     compression_ctx *comp_ctx = (compression_ctx*)calloc(1, sizeof(compression_ctx));
-    
-    hid_t space = H5Dget_space(dataset_id);
-    int rank = H5Sget_simple_extent_ndims(space);
-    hsize_t *h5dims = (hsize_t*)malloc(rank * sizeof(hsize_t));
-    H5Sget_simple_extent_dims(space, h5dims, NULL);
 
     comp_ctx->ndims = (size_t)rank;
     comp_ctx->dims = (size_t*)malloc(rank * sizeof(size_t));
     for (int i=0;i<rank;i++) {
         comp_ctx->dims[i] = (size_t)h5dims[i];
     }
-    free(h5dims);
-    H5Sclose(space);
-
-    hid_t dtype = H5Dget_type(dataset_id);
-    comp_ctx->element_size = H5Tget_size(dtype);
-    H5Tclose(dtype);
+    comp_ctx->element_size = element_size;
 
     if (H5Pexist(dcpl_id, "pressio:compressor") > 0) {
         size_t len;
@@ -517,7 +519,8 @@ compression_ctx* compression_ctx_create(hid_t dataset_id, hid_t dcpl_id, config_
 
     if(pressio_compressor_set_options(comp_ctx->compressor, comp_ctx->compressor_opts)) {
         fprintf(stderr, "%s\n", pressio_compressor_error_msg(comp_ctx->compressor));
-        return pressio_compressor_error_code(comp_ctx->compressor);
+        compression_ctx_destroy(comp_ctx);
+        return NULL;
     }
 
     comp_ctx->compressed_buf = NULL;
@@ -526,26 +529,17 @@ compression_ctx* compression_ctx_create(hid_t dataset_id, hid_t dcpl_id, config_
     return comp_ctx;
 }
 
-void compression_ctx_destroy(compression_ctx *comp_ctx) {
-    if (!comp_ctx) return;
-    if (comp_ctx->compressor) pressio_compressor_release(comp_ctx->compressor);
-    if (comp_ctx->library) pressio_release(comp_ctx->library);
-    if (comp_ctx->compressor_opts) pressio_options_free(comp_ctx->compressor_opts);
-    free(comp_ctx->compressor_id);
-    free(comp_ctx->dims);
-    free(comp_ctx->compressed_buf);
-    free(comp_ctx);
-}
-
-gpu_vol_dataset_t* gpu_vol_dataset_wrap(void *under_dataset, hid_t dataset_id, hid_t under_vol_id)
+gpu_vol_dataset_t* gpu_vol_dataset_wrap(void *under_dataset, hid_t dataset_id, hid_t under_vol_id, config_params *defaults)
 {
     gpu_vol_dataset_t *gpu_dataset_ctx = (gpu_vol_dataset_t*)calloc(1, sizeof(gpu_vol_dataset_t));
 
     gpu_dataset_ctx->under_dataset = under_dataset;
     gpu_dataset_ctx->under_vol_id = under_vol_id;
+
+    // TODO: pretty sure this is declared wrong, will fix later
     gpu_dataset_ctx->datatype_info = datatype_ctx_create(dataset_id);
     gpu_dataset_ctx->chunking_info = chunking_ctx_create(dataset_id);
-    gpu_dataset_ctx->comp_ctx = compression_ctx_create(dataset_id);
+    gpu_dataset_ctx->comp_ctx;
 
     return gpu_dataset_ctx;
 }
@@ -1400,6 +1394,32 @@ H5VL_pass_through_ext_dataset_create(void *obj, const H5VL_loc_params_t *loc_par
     if(under) {
         dset = H5VL_pass_through_ext_new_obj(under, o->under_vol_id);
 
+        H5VL_dataset_get_args_t get_args;
+
+        /* Get space */
+        get_args.op_type = H5VL_DATASET_GET_SPACE;
+        get_args.args.get_space.space_id = H5I_INVALID_HID;
+        H5VLdataset_get(under, o->under_vol_id, &get_args, H5P_DEFAULT, NULL);
+        hid_t space = get_args.args.get_space.space_id;
+
+        int rank = H5Sget_simple_extent_ndims(space);
+        hsize_t *h5dims = (hsize_t *)malloc(rank * sizeof(hsize_t));
+        H5Sget_simple_extent_dims(space, h5dims, NULL);
+
+        /* Get type */
+        get_args.op_type = H5VL_DATASET_GET_TYPE;
+        get_args.args.get_type.type_id = H5I_INVALID_HID;
+        H5VLdataset_get(under, o->under_vol_id, &get_args, H5P_DEFAULT, NULL);
+        hid_t dtype = get_args.args.get_type.type_id;
+
+        size_t element_size = H5Tget_size(dtype);
+
+        config_params *config_ctx = (config_params *)o->custom_data;
+        dset->custom_data = compression_ctx_create(rank, h5dims, element_size, dcpl_id, config_ctx);
+        free(h5dims);
+        H5Sclose(space);
+        H5Tclose(dtype);
+
         /* Check for async request */
         if(req && *req)
             *req = H5VL_pass_through_ext_new_obj(*req, o->under_vol_id);
@@ -1435,7 +1455,7 @@ H5VL_pass_through_ext_dataset_open(void *obj, const H5VL_loc_params_t *loc_param
 
     under = H5VLdataset_open(o->under_object, loc_params, o->under_vol_id, name, dapl_id, dxpl_id, req);
     if(under) {
-        dset = H5VL_pass_through_ext_new_obj(under, o->under_vol_id);
+            dset = H5VL_pass_through_ext_new_obj(under, o->under_vol_id);
 
         /* Check for async request */
         if(req && *req)
@@ -1520,19 +1540,45 @@ H5VL_pass_through_ext_dataset_write(size_t count, void *dset[],
     /* Populate the array of under objects */
     under_vol_id = ((H5VL_pass_through_ext_t *)(dset[0]))->under_vol_id;
     for(size_t u = 0; u < count; u++) {
+        H5VL_pass_through_ext_t *dset_obj = (H5VL_pass_through_ext_t *)(dset[u]);
         // say we have 5 datasets, we can process them all at the same time
         // by specifying the number of GPUs we have access to - no reason this can't
         // just use MPI to use multiple processors
-        hssize_t nelem;
-        nelem = H5Sget_select_npoints(mem_space_id[u]);
+        hsize_t nelem;
+        if (mem_space_id[u] == H5S_ALL) {
+            printf("------- one\n");
+            H5VL_dataset_get_args_t get_args;
+            get_args.op_type = H5VL_DATASET_GET_SPACE;
+            get_args.args.get_space.space_id = H5I_INVALID_HID;
+            H5VLdataset_get(dset_obj->under_object, dset_obj->under_vol_id, &get_args, H5P_DEFAULT, NULL);
+            printf("------- 2\n");
+            hid_t space = get_args.args.get_space.space_id;
+            // dimensions for compression should be set here -- look up H5VLdataset_get
+            // make sure it isn't returning the under_dataset size, otherwise we will need to store metadata here
 
-        int cpu_compression = 0;
-        // ------ COMPRESSION CALL ------
-        if (cpu_compression==0) {
-            H5VL_pass_through_ext_cpu_transfer_compress(nelem, mem_type_id[u], (void *)buf[u]);
+            nelem = H5Sget_simple_extent_npoints(space);
+            printf("------- 3\n");
+            H5Sclose(space);
+            printf("------- 4\n");
         } else {
-            H5VL_pass_through_ext_gpu_transfer_compress(nelem, mem_type_id[u], (void *)buf[u]);
+            nelem = H5Sget_select_npoints(mem_space_id[u]);
         }
+
+        // ------ COMPRESSION CALL ------
+        compression_ctx *comp_ctx = (compression_ctx *)dset_obj->custom_data;
+        printf("------- 5\n");
+        size_t nbytes = nelem * comp_ctx->element_size;
+        printf("------- 6\n");
+
+        #ifdef USE_CUDA
+        if (chunk_size >= config_ctx->min_size_for_gpu) {
+            H5VL_pass_through_ext_gpu_transfer_compress(nelem, mem_type_id[u], (void *)buf[u]);
+        } else {
+            H5VL_pass_through_ext_cpu_transfer_compress(nelem, mem_type_id[u], (void *)buf[u]);
+        }
+        #endif
+        printf("------- 3\n");
+        H5VL_pass_through_ext_cpu_transfer_compress(nelem, mem_type_id[u], (void *)buf[u]);
 
         // printf("Total bytes: %zu\n", nelem * type_size);
         o_arr[u] = ((H5VL_pass_through_ext_t *)(dset[u]))->under_object;
@@ -1957,7 +2003,7 @@ H5VL_pass_through_ext_file_create(const char *name, unsigned flags, hid_t fcpl_i
     /* Get copy of our VOL info from FAPL */
     H5Pget_vol_info(fapl_id, (void **)&info);
 
-    printf("Info: %s", info);
+    printf("Info: %p\n", (void *)info);
 
     /* Make sure we have info about the underlying VOL to be used */
     if (!info)
@@ -1973,6 +2019,9 @@ H5VL_pass_through_ext_file_create(const char *name, unsigned flags, hid_t fcpl_i
     under = H5VLfile_create(name, flags, fcpl_id, under_fapl_id, dxpl_id, req);
     if(under) {
         file = H5VL_pass_through_ext_new_obj(under, info->under_vol_id);
+
+        /* Set the config params */
+        file->custom_data = config_params_create(under_fapl_id);
 
         /* Check for async request */
         if(req && *req)
@@ -2031,6 +2080,7 @@ H5VL_pass_through_ext_file_open(const char *name, unsigned flags, hid_t fapl_id,
     under = H5VLfile_open(name, flags, under_fapl_id, dxpl_id, req);
     if(under) {
         file = H5VL_pass_through_ext_new_obj(under, info->under_vol_id);
+        file->custom_data = config_params_create(fapl_id);
 
         /* Check for async request */
         if(req && *req)
