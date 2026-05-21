@@ -19,6 +19,7 @@
 
 /* Public headers needed by this file */
 #include "H5VLpublic.h"        /* Virtual Object Layer                 */
+#include <libpressio/libpressio.h>
 
 /* Identifier for the pass-through VOL connector */
 #define H5VL_PASSTHRU_EXT	(H5VL_pass_through_ext_register())
@@ -40,7 +41,7 @@ typedef struct compression_ctx {
     struct pressio_compressor *compressor;
     size_t ndims; // replace with std::vector
     size_t *dims; // replace with std::vector
-    size_t element_size; // replace with pressio dtype
+    enum pressio_dtype dtype; // replace with pressio dtype
     void *compressed_buf;
     size_t compressed_chunk_size;
 } compression_ctx;

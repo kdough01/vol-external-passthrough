@@ -7,14 +7,19 @@
 
 int cpu_compress(compression_ctx *comp_ctx, const void *data, size_t nbytes)
 {
-    enum pressio_dtype dtype = pressio_byte_dtype;
-    size_t flat_dim = nbytes;
-    size_t *use_dims = &flat_dim;
-
     // new nonowning data
     // H5E
-    struct pressio_data* input = pressio_data_new_copy(dtype, (void *)data, ndims, use_dims);
-    struct pressio_data *compressed = pressio_data_new_empty(pressio_byte_dtype, 0, NULL);
+    printf("comp_ctx=%p\n", (void*)comp_ctx);
+    printf("data=%p\n", data);
+    printf("ndims=%zu\n", comp_ctx->ndims);
+    for (size_t i = 0; i < comp_ctx->ndims; i++) {
+        printf("dims[%zu]=%zu\n", i, comp_ctx->dims[i]);
+    }
+    printf("dtype=%d\n", comp_ctx->dtype);
+    printf("nbytes=%zu\n", nbytes);
+    struct pressio_data *input = pressio_data_new_nonowning(comp_ctx->dtype, (void *)data, comp_ctx->ndims, comp_ctx->dims);
+    printf("two\n");
+    struct pressio_data *compressed = pressio_data_new_empty(comp_ctx->dtype, 0, NULL);
 
     if(pressio_compressor_compress(comp_ctx->compressor, input, compressed)) {
         fprintf(stderr, "%s\n", pressio_compressor_error_msg(comp_ctx->compressor));

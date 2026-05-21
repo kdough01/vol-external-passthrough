@@ -248,7 +248,7 @@ static herr_t H5VL_pass_through_ext_optional(void *obj, H5VL_optional_args_t *ar
 
 /* Compression Functions */
 herr_t H5VL_pass_through_ext_gpu_transfer_compress(size_t nelem, hid_t dtype, void *buf[]);
-herr_t H5VL_pass_through_ext_cpu_transfer_compress(size_t nelem, hid_t dtype, void *buf[]);
+herr_t H5VL_pass_through_ext_cpu_transfer_compress(compression_ctx *comp_ctx, const void *data, size_t nbytes);
 
 /*******************/
 /* Local variables */
@@ -387,6 +387,22 @@ const void *H5PLget_plugin_info(void) {return &H5VL_pass_through_ext_g;}
 /* Wrapper functions for compression metadata */
 /*******************/
 
+enum pressio_dtype hdf5_to_pressio_dtype(hid_t type_id) {
+
+    size_t size = H5Tget_size(type_id);
+    H5T_class_t cls = H5Tget_class(type_id);
+
+    if (cls == H5T_FLOAT) {
+        if (size == 4) return pressio_float_dtype;
+        if (size == 8) return pressio_double_dtype;
+    } else if (cls == H5T_INTEGER) {
+        if (size == 4) return pressio_int32_dtype;
+        if (size == 8) return pressio_int64_dtype;
+    }
+
+    return pressio_byte_dtype;
+}
+
 config_params* config_params_create(hid_t fapl_id)
 {
     (void)fapl_id;
@@ -474,7 +490,7 @@ void compression_ctx_destroy(compression_ctx *comp_ctx) {
     free(comp_ctx);
 }
 
-compression_ctx* compression_ctx_create(int rank, hsize_t *h5dims, size_t element_size, hid_t dcpl_id, config_params *defaults)
+compression_ctx* compression_ctx_create(int rank, hsize_t *h5dims, enum pressio_dtype dtype, hid_t dcpl_id, config_params *defaults)
 {
 #ifdef ENABLE_EXT_PASSTHRU_LOGGING
     printf("------- EXT PASS THROUGH COMPRESSION CTX\n");
@@ -486,7 +502,7 @@ compression_ctx* compression_ctx_create(int rank, hsize_t *h5dims, size_t elemen
     for (int i=0;i<rank;i++) {
         comp_ctx->dims[i] = (size_t)h5dims[i];
     }
-    comp_ctx->element_size = element_size;
+    comp_ctx->dtype = dtype;
 
     if (H5Pexist(dcpl_id, "pressio:compressor") > 0) {
         size_t len;
@@ -1411,11 +1427,10 @@ H5VL_pass_through_ext_dataset_create(void *obj, const H5VL_loc_params_t *loc_par
         get_args.args.get_type.type_id = H5I_INVALID_HID;
         H5VLdataset_get(under, o->under_vol_id, &get_args, H5P_DEFAULT, NULL);
         hid_t dtype = get_args.args.get_type.type_id;
-
-        size_t element_size = H5Tget_size(dtype);
+        enum pressio_dtype pressio_dt = hdf5_to_pressio_dtype(dtype);
 
         config_params *config_ctx = (config_params *)o->custom_data;
-        dset->custom_data = compression_ctx_create(rank, h5dims, element_size, dcpl_id, config_ctx);
+        dset->custom_data = compression_ctx_create(rank, h5dims, pressio_dt, dcpl_id, config_ctx);
         free(h5dims);
         H5Sclose(space);
         H5Tclose(dtype);
@@ -1546,39 +1561,33 @@ H5VL_pass_through_ext_dataset_write(size_t count, void *dset[],
         // just use MPI to use multiple processors
         hsize_t nelem;
         if (mem_space_id[u] == H5S_ALL) {
-            printf("------- one\n");
             H5VL_dataset_get_args_t get_args;
             get_args.op_type = H5VL_DATASET_GET_SPACE;
             get_args.args.get_space.space_id = H5I_INVALID_HID;
             H5VLdataset_get(dset_obj->under_object, dset_obj->under_vol_id, &get_args, H5P_DEFAULT, NULL);
-            printf("------- 2\n");
             hid_t space = get_args.args.get_space.space_id;
             // dimensions for compression should be set here -- look up H5VLdataset_get
             // make sure it isn't returning the under_dataset size, otherwise we will need to store metadata here
 
             nelem = H5Sget_simple_extent_npoints(space);
-            printf("------- 3\n");
             H5Sclose(space);
-            printf("------- 4\n");
         } else {
             nelem = H5Sget_select_npoints(mem_space_id[u]);
         }
 
         // ------ COMPRESSION CALL ------
         compression_ctx *comp_ctx = (compression_ctx *)dset_obj->custom_data;
-        printf("------- 5\n");
-        size_t nbytes = nelem * comp_ctx->element_size;
-        printf("------- 6\n");
+        size_t nbytes = nelem * pressio_dtype_size(comp_ctx->dtype);
 
         #ifdef USE_CUDA
         if (chunk_size >= config_ctx->min_size_for_gpu) {
             H5VL_pass_through_ext_gpu_transfer_compress(nelem, mem_type_id[u], (void *)buf[u]);
         } else {
-            H5VL_pass_through_ext_cpu_transfer_compress(nelem, mem_type_id[u], (void *)buf[u]);
+            H5VL_pass_through_ext_cpu_transfer_compress(comp_ctx, buf[u], nbytes);
         }
         #endif
-        printf("------- 3\n");
-        H5VL_pass_through_ext_cpu_transfer_compress(nelem, mem_type_id[u], (void *)buf[u]);
+
+        H5VL_pass_through_ext_cpu_transfer_compress(comp_ctx, buf[u], nbytes);
 
         // printf("Total bytes: %zu\n", nelem * type_size);
         o_arr[u] = ((H5VL_pass_through_ext_t *)(dset[u]))->under_object;
@@ -2080,7 +2089,8 @@ H5VL_pass_through_ext_file_open(const char *name, unsigned flags, hid_t fapl_id,
     under = H5VLfile_open(name, flags, under_fapl_id, dxpl_id, req);
     if(under) {
         file = H5VL_pass_through_ext_new_obj(under, info->under_vol_id);
-        file->custom_data = config_params_create(fapl_id);
+        // TODO: this may need to get called here
+        // file->custom_data = config_params_create(fapl_id);
 
         /* Check for async request */
         if(req && *req)
