@@ -44,6 +44,8 @@ typedef struct compression_ctx {
     enum pressio_dtype dtype; // replace with pressio dtype
     void *compressed_buf;
     size_t compressed_chunk_size;
+    uint64_t last_uncompressed_bytes;
+    uint64_t last_compressed_bytes;
 } compression_ctx;
 
 #ifdef __cplusplus
