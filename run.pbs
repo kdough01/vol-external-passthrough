@@ -17,7 +17,9 @@ module load hdf5/1.10.7-zjwj3y2
 
 echo "Building"
 rm -rf build
-/usr/bin/cmake -S . -B build -DCMAKE_C_COMPILER=mpicc
+
+env LD_LIBRARY_PATH="" /usr/bin/cmake -S . -B build -DCMAKE_C_COMPILER=mpicc
+
 cmake --build build -j8
 
 echo "Running small test..."
