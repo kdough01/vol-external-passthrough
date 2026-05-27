@@ -11,7 +11,7 @@ echo "Job started on $(date)"
 echo "Running on: $(hostname)"
 
 echo "Loading modules"
-module load gcc/10.3
+module load gcc/8.5.0-ede2bck
 module load openmpi/4.1.1-by6rv67
 module load hdf5/1.10.7-zjwj3y2
 
