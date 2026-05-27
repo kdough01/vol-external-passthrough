@@ -1591,7 +1591,9 @@ H5VL_pass_through_ext_dataset_open(void *obj,
         hsize_t *recovered_dims = NULL;
         int recovered_dt = 0;
 
-        void *attr_rank = H5VLattr_open(under, &attr_loc, o->under_vol_id, "_VOL_ORIG_RANK", H5P_DEFAULT, dxpl_id, NULL);
+        hid_t aapl_id = H5Pcreate(H5P_ATTRIBUTE_ACCESS);
+
+        void *attr_rank = H5VLattr_open(under, &attr_loc, o->under_vol_id, "_VOL_ORIG_RANK", aapl_id, dxpl_id, NULL);
         if (attr_rank) {
             H5VLattr_read(attr_rank, o->under_vol_id, H5T_NATIVE_INT, &recovered_rank, dxpl_id, NULL);
             H5VLattr_close(attr_rank, o->under_vol_id, dxpl_id, NULL);
@@ -1599,18 +1601,20 @@ H5VL_pass_through_ext_dataset_open(void *obj,
 
         if (recovered_rank > 0) {
             recovered_dims = (hsize_t *)malloc(recovered_rank * sizeof(hsize_t));
-            void *attr_dims = H5VLattr_open(under, &attr_loc, o->under_vol_id, "_VOL_ORIG_DIMS", H5P_DEFAULT, dxpl_id, NULL);
+            void *attr_dims = H5VLattr_open(under, &attr_loc, o->under_vol_id, "_VOL_ORIG_DIMS", aapl_id, dxpl_id, NULL);
             if (attr_dims) {
                 H5VLattr_read(attr_dims, o->under_vol_id, H5T_NATIVE_HSIZE, recovered_dims, dxpl_id, NULL);
                 H5VLattr_close(attr_dims, o->under_vol_id, dxpl_id, NULL);
             }
         }
 
-        void *attr_dt = H5VLattr_open(under, &attr_loc, o->under_vol_id, "_VOL_ORIG_TYPE", H5P_DEFAULT, dxpl_id, NULL);
+        void *attr_dt = H5VLattr_open(under, &attr_loc, o->under_vol_id, "_VOL_ORIG_TYPE", aapl_id, dxpl_id, NULL);
         if (attr_dt) {
             H5VLattr_read(attr_dt, o->under_vol_id, H5T_NATIVE_INT, &recovered_dt, dxpl_id, NULL);
             H5VLattr_close(attr_dt, o->under_vol_id, dxpl_id, NULL);
         }
+
+        H5Pclose(aapl_id);
 
         enum pressio_dtype real_pressio_dt = (enum pressio_dtype)recovered_dt;
 
