@@ -1450,17 +1450,16 @@ H5VL_pass_through_ext_dataset_create(void *obj,
 
     /* If compression is active, rewrite the creation parameters to 1D bytes */
     if (config_ctx) {
-        /* Create 1D UNLIMITED space for variable-length compressed bytes */
+        /* Create 1D array with unlimited space for compressed bytes */
         hsize_t byte_dims[1] = {0}; 
         hsize_t max_byte_dims[1] = {H5S_UNLIMITED};
         underlying_space_id = H5Screate_simple(1, byte_dims, max_byte_dims);
 
         /* Create a new DCPL and force chunking to allow extent resizing */
         underlying_dcpl_id = H5Pcopy(dcpl_id == H5P_DEFAULT ? H5Pcreate(H5P_DATASET_CREATE) : dcpl_id);
-        hsize_t chunk_size[1] = { 1048576 }; /* 1MB chunk size (tune as needed) */
+        hsize_t chunk_size[1] = { 1048576 }; // 1MB chunk
         H5Pset_chunk(underlying_dcpl_id, 1, chunk_size);
         
-        /* Force datatype to unsigned char */
         underlying_type_id = H5T_NATIVE_UCHAR;
     }
 
@@ -1475,10 +1474,42 @@ H5VL_pass_through_ext_dataset_create(void *obj,
         dset = H5VL_pass_through_ext_new_obj(under, o->under_vol_id);
 
         if (config_ctx) {
-            /* Store the ORIGINAL ND metadata in the context so write/read know what to do */
+            /* Store the hidden attributes as metadata for when we want to open the dataset */
+            H5VL_loc_params_t attr_loc;
+            attr_loc.type = H5VL_OBJECT_BY_SELF;
+            attr_loc.obj_type = H5I_DATASET;
+
+            hid_t scalar_space = H5Screate(H5S_SCALAR);
+
+            void *attr_rank = H5VLattr_create(under, &attr_loc, o->under_vol_id,
+            "_VOL_ORIG_RANK", H5T_NATIVE_INT, scalar_space,
+            H5P_DEFAULT, H5P_DEFAULT, dxpl_id, NULL);
+
+            H5VLattr_write(attr_rank, o->under_vol_id, H5T_NATIVE_INT, &rank, dxpl_id, NULL);
+            H5VLattr_close(attr_rank, o->under_vol_id, dxpl_id, NULL);
+
+            hsize_t dim_space_sz[1] = { (hsize_t)rank };
+            hid_t dim_space = H5Screate_simple(1, dim_space_sz, NULL);
+            
+            void *attr_dims = H5VLattr_create(under, &attr_loc, o->under_vol_id, 
+                "_VOL_ORIG_DIMS", H5T_NATIVE_HSIZE, dim_space, 
+                H5P_DEFAULT, H5P_DEFAULT, dxpl_id, NULL);
+            H5VLattr_write(attr_dims, o->under_vol_id, H5T_NATIVE_HSIZE, h5dims, dxpl_id, NULL);
+            H5VLattr_close(attr_dims, o->under_vol_id, dxpl_id, NULL);
+
+            int p_dt = (int)pressio_dt;
+            void *attr_dt = H5VLattr_create(under, &attr_loc, o->under_vol_id, 
+                "_VOL_ORIG_TYPE", H5T_NATIVE_INT, scalar_space, 
+                H5P_DEFAULT, H5P_DEFAULT, dxpl_id, NULL);
+            H5VLattr_write(attr_dt, o->under_vol_id, H5T_NATIVE_INT, &p_dt, dxpl_id, NULL);
+            H5VLattr_close(attr_dt, o->under_vol_id, dxpl_id, NULL);
+
+            H5Sclose(scalar_space);
+            H5Sclose(dim_space);
+
+            /* Store original metadata in the context so write/read know what to do */
             dset->custom_data = compression_ctx_create(rank, h5dims, pressio_dt, dcpl_id, config_ctx);
             
-            /* Clean up the temporary 1D IDs we created */
             H5Sclose(underlying_space_id);
             H5Pclose(underlying_dcpl_id);
         } else {
@@ -1535,24 +1566,51 @@ H5VL_pass_through_ext_dataset_open(void *obj,
     config_params *config_ctx = (config_params *)o->custom_data;
 
     if (config_ctx) {
-        /* 1. Safely query the underlying dataset's real DCPL handle */
+        /* 1. Get underlying dataset's DCPL handle */
         H5VL_dataset_get_args_t get_args;
         get_args.op_type = H5VL_DATASET_GET_DCPL;
         H5VLdataset_get(under, o->under_vol_id, &get_args, dapl_id, NULL);
         hid_t real_dcpl_id = get_args.args.get_dcpl.dcpl_id;
 
-        /* TEMPORARY FOR TESTING: Reconstruct the compression context layout */
-        int mock_rank = 1; 
-        hsize_t mock_dims[1] = { 20 }; /* Adjusted to match your test output size */
-        enum pressio_dtype mock_dt = pressio_float_dtype; 
+        /* Read Metadata */
+        H5VL_loc_params_t attr_loc;
+        attr_loc.type = H5VL_OBJECT_BY_SELF;
+        attr_loc.obj_type = H5I_DATASET;
 
-        /* 2. Pass the valid real_dcpl_id instead of H5P_DEFAULT */
+        int recovered_rank = 0;
+        hsize_t *recovered_dims = NULL;
+        int recovered_dt = 0;
+
+        void *attr_rank = H5VLattr_open(under, &attr_loc, o->under_vol_id, "_VOL_ORIG_RANK", H5P_DEFAULT, dxpl_id, NULL);
+        if (attr_rank) {
+            H5VLattr_read(attr_rank, o->under_vol_id, H5T_NATIVE_INT, &recovered_rank, dxpl_id, NULL);
+            H5VLattr_close(attr_rank, o->under_vol_id, dxpl_id, NULL);
+        }
+
+        if (recovered_rank > 0) {
+            recovered_dims = (hsize_t *)malloc(recovered_rank * sizeof(hsize_t));
+            void *attr_dims = H5VLattr_open(under, &attr_loc, o->under_vol_id, "_VOL_ORIG_DIMS", H5P_DEFAULT, dxpl_id, NULL);
+            if (attr_dims) {
+                H5VLattr_read(attr_dims, o->under_vol_id, H5T_NATIVE_HSIZE, recovered_dims, dxpl_id, NULL);
+                H5VLattr_close(attr_dims, o->under_vol_id, dxpl_id, NULL);
+            }
+        }
+
+        void *attr_dt = H5VLattr_open(under, &attr_loc, o->under_vol_id, "_VOL_ORIG_TYPE", H5P_DEFAULT, dxpl_id, NULL);
+        if (attr_dt) {
+            H5VLattr_read(attr_dt, o->under_vol_id, H5T_NATIVE_INT, &recovered_dt, dxpl_id, NULL);
+            H5VLattr_close(attr_dt, o->under_vol_id, dxpl_id, NULL);
+        }
+
+        enum pressio_dtype real_pressio_dt = (enum pressio_dtype)recovered_dt;
+
+        /* Pass real_dcpl_id instead of H5P_DEFAULT */
         dset->custom_data = compression_ctx_create(
             mock_rank, mock_dims, mock_dt, real_dcpl_id, config_ctx
         );
 
-        /* 3. Close the retrieved DCPL property list to prevent a resource leak */
         H5Pclose(real_dcpl_id);
+        if (recovered_dims) free(recovered_dims);
     } else {
         dset->custom_data = NULL;
     }
@@ -1629,7 +1687,7 @@ H5VL_pass_through_ext_dataset_read(
         H5Sclose(mspace_payload);
         H5Sclose(underlying_fspace);
 
-        /* Decompress directly into user's ND buffer */
+        /* Decompress directly into user buffer */
         H5VL_pass_through_ext_cpu_transfer_decompress(ctx, cbuf, csize, buf[u]);
         free(cbuf);
     }
