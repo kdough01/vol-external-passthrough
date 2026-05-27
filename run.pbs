@@ -19,8 +19,7 @@ module load cuda/12.3.0-gcc-9.3.0
 echo "Building"
 rm -rf build
 cmake -S . -B build \
-    -DCMAKE_C_COMPILER=mpicc \
-    -DCMAKE_CUDA_COMPILER=nvcc
+    -DCMAKE_C_COMPILER=mpicc
 cmake --build build -j8
 
 echo "Running small test..."

@@ -1675,6 +1675,10 @@ H5VL_pass_through_ext_dataset_write(
         uint64_t csize = ctx->compressed_chunk_size;
         size_t total = sizeof(uint64_t) + csize;
 
+        printf("Original size:    %zu bytes\n", nbytes);
+        printf("Compressed size:  %llu bytes\n", (unsigned long long)csize);
+        printf("Ratio:            %.2fx\n", (double)nbytes / (double)csize);
+
         /* Resize the underlying 1D dataset */
         hsize_t new_size[1] = { total };
         H5VL_dataset_specific_args_t sargs;
