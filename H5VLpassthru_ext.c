@@ -1480,30 +1480,40 @@ H5VL_pass_through_ext_dataset_create(void *obj,
             attr_loc.obj_type = H5I_DATASET;
 
             hid_t scalar_space = H5Screate(H5S_SCALAR);
+            
+            hid_t acpl_id = H5Pcreate(H5P_ATTRIBUTE_CREATE);
+            hid_t aapl_id = H5Pcreate(H5P_ATTRIBUTE_ACCESS);
 
-            void *attr_rank = H5VLattr_create(under, &attr_loc, o->under_vol_id,
-            "_VOL_ORIG_RANK", H5T_NATIVE_INT, scalar_space,
-            H5P_DEFAULT, H5P_DEFAULT, dxpl_id, NULL);
-
-            H5VLattr_write(attr_rank, o->under_vol_id, H5T_NATIVE_INT, &rank, dxpl_id, NULL);
-            H5VLattr_close(attr_rank, o->under_vol_id, dxpl_id, NULL);
+            void *attr_rank = H5VLattr_create(under, &attr_loc, o->under_vol_id, 
+                "_VOL_ORIG_RANK", H5T_NATIVE_INT, scalar_space, 
+                acpl_id, aapl_id, dxpl_id, NULL);
+            if (attr_rank) {
+                H5VLattr_write(attr_rank, o->under_vol_id, H5T_NATIVE_INT, &rank, dxpl_id, NULL);
+                H5VLattr_close(attr_rank, o->under_vol_id, dxpl_id, NULL);
+            }
 
             hsize_t dim_space_sz[1] = { (hsize_t)rank };
             hid_t dim_space = H5Screate_simple(1, dim_space_sz, NULL);
             
             void *attr_dims = H5VLattr_create(under, &attr_loc, o->under_vol_id, 
                 "_VOL_ORIG_DIMS", H5T_NATIVE_HSIZE, dim_space, 
-                H5P_DEFAULT, H5P_DEFAULT, dxpl_id, NULL);
-            H5VLattr_write(attr_dims, o->under_vol_id, H5T_NATIVE_HSIZE, h5dims, dxpl_id, NULL);
-            H5VLattr_close(attr_dims, o->under_vol_id, dxpl_id, NULL);
+                acpl_id, aapl_id, dxpl_id, NULL);
+            if (attr_dims) {
+                H5VLattr_write(attr_dims, o->under_vol_id, H5T_NATIVE_HSIZE, h5dims, dxpl_id, NULL);
+                H5VLattr_close(attr_dims, o->under_vol_id, dxpl_id, NULL);
+            }
 
             int p_dt = (int)pressio_dt;
             void *attr_dt = H5VLattr_create(under, &attr_loc, o->under_vol_id, 
                 "_VOL_ORIG_TYPE", H5T_NATIVE_INT, scalar_space, 
-                H5P_DEFAULT, H5P_DEFAULT, dxpl_id, NULL);
-            H5VLattr_write(attr_dt, o->under_vol_id, H5T_NATIVE_INT, &p_dt, dxpl_id, NULL);
-            H5VLattr_close(attr_dt, o->under_vol_id, dxpl_id, NULL);
+                acpl_id, aapl_id, dxpl_id, NULL);
+            if (attr_dt) {
+                H5VLattr_write(attr_dt, o->under_vol_id, H5T_NATIVE_INT, &p_dt, dxpl_id, NULL);
+                H5VLattr_close(attr_dt, o->under_vol_id, dxpl_id, NULL);
+            }
 
+            H5Pclose(acpl_id);
+            H5Pclose(aapl_id);
             H5Sclose(scalar_space);
             H5Sclose(dim_space);
 
