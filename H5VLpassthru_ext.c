@@ -1606,7 +1606,7 @@ H5VL_pass_through_ext_dataset_open(void *obj,
 
         /* Pass real_dcpl_id instead of H5P_DEFAULT */
         dset->custom_data = compression_ctx_create(
-            mock_rank, mock_dims, mock_dt, real_dcpl_id, config_ctx
+            recovered_rank, recovered_dims, real_pressio_dt, real_dcpl_id, config_ctx
         );
 
         H5Pclose(real_dcpl_id);

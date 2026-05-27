@@ -28,6 +28,11 @@ int main() {
     H5Dwrite(dset_id, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL,
              H5P_DEFAULT, buf);
 
+    H5Dclose(dset_id);
+    
+    /* Reopen the dataset */
+    dset_id = H5Dopen2(file_id, "pressure", H5P_DEFAULT);
+
     /* Read it back and verify */
     float *verify = malloc(nbytes);
     H5Dread(dset_id, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL,
