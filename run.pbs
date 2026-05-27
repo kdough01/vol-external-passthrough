@@ -19,8 +19,7 @@ echo "Building"
 rm -rf build
 
 env LD_LIBRARY_PATH="" /usr/bin/cmake -S . -B build -DCMAKE_C_COMPILER=mpicc
-
-cmake --build build -j8
+env LD_LIBRARY_PATH="" /usr/bin/cmake --build build -j8
 
 echo "Running small test..."
 ./build/test_write
