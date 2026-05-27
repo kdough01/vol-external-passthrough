@@ -5,7 +5,7 @@ int main() {
     hid_t file_id = H5Fcreate("test.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     hsize_t dims[2] = {5, 4};
     hid_t space_id = H5Screate_simple(2, dims, NULL);
-    hid_t dset_id = H5Dcreate2(file_id, "data", H5T_NATIVE_INT, space_id,
+    hid_t dset_id = H5Dcreate2(file_id, "data", H5T_NATIVE_FLOAT, space_id,
                                 H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     float buf[20];
