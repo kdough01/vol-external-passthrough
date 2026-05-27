@@ -22,9 +22,8 @@ cmake -S . -B build \
 cmake --build build -j8
 
 echo "Running small test..."
-echo "Running small test..."
 export HDF5_VOL_CONNECTOR="pass_through_ext under_vol=0;under_info={}"
 export HDF5_PLUGIN_PATH=$(pwd)/build
-./build/test_write
+./build/test_hurricane
 
 echo "Job finished on $(date)"
