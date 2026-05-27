@@ -19,8 +19,11 @@ export LD_LIBRARY_PATH="$LP_VIEW/lib64:$LP_VIEW/lib:$LD_LIBRARY_PATH"
 
 echo "Building"
 rm -rf build
+
+MPICC_PATH=$(which mpicc)
+
 env LD_LIBRARY_PATH="" /usr/bin/cmake -S . -B build \
-    -DCMAKE_C_COMPILER=mpicc \
+    -DCMAKE_C_COMPILER="$MPICC_PATH" \
     -DCMAKE_PREFIX_PATH="$LP_VIEW"
 env LD_LIBRARY_PATH="" /usr/bin/cmake --build build -j8
 
