@@ -10,25 +10,18 @@ cd $PBS_O_WORKDIR
 echo "Job started on $(date)"
 echo "Running on: $(hostname)"
 
-module load gcc/8.5.0-ede2bck
-module load openmpi/4.1.1-by6rv67
-module load hdf5/1.10.7-zjwj3y2
+source /lcrc/project/ECP-EZ/public/compression/libpressio/use_spack.sh
 
 LP_VIEW=/lcrc/project/ECP-EZ/public/compression/libpressio/libpressio_env/.spack-env/view
-export LD_LIBRARY_PATH="$LP_VIEW/lib64:$LP_VIEW/lib:$LD_LIBRARY_PATH"
 
 echo "Building"
 rm -rf build
-
-MPICC_PATH=$(which mpicc)
-
-env LD_LIBRARY_PATH="" /usr/bin/cmake -S . -B build \
-    -DCMAKE_C_COMPILER="$MPICC_PATH" \
+cmake -S . -B build \
+    -DCMAKE_C_COMPILER=mpicc \
     -DCMAKE_PREFIX_PATH="$LP_VIEW"
-env LD_LIBRARY_PATH="" /usr/bin/cmake --build build -j8
+cmake --build build -j8
 
 echo "Running small test..."
-export LD_LIBRARY_PATH="$LP_VIEW/lib64:$LP_VIEW/lib:$LD_LIBRARY_PATH"
 ./build/test_write
 
 echo "Job finished on $(date)"

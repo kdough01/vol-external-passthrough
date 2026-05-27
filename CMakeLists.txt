@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.12)
-project(HDF5_VOL_PASSTHROUGH VERSION 0.0.1 LANGUAGES C CUDA)
+project(HDF5_VOL_PASSTHROUGH VERSION 0.0.1 LANGUAGES C)
 
 if(NOT HDF5_VOL_PASSTHROUGH_INSTALL_BIN_DIR)
   set(HDF5_VOL_PASSTHROUGH_INSTALL_BIN_DIR ${CMAKE_INSTALL_PREFIX}/bin)
@@ -29,7 +29,6 @@ endif ()
 find_package(LibPressio REQUIRED)
 
 add_library(hdf5_vol_passthrough SHARED ${HDF5_VOL_PASSTHROUGH_SRCS}
-  gpu_transform.cu
   cpu_compress.c)
 target_compile_definitions(hdf5_vol_passthrough PRIVATE ENABLE_EXT_PASSTHRU_LOGGING)
 target_include_directories(hdf5_vol_passthrough 
