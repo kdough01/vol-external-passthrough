@@ -1,7 +1,7 @@
 #!/bin/bash
 #PBS -N vol_test
 #PBS -l select=1:ncpus=1:mpiprocs=1
-#PBS -l walltime=00:01:00
+#PBS -l walltime=00:05:00
 #PBS -j oe
 #PBS -A ECP-EZ
 
@@ -10,15 +10,21 @@ cd $PBS_O_WORKDIR
 echo "Job started on $(date)"
 echo "Running on: $(hostname)"
 
-echo "Loading modules"
+# Load the shared libpressio spack environment
+source /lcrc/project/ECP-EZ/public/compression/libpressio/use_spack.sh
+
+# Load compatible modules
 module load gcc/8.5.0-ede2bck
 module load openmpi/4.1.1-by6rv67
 module load hdf5/1.10.7-zjwj3y2
 
+LP_VIEW=/lcrc/project/ECP-EZ/public/compression/libpressio/libpressio_env/.spack-env/view
+
 echo "Building"
 rm -rf build
-
-env LD_LIBRARY_PATH="" /usr/bin/cmake -S . -B build -DCMAKE_C_COMPILER=mpicc
+env LD_LIBRARY_PATH="" /usr/bin/cmake -S . -B build \
+    -DCMAKE_C_COMPILER=mpicc \
+    -DCMAKE_PREFIX_PATH="$LP_VIEW"
 env LD_LIBRARY_PATH="" /usr/bin/cmake --build build -j8
 
 echo "Running small test..."

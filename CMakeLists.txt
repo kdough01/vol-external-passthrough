@@ -26,6 +26,7 @@ find_package(HDF5)
 if (NOT HDF5_FOUND)
   message (FATAL_ERROR "HDF5 was not found on the system")
 endif ()
+find_package(LibPressio REQUIRED)
 
 add_library(hdf5_vol_passthrough SHARED ${HDF5_VOL_PASSTHROUGH_SRCS}
   gpu_transform.cu
@@ -37,6 +38,7 @@ target_include_directories(hdf5_vol_passthrough
 )
 target_link_libraries(hdf5_vol_passthrough PRIVATE "${HDF5_LIBRARIES}")
 target_link_libraries(hdf5_vol_passthrough PRIVATE MPI::MPI_C)
+target_link_libraries(hdf5_vol_passthrough PRIVATE LibPressio::libpressio)
 
 add_executable(test_write test_write.c)
 target_link_libraries(test_write PRIVATE ${HDF5_LIBRARIES})
