@@ -6,6 +6,9 @@ build/
 
 *.h5
 
+list_compressors.c
+list_compressors
+
 .vscode/
 test_write
 

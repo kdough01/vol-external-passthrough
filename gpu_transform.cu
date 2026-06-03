@@ -4,135 +4,101 @@
 #include <stdlib.h>
 #include <string.h>
 #include <cuda.h>
-
-/* Public HDF5 headers */
+#include <libpressio/libpressio.h>
 #include "hdf5.h"
 
-// COMPRESSION
-template <typename T>
-__global__ void gpu_compress(T* d_dset, size_t count) {
-    /* 
-    V1.0 this will just pass the data through the GPU and add 1 to show
-    that the data is actually being passed, but not doing anything useful.
-    documentation says that to perform compression, we need to use chunking,
-    but that is with filters
-    */
-    int idx = blockIdx.x * blockDim.x + threadIdx.x;
-    if (idx < count) {
-        d_dset[idx] += 1;
-    }
+static void cuda_deleter(void* data, void* meta) {
+    (void)meta;
+    cudaFree(data);
 }
 
 herr_t
-H5VL_pass_through_ext_gpu_transfer_compress(size_t nelem, hid_t dtype, void *buf)
+H5VL_pass_through_ext_gpu_transfer_compress(gpu_vol_dataset_t* ds_ctx, const void* host_data, size_t nbytes)
 {
-
-    /* 
-    
-    Arguments we need:
-    - size_t - nelem - number of elements
-    - hid_t - dtype - type of data elements
-    - layout of data?
-    - file_space_id - specifies where the data lands in the dataset
-    - void - buf - pointer to the actual data
-
-    I don't quite understand the asynchronous calls yet, so I am temporarily
-    ignoring them. I am also just assuming a simple layout for this V1 and will
-    worry about that in V1.1
-
-    */
-
-
-    /* 
-    I think at least initially, we can have the args be exactly the same as the
-    dataset read. I see these functions as similar - we're "reading" the dset to
-    the gpu (I know it's not strictly reading, but there is similarity)
-
-    the way I am thinking about this is:
-        compression = reading
-        decompression = writing
-    */
-
     #ifdef ENABLE_EXT_PASSTHRU_LOGGING
-        printf("GPU TRANSFORM CALLED: nelem=%zu dtype=%d\n", nelem, dtype);
+        printf("GPU COMPRESSION CALLED: nelem=%zu dtype=%d\n", nelem, dtype);
     #endif
 
-    // copy dset to device
-    // is mem_type_id the type of data stored???
-    void *d_dset;
-    H5T_class_t cls = H5Tget_class(dtype);
-    size_t size = H5Tget_size(dtype);
-    size_t bytes = nelem * H5Tget_size(dtype);
+    compression_ctx* ctx = ds_ctx->comp_ctx;
+    gpu_context_t* gpu = ds_ctx -> gpu_ctx;
 
-    cudaMalloc(&d_dset, bytes);
-    cudaMemcpy(d_dset, buf[0], bytes, cudaMemcpyHostToDevice);
-
-    int threads = 256;
-    int blocks = (nelem + threads - 1) / threads;
-
-    switch (cls) {
-        case H5T_INTEGER:
-            if (size==4) {
-                // printf("GPU INT TRANSFORM CALLED: nelem=%zu dtype=%ld\n", nelem, dtype);
-                gpu_compress<int><<<blocks, threads>>>((int*)d_dset, nelem);
-            }
-            break;
-        case H5T_FLOAT:
-            if (size==4) {
-                // printf("GPU FLOAT TRANSFORM CALLED: nelem=%zu dtype=%d\n", nelem, dtype);
-                gpu_compress<float><<<blocks, threads>>>((float*)d_dset, nelem);
-            }
-            break;
-        default:
-
+    if (nbytes > gpu->d_in_capacity) {
+        cudaFree(gpu->d_in);
+        cudaMalloc(&gpu->d_in, nbytes);
+        gpu->d_in_cpaacity = nbytes;
     }
-    cudaDeviceSynchronize();
+    cudaMemcpyAsync(gpu->d_in, host_data, nbytes, cudaMemcpyHostToDevice, gpu->stream);
 
-    // when we compress the data, the size will be different when returned
-    // need to figure out how to handle that
-    cudaMemcpy(buf[0], d_dset, bytes, cudaMemcpyDeviceToHost);
-    cudaFree(d_dset);
+    size_t dims[1] = {nbytes};
+    struct pressio_data* d_input = pressio_data_new_nonowning(pressio_byte_dtype, gpu->d_in, 1, dims);
+
+    struct pressio_data* d_output = pressio_data_new_empty(pressio_byte_dtype, 0, NULL);
+    struct pressio_options* stream_opts = pressio_options_new();
+    pressio_options_set_userptr(stream_opts, "nvcomp:stream", (void*)gpu->stream);
+    pressio_compressor_set_options(ctx->compressor, stream_opts);
+    pressio_options_free(stream_opts);
+
+    if (pressio_compressor_compress(ctx->compressor, d_input, d_output)) {
+        fprintf(stderr, "GPU compress error: %s\n", pressio_compressor_error_msg(ctx->compressor));
+        pressio_data_free(d_input);
+        pressio_data_free(d_output);
+        return -1;
+    }
+
+    size_t comp_size = 0;
+    void* d_comp_ptr = pressio_data_ptr(d_output, &comp_size);
+
+    ctx -> compressed_buf = malloc(comp_size);
+    cudaMemcpy(ctx->compressed_buf, d_comp_ptr, comp_size, cudaMemcpyDeviceToHost);
+    ctx -> compressed_chunk_size = comp_size;
+
+    pressio_data_free(d_input);
+    pressio_data_free(d_output);
 
     return 0;
 }
 
 // DECOMPRESSION
-
-__global__ void gpu_decompress(float *d_dset, size_t count)
-{
-    int idx = blockIdx.x * blockDim.x + threadIdx.x;
-    if(idx < count) {
-        d_dset[idx] += 1.0f;
-    }
-}
-
 static herr_t
-H5VL_pass_through_ext_gpu_transfer_decompress(size_t count, void *dset[], void *buf[])
+H5VL_pass_through_ext_gpu_transfer_decompress(gpu_vol_dataset_t* ds_ctx, const void* compressed_host_data, size_t compressed_size, void* output_host_buf, size_t output_nbytes)
 {
 
     #ifdef ENABLE_EXT_PASSTHRU_LOGGING
-        printf("GPU TRANSFORM CALLED: nelem=%zu dtype=%d\n", nelem, dtype);
+        printf("GPU DECOMPRESSION CALLED: nelem=%zu dtype=%d\n", nelem, dtype);
     #endif
 
-    // copy dset to device
-    // is mem_type_id the type of data stored???
+    compression_ctx* ctx = ds_ctx->comp_ctx;
+    gpu_context_t* gpu = ds_ctx -> gpu_ctx;
 
-    (void)dset;
+    void* d_comp;
 
-    size_t bytes = count * sizeof(float);
+    cudaMalloc(&d_comp, compressed_size);
+    cudaMemcpy(d_comp, compressed_host_data, compressed_size, cudaMemcpyHostToDevice);
 
-    int threads = 256;
-    int blocks = (count + threads - 1) / threads;
+    size_t comp_dims[1] = {compressed_size};
+    struct pressio_data* d_input = pressio_data_new_move(pressio_byte_dtype, d_comp, 1, comp_dims, cuda_deleter, NULL);
 
-    float *d_dset;
-    cudaMalloc(&d_dset, bytes);
-    cudaMemcpy(d_dset, buf[0], bytes, cudaMemcpyHostToDevice);
+    size_t out_dims[1] = {output_nbytes}
+    struct pressio_data* d_output = pressio_data_new_empty(pressio_byte_dtype, 1, out_dims);
 
-    gpu_decompress<<<blocks, threads>>>(d_dset, count);
-    cudaDeviceSynchronize();
+    struct pressio_options* stream_opts = pressio_options_new();
+    pressio_options_set_userptr(stream_opts, "nvomp:stream", (void*)gpu->stream);
+    pressio_compressor_set_options(ctx->compressor, stream_opts);
+    pressio_options_free(stream_opts);
 
-    cudaMemcpy(buf[0], d_dset, bytes, cudaMemcpyDeviceToHost);
-    cudaFree(d_dset);
+    if (pressio_compresor_decompress(ctx->compressor, d_input, d_output)) {
+        fprintf(stderr, "GPU decompress error: %s\n", pressio_comrpessor_error_msg(ctx->compressor));
+        pressio_data_free(d_input);
+        pressio_data_free(d_output);
+        return -1;
+    }
+
+    size_t actual_bytes = 0;
+    void* d_decomp_ptr = pressio_data_ptr(d_output, &actual_bytes);
+    cudaMemcpy(output_host_buf, d_decomp_ptr, actual_bytes, cudaMemcpyDeviceToHost);
+
+    pressio_data_free(d_input);
+    pressio_data_free(d_output);
 
     return 0;
 }

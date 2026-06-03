@@ -22,8 +22,6 @@ else
     CUDA_SRC=
 endif
 
-DYNSRC = H5VLpassthru_ext.c cpu_compress.c $(CUDA_SRC)
-
 DEBUG=-DENABLE_EXT_PASSTHRU_LOGGING -g -O0
 #INCLUDES=-I$(MPI_DIR)/include -I$(HDF5_DIR)/include
 INCLUDES=-I$(HDF5_DIR)/include -I$(MPI_DIR)/include -I$(LIBPRESSIO_DIR)/include $(CUDA_INCLUDES)
@@ -38,7 +36,9 @@ LDFLAGS = $(DEBUG) $(LIBS)
 ARFLAGS = rs
 
 DYNSRC = H5VLpassthru_ext.c cpu_compress.c $(CUDA_SRC)
-DYNOBJ = $(DYNSRC:.c=.o)
+DYNOBJ_C  = $(filter %.c, $(DYNSRC):.c=.o)
+DYNOBJ_CU = $(filter %.cu, $(DYNSRC):.cu=.o)
+DYNOBJ    = $(DYNOBJ_C:.c=.o) $(DYNOBJ_CU:.cu=.o)
 # Uncomment this line Linux builds:
 DYNLIB = libh5passthrough_vol.so
 # Uncomment this line MacOS builds:
@@ -82,6 +82,18 @@ $(STATOBJ): $(STATSRC)
 
 $(STATLIB): $(STATOBJ)
 	$(AR) $(ARFLAGS) $@ $^
+
+# TESTS
+TEST_SRCS = tests/test_cpu_write.c tests/test_cpu_hurricane.c
+TEST_EXES = test_cpu_write test_cpu_hurricane
+
+tests: $(TEST_EXES)
+
+test_write: tests/test_cpu_write.c $(DYNLIB)
+	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS) -L. -lh5passthrough_vol
+
+test_hurricane: tests/test_cpu_hurricane.c $(DYNLIB)
+	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS) -L. -lh5passthrough_vol -lm
 
 .PHONY: clean all
 clean:
