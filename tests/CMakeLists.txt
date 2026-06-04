@@ -10,6 +10,7 @@ foreach(test_target test_cpu_write test_cpu_hurricane)
         ${HDF5_LIBRARIES}
         MPI::MPI_C
         hdf5_vol_passthrough
+        LibPressio::libpressio
     )
 endforeach()
 target_link_libraries(test_cpu_hurricane PRIVATE m)

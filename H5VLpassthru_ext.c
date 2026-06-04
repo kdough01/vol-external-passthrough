@@ -1766,7 +1766,11 @@ H5VL_pass_through_ext_dataset_read(
         size_t nbytes = nelem_read * pressio_dtype_size(ctx->dtype);
 
 #ifdef USE_CUDA
-        H5VL_pass_through_ext_gpu_transfer_decompress(ds_ctx, cbuf, csize, buf[u], nbytes);
+        if (ds_ctx->gpu_ctx != NULL && strncmp(ctx->compressor_id, "nvcomp", 6) == 0) {
+            H5VL_pass_through_ext_gpu_transfer_decompress(ds_ctx, cbuf, csize, buf[u], nbytes);
+        } else {
+            H5VL_pass_through_ext_cpu_transfer_decompress(ctx, cbuf, csize, buf[u]);
+        }
 #else
         H5VL_pass_through_ext_cpu_transfer_decompress(ctx, cbuf, csize, buf[u]);
 #endif
@@ -1815,7 +1819,11 @@ H5VL_pass_through_ext_dataset_write(
 
         /* Compress the N-dimensional buffer */
 #ifdef USE_CUDA
-        H5VL_pass_through_ext_gpu_transfer_compress(ds_ctx, buf[u], nbytes);
+        if (ds_ctx->gpu_ctx != NULL && strncmp(ctx->compressor_id, "nvcomp", 6) == 0) {
+            H5VL_pass_through_ext_gpu_transfer_compress(ds_ctx, buf[u], nbytes);
+        } else {
+            H5VL_pass_through_ext_cpu_transfer_compress(ctx, buf[u], nbytes);
+        }
 #else
         H5VL_pass_through_ext_cpu_transfer_compress(ctx, buf[u], nbytes);
 #endif
