@@ -85,6 +85,13 @@ H5VL_pass_through_ext_cpu_transfer_decompress(compression_ctx *comp_ctx,
         fprintf(stderr, "decompress error: %s\n",
                 pressio_compressor_error_msg(comp_ctx->compressor));
         ret = pressio_compressor_error_code(comp_ctx->compressor);
+    } else {
+        size_t out_size = 0;
+        void *out_ptr = pressio_data_ptr(decompressed, &out_size);
+        printf("DEBUG decompress success: out_ptr=%p out_size=%zu first_float=%.6e\n",
+            out_ptr, out_size, out_ptr ? ((float*)out_ptr)[0] : 0.0f);
+        printf("DEBUG output_buf=%p first_float=%.6e\n",
+            output_buf, ((float*)output_buf)[0]);
     }
 
     pressio_data_free(compressed);
