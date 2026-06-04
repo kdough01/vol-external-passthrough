@@ -1,6 +1,6 @@
 # TESTS
 
-foreach(test_target test_cpu_write test_cpu_hurricane)
+foreach(test_target test_cpu_write test_cpu_hurricane miranda)
     add_executable(${test_target} ${test_target}.c)
     target_include_directories(${test_target} PRIVATE
         ${HDF5_INCLUDE_DIRS}
@@ -17,3 +17,4 @@ foreach(test_target test_cpu_write test_cpu_hurricane)
     )
 endforeach()
 target_link_libraries(test_cpu_hurricane PRIVATE m)
+target_link_libraries(miranda PRIVATE m)

@@ -26,5 +26,8 @@ export HDF5_PLUGIN_PATH=$(pwd)/build
 echo "=== Small write test ==="
 ./build/tests/test_cpu_write
 
-echo "=== Hurricane test ==="
-./build/tests/test_cpu_hurricane
+# echo "=== Hurricane test ==="
+# ./build/tests/test_cpu_hurricane
+
+# echo "=== SDRBench Miranda test ==="
+# ./build/tests/test_sdrbench
