@@ -62,6 +62,11 @@ int main() {
     if (!field) return 1;
     printf("Loaded %s (%d floats)\n", path, NELEM); fflush(stdout);
 
+    // Add this:
+    printf("Raw field first 10 values:\n");
+    for (int i = 0; i < 10; i++) printf("  [%d] = %.6f\n", i, field[i]);
+    fflush(stdout);
+
     hid_t file_id = H5Fcreate("hurricane_gpu.h5", H5F_ACC_TRUNC,
                                H5P_DEFAULT, H5P_DEFAULT);
     hsize_t dims[3] = {NX, NY, NZ};
@@ -86,8 +91,11 @@ int main() {
     /* --- Read back and spot-check first 10 values --- */
     float *rbuf = malloc(NELEM * sizeof(float));
     dset = H5Dopen2(file_id, "Pf48_gpu_lz4", H5P_DEFAULT);
-    H5Dread(dset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf);
-    H5Dclose(dset);
+    herr_t ret = H5Dread(dset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf);
+    printf("H5Dread returned: %d\n", (int)ret);
+    printf("rbuf first 10 raw values:\n");
+    for (int i = 0; i < 10; i++) printf("  [%d] = %.6f\n", i, rbuf[i]);
+    fflush(stdout);
 
     printf("Pf48_gpu_lz4 first 10 values:\n");
     for (int i = 0; i < 10; i++) printf("  [%d] orig=%.6f  decomp=%.6f  diff=%.2e\n",
