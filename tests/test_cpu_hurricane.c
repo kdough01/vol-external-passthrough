@@ -51,13 +51,6 @@ static float *read_hurricane_field(const char *filename) {
 }
 
 int main() {
-    struct pressio *library = pressio_instance();
-    const char** compressors = pressio_supported_compressors(library);
-    printf("Available compressors:\n");
-    for (int i = 0; compressors[i] != NULL; i++) {
-        printf("  %s\n", compressors[i]);
-    }
-    pressio_release(library);
 
     printf("GPU Hurricane test starting\n"); fflush(stdout);
     register_vol_properties();
