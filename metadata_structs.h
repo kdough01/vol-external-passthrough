@@ -8,6 +8,36 @@
 #include <cuda_runtime.h>
 #endif
 
+/************/
+/* Metadata structs */
+/************/
+
+typedef struct datatype_ctx {
+    void *under_obj;
+    hid_t under_vol;
+
+    compression_ctx *ctx;
+
+    hsize_t *dims;
+    int rank;
+    hid_t type;
+} datatype_ctx;
+
+typedef struct chunking_ctx {
+    size_t ndims; // I'm not sure yet what information we will need for chunking, this is just a placeholder
+    hsize_t *chunk_dims; // how should we specify dimensions, I put in an array here but idk if that's the best way
+    H5D_layout_t layout;
+} chunking_ctx;
+
+// any other static information we want can go here
+typedef struct config_params {
+    int device_id;
+    int min_size_for_gpu; // remove
+    int max_device_memory_bytes; // remove
+    char *default_compression_id; // std::string
+    int compression_level; // pressio_options libpressio_options
+} config_params;
+
 typedef struct compression_ctx {
     char *compressor_id;
     struct pressio_options *compressor_opts;
