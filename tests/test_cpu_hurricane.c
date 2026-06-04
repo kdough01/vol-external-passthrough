@@ -4,8 +4,7 @@
 #include "hdf5.h"
 #include <libpressio/libpressio.h>
 
-#define HURRICANE_PATH "/lcrc/project/ECP-EZ/public/compression/Hurricane-ISABEL/cleaned-data"
-#define NX 100
+#define HURRICANE_PATH "/lcrc/project/ECP-EZ/public/compression/Hurricane-ISABEL/nonclean-data"#define NX 100
 #define NY 500
 #define NZ 500
 #define NELEM (NX * NY * NZ)
@@ -57,7 +56,7 @@ int main() {
 
     /* Load Pf48 (pressure field) */
     char path[512];
-    snprintf(path, sizeof(path), "%s/Pf48.bin", HURRICANE_PATH);
+    snprintf(path, sizeof(path), "%s/CLOUDf01.bin", HURRICANE_PATH);
     float *field = read_hurricane_field(path);
     if (!field) return 1;
     printf("Loaded %s (%d floats)\n", path, NELEM); fflush(stdout);
