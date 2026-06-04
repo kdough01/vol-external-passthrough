@@ -3,6 +3,7 @@
 #include <string.h>
 #include <libpressio/libpressio.h>
 #include "H5VLpassthru_ext.h"
+#include "metadata_structs.h"
 // #include <libpressio_ext/io/posix.h>
 
 

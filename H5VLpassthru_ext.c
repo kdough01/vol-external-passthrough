@@ -568,6 +568,7 @@ gpu_vol_dataset_t* gpu_vol_dataset_wrap(void *under_dataset,
     gpu_dataset_ctx->under_dataset = under_dataset;
     gpu_dataset_ctx->under_vol_id = under_vol_id;
     gpu_dataset_ctx->file_ctx = file_ctx;
+    gpu_dataset_ctx->gpu_ctx = file_ctx->gpu_ctx;
 
     gpu_dataset_ctx->comp_ctx = compression_ctx_create(rank, h5dims, pressio_dt,
                                                         dcpl_id,
