@@ -4,7 +4,8 @@
 #include "hdf5.h"
 #include <libpressio/libpressio.h>
 
-#define HURRICANE_PATH "/lcrc/project/ECP-EZ/public/compression/Hurricane-ISABEL/nonclean-data"#define NX 100
+#define HURRICANE_PATH "/lcrc/project/ECP-EZ/public/compression/Hurricane-ISABEL/nonclean-data"
+#define NX 100
 #define NY 500
 #define NZ 500
 #define NELEM (NX * NY * NZ)
