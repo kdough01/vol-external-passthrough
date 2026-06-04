@@ -43,6 +43,7 @@
 #include "H5VLpassthru_ext_private.h"
 #include <libpressio/libpressio.h>
 #include <libpressio_ext/json/pressio_options_json.h>
+#include "vol_types.h"
 
 #ifdef USE_CUDA
 #include <cuda_runtime.h>
@@ -112,33 +113,6 @@ typedef struct config_params {
     char *default_compression_id; // std::string
     int compression_level; // pressio_options libpressio_options
 } config_params;
-
-typedef struct gpu_context_t {
-    int device_id;
-#ifdef USE_CUDA
-    cudaStream_t stream;
-    void *d_in; // pointer to input buffer in GPU
-    size_t d_in_capacity; // size of input buffer
-    void *d_out;
-    size_t d_out_capacity;
-#endif
-} gpu_context_t;
-
-typedef struct gpu_vol_file_t {
-    void* under_file;
-    hid_t under_vol_id;
-    gpu_context_t* gpu_ctx;
-    config_params* config_params;
-} gpu_vol_file_t;
-
-typedef struct gpu_vol_dataset_t {
-    void* under_dataset;
-    hid_t under_vol_id;
-    datatype_ctx* datatype_info;
-    chunking_ctx* chunking_info;
-    compression_ctx* comp_ctx;
-    gpu_vol_file_t* file_ctx;
-} gpu_vol_dataset_t;
 
 /********************* */
 /* Function prototypes */

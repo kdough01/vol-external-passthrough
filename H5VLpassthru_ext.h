@@ -34,20 +34,6 @@ typedef struct H5VL_pass_through_ext_info_t {
     void *under_vol_info;       /* VOL info for under VOL */
 } H5VL_pass_through_ext_info_t;
 
-typedef struct compression_ctx {
-    char *compressor_id;
-    struct pressio_options *compressor_opts;
-    struct pressio *library;
-    struct pressio_compressor *compressor;
-    size_t ndims; // replace with std::vector
-    size_t *dims; // replace with std::vector
-    enum pressio_dtype dtype; // replace with pressio dtype
-    void *compressed_buf;
-    size_t compressed_chunk_size;
-    uint64_t last_uncompressed_bytes;
-    uint64_t last_compressed_bytes;
-} compression_ctx;
-
 #ifdef __cplusplus
 extern "C" {
 #endif
