@@ -44,6 +44,10 @@
 #include <libpressio/libpressio.h>
 #include <libpressio_ext/json/pressio_options_json.h>
 
+#ifdef USE_CUDA
+#include <cuda_runtime.h>
+#endif
+
 
 /**********/
 /* Macros */
