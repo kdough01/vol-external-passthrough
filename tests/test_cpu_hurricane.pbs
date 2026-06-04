@@ -11,37 +11,38 @@ cd $PBS_O_WORKDIR
 echo "Job started on $(date)"
 echo "Running on: $(hostname)"
 
-module load gcc/11.4.0
+# Load
+module load gcc/9.2.0-r4tyw54
+module load cuda/11.4.0-gqbcqie
 module load openmpi/5.1.0-cuda-ucx
-module load cuda/12.6.0
 
 echo "mpicc: $(which mpicc)"
 echo "nvcc:  $(which nvcc)"
-echo "gcc:   $(which gcc) ($(gcc --version | head -1))"
+echo "gcc:   $(gcc --version | head -1)"
 
 LP_VIEW=/lcrc/project/ECP-EZ/public/compression/libpressio/libpressio_env/.spack-env/view
-
-GCC_LIB=$(gcc -print-file-name=libstdc++.so | xargs dirname)
-export LD_LIBRARY_PATH=${GCC_LIB}:${LP_VIEW}/lib64:${LP_VIEW}/lib
-
-echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH"
 
 # Build
 echo ""
 echo "=== Building ==="
 rm -rf build
+env -u LD_LIBRARY_PATH \
 cmake -S . -B build \
     -DCMAKE_C_COMPILER=mpicc \
     -DCMAKE_CXX_COMPILER=mpicxx \
     -DUSE_CUDA=ON \
     -DCMAKE_PREFIX_PATH="$LP_VIEW" \
     -Wno-dev
+
+env -u LD_LIBRARY_PATH \
 cmake --build build -j4
 
 echo "--- build/ contents ---"
-ls build/
+ls build/ || { echo "Build failed"; exit 1; }
 
-# Run tests
+GCC_LIB=$(gcc -print-file-name=libstdc++.so | xargs dirname)
+export LD_LIBRARY_PATH=${GCC_LIB}:${LP_VIEW}/lib64:${LP_VIEW}/lib
+
 export HDF5_VOL_CONNECTOR="pass_through_ext under_vol=0;under_info={}"
 export HDF5_PLUGIN_PATH=$(pwd)/build
 
