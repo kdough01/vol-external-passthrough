@@ -23,11 +23,11 @@ cmake --build build -j8
 export HDF5_VOL_CONNECTOR="pass_through_ext under_vol=0;under_info={}"
 export HDF5_PLUGIN_PATH=$(pwd)/build
 
-echo "=== Small write test ==="
-./build/tests/test_cpu_write
+# echo "=== Small write test ==="
+# ./build/tests/test_cpu_write
 
 # echo "=== Hurricane test ==="
 # ./build/tests/test_cpu_hurricane
 
-# echo "=== SDRBench Miranda test ==="
-# ./build/tests/test_sdrbench
+echo "=== SDRBench Miranda test ==="
+./build/tests/miranda
