@@ -32,7 +32,7 @@ set(VOL_SRCS
 )
 
 if(USE_CUDA)
-  # find_package(CUDAToolkit REQUIRED)
+  find_package(CUDAToolkit REQUIRED)
   list(APPEND VOL_SRCS gpu_transform.cu)
 endif()
 
