@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "hdf5.h"
+#include <libpressio/libpressio.h>
 
 #define HURRICANE_PATH "/lcrc/project/ECP-EZ/public/compression/Hurricane-ISABEL/cleaned-data"
 #define NX 100

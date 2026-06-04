@@ -12,5 +12,8 @@ foreach(test_target test_cpu_write test_cpu_hurricane)
         hdf5_vol_passthrough
         LibPressio::libpressio
     )
+    target_link_options(${test_target} PRIVATE
+        -Wl,--allow-shlib-undefined
+    )
 endforeach()
 target_link_libraries(test_cpu_hurricane PRIVATE m)
