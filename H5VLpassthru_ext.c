@@ -43,7 +43,7 @@
 #include "H5VLpassthru_ext_private.h"
 #include <libpressio/libpressio.h>
 #include <libpressio_ext/json/pressio_options_json.h>
-#include "vol_types.h"
+#include "metadata_structs.h"
 
 #ifdef USE_CUDA
 #include <cuda_runtime.h>
