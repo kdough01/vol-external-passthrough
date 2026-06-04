@@ -1,7 +1,7 @@
 #!/bin/bash
-#PBS -N vol_test
-#PBS -l select=1:ncpus=1:mpiprocs=1
-#PBS -l walltime=00:02:00
+#PBS -N vol_test_gpu
+#PBS -l select=1:ncpus=4:ngpus=1:mpiprocs=1
+#PBS -l walltime=00:10:00
 #PBS -j oe
 #PBS -A ECP-EZ
 
@@ -14,16 +14,23 @@ source /lcrc/project/ECP-EZ/public/compression/libpressio/use_spack.sh
 
 LP_VIEW=/lcrc/project/ECP-EZ/public/compression/libpressio/libpressio_env/.spack-env/view
 
-echo "Building"
+echo "=== Building (CPU + GPU) ==="
 rm -rf build
 cmake -S . -B build \
     -DCMAKE_C_COMPILER=mpicc \
+    -DUSE_CUDA=ON \
     -DCMAKE_PREFIX_PATH="$LP_VIEW"
 cmake --build build -j8
 
-echo "Running small test..."
 export HDF5_VOL_CONNECTOR="pass_through_ext under_vol=0;under_info={}"
 export HDF5_PLUGIN_PATH=$(pwd)/build
-./build/test_hurricane
+
+echo ""
+echo "=== Small write test (bzip2 / sz3 / zfp) ==="
+./build/test_write
+
+# echo ""
+# echo "=== Hurricane GPU test ==="
+# ./build/test_hurricane_gpu
 
 echo "Job finished on $(date)"

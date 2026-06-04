@@ -53,7 +53,6 @@ H5VL_pass_through_ext_cpu_transfer_decompress(compression_ctx *comp_ctx,
         return -1;
     }
 
-    // noop stores raw bytes — skip libpressio and memcpy directly
     if (strcmp(comp_ctx->compressor_id, "noop") == 0) {
         memcpy(output_buf, compressed_data, compressed_size);
         return 0;
