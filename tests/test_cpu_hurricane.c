@@ -98,9 +98,8 @@ int main() {
     fflush(stdout);
 
     printf("Pf48_gpu_lz4 first 10 values:\n");
-    for (int i = 0; i < 10; i++) printf("  [%d] orig=%.6f  decomp=%.6f  diff=%.2e\n",
-                                         i, field[i], rbuf[i], field[i] - rbuf[i]);
-
+    for (int i = 0; i < 10; i++) printf("  [%d] orig=%.6e  decomp=%.6e  diff=%.2e\n",
+                                        i, field[i], rbuf[i], field[i] - rbuf[i]);
     H5Sclose(space_id);
     H5Fclose(file_id);
     free(field);
