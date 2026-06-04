@@ -15,6 +15,8 @@ static void cuda_deleter(void* data, void* meta) {
     cudaFree(data);
 }
 
+extern "C" {
+
 herr_t
 H5VL_pass_through_ext_gpu_transfer_compress(gpu_vol_dataset_t* ds_ctx, const void* host_data, size_t nbytes)
 {
@@ -99,4 +101,6 @@ H5VL_pass_through_ext_gpu_transfer_decompress(gpu_vol_dataset_t* ds_ctx, const v
     pressio_data_free(d_input);
     pressio_data_free(d_output);
     return 0;
+}
+
 }
