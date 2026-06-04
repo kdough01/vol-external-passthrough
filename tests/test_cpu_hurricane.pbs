@@ -7,12 +7,10 @@
 #PBS -q gpu
 
 cd $PBS_O_WORKDIR/..
-
 echo "Job started on $(date)"
 echo "Running on: $(hostname)"
 echo "PWD: $(pwd)"
 
-# Load
 module load gcc/9.2.0-r4tyw54
 module load cuda/11.4.0-gqbcqie
 module load openmpi/5.1.0-cuda-ucx
@@ -20,18 +18,21 @@ module load openmpi/5.1.0-cuda-ucx
 SYSTEM_MPICC=$(which mpicc)
 SYSTEM_MPICXX=$(which mpicxx)
 echo "mpicc: $SYSTEM_MPICC"
-echo "nvcc:  $(which nvcc)"
-echo "gcc:   $(gcc --version | head -1)"
 
 LP_VIEW=/lcrc/project/ECP-EZ/public/compression/libpressio/libpressio_env/.spack-env/view
 
+MUNGE_LIB=$(find /usr /soft /lib /lib64 -name "libmunge.so.2" 2>/dev/null | head -1 | xargs dirname)
+echo "libmunge found at: ${MUNGE_LIB:-NOT FOUND}"
+
 CLEAN_PATH=$(echo "$PATH" | tr ':' '\n' | grep -v spack-env | tr '\n' ':')
 
-# Build
+GCC_LIB=$(gcc -print-file-name=libstdc++.so | xargs dirname)
+BUILD_LD="${GCC_LIB}${MUNGE_LIB:+:${MUNGE_LIB}}"
+
 echo ""
 echo "=== Building ==="
 rm -rf build
-env -u LD_LIBRARY_PATH PATH="$CLEAN_PATH" \
+env PATH="$CLEAN_PATH" LD_LIBRARY_PATH="$BUILD_LD" \
 cmake -S . -B build \
     -DCMAKE_C_COMPILER="$SYSTEM_MPICC" \
     -DCMAKE_CXX_COMPILER="$SYSTEM_MPICXX" \
@@ -39,16 +40,15 @@ cmake -S . -B build \
     -DCMAKE_PREFIX_PATH="$LP_VIEW" \
     -Wno-dev
 
-env -u LD_LIBRARY_PATH PATH="$CLEAN_PATH" \
+env PATH="$CLEAN_PATH" LD_LIBRARY_PATH="$BUILD_LD" \
 cmake --build build -j4
 
 echo "--- build/ contents ---"
 ls build/ || { echo "Build failed"; exit 1; }
 echo "--- build/tests/ contents ---"
-ls build/tests/ || { echo "No tests/ in build — check CMakeLists.txt"; exit 1; }
+ls build/tests/ || { echo "No tests/ in build"; exit 1; }
 
-GCC_LIB=$(gcc -print-file-name=libstdc++.so | xargs dirname)
-export LD_LIBRARY_PATH=${GCC_LIB}:${LP_VIEW}/lib64:${LP_VIEW}/lib
+export LD_LIBRARY_PATH=${GCC_LIB}${MUNGE_LIB:+:${MUNGE_LIB}}:${LP_VIEW}/lib64:${LP_VIEW}/lib
 
 export HDF5_VOL_CONNECTOR="pass_through_ext under_vol=0;under_info={}"
 export HDF5_PLUGIN_PATH=$(pwd)/build
