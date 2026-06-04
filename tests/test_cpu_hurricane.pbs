@@ -1,41 +1,56 @@
 #!/bin/bash
-#PBS -N swing_diag
+#PBS -N vol_test_swing
 #PBS -l select=1:ncpus=4:ngpus=1:mpiprocs=1
-#PBS -l walltime=00:05:00
+#PBS -l walltime=00:10:00
 #PBS -j oe
 #PBS -A ECP-EZ
 #PBS -q gpu
 
 cd $PBS_O_WORKDIR
 
-echo "=== hostname ==="
-hostname
+echo "Job started on $(date)"
+echo "Running on: $(hostname)"
 
-echo "=== /lcrc/project/ECP-EZ/public/compression/libpressio/ ==="
-ls /lcrc/project/ECP-EZ/public/compression/libpressio/
+module load gcc/11.4.0
+module load openmpi/5.1.0-cuda-ucx
+module load cuda/12.6.0
 
-echo "=== use_spack.sh contents ==="
-cat /lcrc/project/ECP-EZ/public/compression/libpressio/use_spack.sh
+echo "mpicc: $(which mpicc)"
+echo "nvcc:  $(which nvcc)"
+echo "gcc:   $(which gcc) ($(gcc --version | head -1))"
 
-echo "=== module avail (mpi) ==="
-module avail 2>&1 | grep -i mpi
+LP_VIEW=/lcrc/project/ECP-EZ/public/compression/libpressio/libpressio_env/.spack-env/view
 
-echo "=== module avail (cuda) ==="
-module avail 2>&1 | grep -i cuda
+GCC_LIB=$(gcc -print-file-name=libstdc++.so | xargs dirname)
+export LD_LIBRARY_PATH=${GCC_LIB}:${LP_VIEW}/lib64:${LP_VIEW}/lib
 
-echo "=== module avail (gcc) ==="
-module avail 2>&1 | grep -i gcc
+echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH"
 
-echo "=== which mpicc after source ==="
-source /lcrc/project/ECP-EZ/public/compression/libpressio/use_spack.sh 2>&1 || true
-which mpicc 2>/dev/null || echo "mpicc not found"
-mpicc --version 2>/dev/null || true
+# Build
+echo ""
+echo "=== Building ==="
+rm -rf build
+cmake -S . -B build \
+    -DCMAKE_C_COMPILER=mpicc \
+    -DCMAKE_CXX_COMPILER=mpicxx \
+    -DUSE_CUDA=ON \
+    -DCMAKE_PREFIX_PATH="$LP_VIEW" \
+    -Wno-dev
+cmake --build build -j4
 
-echo "=== nvcc ==="
-which nvcc 2>/dev/null || echo "nvcc not found"
-nvcc --version 2>/dev/null || true
+echo "--- build/ contents ---"
+ls build/
 
-echo "=== python version in spack ==="
-python3 --version 2>/dev/null || true
+# Run tests
+export HDF5_VOL_CONNECTOR="pass_through_ext under_vol=0;under_info={}"
+export HDF5_PLUGIN_PATH=$(pwd)/build
 
-echo "Done"
+echo ""
+echo "=== Small write test (bzip2 / sz3 / zfp) ==="
+./build/test_write
+
+echo ""
+echo "=== Hurricane GPU test ==="
+./build/test_hurricane_gpu
+
+echo "Job finished on $(date)"
