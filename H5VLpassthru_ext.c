@@ -259,8 +259,8 @@ static herr_t H5VL_pass_through_ext_token_from_str(void *obj, H5I_type_t obj_typ
 static herr_t H5VL_pass_through_ext_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_id, void **req);
 
 /* Compression Functions */
-herr_t H5VL_pass_through_ext_gpu_transfer_compress(size_t nelem, hid_t dtype, void *buf[]);
-herr_t H5VL_pass_through_ext_gpu_transfer_decompress(size_t nelem, hid_t dtype, void *buf[]);
+herr_t H5VL_pass_through_ext_gpu_transfer_compress(gpu_vol_dataset_t* ds_ctx, const void* host_data, size_t nbytes);
+herr_t H5VL_pass_through_ext_gpu_transfer_decompress(gpu_vol_dataset_t* ds_ctx, const void* compressed_host_data, size_t compressed_size, void* output_host_buf, size_t output_nbytes);
 herr_t H5VL_pass_through_ext_cpu_transfer_compress(compression_ctx *comp_ctx, const void *data, size_t nbytes);
 herr_t H5VL_pass_through_ext_cpu_transfer_decompress(compression_ctx *comp_ctx, const void *compressed_data, size_t compressed_size, void *output_buf);
 
