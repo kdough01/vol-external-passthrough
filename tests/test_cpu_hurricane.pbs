@@ -6,39 +6,46 @@
 #PBS -A ECP-EZ
 #PBS -q gpu
 
-cd $PBS_O_WORKDIR
+cd $PBS_O_WORKDIR/..
 
 echo "Job started on $(date)"
 echo "Running on: $(hostname)"
+echo "PWD: $(pwd)"
 
 # Load
 module load gcc/9.2.0-r4tyw54
 module load cuda/11.4.0-gqbcqie
 module load openmpi/5.1.0-cuda-ucx
 
-echo "mpicc: $(which mpicc)"
+SYSTEM_MPICC=$(which mpicc)
+SYSTEM_MPICXX=$(which mpicxx)
+echo "mpicc: $SYSTEM_MPICC"
 echo "nvcc:  $(which nvcc)"
 echo "gcc:   $(gcc --version | head -1)"
 
 LP_VIEW=/lcrc/project/ECP-EZ/public/compression/libpressio/libpressio_env/.spack-env/view
 
+CLEAN_PATH=$(echo "$PATH" | tr ':' '\n' | grep -v spack-env | tr '\n' ':')
+
 # Build
 echo ""
 echo "=== Building ==="
 rm -rf build
-env -u LD_LIBRARY_PATH \
+env -u LD_LIBRARY_PATH PATH="$CLEAN_PATH" \
 cmake -S . -B build \
-    -DCMAKE_C_COMPILER=mpicc \
-    -DCMAKE_CXX_COMPILER=mpicxx \
+    -DCMAKE_C_COMPILER="$SYSTEM_MPICC" \
+    -DCMAKE_CXX_COMPILER="$SYSTEM_MPICXX" \
     -DUSE_CUDA=ON \
     -DCMAKE_PREFIX_PATH="$LP_VIEW" \
     -Wno-dev
 
-env -u LD_LIBRARY_PATH \
+env -u LD_LIBRARY_PATH PATH="$CLEAN_PATH" \
 cmake --build build -j4
 
 echo "--- build/ contents ---"
 ls build/ || { echo "Build failed"; exit 1; }
+echo "--- build/tests/ contents ---"
+ls build/tests/ || { echo "No tests/ in build — check CMakeLists.txt"; exit 1; }
 
 GCC_LIB=$(gcc -print-file-name=libstdc++.so | xargs dirname)
 export LD_LIBRARY_PATH=${GCC_LIB}:${LP_VIEW}/lib64:${LP_VIEW}/lib
@@ -48,10 +55,10 @@ export HDF5_PLUGIN_PATH=$(pwd)/build
 
 echo ""
 echo "=== Small write test (bzip2 / sz3 / zfp) ==="
-./build/test_write
+./build/tests/test_cpu_write
 
 echo ""
 echo "=== Hurricane GPU test ==="
-./build/test_hurricane_gpu
+./build/tests/test_cpu_hurricane
 
 echo "Job finished on $(date)"
