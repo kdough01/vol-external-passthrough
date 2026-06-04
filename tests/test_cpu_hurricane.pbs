@@ -1,85 +1,41 @@
 #!/bin/bash
-#PBS -N vol_test_gpu
+#PBS -N swing_diag
 #PBS -l select=1:ncpus=4:ngpus=1:mpiprocs=1
-#PBS -l walltime=00:10:00
+#PBS -l walltime=00:05:00
 #PBS -j oe
 #PBS -A ECP-EZ
+#PBS -q gpu
 
 cd $PBS_O_WORKDIR
 
-echo "Job started on $(date)"
-echo "Running on: $(hostname)"
+echo "=== hostname ==="
+hostname
 
-# ----------------------------------------------------------------
-# Find the right spack setup for this node.
-# gpu1 is likely on the "swing" cluster which has its own spack tree.
-# Try the known paths in order.
-# ----------------------------------------------------------------
-SPACK_SETUP=""
-for candidate in \
-    /lcrc/project/ECP-EZ/public/compression/libpressio/spack-swing/share/spack/setup-env.sh \
-    /lcrc/project/ECP-EZ/public/compression/libpressio/spack/share/spack/setup-env.sh \
-    /blues/gpfs/home/software/spack/share/spack/setup-env.sh \
-    /swing/gpfs/home/software/spack/share/spack/setup-env.sh \
-    /lcrc/project/ECP-EZ/public/compression/spack/share/spack/setup-env.sh
-do
-    if [ -f "$candidate" ]; then
-        SPACK_SETUP="$candidate"
-        break
-    fi
-done
+echo "=== /lcrc/project/ECP-EZ/public/compression/libpressio/ ==="
+ls /lcrc/project/ECP-EZ/public/compression/libpressio/
 
-if [ -z "$SPACK_SETUP" ]; then
-    echo "ERROR: Could not find spack setup-env.sh. Searched:"
-    echo "  /lcrc/project/ECP-EZ/public/compression/libpressio/spack-swing/..."
-    echo "  /blues/gpfs/home/software/spack/..."
-    echo "  /swing/gpfs/home/software/spack/..."
-    # Print what actually exists so we can fix this next run
-    echo "--- Contents of /lcrc/project/ECP-EZ/public/compression/libpressio/ ---"
-    ls /lcrc/project/ECP-EZ/public/compression/libpressio/
-    echo "--- Contents of /lcrc/project/ECP-EZ/public/ ---"
-    ls /lcrc/project/ECP-EZ/public/ 2>/dev/null || true
-    exit 1
-fi
+echo "=== use_spack.sh contents ==="
+cat /lcrc/project/ECP-EZ/public/compression/libpressio/use_spack.sh
 
-echo "Using spack from: $SPACK_SETUP"
-source "$SPACK_SETUP"
+echo "=== module avail (mpi) ==="
+module avail 2>&1 | grep -i mpi
 
-LP_VIEW=/lcrc/project/ECP-EZ/public/compression/libpressio/libpressio_env/.spack-env/view
+echo "=== module avail (cuda) ==="
+module avail 2>&1 | grep -i cuda
 
-# ----------------------------------------------------------------
-# CRITICAL: keep spack view libs from shadowing system libstdc++.
-# The view's libstdc++ is older than what cmake was compiled against.
-# Move it to the END of LD_LIBRARY_PATH, not the front.
-# ----------------------------------------------------------------
-export LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:/usr/lib64:${LP_VIEW}/lib:${LP_VIEW}/lib64
+echo "=== module avail (gcc) ==="
+module avail 2>&1 | grep -i gcc
 
-echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH"
-echo "cmake: $(which cmake)"
+echo "=== which mpicc after source ==="
+source /lcrc/project/ECP-EZ/public/compression/libpressio/use_spack.sh 2>&1 || true
+which mpicc 2>/dev/null || echo "mpicc not found"
+mpicc --version 2>/dev/null || true
 
-echo ""
-echo "=== Building (CPU + GPU) ==="
-rm -rf build
-cmake -S . -B build \
-    -DCMAKE_C_COMPILER=mpicc \
-    -DUSE_CUDA=ON \
-    -DCMAKE_PREFIX_PATH="$LP_VIEW"
-cmake --build build -j8
+echo "=== nvcc ==="
+which nvcc 2>/dev/null || echo "nvcc not found"
+nvcc --version 2>/dev/null || true
 
-if [ ! -f ./build/test_write ]; then
-    echo "ERROR: build/test_write not found — build failed. Check output above."
-    exit 1
-fi
+echo "=== python version in spack ==="
+python3 --version 2>/dev/null || true
 
-export HDF5_VOL_CONNECTOR="pass_through_ext under_vol=0;under_info={}"
-export HDF5_PLUGIN_PATH=$(pwd)/build
-
-echo ""
-echo "=== Small write test (bzip2 / sz3 / zfp) ==="
-./build/test_write
-
-echo ""
-echo "=== Hurricane GPU test ==="
-./build/test_hurricane_gpu
-
-echo "Job finished on $(date)"
+echo "Done"
