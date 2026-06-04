@@ -8,6 +8,7 @@
 #include <libpressio/libpressio.h>
 #include "hdf5.h"
 #include "H5VLpassthru_ext.h"
+#include "H5VLpassthru_ext_private.h"
 
 static void cuda_deleter(void* data, void* meta) {
     (void)meta;
