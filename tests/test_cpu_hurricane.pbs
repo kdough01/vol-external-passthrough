@@ -3,7 +3,7 @@
 #PBS -l select=1:ncpus=4:ngpus=1:mpiprocs=1
 #PBS -l walltime=00:10:00
 #PBS -j oe
-#PBS -A ECP-EZ
+#PBS -A SDR
 #PBS -q gpu
 
 cd $PBS_O_WORKDIR/..
