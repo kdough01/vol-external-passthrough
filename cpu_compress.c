@@ -49,6 +49,13 @@ H5VL_pass_through_ext_cpu_transfer_decompress(compression_ctx *comp_ctx,
     printf("------- CPU DECOMPRESSION CALLED\n");
 #endif
 
+    printf("DEBUG decompress entry: ndims=%zu dims=[", comp_ctx->ndims);
+    for (size_t i = 0; i < comp_ctx->ndims; i++)
+        printf("%zu%s", comp_ctx->dims[i], i+1 < comp_ctx->ndims ? "," : "");
+    printf("] dtype=%d compressed_size=%zu output_buf=%p\n",
+           (int)comp_ctx->dtype, compressed_size, output_buf);
+    fflush(stdout);
+
     if (!comp_ctx || !comp_ctx->compressor) {
         fprintf(stderr, "Error: Invalid or uninitialized compression context.\n");
         return -1;
