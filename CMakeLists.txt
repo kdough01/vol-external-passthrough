@@ -42,6 +42,9 @@ target_compile_definitions(hdf5_vol_passthrough PRIVATE ENABLE_EXT_PASSTHRU_LOGG
 
 if(USE_CUDA)
   target_compile_definitions(hdf5_vol_passthrough PRIVATE USE_CUDA)
+  target_include_directories(hdf5_vol_passthrough
+    PRIVATE ${CUDAToolkit_INCLUDE_DIRS}
+  )
   target_link_libraries(hdf5_vol_passthrough PRIVATE CUDA::cudart)
   set_target_properties(hdf5_vol_passthrough PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
 endif()
