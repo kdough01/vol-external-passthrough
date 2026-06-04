@@ -1769,10 +1769,18 @@ H5VL_pass_through_ext_dataset_read(
         if (ds_ctx->gpu_ctx != NULL && strncmp(ctx->compressor_id, "nvcomp", 6) == 0) {
             H5VL_pass_through_ext_gpu_transfer_decompress(ds_ctx, cbuf, csize, buf[u], nbytes);
         } else {
+            printf("DEBUG decompress: ndims=%zu dims=[", comp_ctx->ndims);
+            for (size_t i = 0; i < comp_ctx->ndims; i++)
+                printf("%zu%s", comp_ctx->dims[i], i+1 < comp_ctx->ndims ? "," : "");
+            printf("] dtype=%d compressed_size=%zu\n", (int)comp_ctx->dtype, compressed_size);
+            printf("DEBUG decompress: cbuf=%p csize=%zu output_buf=%p nbytes=%zu\n", cbuf, (size_t)csize, buf[u], nbytes);
             H5VL_pass_through_ext_cpu_transfer_decompress(ctx, cbuf, csize, buf[u]);
+            printf("DEBUG decompress done, first float=%.6e\n", ((float*)buf[u])[0]);
         }
 #else
-        H5VL_pass_through_ext_cpu_transfer_decompress(ctx, cbuf, csize, buf[u]);
+    printf("DEBUG decompress: cbuf=%p csize=%zu output_buf=%p nbytes=%zu\n", cbuf, (size_t)csize, buf[u], nbytes);
+    H5VL_pass_through_ext_cpu_transfer_decompress(ctx, cbuf, csize, buf[u]);
+    printf("DEBUG decompress done, first float=%.6e\n", ((float*)buf[u])[0]);
 #endif
 
         free(cbuf);
