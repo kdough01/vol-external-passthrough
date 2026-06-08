@@ -29,5 +29,8 @@ export HDF5_PLUGIN_PATH=$(pwd)/build
 # echo "=== Hurricane test ==="
 # ./build/tests/test_cpu_hurricane
 
+export HDF5_VOL_PRESSIO_COMPRESSOR=noop
+export HDF5_VOL_PRESSIO_LEVEL=1
+
 echo "=== SDRBench Miranda test ==="
 ./build/tests/miranda

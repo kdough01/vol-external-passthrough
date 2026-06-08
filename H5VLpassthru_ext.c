@@ -372,20 +372,26 @@ enum pressio_dtype hdf5_to_pressio_dtype(hid_t type_id) {
     return pressio_byte_dtype;
 }
 
-config_params* config_params_create(hid_t fapl_id)
+config_params *config_params_create(hid_t fapl_id)
 {
     (void)fapl_id;
 
     config_params *p = (config_params*)calloc(1, sizeof(config_params));
     if (!p) {
+        H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                vol_err_class, maj_config, min_config_missing,
+                "out of memory allocating config_params");
         return NULL;
     }
 
-    p->device_id = 0;
-    p->min_size_for_gpu = 256 * 1024;
+    const char *compressor = getenv("HDF5_VOL_PRESSIO_COMPRESSOR");
+    const char *level      = getenv("HDF5_VOL_PRESSIO_LEVEL");
+
+    p->default_compression_id  = strdup(compressor ? compressor : "noop");
+    p->compression_level       = level ? (int)strtol(level, NULL, 10) : 1;
+    p->device_id               = 0;
+    p->min_size_for_gpu        = 256 * 1024;
     p->max_device_memory_bytes = 2ULL * 1024 * 1024 * 1024;
-    p->default_compression_id = strdup("noop");
-    p->compression_level = 1;
 
     return p;
 }
@@ -766,6 +772,8 @@ H5VL_pass_through_ext_init(hid_t vipl_id)
     min_compressor_unavail = H5Ecreate_msg(vol_err_class, H5E_MINOR, "Compressor not available");
     min_compress_failed    = H5Ecreate_msg(vol_err_class, H5E_MINOR, "Compression failed");
     min_decompress_failed  = H5Ecreate_msg(vol_err_class, H5E_MINOR, "Decompression failed");
+    min_config_missing = H5Ecreate_msg(vol_err_class, H5E_MINOR, "Configuration missing or invalid");
+    maj_config = H5Ecreate_msg(vol_err_class, H5E_MAJOR, "Configuration");
     if(vol_err_class < 0 || maj_compression < 0 || min_compressor_unavail < 0 ||
         min_compress_failed < 0 || min_decompress_failed < 0)
         return(-1);
@@ -835,6 +843,11 @@ H5VL_pass_through_ext_term(void)
     if(H5I_INVALID_HID != vol_err_class) {
         H5Eunregister_class(vol_err_class);
         vol_err_class = H5I_INVALID_HID;
+    }
+
+    if(H5I_INVALID_HID != min_config_missing) {
+        H5Eclose_msg(min_config_missing);
+        min_config_missing = H5I_INVALID_HID;
     }
 
     H5Eset_auto(H5E_DEFAULT, NULL, NULL);

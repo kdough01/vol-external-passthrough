@@ -10,6 +10,15 @@
  * Fields (all 256x384x384 float64):
  *   density.d64, diffusivity.d64, pressure.d64,
  *   velocityx.d64, velocityy.d64, velocityz.d64, viscocity.d64
+ *
+ * Environment variables:
+ *   HDF5_VOL_PRESSIO_COMPRESSOR  default compressor (optional, defaults to noop)
+ *   HDF5_VOL_PRESSIO_LEVEL       default compression level (optional, defaults to 1)
+ *
+ * Example PBS script usage:
+ *   export HDF5_VOL_PRESSIO_COMPRESSOR=sz3
+ *   export HDF5_VOL_PRESSIO_LEVEL=1
+ *   ./build/tests/test_sdrbench
  */
 
 #include <stdio.h>
@@ -144,8 +153,8 @@ static int test_field(hid_t file_id,
           "{\"sz3:error_bound_mode_str\":\"abs\",\"sz3:abs_error_bound\":1e-3}" },
         { "sz3_1e6", "sz3",
           "{\"sz3:error_bound_mode_str\":\"abs\",\"sz3:abs_error_bound\":1e-6}" },
-        { "zstd",    "zstd",
-          "{\"zstd:clevel\":3}" },
+        { "bzip2",   "bzip2",
+          "{\"bzip2:block_size\":9}" },
     };
     int nruns = (int)(sizeof(runs) / sizeof(runs[0]));
 
@@ -243,8 +252,7 @@ static void test_error_handling(hid_t file_id, const double *field, size_t nelem
     /* ---- Test 3: Invalid option key for compressor ---- */
     printf("\n-- Test 3: Invalid JSON option key for compressor --\n");
     {
-        hid_t dcpl = make_dcpl("sz3",
-            "{\"sz3:this_key_does_not_exist\":999}");
+        hid_t dcpl = make_dcpl("sz3", "{\"sz3:this_key_does_not_exist\":999}");
         hid_t dset = H5Dcreate2(file_id, "err_bad_option",
                                  H5T_NATIVE_DOUBLE, space_id,
                                  H5P_DEFAULT, dcpl, H5P_DEFAULT);
@@ -282,7 +290,7 @@ static void test_error_handling(hid_t file_id, const double *field, size_t nelem
         H5Pclose(dcpl);
     }
 
-    /* ---- Test 5: Write then read with valid compressor (regression) ---- */
+    /* ---- Test 5: Successful sz3 round-trip (regression check) ---- */
     printf("\n-- Test 5: Successful sz3 round-trip (regression check) --\n");
     {
         hid_t dcpl = make_dcpl("sz3",
@@ -307,10 +315,9 @@ static void test_error_handling(hid_t file_id, const double *field, size_t nelem
                 herr_t rret = H5Dread(dset, H5T_NATIVE_DOUBLE,
                                       H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf);
                 H5Dclose(dset);
-                if (rret < 0)
+                if (rret < 0) {
                     printf("  FAIL: sz3 read failed unexpectedly\n");
-                else {
-                    /* Verify RMSE is within the 1e-3 bound */
+                } else {
                     Stats st = compute_stats(field, rbuf, nelem);
                     if (st.rmse <= 1e-3)
                         printf("  PASS: sz3 round-trip RMSE=%.4e within 1e-3 bound\n",
@@ -337,6 +344,12 @@ int main(void)
 {
     printf("SDRBench Miranda VOL test starting\n");
     printf("Path: %s\n", MIRANDA_PATH);
+
+    /* Report active environment configuration */
+    const char *compressor = getenv("HDF5_VOL_PRESSIO_COMPRESSOR");
+    const char *level      = getenv("HDF5_VOL_PRESSIO_LEVEL");
+    printf("HDF5_VOL_PRESSIO_COMPRESSOR = %s\n", compressor ? compressor : "(not set, defaulting to noop)");
+    printf("HDF5_VOL_PRESSIO_LEVEL      = %s\n", level      ? level      : "(not set, defaulting to 1)");
     fflush(stdout);
 
     register_vol_properties();
@@ -359,17 +372,17 @@ int main(void)
     hsize_t dims[3] = { MIR_NX, MIR_NY, MIR_NZ };
     int any = 0, rc = 0;
 
-    /* Load one field for error handling tests */
+    /* Load first field for error handling tests */
     char first_path[512];
     snprintf(first_path, sizeof(first_path), "%s/density.d64", MIRANDA_PATH);
     size_t err_nelem = 0;
     double *err_data = read_raw_double(first_path, &err_nelem);
     if (err_data) {
-        hsize_t err_dims[3] = { MIR_NX, MIR_NY, MIR_NZ };
-        test_error_handling(file_id, err_data, err_nelem, 3, err_dims);
+        test_error_handling(file_id, err_data, err_nelem, 3, dims);
         free(err_data);
     }
 
+    /* Main field tests */
     for (int fi = 0; fields[fi]; fi++) {
         char path[512];
         snprintf(path, sizeof(path), "%s/%s", MIRANDA_PATH, fields[fi]);
