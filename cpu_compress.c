@@ -41,6 +41,15 @@ H5VL_pass_through_ext_cpu_transfer_compress(compression_ctx *comp_ctx, const voi
                comp_size, nbytes, (int)comp_ctx->dtype);
     }
 
+    if (getenv("HDF5_VOL_PRESSIO_METRICS")) {
+        struct pressio_options *results =
+            pressio_compressor_get_metrics_results(comp_ctx->compressor);
+        char *str = pressio_options_to_string(results);
+        printf("[VOL METRICS] compress '%s':\n%s\n", comp_ctx->compressor_id, str);
+        free(str);
+        pressio_options_free(results);
+    }
+
 done:
     pressio_data_free(input);
     pressio_data_free(compressed);
@@ -111,6 +120,15 @@ H5VL_pass_through_ext_cpu_transfer_decompress(compression_ctx *comp_ctx,
                out_ptr, out_size, ((float*)out_ptr)[0]);
         printf("DEBUG output_buf=%p first_float=%e\n",
                output_buf, ((float*)output_buf)[0]);
+    }
+
+    if (getenv("HDF5_VOL_PRESSIO_METRICS")) {
+        struct pressio_options *results =
+            pressio_compressor_get_metrics_results(comp_ctx->compressor);
+        char *str = pressio_options_to_string(results);
+        printf("[VOL METRICS] decompress '%s':\n%s\n", comp_ctx->compressor_id, str);
+        free(str);
+        pressio_options_free(results);
     }
 
 done:
