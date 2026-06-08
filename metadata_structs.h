@@ -74,6 +74,7 @@ typedef struct gpu_vol_dataset_t {
     compression_ctx *comp_ctx;
     gpu_vol_file_t *file_ctx;
     gpu_context_t *gpu_ctx;
+    int compression_requested;
 } gpu_vol_dataset_t;
 
 #endif

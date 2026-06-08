@@ -44,6 +44,7 @@
 #include <libpressio/libpressio.h>
 #include <libpressio_ext/json/pressio_options_json.h>
 #include "metadata_structs.h"
+#include "vol_errors.h"
 
 #ifdef USE_CUDA
 #include <cuda_runtime.h>
@@ -210,6 +211,13 @@ herr_t H5VL_pass_through_ext_cpu_transfer_decompress(compression_ctx *comp_ctx, 
 /* Destroy Functions */
 void config_params_destroy(config_params *p);
 void gpu_context_destroy(gpu_context_t *gpu_ctx);
+
+/* Error Handling */
+static hid_t vol_err_class          = H5I_INVALID_HID;
+static hid_t maj_compression        = H5I_INVALID_HID;
+static hid_t min_compressor_unavail = H5I_INVALID_HID;
+static hid_t min_compress_failed    = H5I_INVALID_HID;
+static hid_t min_decompress_failed  = H5I_INVALID_HID;
 
 /*******************/
 /* Local variables */
@@ -470,8 +478,7 @@ compression_ctx* compression_ctx_create(int rank, hsize_t *h5dims, enum pressio_
     printf("------- EXT PASS THROUGH COMPRESSION CTX\n");
 #endif
 
-    printf("DEBUG ctx_create_entry: override='%s'\n", 
-           compressor_override ? compressor_override : "(null)");
+    printf("DEBUG ctx_create_entry: override='%s'\n", compressor_override ? compressor_override : "(null)");
 
     compression_ctx *comp_ctx = (compression_ctx*)calloc(1, sizeof(compression_ctx));
 
@@ -507,8 +514,10 @@ compression_ctx* compression_ctx_create(int rank, hsize_t *h5dims, enum pressio_
 
     // make sure the compressor specified exists and is known by libpressio
     if (!comp_ctx->compressor) {
-        fprintf(stderr, "unknown compressor '%s': %s\n",
-            comp_ctx->compressor_id, pressio_error_msg(comp_ctx->library));
+        H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                vol_err_class, maj_compression, min_compressor_unavail,
+                "compressor '%s' not found in libpressio registry: %s",
+                comp_ctx->compressor_id, pressio_error_msg(comp_ctx->library));
         compression_ctx_destroy(comp_ctx);
         return NULL;
     }
@@ -520,21 +529,32 @@ compression_ctx* compression_ctx_create(int rank, hsize_t *h5dims, enum pressio_
     pressio_options_set_integer(comp_ctx->compressor_opts, level_key, defaults->compression_level);
 
     if(pressio_compressor_set_options(comp_ctx->compressor, comp_ctx->compressor_opts)) {
-        fprintf(stderr, "%s\n", pressio_compressor_error_msg(comp_ctx->compressor));
+        H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                vol_err_class, maj_compression, min_compress_failed,
+                "pressio_compressor_set_options failed for '%s': %s",
+                comp_ctx->compressor_id,
+                pressio_compressor_error_msg(comp_ctx->compressor));
         compression_ctx_destroy(comp_ctx);
         return NULL;
     }
 
+
     // JSON
     if (json_opts[0] != '\0') {
-        struct pressio_options* opts = pressio_options_new_json(comp_ctx->library, json_opts);
-        if (opts) {
-            pressio_compressor_set_options(comp_ctx->compressor, opts);
-            printf("compressor: %s\n", comp_ctx->compressor_id);
-            pressio_options_free(opts);
+        struct pressio_options *opts = pressio_options_new_json(comp_ctx->library, json_opts);
+        if (!opts) {
+            H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                    vol_err_class, maj_compression, min_compress_failed,
+                    "failed to parse JSON options for '%s': %s",
+                    comp_ctx->compressor_id,
+                    pressio_error_msg(comp_ctx->library));
+            compression_ctx_destroy(comp_ctx);
+            return NULL;
         }
+        pressio_compressor_set_options(comp_ctx->compressor, opts);
+        pressio_options_free(opts);
     }
-    
+
 #ifdef USE_CUDA
     if (gpu_ctx && strncmp(comp_ctx->compressor_id, "nvcomp", 6) == 0) {
         struct pressio_options* gpu_opts = pressio_options_new();
@@ -542,6 +562,8 @@ compression_ctx* compression_ctx_create(int rank, hsize_t *h5dims, enum pressio_
         pressio_options_set_integer(gpu_opts, "nvcomp:device_id", gpu_ctx->device_id);
         pressio_compressor_set_options(comp_ctx->compressor, gpu_opts);
         pressio_options_free(gpu_opts);
+    } else {
+        printf("DEBUG: CUDA configured for non-CUDA compressor: %s\n", comp_ctx->compressor_id);
     }
 #endif
 
@@ -738,6 +760,17 @@ H5VL_pass_through_ext_init(hid_t vipl_id)
         return(-1);
     assert(-1 != H5VL_passthru_group_fiddle_op_g);
 
+    /* Register error class and codes for this VOL connector */
+    vol_err_class          = H5Eregister_class("VOL Passthrough", "vol_passthrough", "1.0");
+    maj_compression        = H5Ecreate_msg(vol_err_class, H5E_MAJOR, "Compression");
+    min_compressor_unavail = H5Ecreate_msg(vol_err_class, H5E_MINOR, "Compressor not available");
+    min_compress_failed    = H5Ecreate_msg(vol_err_class, H5E_MINOR, "Compression failed");
+    min_decompress_failed  = H5Ecreate_msg(vol_err_class, H5E_MINOR, "Decompression failed");
+    if(vol_err_class < 0 || maj_compression < 0 || min_compressor_unavail < 0 ||
+        min_compress_failed < 0 || min_decompress_failed < 0)
+        return(-1);
+        
+    H5Eset_auto(H5E_DEFAULT, (H5E_auto2_t)H5Eprint, stderr);
     return 0;
 } /* end H5VL_pass_through_ext_init() */
 
@@ -781,6 +814,30 @@ H5VL_pass_through_ext_term(void)
             return(-1);
         H5VL_passthru_group_fiddle_op_g = (-1);
     } /* end if */
+
+    /* Clean up error class and codes */
+    if(H5I_INVALID_HID != min_decompress_failed) {
+        H5Eclose_msg(min_decompress_failed);
+        min_decompress_failed = H5I_INVALID_HID;
+    }
+    if(H5I_INVALID_HID != min_compress_failed) {
+        H5Eclose_msg(min_compress_failed);
+        min_compress_failed = H5I_INVALID_HID;
+    }
+    if(H5I_INVALID_HID != min_compressor_unavail) {
+        H5Eclose_msg(min_compressor_unavail);
+        min_compressor_unavail = H5I_INVALID_HID;
+    }
+    if(H5I_INVALID_HID != maj_compression) {
+        H5Eclose_msg(maj_compression);
+        maj_compression = H5I_INVALID_HID;
+    }
+    if(H5I_INVALID_HID != vol_err_class) {
+        H5Eunregister_class(vol_err_class);
+        vol_err_class = H5I_INVALID_HID;
+    }
+
+    H5Eset_auto(H5E_DEFAULT, NULL, NULL);
 
     return 0;
 } /* end H5VL_pass_through_ext_term() */
@@ -1561,6 +1618,19 @@ H5VL_pass_through_ext_dataset_create(void *obj,
             /* Store original metadata in the context so write/read know what to do */
             dset->custom_data = gpu_vol_dataset_wrap(under, rank, h5dims, type_id, pressio_dt, dcpl_id, o->under_vol_id, file_ctx, NULL);
             
+            if (ds_ctx->compression_requested && !ds_ctx->comp_ctx) {
+                /* Configuration error — compressor init failed, refuse to create the dataset */
+                H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                        vol_err_class, maj_compression, min_compressor_unavail,
+                        "dataset '%s' creation aborted: compressor '%s' could not be initialized",
+                        name, comp_name);
+                /* Clean up what we already created */
+                H5VLdataset_close(under, o->under_vol_id, dxpl_id, NULL);
+                H5VL_pass_through_ext_free_obj(dset);
+                free(h5dims);
+                return NULL;
+            }
+
             H5Sclose(underlying_space_id);
             H5Pclose(underlying_dcpl_id);
         } else {
@@ -1709,6 +1779,9 @@ H5VL_pass_through_ext_dataset_read(
     size_t count, void *dset[], hid_t mem_type_id[], hid_t mem_space_id[],
     hid_t file_space_id[], hid_t plist_id, void *buf[], void **req)
 {
+    herr_t ret_val = 0;
+    hid_t err_id = H5Eget_current_stack();
+
     for (size_t u = 0; u < count; u++) {
         H5VL_pass_through_ext_t *d = (H5VL_pass_through_ext_t *)dset[u];
         void *under = d->under_object;
@@ -1716,10 +1789,27 @@ H5VL_pass_through_ext_dataset_read(
         compression_ctx *ctx = ds_ctx ? ds_ctx->comp_ctx : NULL;
 
         if (!ctx) {
+            if (ds_ctx && ds_ctx->compression_requested) {
+                /* A compressor was specified but ctx creation failed — hard error */
+                H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                        vol_err_class, maj_compression, min_compressor_unavail,
+                        "compression was requested but no compression context is available "
+                        "— refusing to fall through to uncompressed storage");
+                ret_val = -1;
+                continue;
+            }
+            /* No compressor was specified, data may passthrough without compression */
             void *rbufs[] = { buf[u] };
-            return H5VLdataset_read(
+            herr_t r = H5VLdataset_read(
                 1, &under, d->under_vol_id, &mem_type_id[u],
                 &mem_space_id[u], &file_space_id[u], plist_id, rbufs, NULL);
+            if (r < 0) {
+                H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                        vol_err_class, maj_compression, min_decompress_failed,
+                        "passthrough dataset_read failed for dataset %zu", u);
+                ret_val = -1;
+            }
+            continue;
         }
 
         uint64_t csize;
@@ -1728,7 +1818,13 @@ H5VL_pass_through_ext_dataset_read(
         /* Get the current 1D file space from the underlying dataset */
         H5VL_dataset_get_args_t get_args;
         get_args.op_type = H5VL_DATASET_GET_SPACE;
-        H5VLdataset_get(under, d->under_vol_id, &get_args, plist_id, NULL);
+        if (H5VLdataset_get(under, d->under_vol_id, &get_args, plist_id, NULL) < 0) {
+            H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                    vol_err_class, maj_compression, min_decompress_failed,
+                    "failed to get file space for dataset %zu", u);
+            ret_val = -1;
+            continue;
+        }
         hid_t underlying_fspace = get_args.args.get_space.space_id;
 
         /* --- Read Header --- */
@@ -1737,14 +1833,32 @@ H5VL_pass_through_ext_dataset_read(
         H5Sselect_hyperslab(underlying_fspace, H5S_SELECT_SET, &zero, NULL, &hsz, NULL);
 
         void *header_bufs[] = { &csize };
-        H5VLdataset_read(
+        herr_t hret = H5VLdataset_read(
             1, &under, d->under_vol_id, (hid_t[]){H5T_NATIVE_UCHAR},
             &mspace_hdr, &underlying_fspace, plist_id, header_bufs, NULL);
-        printf("DEBUG read[%zu]: csize=%llu\n", u, (unsigned long long)csize);
         H5Sclose(mspace_hdr);
+
+        if (hret < 0) {
+            H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                    vol_err_class, maj_compression, min_decompress_failed,
+                    "header read failed for dataset %zu", u);
+            H5Sclose(underlying_fspace);
+            ret_val = -1;
+            continue;
+        }
 
         /* --- Read Payload --- */
         void *cbuf = malloc(csize);
+        if (!cbuf) {
+            H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                    vol_err_class, maj_compression, min_decompress_failed,
+                    "out of memory allocating %llu bytes for dataset %zu",
+                    (unsigned long long)csize, u);
+            H5Sclose(underlying_fspace);
+            ret_val = -1;
+            continue;
+        }
+
         hsize_t poff = sizeof(uint64_t);
         hsize_t ps = csize;
 
@@ -1752,35 +1866,53 @@ H5VL_pass_through_ext_dataset_read(
         H5Sselect_hyperslab(underlying_fspace, H5S_SELECT_SET, &poff, NULL, &ps, NULL);
 
         void *payload_bufs[] = { cbuf };
-        H5VLdataset_read(
+        herr_t pret = H5VLdataset_read(
             1, &under, d->under_vol_id, (hid_t[]){H5T_NATIVE_UCHAR},
             &mspace_payload, &underlying_fspace, plist_id, payload_bufs, NULL);
 
         H5Sclose(mspace_payload);
         H5Sclose(underlying_fspace);
 
-        /* Decompress directly into user buffer */
+        if (pret < 0) {
+            H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                    vol_err_class, maj_compression, min_decompress_failed,
+                    "payload read failed for dataset %zu", u);
+            free(cbuf);
+            ret_val = -1;
+            continue;
+        }
 
+        /* Decompress directly into user buffer */
         hsize_t nelem_read = 1;
         for (int i = 0; i < ctx->ndims; i++) nelem_read *= ctx->dims[i];
         size_t nbytes = nelem_read * pressio_dtype_size(ctx->dtype);
 
+        herr_t dret;
 #ifdef USE_CUDA
         if (ds_ctx->gpu_ctx != NULL && strncmp(ctx->compressor_id, "nvcomp", 6) == 0) {
-            H5VL_pass_through_ext_gpu_transfer_decompress(ds_ctx, cbuf, csize, buf[u], nbytes);
+            dret = H5VL_pass_through_ext_gpu_transfer_decompress(ds_ctx, cbuf, csize, buf[u], nbytes);
         } else {
-            H5VL_pass_through_ext_cpu_transfer_decompress(ctx, cbuf, csize, buf[u]);
+            dret = H5VL_pass_through_ext_cpu_transfer_decompress(ctx, cbuf, csize, buf[u]);
         }
 #else
-        H5VL_pass_through_ext_cpu_transfer_decompress(ctx, cbuf, csize, buf[u]);
+        dret = H5VL_pass_through_ext_cpu_transfer_decompress(ctx, cbuf, csize, buf[u]);
 #endif
+        if (dret < 0) {
+            H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                    vol_err_class, maj_compression, min_decompress_failed,
+                    "decompression failed for dataset %zu compressor='%s'",
+                    u, ctx->compressor_id);
+            ret_val = -1;
+        }
 
         free(cbuf);
     }
-    return 0;
+
+    H5Eset_current_stack(err_id);
+    return ret_val;
 } /* end H5VL_pass_through_ext_dataset_read() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5VL_pass_through_ext_dataset_write
  *
@@ -1796,20 +1928,37 @@ H5VL_pass_through_ext_dataset_write(
     size_t count, void *dset[], hid_t mem_type_id[], hid_t mem_space_id[],
     hid_t file_space_id[], hid_t plist_id, const void *buf[], void **req)
 {
+    herr_t ret_val = 0;
+    hid_t err_id = H5Eget_current_stack();
+
     for (size_t u = 0; u < count; u++) {
         H5VL_pass_through_ext_t *d = (H5VL_pass_through_ext_t *)dset[u];
         void *under = d->under_object;
         gpu_vol_dataset_t *ds_ctx = (gpu_vol_dataset_t*)d->custom_data;
         compression_ctx *ctx = ds_ctx ? ds_ctx->comp_ctx : NULL;
 
-        printf("DEBUG write: ds_ctx=%p ctx=%p\n", (void*)ds_ctx, (void*)ctx);
-
         if (!ctx) {
-            printf("DEBUG: no compression ctx, falling through to passthrough\n");
+            if (ds_ctx && ds_ctx->compression_requested) {
+                /* A compressor was specified but ctx creation failed — hard error */
+                H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                        vol_err_class, maj_compression, min_compressor_unavail,
+                        "compression was requested but no compression context is available "
+                        "— refusing to fall through to uncompressed storage");
+                ret_val = -1;
+                continue;
+            }
+            /* No compressor was specified, data may passthrough without compression */
             const void *wbufs[] = { buf[u] };
-            return H5VLdataset_write(
+            herr_t r = H5VLdataset_write(
                 1, &under, d->under_vol_id, &mem_type_id[u],
                 &mem_space_id[u], &file_space_id[u], plist_id, wbufs, NULL);
+            if (r < 0) {
+                H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                        vol_err_class, maj_compression, min_compress_failed,
+                        "passthrough dataset_write failed for dataset %zu", u);
+                ret_val = -1;
+            }
+            continue;
         }
 
         /* Calculate bytes based on the original ND context */
@@ -1818,29 +1967,40 @@ H5VL_pass_through_ext_dataset_write(
         size_t nbytes = nelem * pressio_dtype_size(ctx->dtype);
 
         /* Compress the N-dimensional buffer */
+        herr_t cret;
 #ifdef USE_CUDA
         if (ds_ctx->gpu_ctx != NULL && strncmp(ctx->compressor_id, "nvcomp", 6) == 0) {
-            H5VL_pass_through_ext_gpu_transfer_compress(ds_ctx, buf[u], nbytes);
+            cret = H5VL_pass_through_ext_gpu_transfer_compress(ds_ctx, buf[u], nbytes);
         } else {
-            H5VL_pass_through_ext_cpu_transfer_compress(ctx, buf[u], nbytes);
+            cret = H5VL_pass_through_ext_cpu_transfer_compress(ctx, buf[u], nbytes);
         }
 #else
-        H5VL_pass_through_ext_cpu_transfer_compress(ctx, buf[u], nbytes);
+        cret = H5VL_pass_through_ext_cpu_transfer_compress(ctx, buf[u], nbytes);
 #endif
+        if (cret < 0) {
+            H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                    vol_err_class, maj_compression, min_compress_failed,
+                    "compression failed for dataset %zu compressor='%s'",
+                    u, ctx->compressor_id);
+            ret_val = -1;
+            continue;
+        }
 
         uint64_t csize = ctx->compressed_chunk_size;
         size_t total = sizeof(uint64_t) + csize;
-
-        printf("Original size:    %zu bytes\n", nbytes);
-        printf("Compressed size:  %llu bytes\n", (unsigned long long)csize);
-        printf("Ratio:            %.2fx\n", (double)nbytes / (double)csize);
 
         /* Resize the underlying 1D dataset */
         hsize_t new_size[1] = { total };
         H5VL_dataset_specific_args_t sargs;
         sargs.op_type = H5VL_DATASET_SET_EXTENT;
         sargs.args.set_extent.size = new_size;
-        H5VLdataset_specific(under, d->under_vol_id, &sargs, plist_id, NULL);
+        if (H5VLdataset_specific(under, d->under_vol_id, &sargs, plist_id, NULL) < 0) {
+            H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                    vol_err_class, maj_compression, min_compress_failed,
+                    "failed to resize dataset %zu to %zu bytes", u, total);
+            ret_val = -1;
+            continue;
+        }
 
         /* --- Write Header --- */
         hsize_t zero = 0;
@@ -1851,12 +2011,20 @@ H5VL_pass_through_ext_dataset_write(
         H5Sselect_hyperslab(fspace_hdr, H5S_SELECT_SET, &zero, NULL, &hsz, NULL);
 
         const void *hbufs[] = { &csize };
-        H5VLdataset_write(
+        herr_t hret = H5VLdataset_write(
             1, &under, d->under_vol_id, (hid_t[]){H5T_NATIVE_UCHAR},
             &mspace_hdr, &fspace_hdr, plist_id, hbufs, NULL);
 
         H5Sclose(mspace_hdr);
         H5Sclose(fspace_hdr);
+
+        if (hret < 0) {
+            H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                    vol_err_class, maj_compression, min_compress_failed,
+                    "header write failed for dataset %zu", u);
+            ret_val = -1;
+            continue;
+        }
 
         /* --- Write Payload --- */
         hsize_t poff = sizeof(uint64_t);
@@ -1867,17 +2035,26 @@ H5VL_pass_through_ext_dataset_write(
         H5Sselect_hyperslab(fspace_payload, H5S_SELECT_SET, &poff, NULL, &ps, NULL);
 
         const void *cbufs[] = { ctx->compressed_buf };
-        H5VLdataset_write(
+        herr_t wret = H5VLdataset_write(
             1, &under, d->under_vol_id, (hid_t[]){H5T_NATIVE_UCHAR},
             &mspace_payload, &fspace_payload, plist_id, cbufs, NULL);
 
         H5Sclose(mspace_payload);
         H5Sclose(fspace_payload);
 
+        if (wret < 0) {
+            H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                    vol_err_class, maj_compression, min_compress_failed,
+                    "payload write failed for dataset %zu", u);
+            ret_val = -1;
+        }
+
         free(ctx->compressed_buf);
         ctx->compressed_buf = NULL;
     }
-    return 0;
+
+    H5Eset_current_stack(err_id);
+    return ret_val;
 } /* end H5VL_pass_through_ext_dataset_write() */
 
 

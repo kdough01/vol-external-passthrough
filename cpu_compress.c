@@ -4,6 +4,7 @@
 #include <libpressio/libpressio.h>
 #include "H5VLpassthru_ext.h"
 #include "metadata_structs.h"
+#include "vol_errors.h"
 // #include <libpressio_ext/io/posix.h>
 
 
@@ -17,11 +18,14 @@ H5VL_pass_through_ext_cpu_transfer_compress(compression_ctx *comp_ctx, const voi
     struct pressio_data *input = pressio_data_new_nonowning(comp_ctx->dtype, (void *)data, comp_ctx->ndims, comp_ctx->dims);
     struct pressio_data *compressed = pressio_data_new_empty(comp_ctx->dtype, 0, NULL);
 
-    if(pressio_compressor_compress(comp_ctx->compressor, input, compressed)) {
-        fprintf(stderr, "%s\n", pressio_compressor_error_msg(comp_ctx->compressor));
-        pressio_data_free(input);
-        pressio_data_free(compressed);
-        return pressio_compressor_error_code(comp_ctx->compressor);
+    /* 4. compress failure */
+    if(pressio_compressor_compress(comp_ctx->compressor, input, output)) {
+        H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                vol_err_class, maj_compression, min_compress_failed,
+                "pressio_compressor_compress failed for '%s': %s",
+                comp_ctx->compressor_id,
+                pressio_compressor_error_msg(comp_ctx->compressor));
+        return -1;
     }
 
     size_t comp_size = 0;
@@ -80,18 +84,14 @@ H5VL_pass_through_ext_cpu_transfer_decompress(compression_ctx *comp_ctx,
         comp_ctx->ndims, lp_dims
     );
 
-    herr_t ret = 0;
-    if (pressio_compressor_decompress(comp_ctx->compressor, compressed, decompressed)) {
-        fprintf(stderr, "decompress error: %s\n",
+    /* 5. decompress failure */
+    if(pressio_compressor_decompress(comp_ctx->compressor, input, output)) {
+        H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                vol_err_class, maj_compression, min_decompress_failed,
+                "pressio_compressor_decompress failed for '%s': %s",
+                comp_ctx->compressor_id,
                 pressio_compressor_error_msg(comp_ctx->compressor));
-        ret = pressio_compressor_error_code(comp_ctx->compressor);
-    } else {
-        size_t out_size = 0;
-        void *out_ptr = pressio_data_ptr(decompressed, &out_size);
-        printf("DEBUG decompress success: out_ptr=%p out_size=%zu first_float=%.6e\n",
-            out_ptr, out_size, out_ptr ? ((float*)out_ptr)[0] : 0.0f);
-        printf("DEBUG output_buf=%p first_float=%.6e\n",
-            output_buf, ((float*)output_buf)[0]);
+        return -1;
     }
 
     pressio_data_free(compressed);

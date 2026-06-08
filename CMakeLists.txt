@@ -36,7 +36,8 @@ if(USE_CUDA)
   list(APPEND VOL_SRCS gpu_transform.cu)
 endif()
 
-add_library(hdf5_vol_passthrough SHARED ${VOL_SRCS})
+add_library(hdf5_vol_passthrough SHARED ${VOL_SRCS}
+  vol_errors.h)
 
 target_compile_definitions(hdf5_vol_passthrough PRIVATE ENABLE_EXT_PASSTHRU_LOGGING)
 
