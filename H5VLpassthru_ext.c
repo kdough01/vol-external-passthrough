@@ -1617,8 +1617,16 @@ H5VL_pass_through_ext_dataset_create(void *obj,
 
             /* Store original metadata in the context so write/read know what to do */
             dset->custom_data = gpu_vol_dataset_wrap(under, rank, h5dims, type_id, pressio_dt, dcpl_id, o->under_vol_id, file_ctx, NULL);
-            
-            if (ds_ctx->compression_requested && !ds_ctx->comp_ctx) {
+
+            gpu_vol_dataset_t *ds_ctx = (gpu_vol_dataset_t*)dset->custom_data;
+
+            /* Flag whether compression was explicitly requested */
+            if (ds_ctx) {
+                ds_ctx->compression_requested =
+                    (comp_name[0] != '\0' && strcmp(comp_name, "noop") != 0) ? 1 : 0;
+            }
+
+            if (ds_ctx && ds_ctx->compression_requested && !ds_ctx->comp_ctx) {
                 /* Configuration error — compressor init failed, refuse to create the dataset */
                 H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
                         vol_err_class, maj_compression, min_compressor_unavail,
