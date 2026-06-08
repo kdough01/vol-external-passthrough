@@ -540,7 +540,7 @@ compression_ctx* compression_ctx_create(int rank, hsize_t *h5dims, enum pressio_
         struct pressio_options *metrics_opts = pressio_options_new();
         pressio_options_set_string(metrics_opts, "pressio:metric", "composite");
         
-        const char *plugins[] = {"size", "time", "error_stat"};
+        const char *plugins[] = {"size", "time"};
         pressio_options_set_strings(metrics_opts, "composite:plugins", 3, plugins);
         
         pressio_compressor_set_options(comp_ctx->compressor, metrics_opts);
