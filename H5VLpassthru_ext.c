@@ -490,6 +490,11 @@ compression_ctx* compression_ctx_create(int rank, hsize_t *h5dims, enum pressio_
     printf("------- EXT PASS THROUGH COMPRESSION CTX\n");
 #endif
 
+
+    printf("DEBUG ctx_create_entry: override='%s'\n", compressor_override ? compressor_override : "(null)");
+
+    compression_ctx *comp_ctx = (compression_ctx*)calloc(1, sizeof(compression_ctx));
+
     /* Configure metrics if requested */
     if (getenv("HDF5_VOL_PRESSIO_METRICS")) {
         struct pressio_options *metrics_opts = pressio_options_new();
@@ -498,10 +503,6 @@ compression_ctx* compression_ctx_create(int rank, hsize_t *h5dims, enum pressio_
         pressio_compressor_set_options(comp_ctx->compressor, metrics_opts);
         pressio_options_free(metrics_opts);
     }
-
-    printf("DEBUG ctx_create_entry: override='%s'\n", compressor_override ? compressor_override : "(null)");
-
-    compression_ctx *comp_ctx = (compression_ctx*)calloc(1, sizeof(compression_ctx));
 
     if (compressor_override && compressor_override[0] != '\0') {
         comp_ctx->compressor_id = strdup(compressor_override);
