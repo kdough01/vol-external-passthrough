@@ -495,15 +495,6 @@ compression_ctx* compression_ctx_create(int rank, hsize_t *h5dims, enum pressio_
 
     compression_ctx *comp_ctx = (compression_ctx*)calloc(1, sizeof(compression_ctx));
 
-    /* Configure metrics if requested */
-    if (getenv("HDF5_VOL_PRESSIO_METRICS")) {
-        struct pressio_options *metrics_opts = pressio_options_new();
-        pressio_options_set_string(metrics_opts, "composite:plugins",
-                                "size time error_stat");
-        pressio_compressor_set_options(comp_ctx->compressor, metrics_opts);
-        pressio_options_free(metrics_opts);
-    }
-
     if (compressor_override && compressor_override[0] != '\0') {
         comp_ctx->compressor_id = strdup(compressor_override);
     } else if (H5Pexist(dcpl_id, "pressio:compressor") > 0) {
@@ -542,6 +533,15 @@ compression_ctx* compression_ctx_create(int rank, hsize_t *h5dims, enum pressio_
                 comp_ctx->compressor_id, pressio_error_msg(comp_ctx->library));
         compression_ctx_destroy(comp_ctx);
         return NULL;
+    }
+
+    /* Configure metrics if requested */
+    if (getenv("HDF5_VOL_PRESSIO_METRICS")) {
+        struct pressio_options *metrics_opts = pressio_options_new();
+        pressio_options_set_string(metrics_opts, "composite:plugins",
+                                "size time error_stat");
+        pressio_compressor_set_options(comp_ctx->compressor, metrics_opts);
+        pressio_options_free(metrics_opts);
     }
 
     // configure metrics for the compressor - this is default and overidden if JSON is present
