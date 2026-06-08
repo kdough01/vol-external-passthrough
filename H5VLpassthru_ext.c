@@ -389,6 +389,10 @@ config_params *config_params_create(hid_t fapl_id)
     const char *compressor = getenv("HDF5_VOL_PRESSIO_COMPRESSOR");
     const char *level      = getenv("HDF5_VOL_PRESSIO_LEVEL");
 
+    printf("DEBUG config: compressor='%s' level='%s'\n",
+       compressor ? compressor : "(not set)",
+       level      ? level      : "(not set)");
+
     p->default_compression_id  = strdup(compressor ? compressor : "noop");
     p->compression_level       = level ? (int)strtol(level, NULL, 10) : 1;
     p->device_id               = 0;
