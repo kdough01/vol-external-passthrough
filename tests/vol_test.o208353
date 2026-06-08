@@ -1,0 +1,1090 @@
+loading bebop spack
+Building
+-- The C compiler identification is GNU 10.2.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /lcrc/project/ECP-EZ/public/compression/libpressio/libpressio_env/.spack-env/view/bin/mpicc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Found MPI_C: /lcrc/project/ECP-EZ/public/compression/libpressio/libpressio_env/.spack-env/view/bin/mpicc (found version "3.1") 
+-- Found MPI: TRUE (found version "3.1")  
+-- Found HDF5: hdf5-shared (found version "1.14.3")  
+-- Configuring done (2.2s)
+-- Generating done (0.0s)
+-- Build files have been written to: /home/kdougherty/hdf5_projs/vol-external-passthrough/build
+[ 22%] Building C object CMakeFiles/hdf5_vol_passthrough.dir/cpu_compress.c.o
+[ 22%] Building C object CMakeFiles/hdf5_vol_passthrough.dir/H5VLpassthru_ext.c.o
+/home/kdougherty/hdf5_projs/vol-external-passthrough/H5VLpassthru_ext.c:60: warning: "ENABLE_EXT_PASSTHRU_LOGGING" redefined
+   60 | #define ENABLE_EXT_PASSTHRU_LOGGING
+      | 
+<command-line>: note: this is the location of the previous definition
+[ 33%] Linking C shared library libhdf5_vol_passthrough.so
+[ 33%] Built target hdf5_vol_passthrough
+[ 44%] Building C object tests/CMakeFiles/test_cpu_write.dir/test_cpu_write.c.o
+[ 55%] Building C object tests/CMakeFiles/test_cpu_hurricane.dir/test_cpu_hurricane.c.o
+[ 66%] Building C object tests/CMakeFiles/miranda.dir/miranda.c.o
+[ 77%] Linking C executable test_cpu_write
+[ 88%] Linking C executable test_cpu_hurricane
+[100%] Linking C executable miranda
+[100%] Built target test_cpu_write
+[100%] Built target test_cpu_hurricane
+[100%] Built target miranda
+=== SDRBench Miranda test ===
+SDRBench Miranda VOL test starting
+Path: /lcrc/project/ECP-EZ/public/compression/Miranda/SDRBENCH-Miranda-256x384x384
+------- EXT PASS THROUGH VOL INIT
+------- EXT PASS THROUGH VOL INFO String To Info
+------- EXT PASS THROUGH VOL INFO Copy
+------- EXT PASS THROUGH VOL FILE Create
+------- EXT PASS THROUGH VOL INFO Copy
+Info: 0x1663cf0
+------- EXT PASS THROUGH VOL INFO Copy
+------- EXT PASS THROUGH VOL INFO Free
+------- EXT PASS THROUGH VOL INFO Copy
+------- EXT PASS THROUGH VOL INFO Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL INTROSPECT OptQuery
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL File Optional
+------- EXT PASS THROUGH VOL WRAP Object
+------- EXT PASS THROUGH VOL WRAP CTX Free
+
+--- Field: density  (37748736 doubles, 288.0 MB) ---
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Create
+DEBUG wrap: compressor_override='(null)'
+------- EXT PASS THROUGH COMPRESSION CTX
+DEBUG ctx_create_entry: override='(null)'
+DEBUG ctx_create: id='noop' compressor=0x16718a0
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+DEBUG write: ds_ctx=0x1671640 ctx=0x1671680
+------- CPU COMPRESSION CALLED
+DEBUG compress: comp_size=301989888 original_nbytes=301989888 dtype=0
+Original size:    301989888 bytes
+Compressed size:  301989888 bytes
+Ratio:            1.00x
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Open
+DEBUG wrap: compressor_override='noop'
+------- EXT PASS THROUGH COMPRESSION CTX
+DEBUG ctx_create_entry: override='noop'
+DEBUG ctx_create: id='noop' compressor=0x16c7830
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+DEBUG read[0]: csize=301989888
+------- CPU DECOMPRESSION CALLED
+DEBUG decompress entry: ndims=3 dims=[256,384,384] dtype=0 compressed_size=301989888 output_buf=0x1522d54fe010
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+  density_noop            range=[         1,          3]  mean=     1.934  RMSE=0.0000e+00
+    orig:   1.000000e+00 1.000000e+00 1.000000e+00 1.000000e+00 1.000000e+00 
+    decomp: 1.000000e+00 1.000000e+00 1.000000e+00 1.000000e+00 1.000000e+00 
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Create
+DEBUG wrap: compressor_override='(null)'
+------- EXT PASS THROUGH COMPRESSION CTX
+DEBUG ctx_create_entry: override='(null)'
+DEBUG ctx_create: id='sz3' compressor=0x17b8150
+compressor: sz3
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+DEBUG write: ds_ctx=0x17b7f20 ctx=0x17b7f60
+------- CPU COMPRESSION CALLED
+DEBUG compress: comp_size=7062378 original_nbytes=301989888 dtype=0
+Original size:    301989888 bytes
+Compressed size:  7062378 bytes
+Ratio:            42.76x
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Open
+DEBUG wrap: compressor_override='sz3'
+------- EXT PASS THROUGH COMPRESSION CTX
+DEBUG ctx_create_entry: override='sz3'
+DEBUG ctx_create: id='sz3' compressor=0x17b8510
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+DEBUG read[0]: csize=7062378
+------- CPU DECOMPRESSION CALLED
+DEBUG decompress entry: ndims=3 dims=[256,384,384] dtype=0 compressed_size=7062378 output_buf=0x1522d54fe010
+DEBUG decompress success: out_ptr=0x1522d54fe010 out_size=301989888 first_float=0.000000e+00
+DEBUG output_buf=0x1522d54fe010 first_float=0.000000e+00
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+  density_sz3_1e3         range=[         1,          3]  mean=     1.934  RMSE=3.0670e-04
+    orig:   1.000000e+00 1.000000e+00 1.000000e+00 1.000000e+00 1.000000e+00 
+    decomp: 1.000000e+00 1.000000e+00 1.000000e+00 1.000000e+00 1.000000e+00 
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Create
+DEBUG wrap: compressor_override='(null)'
+------- EXT PASS THROUGH COMPRESSION CTX
+DEBUG ctx_create_entry: override='(null)'
+DEBUG ctx_create: id='sz3' compressor=0x16b3790
+compressor: sz3
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+DEBUG write: ds_ctx=0x16e8c30 ctx=0x16b3690
+------- CPU COMPRESSION CALLED
+DEBUG compress: comp_size=34160382 original_nbytes=301989888 dtype=0
+Original size:    301989888 bytes
+Compressed size:  34160382 bytes
+Ratio:            8.84x
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Open
+DEBUG wrap: compressor_override='sz3'
+------- EXT PASS THROUGH COMPRESSION CTX
+DEBUG ctx_create_entry: override='sz3'
+DEBUG ctx_create: id='sz3' compressor=0x16e58a0
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+DEBUG read[0]: csize=34160382
+------- CPU DECOMPRESSION CALLED
+DEBUG decompress entry: ndims=3 dims=[256,384,384] dtype=0 compressed_size=34160382 output_buf=0x1522d54fe010
+DEBUG decompress success: out_ptr=0x1522d54fe010 out_size=301989888 first_float=0.000000e+00
+DEBUG output_buf=0x1522d54fe010 first_float=0.000000e+00
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+  density_sz3_1e6         range=[         1,          3]  mean=     1.934  RMSE=2.8145e-07
+    orig:   1.000000e+00 1.000000e+00 1.000000e+00 1.000000e+00 1.000000e+00 
+    decomp: 1.000000e+00 1.000000e+00 1.000000e+00 1.000000e+00 1.000000e+00 
+unknown compressor 'zstd': invalid compressor id zstd
+unknown compressor 'zstd': invalid compressor id zstd
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Create
+DEBUG wrap: compressor_override='(null)'
+------- EXT PASS THROUGH COMPRESSION CTX
+DEBUG ctx_create_entry: override='(null)'
+DEBUG ctx_create: id='zstd' compressor=(nil)
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+DEBUG write: ds_ctx=0x1717190 ctx=(nil)
+DEBUG: no compression ctx, falling through to passthrough
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Open
+DEBUG wrap: compressor_override='zstd'
+------- EXT PASS THROUGH COMPRESSION CTX
+DEBUG ctx_create_entry: override='zstd'
+DEBUG ctx_create: id='zstd' compressor=(nil)
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+  density_zstd            range=[         1,          3]  mean=     1.934  RMSE=2.1557e+00
+    orig:   1.000000e+00 1.000000e+00 1.000000e+00 1.000000e+00 1.000000e+00 
+    decomp: 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 
+
+--- Field: diffusivity  (37748736 doubles, 288.0 MB) ---
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Create
+DEBUG wrap: compressor_override='(null)'
+------- EXT PASS THROUGH COMPRESSION CTX
+DEBUG ctx_create_entry: override='(null)'
+DEBUG ctx_create: id='noop' compressor=0x16fe560
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+DEBUG write: ds_ctx=0x17329e0 ctx=0x16d9890
+------- CPU COMPRESSION CALLED
+DEBUG compress: comp_size=301989888 original_nbytes=301989888 dtype=0
+Original size:    301989888 bytes
+Compressed size:  301989888 bytes
+Ratio:            1.00x
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Open
+DEBUG wrap: compressor_override='noop'
+------- EXT PASS THROUGH COMPRESSION CTX
+DEBUG ctx_create_entry: override='noop'
+DEBUG ctx_create: id='noop' compressor=0x16e8d40
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+DEBUG read[0]: csize=301989888
+------- CPU DECOMPRESSION CALLED
+DEBUG decompress entry: ndims=3 dims=[256,384,384] dtype=0 compressed_size=301989888 output_buf=0x1522d54fe010
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+  diffusivity_noop        range=[    -1.667,     0.9482]  mean= 3.652e-05  RMSE=0.0000e+00
+    orig:   -1.593164e-12 -5.346524e-13 7.313157e-13 -3.561026e-13 -2.617096e-12 
+    decomp: -1.593164e-12 -5.346524e-13 7.313157e-13 -3.561026e-13 -2.617096e-12 
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Create
+DEBUG wrap: compressor_override='(null)'
+------- EXT PASS THROUGH COMPRESSION CTX
+DEBUG ctx_create_entry: override='(null)'
+DEBUG ctx_create: id='sz3' compressor=0x1966120
+compressor: sz3
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+DEBUG write: ds_ctx=0x1965c80 ctx=0x16d1b90
+------- CPU COMPRESSION CALLED
+DEBUG compress: comp_size=5332645 original_nbytes=301989888 dtype=0
+Original size:    301989888 bytes
+Compressed size:  5332645 bytes
+Ratio:            56.63x
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Open
+DEBUG wrap: compressor_override='sz3'
+------- EXT PASS THROUGH COMPRESSION CTX
+DEBUG ctx_create_entry: override='sz3'
+DEBUG ctx_create: id='sz3' compressor=0x175e560
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+DEBUG read[0]: csize=5332645
+------- CPU DECOMPRESSION CALLED
+DEBUG decompress entry: ndims=3 dims=[256,384,384] dtype=0 compressed_size=5332645 output_buf=0x1522d54fe010
+DEBUG decompress success: out_ptr=0x1522d54fe010 out_size=301989888 first_float=0.000000e+00
+DEBUG output_buf=0x1522d54fe010 first_float=0.000000e+00
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+  diffusivity_sz3_1e3     range=[    -1.667,     0.9482]  mean= 3.652e-05  RMSE=3.0071e-04
+    orig:   -1.593164e-12 -5.346524e-13 7.313157e-13 -3.561026e-13 -2.617096e-12 
+    decomp: 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Create
+DEBUG wrap: compressor_override='(null)'
+------- EXT PASS THROUGH COMPRESSION CTX
+DEBUG ctx_create_entry: override='(null)'
+DEBUG ctx_create: id='sz3' compressor=0x175e610
+compressor: sz3
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+DEBUG write: ds_ctx=0x1866300 ctx=0x1717bf0
+------- CPU COMPRESSION CALLED
+DEBUG compress: comp_size=25068788 original_nbytes=301989888 dtype=0
+Original size:    301989888 bytes
+Compressed size:  25068788 bytes
+Ratio:            12.05x
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Open
+DEBUG wrap: compressor_override='sz3'
+------- EXT PASS THROUGH COMPRESSION CTX
+DEBUG ctx_create_entry: override='sz3'
+DEBUG ctx_create: id='sz3' compressor=0x1724190
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+DEBUG read[0]: csize=25068788
+------- CPU DECOMPRESSION CALLED
+DEBUG decompress entry: ndims=3 dims=[256,384,384] dtype=0 compressed_size=25068788 output_buf=0x1522d54fe010
+DEBUG decompress success: out_ptr=0x1522d54fe010 out_size=301989888 first_float=0.000000e+00
+DEBUG output_buf=0x1522d54fe010 first_float=0.000000e+00
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+  diffusivity_sz3_1e6     range=[    -1.667,     0.9482]  mean= 3.652e-05  RMSE=4.5302e-07
+    orig:   -1.593164e-12 -5.346524e-13 7.313157e-13 -3.561026e-13 -2.617096e-12 
+    decomp: 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 
+unknown compressor 'zstd': invalid compressor id zstd
+unknown compressor 'zstd': invalid compressor id zstd
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Create
+DEBUG wrap: compressor_override='(null)'
+------- EXT PASS THROUGH COMPRESSION CTX
+DEBUG ctx_create_entry: override='(null)'
+DEBUG ctx_create: id='zstd' compressor=(nil)
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+DEBUG write: ds_ctx=0x1711400 ctx=(nil)
+DEBUG: no compression ctx, falling through to passthrough
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Open
+DEBUG wrap: compressor_override='zstd'
+------- EXT PASS THROUGH COMPRESSION CTX
+DEBUG ctx_create_entry: override='zstd'
+DEBUG ctx_create: id='zstd' compressor=(nil)
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+  diffusivity_zstd        range=[    -1.667,     0.9482]  mean= 3.652e-05  RMSE=5.0137e-02
+    orig:   -1.593164e-12 -5.346524e-13 7.313157e-13 -3.561026e-13 -2.617096e-12 
+    decomp: 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 
+
+--- Field: pressure  (37748736 doubles, 288.0 MB) ---
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Create
+DEBUG wrap: compressor_override='(null)'
+------- EXT PASS THROUGH COMPRESSION CTX
+DEBUG ctx_create_entry: override='(null)'
+DEBUG ctx_create: id='noop' compressor=0x173ce60
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+DEBUG write: ds_ctx=0x16a03b0 ctx=0x169f5e0
+------- CPU COMPRESSION CALLED
+DEBUG compress: comp_size=301989888 original_nbytes=301989888 dtype=0
+Original size:    301989888 bytes
+Compressed size:  301989888 bytes
+Ratio:            1.00x
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Open
+DEBUG wrap: compressor_override='noop'
+------- EXT PASS THROUGH COMPRESSION CTX
+DEBUG ctx_create_entry: override='noop'
+DEBUG ctx_create: id='noop' compressor=0x17bb460
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+DEBUG read[0]: csize=301989888
+------- CPU DECOMPRESSION CALLED
+DEBUG decompress entry: ndims=3 dims=[256,384,384] dtype=0 compressed_size=301989888 output_buf=0x1522d54fe010
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+  pressure_noop           range=[    -2.231,      2.183]  mean=-3.854e-05  RMSE=0.0000e+00
+    orig:   -5.634749e-07 -5.629863e-07 -5.616754e-07 -5.595387e-07 -5.565740e-07 
+    decomp: -5.634749e-07 -5.629863e-07 -5.616754e-07 -5.595387e-07 -5.565740e-07 
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Create
+DEBUG wrap: compressor_override='(null)'
+------- EXT PASS THROUGH COMPRESSION CTX
+DEBUG ctx_create_entry: override='(null)'
+DEBUG ctx_create: id='sz3' compressor=0x16c1770
+compressor: sz3
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+DEBUG write: ds_ctx=0x1880230 ctx=0x18cd880
+------- CPU COMPRESSION CALLED
+DEBUG compress: comp_size=8047612 original_nbytes=301989888 dtype=0
+Original size:    301989888 bytes
+Compressed size:  8047612 bytes
+Ratio:            37.53x
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Open
+DEBUG wrap: compressor_override='sz3'
+------- EXT PASS THROUGH COMPRESSION CTX
+DEBUG ctx_create_entry: override='sz3'
+DEBUG ctx_create: id='sz3' compressor=0x17d2280
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+DEBUG read[0]: csize=8047612
+------- CPU DECOMPRESSION CALLED
+DEBUG decompress entry: ndims=3 dims=[256,384,384] dtype=0 compressed_size=8047612 output_buf=0x1522d54fe010
+DEBUG decompress success: out_ptr=0x1522d54fe010 out_size=301989888 first_float=0.000000e+00
+DEBUG output_buf=0x1522d54fe010 first_float=0.000000e+00
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+  pressure_sz3_1e3        range=[    -2.231,      2.183]  mean=-3.854e-05  RMSE=3.6890e-04
+    orig:   -5.634749e-07 -5.629863e-07 -5.616754e-07 -5.595387e-07 -5.565740e-07 
+    decomp: 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Create
+DEBUG wrap: compressor_override='(null)'
+------- EXT PASS THROUGH COMPRESSION CTX
+DEBUG ctx_create_entry: override='(null)'
+DEBUG ctx_create: id='sz3' compressor=0x1690030
+compressor: sz3
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+DEBUG write: ds_ctx=0x169b070 ctx=0x1874930
+------- CPU COMPRESSION CALLED
+DEBUG compress: comp_size=44941131 original_nbytes=301989888 dtype=0
+Original size:    301989888 bytes
+Compressed size:  44941131 bytes
+Ratio:            6.72x
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Open
+DEBUG wrap: compressor_override='sz3'
+------- EXT PASS THROUGH COMPRESSION CTX
+DEBUG ctx_create_entry: override='sz3'
+DEBUG ctx_create: id='sz3' compressor=0x1696180
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+DEBUG read[0]: csize=44941131
+------- CPU DECOMPRESSION CALLED
+DEBUG decompress entry: ndims=3 dims=[256,384,384] dtype=0 compressed_size=44941131 output_buf=0x1522d54fe010
+DEBUG decompress success: out_ptr=0x1522d54fe010 out_size=301989888 first_float=0.000000e+00
+DEBUG output_buf=0x1522d54fe010 first_float=0.000000e+00
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+  pressure_sz3_1e6        range=[    -2.231,      2.183]  mean=-3.854e-05  RMSE=4.8712e-07
+    orig:   -5.634749e-07 -5.629863e-07 -5.616754e-07 -5.595387e-07 -5.565740e-07 
+    decomp: 0.000000e+00 -3.051758e-08 -5.957031e-08 -8.715516e-08 -1.132813e-07 
+unknown compressor 'zstd': invalid compressor id zstd
+unknown compressor 'zstd': invalid compressor id zstd
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Create
+DEBUG wrap: compressor_override='(null)'
+------- EXT PASS THROUGH COMPRESSION CTX
+DEBUG ctx_create_entry: override='(null)'
+DEBUG ctx_create: id='zstd' compressor=(nil)
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+DEBUG write: ds_ctx=0x16a2740 ctx=(nil)
+DEBUG: no compression ctx, falling through to passthrough
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Open
+DEBUG wrap: compressor_override='zstd'
+------- EXT PASS THROUGH COMPRESSION CTX
+DEBUG ctx_create_entry: override='zstd'
+DEBUG ctx_create: id='zstd' compressor=(nil)
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+  pressure_zstd           range=[    -2.231,      2.183]  mean=-3.854e-05  RMSE=8.9868e-02
+    orig:   -5.634749e-07 -5.629863e-07 -5.616754e-07 -5.595387e-07 -5.565740e-07 
+    decomp: 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 
+
+--- Field: velocityx  (37748736 doubles, 288.0 MB) ---
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Create
+DEBUG wrap: compressor_override='(null)'
+------- EXT PASS THROUGH COMPRESSION CTX
+DEBUG ctx_create_entry: override='(null)'
+DEBUG ctx_create: id='noop' compressor=0x16fa4d0
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+DEBUG write: ds_ctx=0x1754e60 ctx=0x1737cd0
+------- CPU COMPRESSION CALLED
+DEBUG compress: comp_size=301989888 original_nbytes=301989888 dtype=0
+Original size:    301989888 bytes
+Compressed size:  301989888 bytes
+Ratio:            1.00x
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Open
+DEBUG wrap: compressor_override='noop'
+------- EXT PASS THROUGH COMPRESSION CTX
+DEBUG ctx_create_entry: override='noop'
+DEBUG ctx_create: id='noop' compressor=0x176f840
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+DEBUG read[0]: csize=301989888
+------- CPU DECOMPRESSION CALLED
+DEBUG decompress entry: ndims=3 dims=[256,384,384] dtype=0 compressed_size=301989888 output_buf=0x1522d54fe010
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+  velocityx_noop          range=[    -2.214,      2.297]  mean=-0.0004045  RMSE=0.0000e+00
+    orig:   -1.011469e-03 -1.010722e-03 -1.009101e-03 -1.006599e-03 -1.003208e-03 
+    decomp: -1.011469e-03 -1.010722e-03 -1.009101e-03 -1.006599e-03 -1.003208e-03 
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Create
+DEBUG wrap: compressor_override='(null)'
+------- EXT PASS THROUGH COMPRESSION CTX
+DEBUG ctx_create_entry: override='(null)'
+DEBUG ctx_create: id='sz3' compressor=0x170c1b0
+compressor: sz3
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+DEBUG write: ds_ctx=0x1721680 ctx=0x169ff20
+------- CPU COMPRESSION CALLED
+DEBUG compress: comp_size=17417563 original_nbytes=301989888 dtype=0
+Original size:    301989888 bytes
+Compressed size:  17417563 bytes
+Ratio:            17.34x
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Open
+DEBUG wrap: compressor_override='sz3'
+------- EXT PASS THROUGH COMPRESSION CTX
+DEBUG ctx_create_entry: override='sz3'
+DEBUG ctx_create: id='sz3' compressor=0x16c1790
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+DEBUG read[0]: csize=17417563
+------- CPU DECOMPRESSION CALLED
+DEBUG decompress entry: ndims=3 dims=[256,384,384] dtype=0 compressed_size=17417563 output_buf=0x1522d54fe010
+DEBUG decompress success: out_ptr=0x1522d54fe010 out_size=301989888 first_float=-5.189695e+11
+DEBUG output_buf=0x1522d54fe010 first_float=-5.189695e+11
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+  velocityx_sz3_1e3       range=[    -2.214,      2.297]  mean=-0.0004045  RMSE=5.2409e-04
+    orig:   -1.011469e-03 -1.010722e-03 -1.009101e-03 -1.006599e-03 -1.003208e-03 
+    decomp: -2.000000e-03 -1.492676e-03 -1.111328e-03 -8.442379e-04 -7.265625e-04 
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Create
+DEBUG wrap: compressor_override='(null)'
+------- EXT PASS THROUGH COMPRESSION CTX
+DEBUG ctx_create_entry: override='(null)'
+DEBUG ctx_create: id='sz3' compressor=0x16d3880
+compressor: sz3
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+DEBUG write: ds_ctx=0x16bc6b0 ctx=0x169be20
+------- CPU COMPRESSION CALLED
+DEBUG compress: comp_size=76567020 original_nbytes=301989888 dtype=0
+Original size:    301989888 bytes
+Compressed size:  76567020 bytes
+Ratio:            3.94x
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Open
+DEBUG wrap: compressor_override='sz3'
+------- EXT PASS THROUGH COMPRESSION CTX
+DEBUG ctx_create_entry: override='sz3'
+DEBUG ctx_create: id='sz3' compressor=0x18227d0
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+DEBUG read[0]: csize=76567020
+------- CPU DECOMPRESSION CALLED
+DEBUG decompress entry: ndims=3 dims=[256,384,384] dtype=0 compressed_size=76567020 output_buf=0x1522d54fe010
+DEBUG decompress success: out_ptr=0x1522d54fe010 out_size=301989888 first_float=-4.039687e-04
+DEBUG output_buf=0x1522d54fe010 first_float=-4.039687e-04
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+  velocityx_sz3_1e6       range=[    -2.214,      2.297]  mean=-0.0004045  RMSE=5.0109e-07
+    orig:   -1.011469e-03 -1.010722e-03 -1.009101e-03 -1.006599e-03 -1.003208e-03 
+    decomp: -1.012000e-03 -1.011175e-03 -1.009464e-03 -1.006867e-03 -1.003387e-03 
+unknown compressor 'zstd': invalid compressor id zstd
+unknown compressor 'zstd': invalid compressor id zstd
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Create
+DEBUG wrap: compressor_override='(null)'
+------- EXT PASS THROUGH COMPRESSION CTX
+DEBUG ctx_create_entry: override='(null)'
+DEBUG ctx_create: id='zstd' compressor=(nil)
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+DEBUG write: ds_ctx=0x16fd6c0 ctx=(nil)
+DEBUG: no compression ctx, falling through to passthrough
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Open
+DEBUG wrap: compressor_override='zstd'
+------- EXT PASS THROUGH COMPRESSION CTX
+DEBUG ctx_create_entry: override='zstd'
+DEBUG ctx_create: id='zstd' compressor=(nil)
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+  velocityx_zstd          range=[    -2.214,      2.297]  mean=-0.0004045  RMSE=2.1322e-01
+    orig:   -1.011469e-03 -1.010722e-03 -1.009101e-03 -1.006599e-03 -1.003208e-03 
+    decomp: 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 
+
+--- Field: velocityy  (37748736 doubles, 288.0 MB) ---
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Create
+DEBUG wrap: compressor_override='(null)'
+------- EXT PASS THROUGH COMPRESSION CTX
+DEBUG ctx_create_entry: override='(null)'
+DEBUG ctx_create: id='noop' compressor=0x16d7480
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+DEBUG write: ds_ctx=0x16d7340 ctx=0x16d7380
+------- CPU COMPRESSION CALLED
+DEBUG compress: comp_size=301989888 original_nbytes=301989888 dtype=0
+Original size:    301989888 bytes
+Compressed size:  301989888 bytes
+Ratio:            1.00x
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Open
+DEBUG wrap: compressor_override='noop'
+------- EXT PASS THROUGH COMPRESSION CTX
+DEBUG ctx_create_entry: override='noop'
+DEBUG ctx_create: id='noop' compressor=0x175f730
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+DEBUG read[0]: csize=301989888
+------- CPU DECOMPRESSION CALLED
+DEBUG decompress entry: ndims=3 dims=[256,384,384] dtype=0 compressed_size=301989888 output_buf=0x1522d54fe010
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+  velocityy_noop          range=[    -2.054,      2.337]  mean=-3.793e-05  RMSE=0.0000e+00
+    orig:   -1.531142e-03 -1.511722e-03 -1.492002e-03 -1.471986e-03 -1.451675e-03 
+    decomp: -1.531142e-03 -1.511722e-03 -1.492002e-03 -1.471986e-03 -1.451675e-03 
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Create
+DEBUG wrap: compressor_override='(null)'
+------- EXT PASS THROUGH COMPRESSION CTX
+DEBUG ctx_create_entry: override='(null)'
+DEBUG ctx_create: id='sz3' compressor=0x16a2cb0
+compressor: sz3
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+DEBUG write: ds_ctx=0x171a910 ctx=0x173e420
+------- CPU COMPRESSION CALLED
+DEBUG compress: comp_size=17489539 original_nbytes=301989888 dtype=0
+Original size:    301989888 bytes
+Compressed size:  17489539 bytes
+Ratio:            17.27x
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Open
+DEBUG wrap: compressor_override='sz3'
+------- EXT PASS THROUGH COMPRESSION CTX
+DEBUG ctx_create_entry: override='sz3'
+DEBUG ctx_create: id='sz3' compressor=0x1767b90
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+DEBUG read[0]: csize=17489539
+------- CPU DECOMPRESSION CALLED
+DEBUG decompress entry: ndims=3 dims=[256,384,384] dtype=0 compressed_size=17489539 output_buf=0x1522d54fe010
+DEBUG decompress success: out_ptr=0x1522d54fe010 out_size=301989888 first_float=-5.189695e+11
+DEBUG output_buf=0x1522d54fe010 first_float=-5.189695e+11
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+  velocityy_sz3_1e3       range=[    -2.054,      2.337]  mean=-3.793e-05  RMSE=5.2516e-04
+    orig:   -1.531142e-03 -1.511722e-03 -1.492002e-03 -1.471986e-03 -1.451675e-03 
+    decomp: -2.000000e-03 -1.945557e-03 -1.891602e-03 -1.838135e-03 -1.785156e-03 
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Create
+DEBUG wrap: compressor_override='(null)'
+------- EXT PASS THROUGH COMPRESSION CTX
+DEBUG ctx_create_entry: override='(null)'
+DEBUG ctx_create: id='sz3' compressor=0x16b59d0
+compressor: sz3
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+DEBUG write: ds_ctx=0x18ac440 ctx=0x1915b30
+------- CPU COMPRESSION CALLED
+DEBUG compress: comp_size=75764186 original_nbytes=301989888 dtype=0
+Original size:    301989888 bytes
+Compressed size:  75764186 bytes
+Ratio:            3.99x
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Open
+DEBUG wrap: compressor_override='sz3'
+------- EXT PASS THROUGH COMPRESSION CTX
+DEBUG ctx_create_entry: override='sz3'
+DEBUG ctx_create: id='sz3' compressor=0x18dc190
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+DEBUG read[0]: csize=75764186
+------- CPU DECOMPRESSION CALLED
+DEBUG decompress entry: ndims=3 dims=[256,384,384] dtype=0 compressed_size=75764186 output_buf=0x1522d54fe010
+DEBUG decompress success: out_ptr=0x1522d54fe010 out_size=301989888 first_float=7.794327e+34
+DEBUG output_buf=0x1522d54fe010 first_float=7.794327e+34
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+  velocityy_sz3_1e6       range=[    -2.054,      2.337]  mean=-3.793e-05  RMSE=4.9565e-07
+    orig:   -1.531142e-03 -1.511722e-03 -1.492002e-03 -1.471986e-03 -1.451675e-03 
+    decomp: -1.532000e-03 -1.512019e-03 -1.491888e-03 -1.471595e-03 -1.451176e-03 
+unknown compressor 'zstd': invalid compressor id zstd
+unknown compressor 'zstd': invalid compressor id zstd
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Create
+DEBUG wrap: compressor_override='(null)'
+------- EXT PASS THROUGH COMPRESSION CTX
+DEBUG ctx_create_entry: override='(null)'
+DEBUG ctx_create: id='zstd' compressor=(nil)
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+DEBUG write: ds_ctx=0x1708d10 ctx=(nil)
+DEBUG: no compression ctx, falling through to passthrough
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Open
+DEBUG wrap: compressor_override='zstd'
+------- EXT PASS THROUGH COMPRESSION CTX
+DEBUG ctx_create_entry: override='zstd'
+DEBUG ctx_create: id='zstd' compressor=(nil)
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+  velocityy_zstd          range=[    -2.054,      2.337]  mean=-3.793e-05  RMSE=2.2477e-01
+    orig:   -1.531142e-03 -1.511722e-03 -1.492002e-03 -1.471986e-03 -1.451675e-03 
+    decomp: 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 
+
+--- Field: velocityz  (37748736 doubles, 288.0 MB) ---
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Create
+DEBUG wrap: compressor_override='(null)'
+------- EXT PASS THROUGH COMPRESSION CTX
+DEBUG ctx_create_entry: override='(null)'
+DEBUG ctx_create: id='noop' compressor=0x16d41e0
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+DEBUG write: ds_ctx=0x16d4050 ctx=0x16d4090
+------- CPU COMPRESSION CALLED
+DEBUG compress: comp_size=301989888 original_nbytes=301989888 dtype=0
+Original size:    301989888 bytes
+Compressed size:  301989888 bytes
+Ratio:            1.00x
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Open
+DEBUG wrap: compressor_override='noop'
+------- EXT PASS THROUGH COMPRESSION CTX
+DEBUG ctx_create_entry: override='noop'
+DEBUG ctx_create: id='noop' compressor=0x16ada70
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+DEBUG read[0]: csize=301989888
+------- CPU DECOMPRESSION CALLED
+DEBUG decompress entry: ndims=3 dims=[256,384,384] dtype=0 compressed_size=301989888 output_buf=0x1522d54fe010
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+  velocityz_noop          range=[    -5.158,      8.996]  mean= -0.006391  RMSE=0.0000e+00
+    orig:   -5.707815e-04 -5.949639e-04 -6.191790e-04 -6.433903e-04 -6.675605e-04 
+    decomp: -5.707815e-04 -5.949639e-04 -6.191790e-04 -6.433903e-04 -6.675605e-04 
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Create
+DEBUG wrap: compressor_override='(null)'
+------- EXT PASS THROUGH COMPRESSION CTX
+DEBUG ctx_create_entry: override='(null)'
+DEBUG ctx_create: id='sz3' compressor=0x1929630
+compressor: sz3
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+DEBUG write: ds_ctx=0x173bf90 ctx=0x17464c0
+------- CPU COMPRESSION CALLED
+DEBUG compress: comp_size=20113626 original_nbytes=301989888 dtype=0
+Original size:    301989888 bytes
+Compressed size:  20113626 bytes
+Ratio:            15.01x
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Open
+DEBUG wrap: compressor_override='sz3'
+------- EXT PASS THROUGH COMPRESSION CTX
+DEBUG ctx_create_entry: override='sz3'
+DEBUG ctx_create: id='sz3' compressor=0x172cae0
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+DEBUG read[0]: csize=20113626
+------- CPU DECOMPRESSION CALLED
+DEBUG decompress entry: ndims=3 dims=[256,384,384] dtype=0 compressed_size=20113626 output_buf=0x1522d54fe010
+DEBUG decompress success: out_ptr=0x1522d54fe010 out_size=301989888 first_float=0.000000e+00
+DEBUG output_buf=0x1522d54fe010 first_float=0.000000e+00
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+  velocityz_sz3_1e3       range=[    -5.158,      8.996]  mean= -0.006391  RMSE=5.2535e-04
+    orig:   -5.707815e-04 -5.949639e-04 -6.191790e-04 -6.433903e-04 -6.675605e-04 
+    decomp: 0.000000e+00 -1.520996e-04 -2.958984e-04 -4.314426e-04 -5.585938e-04 
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Create
+DEBUG wrap: compressor_override='(null)'
+------- EXT PASS THROUGH COMPRESSION CTX
+DEBUG ctx_create_entry: override='(null)'
+DEBUG ctx_create: id='sz3' compressor=0x18792f0
+compressor: sz3
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+DEBUG write: ds_ctx=0x1758b30 ctx=0x1695810
+------- CPU COMPRESSION CALLED
+DEBUG compress: comp_size=81608823 original_nbytes=301989888 dtype=0
+Original size:    301989888 bytes
+Compressed size:  81608823 bytes
+Ratio:            3.70x
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Open
+DEBUG wrap: compressor_override='sz3'
+------- EXT PASS THROUGH COMPRESSION CTX
+DEBUG ctx_create_entry: override='sz3'
+DEBUG ctx_create: id='sz3' compressor=0x16f4f80
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+DEBUG read[0]: csize=81608823
+------- CPU DECOMPRESSION CALLED
+DEBUG decompress entry: ndims=3 dims=[256,384,384] dtype=0 compressed_size=81608823 output_buf=0x1522d54fe010
+DEBUG decompress success: out_ptr=0x1522d54fe010 out_size=301989888 first_float=-2.666376e-11
+DEBUG output_buf=0x1522d54fe010 first_float=-2.666376e-11
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+  velocityz_sz3_1e6       range=[    -5.158,      8.996]  mean= -0.006391  RMSE=4.9419e-07
+    orig:   -5.707815e-04 -5.949639e-04 -6.191790e-04 -6.433903e-04 -6.675605e-04 
+    decomp: -5.700000e-04 -5.946069e-04 -6.190840e-04 -6.434237e-04 -6.676484e-04 
+unknown compressor 'zstd': invalid compressor id zstd
+unknown compressor 'zstd': invalid compressor id zstd
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Create
+DEBUG wrap: compressor_override='(null)'
+------- EXT PASS THROUGH COMPRESSION CTX
+DEBUG ctx_create_entry: override='(null)'
+DEBUG ctx_create: id='zstd' compressor=(nil)
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+DEBUG write: ds_ctx=0x1752fe0 ctx=(nil)
+DEBUG: no compression ctx, falling through to passthrough
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Open
+DEBUG wrap: compressor_override='zstd'
+------- EXT PASS THROUGH COMPRESSION CTX
+DEBUG ctx_create_entry: override='zstd'
+DEBUG ctx_create: id='zstd' compressor=(nil)
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+  velocityz_zstd          range=[    -5.158,      8.996]  mean= -0.006391  RMSE=7.6920e-01
+    orig:   -5.707815e-04 -5.949639e-04 -6.191790e-04 -6.433903e-04 -6.675605e-04 
+    decomp: 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 
+
+--- Field: viscocity  (37748736 doubles, 288.0 MB) ---
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Create
+DEBUG wrap: compressor_override='(null)'
+------- EXT PASS THROUGH COMPRESSION CTX
+DEBUG ctx_create_entry: override='(null)'
+DEBUG ctx_create: id='noop' compressor=0x1777bc0
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+DEBUG write: ds_ctx=0x1777a80 ctx=0x1777ac0
+------- CPU COMPRESSION CALLED
+DEBUG compress: comp_size=301989888 original_nbytes=301989888 dtype=0
+Original size:    301989888 bytes
+Compressed size:  301989888 bytes
+Ratio:            1.00x
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Open
+DEBUG wrap: compressor_override='noop'
+------- EXT PASS THROUGH COMPRESSION CTX
+DEBUG ctx_create_entry: override='noop'
+DEBUG ctx_create: id='noop' compressor=0x17c4510
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+DEBUG read[0]: csize=301989888
+------- CPU DECOMPRESSION CALLED
+DEBUG decompress entry: ndims=3 dims=[256,384,384] dtype=0 compressed_size=301989888 output_buf=0x1522d54fe010
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+  viscocity_noop          range=[    -1.677,     0.9447]  mean= 3.655e-05  RMSE=0.0000e+00
+    orig:   -1.249655e-12 1.266374e-12 3.318585e-13 -6.336969e-13 -2.763157e-12 
+    decomp: -1.249655e-12 1.266374e-12 3.318585e-13 -6.336969e-13 -2.763157e-12 
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Create
+DEBUG wrap: compressor_override='(null)'
+------- EXT PASS THROUGH COMPRESSION CTX
+DEBUG ctx_create_entry: override='(null)'
+DEBUG ctx_create: id='sz3' compressor=0x176d880
+compressor: sz3
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+DEBUG write: ds_ctx=0x1784680 ctx=0x18373b0
+------- CPU COMPRESSION CALLED
+DEBUG compress: comp_size=5323314 original_nbytes=301989888 dtype=0
+Original size:    301989888 bytes
+Compressed size:  5323314 bytes
+Ratio:            56.73x
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Open
+DEBUG wrap: compressor_override='sz3'
+------- EXT PASS THROUGH COMPRESSION CTX
+DEBUG ctx_create_entry: override='sz3'
+DEBUG ctx_create: id='sz3' compressor=0x17481a0
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+DEBUG read[0]: csize=5323314
+------- CPU DECOMPRESSION CALLED
+DEBUG decompress entry: ndims=3 dims=[256,384,384] dtype=0 compressed_size=5323314 output_buf=0x1522d54fe010
+DEBUG decompress success: out_ptr=0x1522d54fe010 out_size=301989888 first_float=0.000000e+00
+DEBUG output_buf=0x1522d54fe010 first_float=0.000000e+00
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+  viscocity_sz3_1e3       range=[    -1.677,     0.9447]  mean= 3.655e-05  RMSE=3.0055e-04
+    orig:   -1.249655e-12 1.266374e-12 3.318585e-13 -6.336969e-13 -2.763157e-12 
+    decomp: 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Create
+DEBUG wrap: compressor_override='(null)'
+------- EXT PASS THROUGH COMPRESSION CTX
+DEBUG ctx_create_entry: override='(null)'
+DEBUG ctx_create: id='sz3' compressor=0x1836e00
+compressor: sz3
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+DEBUG write: ds_ctx=0x176d480 ctx=0x17baf20
+------- CPU COMPRESSION CALLED
+DEBUG compress: comp_size=25048376 original_nbytes=301989888 dtype=0
+Original size:    301989888 bytes
+Compressed size:  25048376 bytes
+Ratio:            12.06x
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Open
+DEBUG wrap: compressor_override='sz3'
+------- EXT PASS THROUGH COMPRESSION CTX
+DEBUG ctx_create_entry: override='sz3'
+DEBUG ctx_create: id='sz3' compressor=0x1768a30
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+DEBUG read[0]: csize=25048376
+------- CPU DECOMPRESSION CALLED
+DEBUG decompress entry: ndims=3 dims=[256,384,384] dtype=0 compressed_size=25048376 output_buf=0x1522d54fe010
+DEBUG decompress success: out_ptr=0x1522d54fe010 out_size=301989888 first_float=0.000000e+00
+DEBUG output_buf=0x1522d54fe010 first_float=0.000000e+00
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+  viscocity_sz3_1e6       range=[    -1.677,     0.9447]  mean= 3.655e-05  RMSE=4.5317e-07
+    orig:   -1.249655e-12 1.266374e-12 3.318585e-13 -6.336969e-13 -2.763157e-12 
+    decomp: 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 
+unknown compressor 'zstd': invalid compressor id zstd
+unknown compressor 'zstd': invalid compressor id zstd
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Create
+DEBUG wrap: compressor_override='(null)'
+------- EXT PASS THROUGH COMPRESSION CTX
+DEBUG ctx_create_entry: override='(null)'
+DEBUG ctx_create: id='zstd' compressor=(nil)
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+DEBUG write: ds_ctx=0x16f8e90 ctx=(nil)
+DEBUG: no compression ctx, falling through to passthrough
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Open
+DEBUG wrap: compressor_override='zstd'
+------- EXT PASS THROUGH COMPRESSION CTX
+DEBUG ctx_create_entry: override='zstd'
+DEBUG ctx_create: id='zstd' compressor=(nil)
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+  viscocity_zstd          range=[    -1.677,     0.9447]  mean= 3.655e-05  RMSE=5.0071e-02
+    orig:   -1.249655e-12 1.266374e-12 3.318585e-13 -6.336969e-13 -2.763157e-12 
+    decomp: 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL FILE Close
+------- EXT PASS THROUGH VOL INFO Free
+------- EXT PASS THROUGH VOL UNWRAP Object
+------- EXT PASS THROUGH VOL WRAP CTX Free
+
+SDRBench Miranda VOL test PASSED.
+------- EXT PASS THROUGH VOL INFO Free
+------- EXT PASS THROUGH VOL INFO Free
+------- EXT PASS THROUGH VOL TERM
