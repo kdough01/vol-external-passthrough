@@ -213,11 +213,11 @@ void config_params_destroy(config_params *p);
 void gpu_context_destroy(gpu_context_t *gpu_ctx);
 
 /* Error Handling */
-static hid_t vol_err_class          = H5I_INVALID_HID;
-static hid_t maj_compression        = H5I_INVALID_HID;
-static hid_t min_compressor_unavail = H5I_INVALID_HID;
-static hid_t min_compress_failed    = H5I_INVALID_HID;
-static hid_t min_decompress_failed  = H5I_INVALID_HID;
+hid_t vol_err_class          = H5I_INVALID_HID;
+hid_t maj_compression        = H5I_INVALID_HID;
+hid_t min_compressor_unavail = H5I_INVALID_HID;
+hid_t min_compress_failed    = H5I_INVALID_HID;
+hid_t min_decompress_failed  = H5I_INVALID_HID;
 
 /*******************/
 /* Local variables */
