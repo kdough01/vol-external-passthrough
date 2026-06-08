@@ -537,11 +537,11 @@ compression_ctx* compression_ctx_create(int rank, hsize_t *h5dims, enum pressio_
 
     /* Configure metrics if requested */
     if (getenv("HDF5_VOL_PRESSIO_METRICS")) {
-        struct pressio_options *metrics_opts = pressio_options_new();
-        pressio_options_set_string(metrics_opts, "composite:plugins",
-                                "size time error_stat");
-        pressio_compressor_set_options(comp_ctx->compressor, metrics_opts);
-        pressio_options_free(metrics_opts);
+        struct pressio_options *all_opts = pressio_compressor_get_options(comp_ctx->compressor);
+        char *str = pressio_options_to_string(all_opts);
+        printf("[VOL METRICS DEBUG] all options for '%s':\n%s\n", comp_ctx->compressor_id, str);
+        free(str);
+        pressio_options_free(all_opts);
     }
 
     // configure metrics for the compressor - this is default and overidden if JSON is present

@@ -97,6 +97,15 @@ H5VL_pass_through_ext_gpu_transfer_compress(gpu_vol_dataset_t* ds_ctx, const voi
         ctx->compressed_chunk_size = comp_size;
     }
 
+    if (getenv("HDF5_VOL_PRESSIO_METRICS")) {
+        struct pressio_options *results =
+            pressio_compressor_get_metrics_results(comp_ctx->compressor);
+        char *str = pressio_options_to_string(results);
+        printf("[VOL METRICS] compress '%s':\n%s\n", comp_ctx->compressor_id, str);
+        free(str);
+        pressio_options_free(results);
+    }
+
 done:
     if (stream_opts) pressio_options_free(stream_opts);
     if (d_input)     pressio_data_free(d_input);
@@ -156,6 +165,15 @@ H5VL_pass_through_ext_gpu_transfer_decompress(gpu_vol_dataset_t* ds_ctx, const v
         CUDA_CHECK(cudaMemcpy(output_host_buf, d_decomp_ptr, actual_bytes,
                               cudaMemcpyDeviceToHost),
                    "cudaMemcpy device->host for decompressed data failed");
+    }
+
+    if (getenv("HDF5_VOL_PRESSIO_METRICS")) {
+        struct pressio_options *results =
+            pressio_compressor_get_metrics_results(comp_ctx->compressor);
+        char *str = pressio_options_to_string(results);
+        printf("[VOL METRICS] decompress '%s':\n%s\n", comp_ctx->compressor_id, str);
+        free(str);
+        pressio_options_free(results);
     }
 
 done:
