@@ -581,7 +581,7 @@ compression_ctx* compression_ctx_create(int rank, hsize_t *h5dims, enum pressio_
     }
 
 #ifdef USE_CUDA
-    if ((gpu_ctx && strncmp(comp_ctx->compressor_id, "nvcomp", 6) == 0) || (strncmp(ctx->compressor_id, "cusz",   4) == 0)) {
+    if (gpu_ctx && strncmp(comp_ctx->compressor_id, "nvcomp", 6) == 0) {
         struct pressio_options* gpu_opts = pressio_options_new();
         pressio_options_set_userptr(gpu_opts, "nvcomp:stream", (void*)gpu_ctx->stream);
         pressio_options_set_integer(gpu_opts, "nvcomp:device_id", gpu_ctx->device_id);
