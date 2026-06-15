@@ -1,35 +1,9 @@
-/*
- * test_sdrbench.c
- *
- * Tests the vol-external-passthrough VOL connector against the Miranda
- * SDRBench dataset on LCRC. Files are raw binary float64 (double).
- *
- * Dataset path:
- *   /lcrc/project/ECP-EZ/public/compression/Miranda/SDRBENCH-Miranda-256x384x384/
- *
- * Fields (all 256x384x384 float64):
- *   density.d64, diffusivity.d64, pressure.d64,
- *   velocityx.d64, velocityy.d64, velocityz.d64, viscocity.d64
- *
- * Environment variables:
- *   HDF5_VOL_PRESSIO_COMPRESSOR  default compressor (optional, defaults to noop)
- *   HDF5_VOL_PRESSIO_LEVEL       default compression level (optional, defaults to 1)
- *
- * Example PBS script usage:
- *   export HDF5_VOL_PRESSIO_COMPRESSOR=sz3
- *   export HDF5_VOL_PRESSIO_LEVEL=1
- *   ./build/tests/test_sdrbench
- */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
 #include "hdf5.h"
 
-/* ------------------------------------------------------------------ */
-/*  Dataset configuration                                              */
-/* ------------------------------------------------------------------ */
 
 #define MIRANDA_PATH \
     "/lcrc/project/ECP-EZ/public/compression/Miranda/SDRBENCH-Miranda-256x384x384"
@@ -37,11 +11,9 @@
 #define MIR_NX    256
 #define MIR_NY    384
 #define MIR_NZ    384
-#define MIR_NELEM ((size_t)MIR_NX * MIR_NY * MIR_NZ)   /* 37,748,736 */
+#define MIR_NELEM ((size_t)MIR_NX * MIR_NY * MIR_NZ)
 
-/* ------------------------------------------------------------------ */
-/*  VOL property helpers                                               */
-/* ------------------------------------------------------------------ */
+//  VOL property helpers
 
 static void register_vol_properties(void)
 {
@@ -71,9 +43,7 @@ static hid_t make_dcpl(const char *compressor, const char *json_opts)
     return dcpl;
 }
 
-/* ------------------------------------------------------------------ */
-/*  I/O helper                                                         */
-/* ------------------------------------------------------------------ */
+//  I/O helper
 
 static double *read_raw_double(const char *path, size_t *out_nelem)
 {
@@ -104,9 +74,7 @@ static double *read_raw_double(const char *path, size_t *out_nelem)
     return data;
 }
 
-/* ------------------------------------------------------------------ */
-/*  Statistics helper                                                  */
-/* ------------------------------------------------------------------ */
+// Statistics helper
 
 typedef struct { double min, max, mean, rmse; } Stats;
 
@@ -126,9 +94,7 @@ static Stats compute_stats(const double *orig, const double *decomp, size_t n)
     return s;
 }
 
-/* ------------------------------------------------------------------ */
-/*  Per-field test                                                     */
-/* ------------------------------------------------------------------ */
+// Per-field test
 
 static int test_field(hid_t file_id,
                       const char *label,
@@ -205,9 +171,7 @@ static int test_field(hid_t file_id,
     return 0;
 }
 
-/* ------------------------------------------------------------------ */
-/*  Error handling tests                                               */
-/* ------------------------------------------------------------------ */
+//  Error handling tests
 
 static void test_error_handling(hid_t file_id, const double *field, size_t nelem,
                                 int ndims, const hsize_t *dims)
@@ -256,14 +220,10 @@ static void test_error_handling(hid_t file_id, const double *field, size_t nelem
         hid_t dset = H5Dcreate2(file_id, "err_bad_option",
                                  H5T_NATIVE_DOUBLE, space_id,
                                  H5P_DEFAULT, dcpl, H5P_DEFAULT);
-        /* Note: libpressio may silently ignore unknown keys rather than
-         * failing set_options — check whether this passes or fails and
-         * update expected behavior accordingly */
         if (dset < 0)
             printf("  PASS: H5Dcreate2 correctly failed for invalid option key\n");
         else {
-            printf("  INFO: H5Dcreate2 succeeded — libpressio silently ignored "
-                   "unknown key (this may be expected behavior)\n");
+            printf("  INFO: H5Dcreate2 succeeded — libpressio silently ignored unknown key\n");
             H5Dclose(dset);
         }
         H5Pclose(dcpl);
@@ -272,7 +232,7 @@ static void test_error_handling(hid_t file_id, const double *field, size_t nelem
     /* ---- Test 4: noop is always allowed (intentional passthrough) ---- */
     printf("\n-- Test 4: noop passthrough (should always succeed) --\n");
     {
-        hid_t dcpl = make_dcpl(NULL, NULL);  /* defaults to noop */
+        hid_t dcpl = make_dcpl(NULL, NULL);
         hid_t dset = H5Dcreate2(file_id, "err_noop_passthrough",
                                  H5T_NATIVE_DOUBLE, space_id,
                                  H5P_DEFAULT, dcpl, H5P_DEFAULT);
@@ -336,16 +296,11 @@ static void test_error_handling(hid_t file_id, const double *field, size_t nelem
     fflush(stdout);
 }
 
-/* ------------------------------------------------------------------ */
-/*  main                                                               */
-/* ------------------------------------------------------------------ */
-
 int main(void)
 {
     printf("SDRBench Miranda VOL test starting\n");
     printf("Path: %s\n", MIRANDA_PATH);
 
-    /* Report active environment configuration */
     const char *compressor = getenv("HDF5_VOL_PRESSIO_COMPRESSOR");
     const char *level      = getenv("HDF5_VOL_PRESSIO_LEVEL");
     printf("HDF5_VOL_PRESSIO_COMPRESSOR = %s\n", compressor ? compressor : "(not set, defaulting to noop)");
@@ -365,14 +320,13 @@ int main(void)
         "velocityx.d64",
         "velocityy.d64",
         "velocityz.d64",
-        "viscocity.d64",   /* note: SDRBench spells it this way */
+        "viscocity.d64",
         NULL
     };
 
     hsize_t dims[3] = { MIR_NX, MIR_NY, MIR_NZ };
     int any = 0, rc = 0;
 
-    /* Load first field for error handling tests */
     char first_path[512];
     snprintf(first_path, sizeof(first_path), "%s/density.d64", MIRANDA_PATH);
     size_t err_nelem = 0;
@@ -382,7 +336,7 @@ int main(void)
         free(err_data);
     }
 
-    /* Main field tests */
+    /* field tests */
     for (int fi = 0; fields[fi]; fi++) {
         char path[512];
         snprintf(path, sizeof(path), "%s/%s", MIRANDA_PATH, fields[fi]);
