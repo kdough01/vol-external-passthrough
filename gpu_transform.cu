@@ -99,9 +99,9 @@ H5VL_pass_through_ext_gpu_transfer_compress(gpu_vol_dataset_t* ds_ctx, const voi
 
     if (getenv("HDF5_VOL_PRESSIO_METRICS")) {
         struct pressio_options *results =
-            pressio_compressor_get_metrics_results(comp_ctx->compressor);
+            pressio_compressor_get_metrics_results(ctx->compressor);
         char *str = pressio_options_to_string(results);
-        printf("[VOL METRICS] compress '%s':\n%s\n", comp_ctx->compressor_id, str);
+        printf("[VOL METRICS] compress '%s':\n%s\n", ctx->compressor_id, str);
         free(str);
         pressio_options_free(results);
     }
@@ -169,9 +169,9 @@ H5VL_pass_through_ext_gpu_transfer_decompress(gpu_vol_dataset_t* ds_ctx, const v
 
     if (getenv("HDF5_VOL_PRESSIO_METRICS")) {
         struct pressio_options *results =
-            pressio_compressor_get_metrics_results(comp_ctx->compressor);
+            pressio_compressor_get_metrics_results(ctx->compressor);
         char *str = pressio_options_to_string(results);
-        printf("[VOL METRICS] decompress '%s':\n%s\n", comp_ctx->compressor_id, str);
+        printf("[VOL METRICS] decompress '%s':\n%s\n", ctx->compressor_id, str);
         free(str);
         pressio_options_free(results);
     }
