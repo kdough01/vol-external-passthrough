@@ -27,7 +27,7 @@ echo "GCC_LIB: $GCC_LIB"
 
 $SYSTEM_MPICC --version || { echo "mpicc broken — aborting"; exit 1; }
 
-LP_VIEW=/lcrc/project/ECP-EZ/public/compression/libpressio/libpressio_env/.spack-env/view
+LP_VIEW=/home/kdougherty/libpressio_cuda/.spack-env/view
 
 # Find LibPressio cmake config — check both lib and lib64
 LP_CMAKE_DIR=""

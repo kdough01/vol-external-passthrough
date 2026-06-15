@@ -74,8 +74,8 @@ int main() {
 
     /* --- GPU compressor (nvcomp_lz4 or whatever your CUDA build exposes) --- */
     /* Adjust the compressor name to match your gpu_compression registration  */
-    hid_t dcpl = make_dcpl("sz3",
-    "{\"sz3:error_bound_mode_str\": \"abs\", \"sz3:abs_error_bound\": 1e-3}");
+    hid_t dcpl = make_dcpl("cuszp",
+    "{\"pressio:abs\": 1e-3, \"cuszp:mode_str\": \"outlier\"}");
     hid_t dset = H5Dcreate2(file_id, "Pf48_gpu_lz4", H5T_NATIVE_FLOAT, space_id,
                              H5P_DEFAULT, dcpl, H5P_DEFAULT);
     H5Dwrite(dset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, field);
