@@ -12,12 +12,12 @@
 
 static void register_vol_properties() {
     if (H5Pexist(H5P_DATASET_CREATE, "pressio:compressor") <= 0) {
-        char d[64] = "noop";
+        static char d[64] = "noop"; // <-- Now persists in memory
         H5Pregister2(H5P_DATASET_CREATE, "pressio:compressor",
                      sizeof(d), d, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
     }
     if (H5Pexist(H5P_DATASET_CREATE, "vol:options_json") <= 0) {
-        char d[4096] = "";
+        static char d[4096] = "";   // <-- Now persists in memory
         H5Pregister2(H5P_DATASET_CREATE, "vol:options_json",
                      sizeof(d), d, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
     }
