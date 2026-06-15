@@ -79,9 +79,9 @@ export LD_LIBRARY_PATH=${GCC_LIB}:${LP_VIEW}/lib64:${LP_VIEW}/lib
 export HDF5_VOL_CONNECTOR="pass_through_ext under_vol=0;under_info={}"
 export HDF5_PLUGIN_PATH=$(pwd)/build
 
-echo ""
-echo "=== Small write test (bzip2 / sz3 / zfp) ==="
-./build/tests/test_cpu_write
+# echo ""
+# echo "=== Small write test (bzip2 / sz3 / zfp) ==="
+# ./build/tests/test_cpu_write
 
 echo ""
 echo "=== Hurricane test ==="

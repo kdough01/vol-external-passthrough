@@ -67,15 +67,18 @@ int main() {
     for (int i = 0; i < 10; i++) printf("  [%d] = %.6f\n", i, field[i]);
     fflush(stdout);
 
+    printf("create:\n");
     hid_t file_id = H5Fcreate("hurricane_gpu.h5", H5F_ACC_TRUNC,
                                H5P_DEFAULT, H5P_DEFAULT);
     hsize_t dims[3] = {NX, NY, NZ};
     hid_t space_id = H5Screate_simple(3, dims, NULL);
+    printf("compressor:\n");
 
     /* --- GPU compressor (nvcomp_lz4 or whatever your CUDA build exposes) --- */
     /* Adjust the compressor name to match your gpu_compression registration  */
     hid_t dcpl = make_dcpl("cuszp",
     "{\"pressio:abs\": 1e-3, \"cuszp:mode_str\": \"outlier\"}");
+    printf("create again:\n");
     hid_t dset = H5Dcreate2(file_id, "Pf48_gpu_lz4", H5T_NATIVE_FLOAT, space_id,
                              H5P_DEFAULT, dcpl, H5P_DEFAULT);
     H5Dwrite(dset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, field);
