@@ -46,6 +46,7 @@ H5VL_pass_through_ext_gpu_transfer_compress(gpu_vol_dataset_t* ds_ctx, const voi
     struct pressio_data* d_input  = NULL;
     struct pressio_data* d_output = NULL;
     struct pressio_options* stream_opts = NULL;
+    size_t dims[1] = {nbytes};
 
     /* Grow device input buffer if needed */
     if (nbytes > gpu->d_in_capacity) {
@@ -58,7 +59,6 @@ H5VL_pass_through_ext_gpu_transfer_compress(gpu_vol_dataset_t* ds_ctx, const voi
                                cudaMemcpyHostToDevice, gpu->stream),
                "cudaMemcpyAsync host->device failed");
 
-    size_t dims[1] = {nbytes};
     d_input  = pressio_data_new_nonowning(pressio_byte_dtype, gpu->d_in, 1, dims);
     d_output = pressio_data_new_empty(pressio_byte_dtype, 0, NULL);
 
@@ -128,6 +128,8 @@ H5VL_pass_through_ext_gpu_transfer_decompress(gpu_vol_dataset_t* ds_ctx, const v
     struct pressio_data* d_input  = NULL;
     struct pressio_data* d_output = NULL;
     struct pressio_options* stream_opts = NULL;
+    size_t comp_dims[1] = {compressed_size};
+    size_t out_dims[1] = {output_nbytes};
 
     CUDA_CHECK(cudaMalloc(&d_comp, compressed_size),
                "cudaMalloc for compressed input buffer failed");
@@ -136,11 +138,9 @@ H5VL_pass_through_ext_gpu_transfer_decompress(gpu_vol_dataset_t* ds_ctx, const v
                "cudaMemcpy host->device for compressed data failed");
 
     /* d_input takes ownership of d_comp via cuda_deleter */
-    size_t comp_dims[1] = {compressed_size};
     d_input = pressio_data_new_move(pressio_byte_dtype, d_comp, 1, comp_dims, cuda_deleter, NULL);
     d_comp  = NULL; /* ownership transferred — don't double-free */
 
-    size_t out_dims[1] = {output_nbytes};
     d_output = pressio_data_new_empty(pressio_byte_dtype, 1, out_dims);
 
     /* Set CUDA stream on compressor */
