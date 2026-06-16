@@ -1824,7 +1824,7 @@ H5VL_pass_through_ext_dataset_read(
     hid_t file_space_id[], hid_t plist_id, void *buf[], void **req)
 {
     herr_t ret_val = 0;
-    hid_t err_id = H5Eget_current_stack();
+    // hid_t err_id = H5Eget_current_stack();
 
     for (size_t u = 0; u < count; u++) {
         H5VL_pass_through_ext_t *d = (H5VL_pass_through_ext_t *)dset[u];
@@ -1954,7 +1954,7 @@ H5VL_pass_through_ext_dataset_read(
         free(cbuf);
     }
 
-    H5Eset_current_stack(err_id);
+    // H5Eset_current_stack(err_id);
     return ret_val;
 } /* end H5VL_pass_through_ext_dataset_read() */
 
@@ -1975,7 +1975,7 @@ H5VL_pass_through_ext_dataset_write(
     hid_t file_space_id[], hid_t plist_id, const void *buf[], void **req)
 {
     herr_t ret_val = 0;
-    hid_t err_id = H5Eget_current_stack();
+    // hid_t err_id = H5Eget_current_stack();
 
     for (size_t u = 0; u < count; u++) {
         H5VL_pass_through_ext_t *d = (H5VL_pass_through_ext_t *)dset[u];
@@ -2099,7 +2099,7 @@ H5VL_pass_through_ext_dataset_write(
         ctx->compressed_buf = NULL;
     }
 
-    H5Eset_current_stack(err_id);
+    // H5Eset_current_stack(err_id);
     return ret_val;
 } /* end H5VL_pass_through_ext_dataset_write() */
 
