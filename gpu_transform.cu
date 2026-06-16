@@ -171,7 +171,7 @@ done:
     return ret_val;
 }
 
-static herr_t
+herr_t
 H5VL_pass_through_ext_gpu_transfer_decompress(gpu_vol_dataset_t* ds_ctx, const void* compressed_host_data, size_t compressed_size, void* output_host_buf, size_t output_nbytes)
 {
     herr_t ret_val = 0;
