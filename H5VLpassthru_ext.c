@@ -410,19 +410,31 @@ gpu_context_t* gpu_context_create(config_params *conf_params)
 {
 #ifdef USE_CUDA
     gpu_context_t *gpu_ctx = (gpu_context_t*)calloc(1, sizeof(gpu_context_t));
+    if (!gpu_ctx) return NULL;
 
     gpu_ctx->device_id = conf_params->device_id;
-    cudaSetDevice(gpu_ctx->device_id);
+    if (cudaSetDevice(gpu_ctx->device_id) != cudaSuccess) goto fail;
+    if (cudaStreamCreate(&gpu_ctx->stream) != cudaSuccess) goto fail;
 
-    cudaStreamCreate(&gpu_ctx->stream);
+    size_t cap = conf_params->max_device_memory_bytes;
+    if (cap == 0 || cap > (1ull << 40)) {
+        fprintf(stderr, "bad max_device_memory_bytes=%zu\n", cap);
+        goto fail;
+    }
+    gpu_ctx->d_in_capacity  = cap;
+    gpu_ctx->d_out_capacity = cap;
 
-    gpu_ctx->d_in_capacity = conf_params->max_device_memory_bytes;
-    gpu_ctx->d_out_capacity = conf_params->max_device_memory_bytes;
-
-    cudaMalloc(&gpu_ctx->d_in, gpu_ctx->d_in_capacity);
-    cudaMalloc(&gpu_ctx->d_out, gpu_ctx->d_out_capacity);
-
+    if (cudaMalloc(&gpu_ctx->d_in,  cap) != cudaSuccess) goto fail;
+    if (cudaMalloc(&gpu_ctx->d_out, cap) != cudaSuccess) goto fail;
     return gpu_ctx;
+
+    fail:
+        if (gpu_ctx) {
+            if (gpu_ctx->d_in)   cudaFree(gpu_ctx->d_in);
+            if (gpu_ctx->stream) cudaStreamDestroy(gpu_ctx->stream);
+            free(gpu_ctx);
+        }
+    return NULL;
 #endif
     return NULL;
 }
