@@ -274,15 +274,12 @@ H5VL_pass_through_ext_gpu_transfer_decompress(gpu_vol_dataset_t* ds_ctx, const v
         pressio_options_free(results);
     }
 
-    CUDA_CHECK(cudaMemcpy(output_host_buf, d_out_buf, output_nbytes,
-                      cudaMemcpyDeviceToHost), "D2H decompressed copy failed");
-    cudaFree(d_out_buf);
-
 done:
     if (stream_opts) pressio_options_free(stream_opts);
     if (d_input)     pressio_data_free(d_input);
     if (d_output)    pressio_data_free(d_output);
     if (d_comp)      cudaFree(d_comp);
+    if (d_out_buf)   cudaFree(d_out_buf);
     return ret_val;
 }
 }
