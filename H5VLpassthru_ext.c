@@ -374,6 +374,10 @@ enum pressio_dtype hdf5_to_pressio_dtype(hid_t type_id) {
     return pressio_byte_dtype;
 }
 
+static int compressor_is_gpu(const char *id) {
+    return strncmp(id, "nvcomp", 6) == 0 || strncmp(id, "cusz", 4) == 0;
+}
+
 config_params *config_params_create(hid_t fapl_id)
 {
     (void)fapl_id;
@@ -581,7 +585,7 @@ compression_ctx* compression_ctx_create(int rank, hsize_t *h5dims, enum pressio_
     }
 
 #ifdef USE_CUDA
-    if (gpu_ctx && strncmp(comp_ctx->compressor_id, "nvcomp", 6) == 0) {
+    if (compressor_is_gpu(comp_ctx->compressor_id)) {
         struct pressio_options* gpu_opts = pressio_options_new();
         pressio_options_set_userptr(gpu_opts, "nvcomp:stream", (void*)gpu_ctx->stream);
         pressio_options_set_integer(gpu_opts, "nvcomp:device_id", gpu_ctx->device_id);
@@ -1929,9 +1933,9 @@ H5VL_pass_through_ext_dataset_read(
 
         herr_t dret;
 #ifdef USE_CUDA
-    int is_gpu = (strncmp(ctx->compressor_id, "nvcomp", 6) == 0) ||
-                 (strncmp(ctx->compressor_id, "cusz",   4) == 0);
-    if (ds_ctx->gpu_ctx != NULL && is_gpu) {
+        // this is fragile, I don't like it - we need to either have this be a try and except
+        // or maybe the user can specify which compressors are cuda and which aren't in their config
+    if (ds_ctx->gpu_ctx != NULL && compressor_is_gpu(ctx->compressor_id)) {
         dret = H5VL_pass_through_ext_gpu_transfer_decompress(ds_ctx, cbuf, csize, buf[u], nbytes);
     } else {
         dret = H5VL_pass_through_ext_cpu_transfer_decompress(ctx, cbuf, csize, buf[u]);
@@ -2011,7 +2015,7 @@ H5VL_pass_through_ext_dataset_write(
         /* Compress the N-dimensional buffer */
         herr_t cret;
 #ifdef USE_CUDA
-        if ((ds_ctx->gpu_ctx != NULL && strncmp(ctx->compressor_id, "nvcomp", 6) == 0) || (strncmp(ctx->compressor_id, "cusz",   4) == 0)) {
+        if (ds_ctx->gpu_ctx != NULL && compressor_is_gpu(ctx->compressor_id)) {
             cret = H5VL_pass_through_ext_gpu_transfer_compress(ds_ctx, buf[u], nbytes);
         } else {
             cret = H5VL_pass_through_ext_cpu_transfer_compress(ctx, buf[u], nbytes);
