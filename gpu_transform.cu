@@ -273,3 +273,4 @@ done:
     if (d_comp)      cudaFree(d_comp);
     return ret_val;
 }
+}
