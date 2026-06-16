@@ -101,8 +101,6 @@ H5VL_pass_through_ext_gpu_transfer_compress(gpu_vol_dataset_t* ds_ctx, const voi
                "cudaMemcpyAsync host->device failed");
 
     d_input = pressio_data_new_nonowning(in_dtype, gpu->d_in, in_ndims, in_dims);
-    pressio_data_set_domain(d_input, "cudamalloc"); 
-    
     d_output = pressio_data_new_empty(pressio_byte_dtype, 0, NULL);
 
     {
@@ -177,13 +175,13 @@ herr_t
 H5VL_pass_through_ext_gpu_transfer_decompress(gpu_vol_dataset_t* ds_ctx, const void* compressed_host_data, size_t compressed_size, void* output_host_buf, size_t output_nbytes)
 {
     herr_t ret_val = 0;
-    compression_ctx*  ctx = ds_ctx->comp_ctx;
-    gpu_context_t*    gpu = ds_ctx->gpu_ctx;
+    compression_ctx* ctx = ds_ctx->comp_ctx;
+    gpu_context_t* gpu = ds_ctx->gpu_ctx;
 
     void* d_comp = NULL;
-    void* d_out_buf = NULL;
-    struct pressio_data*    d_input     = NULL;
-    struct pressio_data*    d_output    = NULL;
+    // d_out_buf removed!
+    struct pressio_data* d_input     = NULL;
+    struct pressio_data* d_output    = NULL;
     struct pressio_options* stream_opts = NULL;
     size_t comp_dims[1] = {compressed_size};
 
@@ -223,14 +221,8 @@ H5VL_pass_through_ext_gpu_transfer_decompress(gpu_vol_dataset_t* ds_ctx, const v
                           cudaMemcpyHostToDevice),
                "cudaMemcpy host->device for compressed data failed");
 
-    d_input = pressio_data_new_move(pressio_byte_dtype, d_comp, 1, comp_dims, cuda_deleter, NULL);
-    pressio_data_set_domain(d_input, "cudamalloc"); 
-    d_comp  = NULL;
-
-    CUDA_CHECK(cudaMalloc(&d_out_buf, output_nbytes),
-               "cudaMalloc for decompress output buffer failed");
-    d_output = pressio_data_new_nonowning(out_dtype, d_out_buf, out_ndims, out_dims);
-    pressio_data_set_domain(d_output, "cudamalloc");
+    d_input = pressio_data_new_nonowning(pressio_byte_dtype, d_comp, 1, comp_dims);
+    d_output = pressio_data_new_empty(out_dtype, out_ndims, out_dims);
 
     {
         const char* skey = gpu_stream_key(ctx->compressor_id);
@@ -283,7 +275,6 @@ done:
     if (d_input)     pressio_data_free(d_input);
     if (d_output)    pressio_data_free(d_output);
     if (d_comp)      cudaFree(d_comp);
-    if (d_out_buf)   cudaFree(d_out_buf);
     return ret_val;
 }
 }
