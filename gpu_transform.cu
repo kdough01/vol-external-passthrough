@@ -223,7 +223,10 @@ H5VL_pass_through_ext_gpu_transfer_decompress(gpu_vol_dataset_t* ds_ctx, const v
     d_input = pressio_data_new_move(pressio_byte_dtype, d_comp, 1, comp_dims, cuda_deleter, NULL);
     d_comp  = NULL;
 
-    d_output = pressio_data_new_empty(out_dtype, out_ndims, out_dims);
+    void* d_out_buf = NULL;
+    CUDA_CHECK(cudaMalloc(&d_out_buf, output_nbytes), "cudaMalloc decompress output failed");
+
+    d_output = pressio_data_new_nonowning(out_dtype, d_out_buf, out_ndims, out_dims);
 
     {
         const char* skey = gpu_stream_key(ctx->compressor_id);
@@ -270,6 +273,10 @@ H5VL_pass_through_ext_gpu_transfer_decompress(gpu_vol_dataset_t* ds_ctx, const v
         free(str);
         pressio_options_free(results);
     }
+
+    CUDA_CHECK(cudaMemcpy(output_host_buf, d_out_buf, output_nbytes,
+                      cudaMemcpyDeviceToHost), "D2H decompressed copy failed");
+    cudaFree(d_out_buf);
 
 done:
     if (stream_opts) pressio_options_free(stream_opts);
