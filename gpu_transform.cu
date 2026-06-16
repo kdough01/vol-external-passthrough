@@ -32,13 +32,20 @@ static void cuda_deleter(void* data, void* meta) {
 
 extern "C" {
 
+static int compressor_is_byte_stream(const char* id) {
+    return strncmp(id, "nvcomp", 6) == 0;
+}
+
+static const char* gpu_stream_key(const char* id) {
+    if (strncmp(id, "nvcomp", 6) == 0) return "nvcomp:stream";
+    if (strncmp(id, "cuszp",  5) == 0) return "cuszp:stream";
+    if (strncmp(id, "cusz",   4) == 0) return "cusz:stream";
+    return NULL;
+}
+
 herr_t
 H5VL_pass_through_ext_gpu_transfer_compress(gpu_vol_dataset_t* ds_ctx, const void* host_data, size_t nbytes)
 {
-#ifdef ENABLE_EXT_PASSTHRU_LOGGING
-    printf("GPU COMPRESSION CALLED: nbytes=%zu\n", nbytes);
-#endif
-
     herr_t ret_val = 0;
     compression_ctx*  ctx = ds_ctx->comp_ctx;
     gpu_context_t*    gpu = ds_ctx->gpu_ctx;
@@ -46,7 +53,36 @@ H5VL_pass_through_ext_gpu_transfer_compress(gpu_vol_dataset_t* ds_ctx, const voi
     struct pressio_data* d_input  = NULL;
     struct pressio_data* d_output = NULL;
     struct pressio_options* stream_opts = NULL;
-    size_t dims[1] = {nbytes};
+
+    int byte_stream = compressor_is_byte_stream(ctx->compressor_id);
+    enum pressio_dtype in_dtype;
+    size_t in_ndims;
+    size_t* in_dims;
+    size_t  byte_dims[1];
+
+    if (byte_stream) {
+        in_dtype   = pressio_byte_dtype;
+        in_ndims   = 1;
+        byte_dims[0] = nbytes;
+        in_dims    = byte_dims;
+    } else {
+        if (ctx->ndims == 0 || ctx->dims == NULL) {
+            H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                    vol_err_class, maj_compression, min_compress_failed,
+                    "typed GPU compressor '%s' needs dtype/shape, but none recorded",
+                    ctx->compressor_id);
+            ret_val = -1;
+            goto done;
+        }
+        in_dtype = ctx->dtype;
+        in_ndims = ctx->ndims;
+        in_dims  = ctx->dims;
+    }
+
+#ifdef ENABLE_EXT_PASSTHRU_LOGGING
+    printf("GPU COMPRESSION CALLED: id=%s nbytes=%zu dtype=%d ndims=%zu\n",
+           ctx->compressor_id, nbytes, (int)in_dtype, in_ndims);
+#endif
 
     /* Grow device input buffer if needed */
     if (nbytes > gpu->d_in_capacity) {
@@ -59,13 +95,19 @@ H5VL_pass_through_ext_gpu_transfer_compress(gpu_vol_dataset_t* ds_ctx, const voi
                                cudaMemcpyHostToDevice, gpu->stream),
                "cudaMemcpyAsync host->device failed");
 
-    d_input  = pressio_data_new_nonowning(pressio_byte_dtype, gpu->d_in, 1, dims);
+    d_input = pressio_data_new_nonowning(in_dtype, gpu->d_in, in_ndims, in_dims);
     d_output = pressio_data_new_empty(pressio_byte_dtype, 0, NULL);
 
-    /* Set CUDA stream on compressor */
-    stream_opts = pressio_options_new();
-    pressio_options_set_userptr(stream_opts, "nvcomp:stream", (void*)gpu->stream);
-    pressio_compressor_set_options(ctx->compressor, stream_opts);
+    {
+        const char* skey = gpu_stream_key(ctx->compressor_id);
+        if (skey) {
+            stream_opts = pressio_options_new();
+            pressio_options_set_userptr(stream_opts, skey, (void*)gpu->stream);
+            pressio_compressor_set_options(ctx->compressor, stream_opts);
+        }
+        CUDA_CHECK(cudaStreamSynchronize(gpu->stream),
+                   "cudaStreamSynchronize before compress failed");
+    }
 
     if (pressio_compressor_compress(ctx->compressor, d_input, d_output)) {
         H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
@@ -80,6 +122,17 @@ H5VL_pass_through_ext_gpu_transfer_compress(gpu_vol_dataset_t* ds_ctx, const voi
     {
         size_t comp_size = 0;
         void* d_comp_ptr = pressio_data_ptr(d_output, &comp_size);
+
+#ifdef ENABLE_EXT_PASSTHRU_LOGGING
+        printf("GPU compress OK: id=%s comp_size=%zu\n", ctx->compressor_id, comp_size);
+#endif
+        if (comp_size == 0) {
+            H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                    vol_err_class, maj_compression, min_compress_failed,
+                    "GPU compressor '%s' produced 0 bytes", ctx->compressor_id);
+            ret_val = -1;
+            goto done;
+        }
 
         ctx->compressed_buf = malloc(comp_size);
         if (!ctx->compressed_buf) {
@@ -116,20 +169,45 @@ done:
 static herr_t
 H5VL_pass_through_ext_gpu_transfer_decompress(gpu_vol_dataset_t* ds_ctx, const void* compressed_host_data, size_t compressed_size, void* output_host_buf, size_t output_nbytes)
 {
-#ifdef ENABLE_EXT_PASSTHRU_LOGGING
-    printf("GPU DECOMPRESSION CALLED: compressed_size=%zu output_nbytes=%zu\n", compressed_size, output_nbytes);
-#endif
-
     herr_t ret_val = 0;
     compression_ctx*  ctx = ds_ctx->comp_ctx;
     gpu_context_t*    gpu = ds_ctx->gpu_ctx;
 
     void* d_comp = NULL;
-    struct pressio_data* d_input  = NULL;
-    struct pressio_data* d_output = NULL;
+    struct pressio_data*    d_input     = NULL;
+    struct pressio_data*    d_output    = NULL;
     struct pressio_options* stream_opts = NULL;
     size_t comp_dims[1] = {compressed_size};
-    size_t out_dims[1] = {output_nbytes};
+
+    int byte_stream = compressor_is_byte_stream(ctx->compressor_id);
+    enum pressio_dtype out_dtype;
+    size_t  out_ndims;
+    size_t* out_dims;
+    size_t  byte_dims[1];
+
+    if (byte_stream) {
+        out_dtype = pressio_byte_dtype;
+        out_ndims = 1;
+        byte_dims[0] = output_nbytes;
+        out_dims = byte_dims;
+    } else {
+        if (ctx->ndims == 0 || ctx->dims == NULL) {
+            H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                    vol_err_class, maj_compression, min_decompress_failed,
+                    "typed GPU compressor '%s' needs dtype/shape, but none recorded",
+                    ctx->compressor_id);
+            ret_val = -1;
+            goto done;
+        }
+        out_dtype = ctx->dtype;
+        out_ndims = ctx->ndims;
+        out_dims  = ctx->dims;
+    }
+
+#ifdef ENABLE_EXT_PASSTHRU_LOGGING
+    printf("GPU DECOMPRESSION CALLED: id=%s compressed_size=%zu output_nbytes=%zu dtype=%d\n",
+           ctx->compressor_id, compressed_size, output_nbytes, (int)out_dtype);
+#endif
 
     CUDA_CHECK(cudaMalloc(&d_comp, compressed_size),
                "cudaMalloc for compressed input buffer failed");
@@ -137,16 +215,19 @@ H5VL_pass_through_ext_gpu_transfer_decompress(gpu_vol_dataset_t* ds_ctx, const v
                           cudaMemcpyHostToDevice),
                "cudaMemcpy host->device for compressed data failed");
 
-    /* d_input takes ownership of d_comp via cuda_deleter */
     d_input = pressio_data_new_move(pressio_byte_dtype, d_comp, 1, comp_dims, cuda_deleter, NULL);
-    d_comp  = NULL; /* ownership transferred — don't double-free */
+    d_comp  = NULL;
 
-    d_output = pressio_data_new_empty(pressio_byte_dtype, 1, out_dims);
+    d_output = pressio_data_new_empty(out_dtype, out_ndims, out_dims);
 
-    /* Set CUDA stream on compressor */
-    stream_opts = pressio_options_new();
-    pressio_options_set_userptr(stream_opts, "nvcomp:stream", (void*)gpu->stream);
-    pressio_compressor_set_options(ctx->compressor, stream_opts);
+    {
+        const char* skey = gpu_stream_key(ctx->compressor_id);
+        if (skey) {
+            stream_opts = pressio_options_new();
+            pressio_options_set_userptr(stream_opts, skey, (void*)gpu->stream);
+            pressio_compressor_set_options(ctx->compressor, stream_opts);
+        }
+    }
 
     if (pressio_compressor_decompress(ctx->compressor, d_input, d_output)) {
         H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
@@ -161,6 +242,15 @@ H5VL_pass_through_ext_gpu_transfer_decompress(gpu_vol_dataset_t* ds_ctx, const v
     {
         size_t actual_bytes = 0;
         void* d_decomp_ptr = pressio_data_ptr(d_output, &actual_bytes);
+
+        if (actual_bytes > output_nbytes) {
+            H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                    vol_err_class, maj_compression, min_decompress_failed,
+                    "GPU decompress of '%s' produced %zu bytes, expected %zu",
+                    ctx->compressor_id, actual_bytes, output_nbytes);
+            ret_val = -1;
+            goto done;
+        }
 
         CUDA_CHECK(cudaMemcpy(output_host_buf, d_decomp_ptr, actual_bytes,
                               cudaMemcpyDeviceToHost),
@@ -178,10 +268,8 @@ H5VL_pass_through_ext_gpu_transfer_decompress(gpu_vol_dataset_t* ds_ctx, const v
 
 done:
     if (stream_opts) pressio_options_free(stream_opts);
-    if (d_input)     pressio_data_free(d_input); /* also frees d_comp if not NULL */
+    if (d_input)     pressio_data_free(d_input);
     if (d_output)    pressio_data_free(d_output);
-    if (d_comp)      cudaFree(d_comp); /* only reached if move failed before transfer */
+    if (d_comp)      cudaFree(d_comp);
     return ret_val;
-}
-
 }
