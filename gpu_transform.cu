@@ -60,6 +60,11 @@ H5VL_pass_through_ext_gpu_transfer_compress(gpu_vol_dataset_t* ds_ctx, const voi
     size_t* in_dims;
     size_t  byte_dims[1];
 
+    int dev = -1; cudaError_t ce = cudaGetDevice(&dev);
+    fprintf(stderr, "[gpu] entry: cudaGetDevice rc=%d dev=%d d_in=%p cap=%zu stream=%p\n",
+            (int)ce, dev, (void*)gpu->d_in, gpu->d_in_capacity, (void*)gpu->stream);
+    fflush(stderr);
+
     if (byte_stream) {
         in_dtype   = pressio_byte_dtype;
         in_ndims   = 1;
