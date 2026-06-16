@@ -668,15 +668,17 @@ void gpu_context_destroy(gpu_context_t *gpu_ctx) {
 
 gpu_vol_file_t* gpu_vol_file_wrap(hid_t fapl_id, hid_t under_vol_id, void *under_file)
 {
-    gpu_vol_file_t *gpu_vol_file_ctx = (gpu_vol_file_t*)calloc(1, sizeof(gpu_vol_file_t));
+    gpu_vol_file_t *ctx = (gpu_vol_file_t*)calloc(1, sizeof(gpu_vol_file_t));
+    if (!ctx) return NULL;
 
-    gpu_vol_file_ctx->under_file = under_file;
-    gpu_vol_file_ctx->under_vol_id = under_vol_id;
+    ctx->under_file   = under_file;
+    ctx->under_vol_id = under_vol_id;
+    ctx->config_params = config_params_create(fapl_id);
+    if (!ctx->config_params) { free(ctx); return NULL; }
 
-    gpu_vol_file_ctx->config_params = config_params_create(fapl_id);
-    gpu_vol_file_ctx->gpu_ctx = gpu_context_create(gpu_vol_file_ctx->config_params);
+    ctx->gpu_ctx = gpu_context_create(ctx->config_params);
 
-    return gpu_vol_file_ctx;
+    return ctx;
 }
 
 

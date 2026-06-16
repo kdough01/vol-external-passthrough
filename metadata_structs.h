@@ -42,8 +42,8 @@ typedef struct chunking_ctx {
 
 typedef struct config_params {
     int device_id;
-    int min_size_for_gpu;
-    int max_device_memory_bytes;
+    size_t min_size_for_gpu;
+    size_t max_device_memory_bytes;
     char *default_compression_id;
     int compression_level;
 } config_params;
