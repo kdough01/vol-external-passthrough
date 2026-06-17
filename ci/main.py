@@ -19,11 +19,9 @@ async def main():
         )
 
         base = (
-            client.container()
-            .build(
-                context=src,
-                dockerfile="ci/Dockerfile"
-            )
+            client.host()
+            .directory(".", exclude=["build/", "*.h5", ".git/", "__pycache__/", "ci/*.pyc"])
+            .docker_build(dockerfile="ci/Dockerfile")
         )
 
         print("\n ----- Build -----")
