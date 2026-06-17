@@ -23,16 +23,14 @@ jobs:
             build-essential cmake git pkg-config ninja-build \
             libhdf5-dev hdf5-tools libbz2-dev nlohmann-json3-dev
 
-      - name: Symlink HDF5 serial headers and libs into /usr/local
+      - name: Debug HDF5 install paths
         run: |
-          sudo mkdir -p /usr/local/include /usr/local/lib
-          for f in /usr/include/hdf5/serial/*.h; do
-            sudo ln -sf "$f" /usr/local/include/$(basename "$f")
-          done
-          for f in /usr/lib/x86_64-linux-gnu/hdf5/serial/lib*; do
-            sudo ln -sf "$f" /usr/local/lib/$(basename "$f")
-          done
-          sudo ldconfig
+          echo "=== find H5VLpublic.h ==="
+          find /usr -name "H5VLpublic.h" 2>/dev/null
+          echo "=== pkg-config hdf5 ==="
+          pkg-config --cflags --libs hdf5 2>/dev/null || echo "pkg-config hdf5 not found"
+          echo "=== HDF5 serial include ==="
+          ls /usr/include/hdf5/serial/ | head -5
 
       - name: Build std_compat
         run: |
@@ -64,11 +62,18 @@ jobs:
       # Build the VOL connector
       - name: Configure
         run: |
+          HDF5_SERIAL_INC=$(dpkg -L libhdf5-dev | grep "serial/hdf5.h" | xargs dirname)
+          HDF5_SERIAL_LIB=$(dpkg -L libhdf5-dev | grep "serial/libhdf5.so$" | xargs dirname)
+          echo "HDF5 include: $HDF5_SERIAL_INC"
+          echo "HDF5 lib:     $HDF5_SERIAL_LIB"
           cmake -S . -B build \
             -DCMAKE_C_COMPILER=gcc \
             -DUSE_CUDA=OFF \
             -DCMAKE_PREFIX_PATH=/usr/local \
-            -DCMAKE_BUILD_TYPE=Release
+            -DCMAKE_BUILD_TYPE=Release \
+            -DHDF5_INCLUDE_DIRS="$HDF5_SERIAL_INC" \
+            -DHDF5_LIBRARIES="$HDF5_SERIAL_LIB/libhdf5.so" \
+            -DCMAKE_C_FLAGS="-I$HDF5_SERIAL_INC"
 
       - name: Build
         run: cmake --build build -j$(nproc)
