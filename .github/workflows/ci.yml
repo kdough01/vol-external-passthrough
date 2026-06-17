@@ -21,7 +21,15 @@ jobs:
           python-version: '3.11'
 
       - name: Install Dagger SDK
-        run: pip install dagger-io
+        run: pip install dagger-io==0.21.5
 
       - name: Run Dagger pipeline
         run: python3 ci/main.py
+
+      - name: Upload test logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-logs
+          path: /tmp/test_ci_*.h5
+          retention-days: 7
