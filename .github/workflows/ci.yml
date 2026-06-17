@@ -19,7 +19,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: spack/spack
-          ref: releases/v0.23
           path: ./spack
 
       - name: Checkout robertu94 spack packages
@@ -28,6 +27,15 @@ jobs:
           repository: robertu94/spack_packages
           path: ./robertu94_packages
 
+      - name: Inspect robertu94_packages layout
+        run: |
+          echo "=== top-level ==="
+          ls -la ./robertu94_packages
+          echo "=== find repo.yaml ==="
+          find ./robertu94_packages -name 'repo.yaml' -not -path '*/.git/*'
+          echo "=== find spack_repo dirs ==="
+          find ./robertu94_packages -name 'spack_repo' -type d -not -path '*/.git/*'
+
       - name: Install build prerequisites
         run: |
           sudo apt-get update
@@ -35,13 +43,19 @@ jobs:
             build-essential cmake git pkg-config ninja-build \
             python3 python3-pip
 
+      - name: Add repo and concretize
+        run: |
+          . ./spack/share/spack/setup-env.sh
+          # The actual repo.yaml may be nested — find it and add the directory
+          REPO_YAML=$(find ./robertu94_packages -name 'repo.yaml' -not -path '*/.git/*' | head -n1)
+          REPO_DIR=$(dirname "$REPO_YAML")
+          echo "Adding repo from: $REPO_DIR"
+          spack repo add "$REPO_DIR"
+          spack repo list
+
       - name: Install dependencies via spack
         run: |
           . ./spack/share/spack/setup-env.sh
-          spack repo add ./robertu94_packages
-          spack repo list
-          # Install just the deps we need — HDF5, std_compat, and libpressio
-          # with the compressors that match what the VOL connector supports.
           spack install \
             hdf5@1.14 \
             libpressio+bzip2+json~mpi~cuda~zfp ^std_compat
