@@ -47,8 +47,7 @@ async def main():
         try:
             await build.stdout()
             print("Build PASSED")
-        except:
-            dagger.ExecError as e:
+        except dagger.ExecError as e:
                 print(f"Build: FAILED\n{e.stderr}")
                 sys.exit(1)
 
