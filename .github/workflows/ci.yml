@@ -23,6 +23,11 @@ jobs:
       - name: Install Dagger SDK
         run: pip install dagger-io==0.21.5
 
+      - name: Install Dagger CLI
+        run: |
+          cd /usr/local
+          curl -fsSL https://dl.dagger.io/dagger/install.sh | DAGGER_VERSION=0.21.5 sh
+
       - name: Run Dagger pipeline
         run: python3 ci/main.py
 
