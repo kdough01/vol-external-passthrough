@@ -20,6 +20,17 @@ RUN apt-get update && apt-get install -y \
     nlohmann-json3-dev \
     && rm -rf /var/lib/apt/lists/*
 
+WORKDIR /build/std_compat
+ 
+RUN git clone --depth=1 https://github.com/robertu94/std_compat.git . \
+    && cmake -S . -B build \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_INSTALL_PREFIX=/usr/local \
+        -DBUILD_TESTING=OFF \
+    && cmake --build build -j$(nproc) \
+    && cmake --install build \
+    && rm -rf /build/std_compat
+
 WORKDIR /build/libpressio
 
 RUN git clone --depth=1 https://github.com/robertu94/libpressio.git . \
