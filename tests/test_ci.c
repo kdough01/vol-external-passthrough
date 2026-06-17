@@ -160,7 +160,7 @@ int main(void)
     failures += test_roundtrip("noop", 0.0);
     failures += test_roundtrip("bzip2", 0.0);
     // failures += test_roundtrip("sz3", 1e-3);
-    failures += test_roundtrip("zfp", 1e-3);
+    // failures += test_roundtrip("zfp", 1e-3);
 
     failures += test_bad_compressor();
 

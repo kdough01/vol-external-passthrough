@@ -15,7 +15,7 @@ RUN apt-get update && apt-get install -y \
     # bzip2 (pressio bzip2 compressor)
     libbz2-dev \
     # zfp
-    libzfp-dev \
+    # libzfp-dev \
     # nlohmann-json (header-only, needed for pressio +json)
     nlohmann-json3-dev \
     && rm -rf /var/lib/apt/lists/*
