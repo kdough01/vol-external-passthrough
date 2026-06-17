@@ -15,23 +15,72 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Install Dagger SDK
-        run: pip install dagger-io==0.21.5
-
-      - name: Install Dagger CLI
+      # Dependencies
+      - name: Install system packages
         run: |
-          cd /usr/local
-          curl -fsSL https://dl.dagger.io/dagger/install.sh | DAGGER_VERSION=0.21.5 sh
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential cmake git pkg-config ninja-build \
+            libhdf5-dev hdf5-tools libbz2-dev nlohmann-json3-dev
 
-      - name: Run Dagger pipeline
-        run: python3 ci/main.py
+      - name: Symlink HDF5 serial headers and libs into /usr/local
+        run: |
+          sudo mkdir -p /usr/local/include /usr/local/lib
+          for f in /usr/include/hdf5/serial/*.h; do
+            sudo ln -sf "$f" /usr/local/include/$(basename "$f")
+          done
+          for f in /usr/lib/x86_64-linux-gnu/hdf5/serial/lib*; do
+            sudo ln -sf "$f" /usr/local/lib/$(basename "$f")
+          done
+          sudo ldconfig
 
-      - name: Upload test logs on failure
+      - name: Build std_compat
+        run: |
+          git clone --depth=1 https://github.com/robertu94/std_compat.git /tmp/std_compat
+          cmake -S /tmp/std_compat -B /tmp/std_compat/build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX=/usr/local \
+            -DBUILD_TESTING=OFF
+          sudo cmake --build /tmp/std_compat/build -j$(nproc)
+          sudo cmake --install /tmp/std_compat/build
+
+      - name: Build libpressio
+        run: |
+          git clone --depth=1 https://github.com/robertu94/libpressio.git /tmp/libpressio
+          cmake -S /tmp/libpressio -B /tmp/libpressio/build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX=/usr/local \
+            -DBUILD_SHARED_LIBS=ON \
+            -DLIBPRESSIO_HAS_SZ3=OFF \
+            -DLIBPRESSIO_HAS_BZIP2=ON \
+            -DLIBPRESSIO_HAS_ZFP=OFF \
+            -DLIBPRESSIO_HAS_JSON=ON \
+            -DLIBPRESSIO_HAS_MPI=OFF \
+            -DLIBPRESSIO_HAS_CUDA=OFF
+          sudo cmake --build /tmp/libpressio/build -j$(nproc)
+          sudo cmake --install /tmp/libpressio/build
+          sudo ldconfig
+
+      # Build the VOL connector
+      - name: Configure
+        run: |
+          cmake -S . -B build \
+            -DCMAKE_C_COMPILER=gcc \
+            -DUSE_CUDA=OFF \
+            -DCMAKE_PREFIX_PATH=/usr/local \
+            -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build -j$(nproc)
+
+      # Tests
+      - name: Run CI tests
+        run: |
+          export HDF5_VOL_CONNECTOR="pass_through_ext under_vol=0;under_info={}"
+          export HDF5_PLUGIN_PATH="$(pwd)/build"
+          ./build/tests/test_ci
+
+      - name: Upload test artifacts on failure
         if: failure()
         uses: actions/upload-artifact@v4
         with:
