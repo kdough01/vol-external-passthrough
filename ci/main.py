@@ -32,7 +32,7 @@ async def main():
             .with_workdir("/workspace")
             .with_exec([
                 "cmake", "-S", ".", "-B", "build",
-                "-DCMAKE_C_COMPILER=mpicc",
+                "-DCMAKE_C_COMPILER=gcc",
                 "-DUSE_CUDA=OFF",
                 "-DCMAKE_PREFIX_PATH=/usr/local",
                 "-DCMAKE_BUILD_TYPE=Release",
