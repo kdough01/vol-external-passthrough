@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ develop ]
+    branches: [ main, master, develop ]
   pull_request:
-    branches: [ develop ]
+    branches: [ main, master, develop ]
 
 jobs:
   ci:
@@ -12,93 +12,58 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout vol-external-passthrough
         uses: actions/checkout@v4
 
-      # System packages
-      - name: Install system packages
+      - name: Checkout spack
+        uses: actions/checkout@v4
+        with:
+          repository: spack/spack
+          path: ./spack
+
+      - name: Checkout robertu94 spack packages
+        uses: actions/checkout@v4
+        with:
+          repository: robertu94/spack_packages
+          path: ./robertu94_packages
+
+      - name: Install build prerequisites
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            build-essential cmake git pkg-config ninja-build wget \
-            libbz2-dev nlohmann-json3-dev
+            build-essential cmake git pkg-config ninja-build \
+            python3 python3-pip
 
-      # Cache the /usr/local prefix so reruns skip the source builds
-      - name: Cache /usr/local prefix
-        id: cache-deps
-        uses: actions/cache@v4
-        with:
-          path: |
-            /usr/local/include
-            /usr/local/lib
-            /usr/local/share
-            /usr/local/bin
-          key: deps-hdf5-1.14.3-stdcompat-libpressio-v3
-
-      - name: Build HDF5 1.14.3 from source
-        if: steps.cache-deps.outputs.cache-hit != 'true'
+      - name: Install dependencies via spack
         run: |
-          wget -q https://github.com/HDFGroup/hdf5/releases/download/hdf5_1.14.3/hdf5-1.14.3.tar.gz
-          tar -xzf hdf5-1.14.3.tar.gz
-          cmake -S hdf5-1.14.3 -B hdf5-1.14.3/build \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_INSTALL_PREFIX=/usr/local \
-            -DHDF5_ENABLE_PARALLEL=OFF \
-            -DHDF5_BUILD_HL_LIB=ON \
-            -DHDF5_BUILD_TOOLS=OFF \
-            -DHDF5_BUILD_EXAMPLES=OFF \
-            -DBUILD_TESTING=OFF
-          sudo cmake --build hdf5-1.14.3/build -j$(nproc)
-          sudo cmake --install hdf5-1.14.3/build
-          sudo ldconfig
-          rm -rf hdf5-1.14.3 hdf5-1.14.3.tar.gz
+          . ./spack/share/spack/setup-env.sh
+          spack repo add ./robertu94_packages
+          spack repo list
+          # Install just the deps we need — HDF5, std_compat, and libpressio
+          # with the compressors that match what the VOL connector supports.
+          spack install \
+            hdf5@1.14 \
+            libpressio+bzip2+json~mpi~cuda~zfp ^std_compat
 
-      - name: Build std_compat
-        if: steps.cache-deps.outputs.cache-hit != 'true'
-        run: |
-          git clone --depth=1 https://github.com/robertu94/std_compat.git /tmp/std_compat
-          cmake -S /tmp/std_compat -B /tmp/std_compat/build \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_INSTALL_PREFIX=/usr/local \
-            -DBUILD_TESTING=OFF
-          sudo cmake --build /tmp/std_compat/build -j$(nproc)
-          sudo cmake --install /tmp/std_compat/build
-
-      - name: Build libpressio
-        if: steps.cache-deps.outputs.cache-hit != 'true'
-        run: |
-          git clone --depth=1 https://github.com/robertu94/libpressio.git /tmp/libpressio
-          cmake -S /tmp/libpressio -B /tmp/libpressio/build \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_INSTALL_PREFIX=/usr/local \
-            -DBUILD_SHARED_LIBS=ON \
-            -DLIBPRESSIO_HAS_SZ3=OFF \
-            -DLIBPRESSIO_HAS_BZIP2=ON \
-            -DLIBPRESSIO_HAS_ZFP=OFF \
-            -DLIBPRESSIO_HAS_JSON=ON \
-            -DLIBPRESSIO_HAS_MPI=OFF \
-            -DLIBPRESSIO_HAS_CUDA=OFF
-          sudo cmake --build /tmp/libpressio/build -j$(nproc)
-          sudo cmake --install /tmp/libpressio/build
-
-      - name: Refresh linker cache
-        run: sudo ldconfig
-
-      # Build the VOL connector
       - name: Configure
         run: |
+          . ./spack/share/spack/setup-env.sh
+          spack load hdf5 libpressio std_compat
           cmake -S . -B build \
             -DCMAKE_C_COMPILER=gcc \
             -DUSE_CUDA=OFF \
-            -DCMAKE_PREFIX_PATH=/usr/local \
             -DCMAKE_BUILD_TYPE=Release
 
       - name: Build
-        run: cmake --build build -j$(nproc)
+        run: |
+          . ./spack/share/spack/setup-env.sh
+          spack load hdf5 libpressio std_compat
+          cmake --build build -j$(nproc)
 
-      # Tests
       - name: Run CI tests
         run: |
+          . ./spack/share/spack/setup-env.sh
+          spack load hdf5 libpressio std_compat
           export HDF5_VOL_CONNECTOR="pass_through_ext under_vol=0;under_info={}"
           export HDF5_PLUGIN_PATH="$(pwd)/build"
           ./build/tests/test_ci
