@@ -56,7 +56,7 @@ endif()
 
 target_include_directories(hdf5_vol_passthrough
   PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
-  PUBLIC  ${HDF5_INCLUDE_DIRS}
+  PUBLIC  ${HDF5_INCLUDE_DIRS} ${LIBPRESSIO_INCLUDE_DIRS}
 )
 target_link_libraries(hdf5_vol_passthrough PRIVATE
   ${HDF5_LIBRARIES}
