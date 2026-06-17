@@ -6,19 +6,17 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     cmake \
     git \
-    wget \
     pkg-config \
     ninja-build \
-    # HDF5
     libhdf5-dev \
     hdf5-tools \
-    # bzip2 (pressio bzip2 compressor)
     libbz2-dev \
-    # zfp
-    # libzfp-dev \
-    # nlohmann-json (header-only, needed for pressio +json)
     nlohmann-json3-dev \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && ln -s /usr/include/hdf5/serial /usr/include/hdf5_include \
+    && ln -s /usr/lib/x86_64-linux-gnu/hdf5/serial/libhdf5.so /usr/local/lib/libhdf5.so \
+    && ln -s /usr/lib/x86_64-linux-gnu/hdf5/serial/libhdf5_hl.so /usr/local/lib/libhdf5_hl.so \
+    && ldconfig
 
 WORKDIR /build/std_compat
  

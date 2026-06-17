@@ -36,6 +36,8 @@ async def main():
                 "-DUSE_CUDA=OFF",
                 "-DCMAKE_PREFIX_PATH=/usr/local",
                 "-DCMAKE_BUILD_TYPE=Release",
+                "-DHDF5_INCLUDE_DIRS=/usr/include/hdf5/serial",
+                "-DHDF5_LIBRARIES=/usr/lib/x86_64-linux-gnu/hdf5/serial/libhdf5.so",
             ])
             .with_exec([
                 "cmake", "--build", "build", "-j4"
