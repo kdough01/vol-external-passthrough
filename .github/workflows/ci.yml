@@ -58,12 +58,12 @@ jobs:
           . ./spack/share/spack/setup-env.sh
           spack install \
             hdf5@1.14 \
-            libpressio+bzip2+json~mpi~cuda~zfp ^std_compat
+            libpressio+bzip2+json~mpi~cuda~zfp
 
       - name: Configure
         run: |
           . ./spack/share/spack/setup-env.sh
-          spack load hdf5 libpressio std_compat
+          spack load hdf5 libpressio libstdcompat
           cmake -S . -B build \
             -DCMAKE_C_COMPILER=gcc \
             -DUSE_CUDA=OFF \
@@ -72,13 +72,13 @@ jobs:
       - name: Build
         run: |
           . ./spack/share/spack/setup-env.sh
-          spack load hdf5 libpressio std_compat
+          spack load hdf5 libpressio libstdcompat
           cmake --build build -j$(nproc)
 
       - name: Run CI tests
         run: |
           . ./spack/share/spack/setup-env.sh
-          spack load hdf5 libpressio std_compat
+          spack load hdf5 libpressio libstdcompat
           export HDF5_VOL_CONNECTOR="pass_through_ext under_vol=0;under_info={}"
           export HDF5_PLUGIN_PATH="$(pwd)/build"
           ./build/tests/test_ci
