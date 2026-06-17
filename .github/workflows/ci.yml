@@ -15,24 +15,46 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Dependencies
+      # System packages
       - name: Install system packages
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            build-essential cmake git pkg-config ninja-build \
-            libhdf5-dev hdf5-tools libbz2-dev nlohmann-json3-dev
+            build-essential cmake git pkg-config ninja-build wget \
+            libbz2-dev nlohmann-json3-dev
 
-      - name: Debug HDF5 install paths
+      # Cache the /usr/local prefix so reruns skip the source builds
+      - name: Cache /usr/local prefix
+        id: cache-deps
+        uses: actions/cache@v4
+        with:
+          path: |
+            /usr/local/include
+            /usr/local/lib
+            /usr/local/share
+            /usr/local/bin
+          key: deps-hdf5-1.14.3-stdcompat-libpressio-v3
+
+      - name: Build HDF5 1.14.3 from source
+        if: steps.cache-deps.outputs.cache-hit != 'true'
         run: |
-          echo "=== find H5VLpublic.h ==="
-          find /usr -name "H5VLpublic.h" 2>/dev/null
-          echo "=== pkg-config hdf5 ==="
-          pkg-config --cflags --libs hdf5 2>/dev/null || echo "pkg-config hdf5 not found"
-          echo "=== HDF5 serial include ==="
-          ls /usr/include/hdf5/serial/ | head -5
+          wget -q https://github.com/HDFGroup/hdf5/releases/download/hdf5_1.14.3/hdf5-1.14.3.tar.gz
+          tar -xzf hdf5-1.14.3.tar.gz
+          cmake -S hdf5-1.14.3 -B hdf5-1.14.3/build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX=/usr/local \
+            -DHDF5_ENABLE_PARALLEL=OFF \
+            -DHDF5_BUILD_HL_LIB=ON \
+            -DHDF5_BUILD_TOOLS=OFF \
+            -DHDF5_BUILD_EXAMPLES=OFF \
+            -DBUILD_TESTING=OFF
+          sudo cmake --build hdf5-1.14.3/build -j$(nproc)
+          sudo cmake --install hdf5-1.14.3/build
+          sudo ldconfig
+          rm -rf hdf5-1.14.3 hdf5-1.14.3.tar.gz
 
       - name: Build std_compat
+        if: steps.cache-deps.outputs.cache-hit != 'true'
         run: |
           git clone --depth=1 https://github.com/robertu94/std_compat.git /tmp/std_compat
           cmake -S /tmp/std_compat -B /tmp/std_compat/build \
@@ -43,6 +65,7 @@ jobs:
           sudo cmake --install /tmp/std_compat/build
 
       - name: Build libpressio
+        if: steps.cache-deps.outputs.cache-hit != 'true'
         run: |
           git clone --depth=1 https://github.com/robertu94/libpressio.git /tmp/libpressio
           cmake -S /tmp/libpressio -B /tmp/libpressio/build \
@@ -57,23 +80,18 @@ jobs:
             -DLIBPRESSIO_HAS_CUDA=OFF
           sudo cmake --build /tmp/libpressio/build -j$(nproc)
           sudo cmake --install /tmp/libpressio/build
-          sudo ldconfig
+
+      - name: Refresh linker cache
+        run: sudo ldconfig
 
       # Build the VOL connector
       - name: Configure
         run: |
-          HDF5_SERIAL_INC=$(dpkg -L libhdf5-dev | grep -m1 "serial/hdf5.h$" | xargs dirname)
-          HDF5_SERIAL_LIB=$(dpkg -L libhdf5-dev | grep -m1 "serial/libhdf5.so$" | xargs dirname)
-          echo "HDF5 include: $HDF5_SERIAL_INC"
-          echo "HDF5 lib:     $HDF5_SERIAL_LIB"
           cmake -S . -B build \
             -DCMAKE_C_COMPILER=gcc \
             -DUSE_CUDA=OFF \
             -DCMAKE_PREFIX_PATH=/usr/local \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DHDF5_INCLUDE_DIRS="$HDF5_SERIAL_INC" \
-            -DHDF5_LIBRARIES="$HDF5_SERIAL_LIB/libhdf5.so" \
-            -DCMAKE_C_FLAGS="-I$HDF5_SERIAL_INC"
+            -DCMAKE_BUILD_TYPE=Release
 
       - name: Build
         run: cmake --build build -j$(nproc)
