@@ -12,14 +12,19 @@ RUN apt-get update && apt-get install -y \
     hdf5-tools \
     libbz2-dev \
     nlohmann-json3-dev \
-    && rm -rf /var/lib/apt/lists/* \
-    && ln -s /usr/include/hdf5/serial /usr/include/hdf5_include \
-    && ln -s /usr/lib/x86_64-linux-gnu/hdf5/serial/libhdf5.so /usr/local/lib/libhdf5.so \
-    && ln -s /usr/lib/x86_64-linux-gnu/hdf5/serial/libhdf5_hl.so /usr/local/lib/libhdf5_hl.so \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN mkdir -p /usr/local/include /usr/local/lib \
+    && for f in /usr/include/hdf5/serial/*.h; do \
+           ln -sf "$f" /usr/local/include/$(basename "$f"); \
+       done \
+    && for f in /usr/lib/x86_64-linux-gnu/hdf5/serial/lib*; do \
+           ln -sf "$f" /usr/local/lib/$(basename "$f"); \
+       done \
     && ldconfig
 
 WORKDIR /build/std_compat
- 
+
 RUN git clone --depth=1 https://github.com/robertu94/std_compat.git . \
     && cmake -S . -B build \
         -DCMAKE_BUILD_TYPE=Release \
@@ -38,6 +43,7 @@ RUN git clone --depth=1 https://github.com/robertu94/libpressio.git . \
         -DBUILD_SHARED_LIBS=ON \
         -DLIBPRESSIO_HAS_SZ3=OFF \
         -DLIBPRESSIO_HAS_BZIP2=ON \
+        -DLIBPRESSIO_HAS_ZFP=OFF \
         -DLIBPRESSIO_HAS_JSON=ON \
         -DLIBPRESSIO_HAS_MPI=OFF \
         -DLIBPRESSIO_HAS_CUDA=OFF \
