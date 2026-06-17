@@ -8,7 +8,7 @@ async def main():
 
     async with dagger.Connection(config) as client:
         src = client.host().directory(
-            "..",
+            ".",
             exclude=[
                 "build/",
                 "*.h5",
