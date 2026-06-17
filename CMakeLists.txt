@@ -21,7 +21,6 @@ if(NOT HDF5_VOL_PASSTHROUGH_INSTALL_DATA_DIR)
   set(HDF5_VOL_PASSTHROUGH_INSTALL_DATA_DIR ${CMAKE_INSTALL_PREFIX}/share)
 endif()
 
-find_package(MPI REQUIRED)
 find_package(HDF5 REQUIRED)
 find_package(LibPressio REQUIRED)
 
@@ -36,8 +35,13 @@ if(USE_CUDA)
   list(APPEND VOL_SRCS gpu_transform.cu)
 endif()
 
-add_library(hdf5_vol_passthrough SHARED ${VOL_SRCS}
-  vol_errors.h)
+add_library(hdf5_vol_passthrough SHARED ${VOL_SRCS} vol_errors.h)
+
+find_package(MPI)
+if(MPI_FOUND)
+    target_link_libraries(hdf5_vol_passthrough PRIVATE MPI::MPI_C)
+    target_compile_definitions(hdf5_vol_passthrough PRIVATE HAVE_MPI)
+endif()
 
 target_compile_definitions(hdf5_vol_passthrough PRIVATE ENABLE_EXT_PASSTHRU_LOGGING)
 
@@ -56,7 +60,6 @@ target_include_directories(hdf5_vol_passthrough
 )
 target_link_libraries(hdf5_vol_passthrough PRIVATE
   ${HDF5_LIBRARIES}
-  MPI::MPI_C
   LibPressio::libpressio
 )
 
