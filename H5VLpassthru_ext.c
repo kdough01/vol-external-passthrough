@@ -1659,6 +1659,25 @@ H5VL_pass_through_ext_dataset_create(void *obj,
                 H5VLattr_close(attr_comp, o->under_vol_id, dxpl_id, NULL);
             }
 
+            pressio_options *opts = pressio_compressor_get_options(ctx->compressor);
+            if (opts) {
+                char *json = pressio_options_as_json(opts);
+                if (json) {
+                    hid_t atype = H5Tcopy(H5T_C_S1);
+                    H5Tset_size(atype, strlen(json) + 1);
+                    H5Tset_strpad(atype, H5T_STR_NULLTERM);
+                    hid_t aspace = H5Screate(H5S_SCALAR);
+                    hid_t attr   = H5Acreate2(dset_id, "_VOL_OPTIONS_JSON",
+                                            atype, aspace, H5P_DEFAULT, H5P_DEFAULT);
+                    H5Awrite(attr, atype, json);
+                    H5Aclose(attr);
+                    H5Sclose(aspace);
+                    H5Tclose(atype);
+                    free(json);
+                }
+                pressio_options_free(opts);
+            }
+
             H5Tclose(str_type);
             H5Pclose(acpl_id);
             H5Pclose(aapl_id);
@@ -1804,10 +1823,41 @@ H5VL_pass_through_ext_dataset_open(void *obj,
         H5Tclose(str_type);
         H5Pclose(aapl_id);
 
+        char *json_buf = NULL;
+        if (H5Aexists(dset_id, "_VOL_OPTIONS_JSON") > 0) {
+            hid_t attr   = H5Aopen(dset_id, "_VOL_OPTIONS_JSON", H5P_DEFAULT);
+            hid_t atype  = H5Aget_type(attr);
+            size_t jlen  = H5Tget_size(atype);
+            json_buf     = malloc(jlen);
+            H5Aread(attr, atype, json_buf);
+            H5Tclose(atype);
+            H5Aclose(attr);
+        }
+
         dset->custom_data = gpu_vol_dataset_wrap(under, recovered_rank, recovered_dims,
                                           real_type_id, real_pressio_dt,
                                           real_dcpl_id, o->under_vol_id, file_ctx,
                                           recovered_comp);
+
+        if (json_buf && new_dset->comp_ctx && new_dset->comp_ctx->compressor) {
+            pressio_options *opts = pressio_options_new_from_json(json_buf);
+            if (opts) {
+                pressio_compressor_set_options(new_dset->comp_ctx->compressor, opts);
+                pressio_options_free(opts);
+            }
+            free(json_buf);
+            json_buf = NULL;
+
+            /* re-apply the CUDA stream */
+            const char *stream_key = gpu_stream_key(new_dset->comp_ctx->compressor_id);
+            if (stream_key && new_dset->gpu_ctx) {
+                pressio_options *sopts = pressio_options_new();
+                pressio_options_set_userptr(sopts, stream_key, new_dset->gpu_ctx->stream);
+                pressio_compressor_set_options(new_dset->comp_ctx->compressor, sopts);
+                pressio_options_free(sopts);
+            }
+        }
+
         H5Pclose(real_dcpl_id);
         if (recovered_dims) free(recovered_dims);
     } else {
