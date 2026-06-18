@@ -13,6 +13,11 @@ static const run_config_t RUNS[] = {
         NULL
     },
     {
+        "Pf48_cuszp",
+        "cuszp",
+        "{\"pressio:abs\": 1e-3, \"cuszp:mode_str\": \"outlier\"}"
+    },
+    {
         "sz3_1e3",
         "sz3",
         "{\"sz3:error_bound_mode_str\":\"abs\",\"sz3:abs_error_bound\":1e-3}"
