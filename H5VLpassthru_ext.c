@@ -1700,9 +1700,18 @@ H5VL_pass_through_ext_dataset_create(void *obj,
                         H5Tset_size(json_str_type, strlen(json) + 1);
                         H5Tset_strpad(json_str_type, H5T_STR_NULLTERM);
                         hid_t json_space = H5Screate(H5S_SCALAR);
+                        hid_t json_acpl = H5Pcreate(H5P_ATTRIBUTE_CREATE);
+                        hid_t json_aapl = H5Pcreate(H5P_ATTRIBUTE_ACCESS);
                         void *attr_json = H5VLattr_create(under, &attr_loc, o->under_vol_id,
                             "_VOL_OPTIONS_JSON", json_str_type, json_space,
-                            H5P_DEFAULT, H5P_DEFAULT, dxpl_id, NULL);
+                            json_acpl, json_aapl, dxpl_id, NULL);
+                        if (attr_json) {
+                            H5VLattr_write(attr_json, o->under_vol_id,
+                                        json_str_type, json, dxpl_id, NULL);
+                            H5VLattr_close(attr_json, o->under_vol_id, dxpl_id, NULL);
+                        }
+                        H5Pclose(json_acpl);
+                        H5Pclose(json_aapl);
                         if (attr_json) {
                             H5VLattr_write(attr_json, o->under_vol_id,
                                            json_str_type, json, dxpl_id, NULL);
@@ -1832,8 +1841,9 @@ H5VL_pass_through_ext_dataset_open(void *obj,
 
         /* Read back the options JSON snapshot written at dataset_create */
         char *json_buf = NULL;
+        hid_t json_aapl = H5Pcreate(H5P_ATTRIBUTE_ACCESS);
         void *attr_json = H5VLattr_open(under, &attr_loc, o->under_vol_id,
-            "_VOL_OPTIONS_JSON", H5P_DEFAULT, dxpl_id, NULL);
+            "_VOL_OPTIONS_JSON", json_aapl, dxpl_id, NULL);
         if (attr_json) {
             H5VL_attr_get_args_t ag;
             ag.op_type = H5VL_ATTR_GET_TYPE;
@@ -1846,6 +1856,7 @@ H5VL_pass_through_ext_dataset_open(void *obj,
             H5Tclose(json_type);
             H5VLattr_close(attr_json, o->under_vol_id, dxpl_id, NULL);
         }
+        H5Pclose(json_aapl);
 
         dset->custom_data = gpu_vol_dataset_wrap(under, recovered_rank, recovered_dims,
                                           real_type_id, real_pressio_dt,
