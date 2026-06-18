@@ -85,6 +85,6 @@ export HDF5_PLUGIN_PATH=$(pwd)/build
 
 echo ""
 echo "=== Hurricane test ==="
-./build/tests/test_cpu_hurricane
+./build/tests/test_time_hurricane
 
 echo "Job finished on $(date)"
