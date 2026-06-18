@@ -1,4 +1,4 @@
-foreach(test_target test_cpu_write test_time_hurricane miranda test_time_miranda test_ci test_error_miranda)
+foreach(test_target test_cpu_write test_time_hurricane test_time_miranda test_ci test_error_miranda)
     add_executable(${test_target} ${test_target}.c)
     target_include_directories(${test_target} PRIVATE
         ${HDF5_INCLUDE_DIRS}
