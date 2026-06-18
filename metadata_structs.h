@@ -77,4 +77,11 @@ typedef struct gpu_vol_dataset_t {
     int compression_requested;
 } gpu_vol_dataset_t;
 
+static inline const char* gpu_stream_key(const char* id) {
+    if (strncmp(id, "nvcomp", 6) == 0) return "nvcomp:stream";
+    if (strncmp(id, "cuszp",  5) == 0) return "cuszp:stream";
+    if (strncmp(id, "cusz",   4) == 0) return "cusz:stream";
+    return NULL;
+}
+
 #endif

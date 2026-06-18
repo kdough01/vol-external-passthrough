@@ -36,13 +36,6 @@ static int compressor_is_byte_stream(const char* id) {
     return strncmp(id, "nvcomp", 6) == 0;
 }
 
-static const char* gpu_stream_key(const char* id) {
-    if (strncmp(id, "nvcomp", 6) == 0) return "nvcomp:stream";
-    if (strncmp(id, "cuszp",  5) == 0) return "cuszp:stream";
-    if (strncmp(id, "cusz",   4) == 0) return "cusz:stream";
-    return NULL;
-}
-
 herr_t
 H5VL_pass_through_ext_gpu_transfer_compress(gpu_vol_dataset_t* ds_ctx, const void* host_data, size_t nbytes)
 {

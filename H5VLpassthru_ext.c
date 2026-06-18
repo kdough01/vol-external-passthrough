@@ -1582,7 +1582,7 @@ H5VL_pass_through_ext_dataset_create(void *obj,
     /* If compression is active, rewrite the creation parameters to 1D bytes */
     if (config_ctx) {
         /* Create 1D array with unlimited space for compressed bytes */
-        hsize_t byte_dims[1] = {0}; 
+        hsize_t byte_dims[1] = {0};
         hsize_t max_byte_dims[1] = {H5S_UNLIMITED};
         underlying_space_id = H5Screate_simple(1, byte_dims, max_byte_dims);
 
@@ -1590,14 +1590,14 @@ H5VL_pass_through_ext_dataset_create(void *obj,
         underlying_dcpl_id = H5Pcopy(dcpl_id == H5P_DEFAULT ? H5Pcreate(H5P_DATASET_CREATE) : dcpl_id);
         hsize_t chunk_size[1] = { 1048576 }; // 1MB chunk
         H5Pset_chunk(underlying_dcpl_id, 1, chunk_size);
-        
+
         underlying_type_id = H5T_NATIVE_UCHAR;
     }
 
     /* Create the underlying dataset */
     under = H5VLdataset_create(
         o->under_object, loc_params, o->under_vol_id, name,
-        lcpl_id, underlying_type_id, underlying_space_id, 
+        lcpl_id, underlying_type_id, underlying_space_id,
         underlying_dcpl_id, dapl_id, dxpl_id, req
     );
 
@@ -1611,12 +1611,12 @@ H5VL_pass_through_ext_dataset_create(void *obj,
             attr_loc.obj_type = H5I_DATASET;
 
             hid_t scalar_space = H5Screate(H5S_SCALAR);
-            
+
             hid_t acpl_id = H5Pcreate(H5P_ATTRIBUTE_CREATE);
             hid_t aapl_id = H5Pcreate(H5P_ATTRIBUTE_ACCESS);
 
-            void *attr_rank = H5VLattr_create(under, &attr_loc, o->under_vol_id, 
-                "_VOL_ORIG_RANK", H5T_NATIVE_INT, scalar_space, 
+            void *attr_rank = H5VLattr_create(under, &attr_loc, o->under_vol_id,
+                "_VOL_ORIG_RANK", H5T_NATIVE_INT, scalar_space,
                 acpl_id, aapl_id, dxpl_id, NULL);
             if (attr_rank) {
                 H5VLattr_write(attr_rank, o->under_vol_id, H5T_NATIVE_INT, &rank, dxpl_id, NULL);
@@ -1625,9 +1625,9 @@ H5VL_pass_through_ext_dataset_create(void *obj,
 
             hsize_t dim_space_sz[1] = { (hsize_t)rank };
             hid_t dim_space = H5Screate_simple(1, dim_space_sz, NULL);
-            
-            void *attr_dims = H5VLattr_create(under, &attr_loc, o->under_vol_id, 
-                "_VOL_ORIG_DIMS", H5T_NATIVE_HSIZE, dim_space, 
+
+            void *attr_dims = H5VLattr_create(under, &attr_loc, o->under_vol_id,
+                "_VOL_ORIG_DIMS", H5T_NATIVE_HSIZE, dim_space,
                 acpl_id, aapl_id, dxpl_id, NULL);
             if (attr_dims) {
                 H5VLattr_write(attr_dims, o->under_vol_id, H5T_NATIVE_HSIZE, h5dims, dxpl_id, NULL);
@@ -1635,8 +1635,8 @@ H5VL_pass_through_ext_dataset_create(void *obj,
             }
 
             int p_dt = (int)pressio_dt;
-            void *attr_dt = H5VLattr_create(under, &attr_loc, o->under_vol_id, 
-                "_VOL_ORIG_TYPE", H5T_NATIVE_INT, scalar_space, 
+            void *attr_dt = H5VLattr_create(under, &attr_loc, o->under_vol_id,
+                "_VOL_ORIG_TYPE", H5T_NATIVE_INT, scalar_space,
                 acpl_id, aapl_id, dxpl_id, NULL);
             if (attr_dt) {
                 H5VLattr_write(attr_dt, o->under_vol_id, H5T_NATIVE_INT, &p_dt, dxpl_id, NULL);
@@ -1689,11 +1689,12 @@ H5VL_pass_through_ext_dataset_create(void *obj,
                 return NULL;
             }
 
+            /* Snapshot compressor options as a hidden attribute for replay at dataset_open */
             if (ds_ctx && ds_ctx->comp_ctx && ds_ctx->comp_ctx->compressor) {
                 struct pressio_options *opts =
                     pressio_compressor_get_options(ds_ctx->comp_ctx->compressor);
                 if (opts) {
-                    char *json = pressio_options_to_json(opts);
+                    char *json = pressio_options_to_json(pressio_instance(), opts);
                     if (json) {
                         hid_t json_str_type = H5Tcopy(H5T_C_S1);
                         H5Tset_size(json_str_type, strlen(json) + 1);
@@ -1704,7 +1705,7 @@ H5VL_pass_through_ext_dataset_create(void *obj,
                             H5P_DEFAULT, H5P_DEFAULT, dxpl_id, NULL);
                         if (attr_json) {
                             H5VLattr_write(attr_json, o->under_vol_id,
-                                        json_str_type, json, dxpl_id, NULL);
+                                           json_str_type, json, dxpl_id, NULL);
                             H5VLattr_close(attr_json, o->under_vol_id, dxpl_id, NULL);
                         }
                         H5Sclose(json_space);
@@ -1732,7 +1733,7 @@ H5VL_pass_through_ext_dataset_create(void *obj,
     return (void *)dset;
 } /* end H5VL_pass_through_ext_dataset_create() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5VL_pass_through_ext_dataset_open
  *
@@ -1817,7 +1818,6 @@ H5VL_pass_through_ext_dataset_open(void *obj,
         H5VLdataset_get(under, o->under_vol_id, &get_args, dapl_id, NULL);
         hid_t real_type_id = get_args.args.get_type.type_id;
 
-        /* Pass real_dcpl_id instead of H5P_DEFAULT */
         char recovered_comp[64] = "";
         hid_t str_type = H5Tcopy(H5T_C_S1);
         H5Tset_size(str_type, 64);
@@ -1830,6 +1830,7 @@ H5VL_pass_through_ext_dataset_open(void *obj,
         H5Tclose(str_type);
         H5Pclose(aapl_id);
 
+        /* Read back the options JSON snapshot written at dataset_create */
         char *json_buf = NULL;
         void *attr_json = H5VLattr_open(under, &attr_loc, o->under_vol_id,
             "_VOL_OPTIONS_JSON", H5P_DEFAULT, dxpl_id, NULL);
@@ -1851,9 +1852,11 @@ H5VL_pass_through_ext_dataset_open(void *obj,
                                           real_dcpl_id, o->under_vol_id, file_ctx,
                                           recovered_comp);
 
+        /* Replay options into the compressor handle, then re-apply the CUDA stream */
         gpu_vol_dataset_t *ds_ctx = (gpu_vol_dataset_t*)dset->custom_data;
         if (json_buf && ds_ctx && ds_ctx->comp_ctx && ds_ctx->comp_ctx->compressor) {
-            struct pressio_options *opts = pressio_options_new_json(json_buf);
+            struct pressio_options *opts =
+                pressio_options_new_json(pressio_instance(), json_buf);
             if (opts) {
                 pressio_compressor_set_options(ds_ctx->comp_ctx->compressor, opts);
                 pressio_options_free(opts);
@@ -1861,6 +1864,7 @@ H5VL_pass_through_ext_dataset_open(void *obj,
             free(json_buf);
             json_buf = NULL;
 
+            /* JSON cannot carry cudaStream_t (userptr) — must be set separately */
             const char *stream_key = gpu_stream_key(ds_ctx->comp_ctx->compressor_id);
             if (stream_key && ds_ctx->gpu_ctx) {
                 struct pressio_options *sopts = pressio_options_new();
