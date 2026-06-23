@@ -1,0 +1,315 @@
+/*
+ * H5VLpassthru_ext_transfer.cc
+ *
+ * Unified compress/decompress transfer path for the passthrough VOL.
+ *
+ * This replaces the separate CPU (.c) and GPU (.cu) transfer files. There is
+ * no longer a CPU-vs-GPU branch at the call site: a single pair of functions
+ * works for every libpressio compressor. Memory placement is delegated to
+ * libpressio's domain manager:
+ *
+ *   - We always hand libpressio HOST memory, tagged with the "malloc" domain.
+ *   - GPU compressors (cuszp / cusz / zfp-cuda) internally call
+ *         domain_manager().make_readable(build("cudamalloc"), input)
+ *     so the host->device copy happens inside libpressio.
+ *   - Their result is left on the device. We pull it back with
+ *         domain_manager().make_readable(build("malloc"), output)
+ *     which is a no-op for CPU compressors (already host-resident) and a
+ *     device->host copy for GPU compressors.
+ *
+ * Consequence: this file contains NO CUDA calls and does not need to link
+ * CUDA. All device work lives inside libpressio. Whether a GPU compressor is
+ * usable depends solely on how *libpressio* was built, not on how this
+ * connector was built. compressor_is_gpu() / gpu_ctx / the persistent device
+ * buffer / the USE_CUDA transfer-path branch are all gone.
+ *
+ * Stream note: current cuszp creates and owns its own cudaStream_t per call
+ * and reads no stream option, so none is plumbed here. If your installed
+ * cuszp/nvcomp version requires an externally supplied stream, verify with
+ * pressio_compressor_get_options() and re-apply it where the compressor is
+ * configured (e.g. at dataset-create, stored on compression_ctx). Doing so
+ * re-couples this file to CUDA, so prefer letting the compressor own it.
+ */
+
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <utility>
+
+extern "C" {
+#include <libpressio/libpressio.h>
+#include "hdf5.h"
+#include "H5VLpassthru_ext.h"
+#include "metadata_structs.h"
+#include "vol_errors.h"
+}
+#include <libpressio_ext/cpp/data.h>
+#include <libpressio_ext/cpp/domain.h>
+#include <libpressio_ext/cpp/domain_manager.h>
+
+/* Helpers */
+static int
+vol_is_byte_stream(const char *id)
+{
+    return strncmp(id, "nvcomp", 6) == 0;
+}
+
+static size_t
+vol_logical_nbytes(const compression_ctx *ctx)
+{
+    size_t n = (size_t)pressio_dtype_size(ctx->dtype);
+    for (size_t i = 0; i < ctx->ndims; i++)
+        n *= ctx->dims[i];
+    return n;
+}
+
+static void
+vol_make_host_resident(struct pressio_data *data)
+{
+    pressio_data *d = data;
+    *d = domain_manager().make_readable(libpressio::domain_plugins().build("malloc"), std::move(*d));
+}
+
+extern "C" {
+
+int
+H5VL_pass_through_ext_compressor_available(const char *compressor_id)
+{
+    const char *list = pressio_supported_compressors();
+    if (!list || !compressor_id)
+        return 0;
+
+    size_t idlen = strlen(compressor_id);
+    const char *p = list;
+    while (*p) {
+        while (*p == ' ')
+            p++;
+        const char *start = p;
+        while (*p && *p != ' ')
+            p++;
+        if ((size_t)(p - start) == idlen &&
+            strncmp(start, compressor_id, idlen) == 0)
+            return 1;
+    }
+    return 0;
+}
+
+herr_t
+H5VL_pass_through_ext_transfer_compress(compression_ctx *ctx, const void *data, size_t nbytes)
+{
+    herr_t ret_val = 0;
+    struct pressio_data *input  = NULL;
+    struct pressio_data *output = NULL;
+
+    enum pressio_dtype in_dtype;
+    size_t  in_ndims;
+    size_t *in_dims;
+    size_t  byte_dims[1];
+
+    if (vol_is_byte_stream(ctx->compressor_id)) {
+        in_dtype     = pressio_byte_dtype;
+        in_ndims     = 1;
+        byte_dims[0] = nbytes;
+        in_dims      = byte_dims;
+    } else {
+        if (ctx->ndims == 0 || ctx->dims == NULL) {
+            H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                    vol_err_class, maj_compression, min_compress_failed,
+                    "compressor '%s' needs dtype/shape, but none recorded",
+                    ctx->compressor_id);
+            return -1;
+        }
+        in_dtype = ctx->dtype;
+        in_ndims = ctx->ndims;
+        in_dims  = ctx->dims;
+    }
+
+#ifdef ENABLE_EXT_PASSTHRU_LOGGING
+    printf("------- TRANSFER COMPRESS: id=%s nbytes=%zu dtype=%d ndims=%zu\n",
+           ctx->compressor_id, nbytes, (int)in_dtype, in_ndims);
+#endif
+
+    /* Always hand libpressio host memory; GPU compressors migrate it to the
+     * device themselves via the domain manager. */
+    input  = pressio_data_new_nonowning_domain(in_dtype, (void *)data, in_ndims, in_dims, "malloc");
+    output = pressio_data_new_empty(pressio_byte_dtype, 0, NULL);
+
+    if (pressio_compressor_compress(ctx->compressor, input, output)) {
+        H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                vol_err_class, maj_compression, min_compress_failed,
+                "pressio_compressor_compress failed for '%s': %s",
+                ctx->compressor_id,
+                pressio_compressor_error_msg(ctx->compressor));
+        ret_val = -1;
+        goto done;
+    }
+
+    /* The result may be device-resident (GPU compressors). Pull it home. */
+    vol_make_host_resident(output);
+
+    {
+        size_t comp_size = 0;
+        void  *comp_ptr  = pressio_data_ptr(output, &comp_size);
+
+        if (comp_size == 0 || comp_ptr == NULL) {
+            H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                    vol_err_class, maj_compression, min_compress_failed,
+                    "compressor '%s' produced 0 bytes", ctx->compressor_id);
+            ret_val = -1;
+            goto done;
+        }
+
+        ctx->compressed_buf = malloc(comp_size);
+        if (!ctx->compressed_buf) {
+            H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                    vol_err_class, maj_compression, min_compress_failed,
+                    "out of memory allocating %zu bytes for compressed output",
+                    comp_size);
+            ret_val = -1;
+            goto done;
+        }
+
+        memcpy(ctx->compressed_buf, comp_ptr, comp_size);
+        ctx->compressed_chunk_size = comp_size;
+
+#ifdef ENABLE_EXT_PASSTHRU_LOGGING
+        printf("TRANSFER COMPRESS OK: id=%s comp_size=%zu original_nbytes=%zu\n",
+               ctx->compressor_id, comp_size, nbytes);
+#endif
+    }
+
+    if (getenv("HDF5_VOL_PRESSIO_METRICS")) {
+        struct pressio_options *results =
+            pressio_compressor_get_metrics_results(ctx->compressor);
+        char *str = pressio_options_to_string(results);
+        printf("[VOL METRICS] compress '%s':\n%s\n", ctx->compressor_id, str);
+        free(str);
+        pressio_options_free(results);
+    }
+
+done:
+    if (input)  pressio_data_free(input);
+    if (output) pressio_data_free(output);
+    return ret_val;
+}
+
+herr_t
+H5VL_pass_through_ext_transfer_decompress(compression_ctx *ctx,
+                                          const void *compressed_data,
+                                          size_t compressed_size,
+                                          void *output_buf)
+{
+    if (!ctx || !ctx->compressor) {
+        H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                vol_err_class, maj_compression, min_decompress_failed,
+                "invalid or uninitialized compression context");
+        return -1;
+    }
+
+    /* noop: libpressio's noop rejects a typed output buffer, so copy directly. */
+    if (strcmp(ctx->compressor_id, "noop") == 0) {
+        memcpy(output_buf, compressed_data, compressed_size);
+        return 0;
+    }
+
+    if (ctx->ndims == 0 || ctx->dims == NULL) {
+        H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                vol_err_class, maj_compression, min_decompress_failed,
+                "compressor '%s' needs dtype/shape, but none recorded",
+                ctx->compressor_id);
+        return -1;
+    }
+
+    herr_t ret_val = 0;
+    struct pressio_data *input  = NULL;
+    struct pressio_data *output = NULL;
+    size_t comp_dims[1] = { compressed_size };
+
+    const size_t out_nbytes = vol_logical_nbytes(ctx);
+
+    enum pressio_dtype out_dtype;
+    size_t  out_ndims;
+    size_t *out_dims;
+    size_t  byte_dims[1];
+
+    if (vol_is_byte_stream(ctx->compressor_id)) {
+        out_dtype    = pressio_byte_dtype;
+        out_ndims    = 1;
+        byte_dims[0] = out_nbytes;
+        out_dims     = byte_dims;
+    } else {
+        out_dtype = ctx->dtype;
+        out_ndims = ctx->ndims;
+        out_dims  = ctx->dims;
+    }
+
+#ifdef ENABLE_EXT_PASSTHRU_LOGGING
+    printf("------- TRANSFER DECOMPRESS: id=%s compressed_size=%zu "
+           "out_nbytes=%zu dtype=%d ndims=%zu\n",
+           ctx->compressor_id, compressed_size, out_nbytes,
+           (int)out_dtype, out_ndims);
+#endif
+
+    input = pressio_data_new_nonowning_domain(pressio_byte_dtype,
+                                              (void *)compressed_data,
+                                              1, comp_dims, "malloc");
+
+    /* Wrap the caller's buffer as host memory. CPU compressors decompress
+     * into it directly (zero copy); GPU compressors decompress on the device
+     * and we copy back below. */
+    output = pressio_data_new_nonowning_domain(out_dtype, output_buf,
+                                               out_ndims, out_dims, "malloc");
+
+    if (pressio_compressor_decompress(ctx->compressor, input, output)) {
+        H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                vol_err_class, maj_compression, min_decompress_failed,
+                "pressio_compressor_decompress failed for '%s': %s",
+                ctx->compressor_id,
+                pressio_compressor_error_msg(ctx->compressor));
+        ret_val = -1;
+        goto done;
+    }
+
+    /* Pull the result home (no-op if it already landed in output_buf). */
+    vol_make_host_resident(output);
+
+    {
+        size_t actual_bytes = 0;
+        void  *out_ptr = pressio_data_ptr(output, &actual_bytes);
+
+        if (actual_bytes > out_nbytes) {
+            H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                    vol_err_class, maj_compression, min_decompress_failed,
+                    "decompress of '%s' produced %zu bytes, expected %zu",
+                    ctx->compressor_id, actual_bytes, out_nbytes);
+            ret_val = -1;
+            goto done;
+        }
+
+        /* If libpressio reused output_buf in place, out_ptr == output_buf and
+         * this is skipped; otherwise copy the result into the caller buffer. */
+        if (out_ptr && out_ptr != output_buf)
+            memcpy(output_buf, out_ptr, actual_bytes);
+
+#ifdef ENABLE_EXT_PASSTHRU_LOGGING
+        printf("TRANSFER DECOMPRESS OK: id=%s actual_bytes=%zu in_place=%d\n",
+               ctx->compressor_id, actual_bytes, (int)(out_ptr == output_buf));
+#endif
+    }
+
+    if (getenv("HDF5_VOL_PRESSIO_METRICS")) {
+        struct pressio_options *results =
+            pressio_compressor_get_metrics_results(ctx->compressor);
+        char *str = pressio_options_to_string(results);
+        printf("[VOL METRICS] decompress '%s':\n%s\n", ctx->compressor_id, str);
+        free(str);
+        pressio_options_free(results);
+    }
+
+done:
+    if (input)  pressio_data_free(input);
+    if (output) pressio_data_free(output);
+    return ret_val;
+}
+
+} /* extern "C" */

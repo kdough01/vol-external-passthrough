@@ -203,10 +203,9 @@ static herr_t H5VL_pass_through_ext_token_from_str(void *obj, H5I_type_t obj_typ
 static herr_t H5VL_pass_through_ext_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_id, void **req);
 
 /* Compression Functions */
-herr_t H5VL_pass_through_ext_gpu_transfer_compress(gpu_vol_dataset_t* ds_ctx, const void* host_data, size_t nbytes);
-herr_t H5VL_pass_through_ext_gpu_transfer_decompress(gpu_vol_dataset_t* ds_ctx, const void* compressed_host_data, size_t compressed_size, void* output_host_buf, size_t output_nbytes);
-herr_t H5VL_pass_through_ext_cpu_transfer_compress(compression_ctx *comp_ctx, const void *data, size_t nbytes);
-herr_t H5VL_pass_through_ext_cpu_transfer_decompress(compression_ctx *comp_ctx, const void *compressed_data, size_t compressed_size, void *output_buf);
+herr_t H5VL_pass_through_ext_transfer_compress(compression_ctx *ctx, const void *data, size_t nbytes);
+herr_t H5VL_pass_through_ext_transfer_decompress(compression_ctx *ctx, const void *compressed_data, size_t compressed_size, void *output_buf);
+int    H5VL_pass_through_ext_compressor_available(const char *compressor_id);
 
 /* Destroy Functions */
 void config_params_destroy(config_params *p);
@@ -2023,17 +2022,8 @@ H5VL_pass_through_ext_dataset_read(
         size_t nbytes = nelem_read * pressio_dtype_size(ctx->dtype);
 
         herr_t dret;
-#ifdef USE_CUDA
-        // this is fragile, I don't like it - we need to either have this be a try and except
-        // or maybe the user can specify which compressors are cuda and which aren't in their config
-    if (ds_ctx->gpu_ctx != NULL && compressor_is_gpu(ctx->compressor_id)) {
-        dret = H5VL_pass_through_ext_gpu_transfer_decompress(ds_ctx, cbuf, csize, buf[u], nbytes);
-    } else {
-        dret = H5VL_pass_through_ext_cpu_transfer_decompress(ctx, cbuf, csize, buf[u]);
-    }
-#else
-    dret = H5VL_pass_through_ext_cpu_transfer_decompress(ctx, cbuf, csize, buf[u]);
-#endif
+        dret = H5VL_pass_through_ext_transfer_decompress(ctx, buf[u], nbytes);
+
         if (dret < 0) {
             H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
                     vol_err_class, maj_compression, min_decompress_failed,
@@ -2105,15 +2095,8 @@ H5VL_pass_through_ext_dataset_write(
 
         /* Compress the N-dimensional buffer */
         herr_t cret;
-#ifdef USE_CUDA
-        if (ds_ctx->gpu_ctx != NULL && compressor_is_gpu(ctx->compressor_id)) {
-            cret = H5VL_pass_through_ext_gpu_transfer_compress(ds_ctx, buf[u], nbytes);
-        } else {
-            cret = H5VL_pass_through_ext_cpu_transfer_compress(ctx, buf[u], nbytes);
-        }
-#else
-        cret = H5VL_pass_through_ext_cpu_transfer_compress(ctx, buf[u], nbytes);
-#endif
+        cret = H5VL_pass_through_ext_transfer_compress(ctx, buf[u], nbytes);
+        
         if (cret < 0) {
             H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
                     vol_err_class, maj_compression, min_compress_failed,

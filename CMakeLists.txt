@@ -3,9 +3,9 @@ cmake_minimum_required(VERSION 3.18)
 option(USE_CUDA "Enable CUDA GPU compression" OFF)
 
 if(USE_CUDA)
-  project(HDF5_VOL_PASSTHROUGH VERSION 0.0.1 LANGUAGES C CUDA)
+  project(HDF5_VOL_PASSTHROUGH VERSION 0.0.1 LANGUAGES C CXX CUDA)
 else()
-  project(HDF5_VOL_PASSTHROUGH VERSION 0.0.1 LANGUAGES C)
+  project(HDF5_VOL_PASSTHROUGH VERSION 0.0.1 LANGUAGES C CXX)
 endif()
 
 if(NOT HDF5_VOL_PASSTHROUGH_INSTALL_BIN_DIR)
@@ -24,16 +24,10 @@ endif()
 find_package(HDF5 REQUIRED)
 find_package(LibPressio REQUIRED)
 
-# Build the source list, adding CUDA conditionally
 set(VOL_SRCS
     ${CMAKE_CURRENT_SOURCE_DIR}/H5VLpassthru_ext.c
-    cpu_compress.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/compress.cc
 )
-
-if(USE_CUDA)
-  find_package(CUDAToolkit REQUIRED)
-  list(APPEND VOL_SRCS gpu_transform.cu)
-endif()
 
 add_library(hdf5_vol_passthrough SHARED ${VOL_SRCS} vol_errors.h)
 
@@ -44,6 +38,7 @@ if(MPI_FOUND)
 endif()
 
 target_compile_definitions(hdf5_vol_passthrough PRIVATE ENABLE_EXT_PASSTHRU_LOGGING)
+target_compile_features(hdf5_vol_passthrough PRIVATE cxx_std_17)
 
 if(USE_CUDA)
   target_compile_definitions(hdf5_vol_passthrough PRIVATE USE_CUDA)
