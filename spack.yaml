@@ -1,0 +1,26 @@
+spack:
+  specs:
+    - hdf5@1.14
+    - libpressio+bzip2+json~mpi~cuda~zfp
+
+  view: /opt/view
+
+  concretizer:
+    reuse: true
+
+  config:
+    install_tree:
+      root: /opt/spack
+      padded_length: 128
+
+  packages:
+    all:
+      require: target=x86_64_v3
+
+  mirrors:
+    local-buildcache:
+      url: oci://ghcr.io/kdough01/spack-buildcache
+      signed: false
+      access_pair:
+        id_variable: GITHUB_USER
+        secret_variable: GITHUB_TOKEN

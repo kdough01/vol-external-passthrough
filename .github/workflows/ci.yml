@@ -9,17 +9,16 @@ on:
 jobs:
   ci:
     name: Build and Test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
+    permissions:
+      packages: write
+    env:
+      GITHUB_USER: ${{ github.actor }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
       - name: Checkout vol-external-passthrough
         uses: actions/checkout@v4
-
-      - name: Checkout spack
-        uses: actions/checkout@v4
-        with:
-          repository: spack/spack
-          path: ./spack
 
       - name: Checkout robertu94 spack packages
         uses: actions/checkout@v4
@@ -27,61 +26,45 @@ jobs:
           repository: robertu94/spack_packages
           path: ./robertu94_packages
 
-      - name: Inspect robertu94_packages layout
-        run: |
-          echo "=== top-level ==="
-          ls -la ./robertu94_packages
-          echo "=== find repo.yaml ==="
-          find ./robertu94_packages -name 'repo.yaml' -not -path '*/.git/*'
-          echo "=== find spack_repo dirs ==="
-          find ./robertu94_packages -name 'spack_repo' -type d -not -path '*/.git/*'
-
-      - name: Install build prerequisites
+      - name: System MPI for the test targets
         run: |
           sudo apt-get update
-          sudo apt-get install -y \
-            build-essential cmake git pkg-config ninja-build \
-            python3 python3-pip
+          sudo apt-get install -y libopenmpi-dev openmpi-bin
 
-      - name: Add repo and concretize
+      - name: Set up Spack
+        uses: spack/setup-spack@v3
+        with:
+          buildcache: true
+
+      - name: Add robertu94 package repo
+        shell: spack-bash {0}
         run: |
-          . ./spack/share/spack/setup-env.sh
-          # The actual repo.yaml may be nested — find it and add the directory
           REPO_YAML=$(find ./robertu94_packages -name 'repo.yaml' -not -path '*/.git/*' | head -n1)
-          REPO_DIR=$(dirname "$REPO_YAML")
-          echo "Adding repo from: $REPO_DIR"
-          spack repo add "$REPO_DIR"
+          spack repo add "$(dirname "$REPO_YAML")"
           spack repo list
 
-      - name: Install dependencies via spack
-        run: |
-          . ./spack/share/spack/setup-env.sh
-          spack install \
-            hdf5@1.14 \
-            libpressio+bzip2+json~mpi~cuda~zfp
+      - name: Concretize
+        shell: spack-bash {0}
+        run: spack -e . concretize
 
-      - name: Configure
-        run: |
-          . ./spack/share/spack/setup-env.sh
-          spack load hdf5 libpressio libstdcompat
-          cmake -S . -B build \
-            -DCMAKE_C_COMPILER=gcc \
-            -DUSE_CUDA=OFF \
-            -DCMAKE_BUILD_TYPE=Release
+      - name: Install dependencies
+        shell: spack-bash {0}
+        run: spack -e . install --no-check-signature
 
-      - name: Build
+      - name: Configure, build, test
+        shell: spack-bash {0}
         run: |
-          . ./spack/share/spack/setup-env.sh
-          spack load hdf5 libpressio libstdcompat
-          cmake --build build -j$(nproc)
-
-      - name: Run CI tests
-        run: |
-          . ./spack/share/spack/setup-env.sh
-          spack load hdf5 libpressio libstdcompat
+          spack env activate .
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+          cmake --build build -j"$(nproc)"
           export HDF5_VOL_CONNECTOR="pass_through_ext under_vol=0;under_info={}"
           export HDF5_PLUGIN_PATH="$(pwd)/build"
           ./build/tests/test_ci
+
+      - name: Push deps to buildcache
+        if: ${{ !cancelled() && github.ref == 'refs/heads/develop' }}
+        shell: spack-bash {0}
+        run: spack -e . buildcache push --base-image ubuntu:22.04 --update-index local-buildcache
 
       - name: Upload test artifacts on failure
         if: failure()

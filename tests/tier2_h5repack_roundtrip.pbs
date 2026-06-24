@@ -1,0 +1,145 @@
+#!/bin/bash
+#PBS -N vol_h5repack_roundtrip
+#PBS -l select=1:ncpus=8:ngpus=1
+#PBS -l walltime=00:05:00
+#PBS -q gpu
+#PBS -A SDR
+#PBS -j oe
+
+set -uo pipefail   # h5diff returns 1 on differences
+
+SPACK_ROOT="$HOME/spack"
+SPACK_ENV_DIR="$HOME/libpressio_cuda"
+VOL_BUILD_DIR="$HOME/hdf5_projs/vol-external-passthrough/build"
+VOL_NAME="pass_through_ext"
+
+MIRANDA_DIR="/lcrc/project/SDR/public/compression/Miranda/SDRBENCH-Miranda-256x384x384"
+FIELD_FILE="density.d64"
+DSET="/field"
+NX=256; NY=384; NZ=384
+
+CACHE_DIR="/lcrc/project/SDR/kdougherty/ci/h5repack_roundtrip"
+NATIVE_H5="$CACHE_DIR/native_${FIELD_FILE%.*}.h5"
+WORK="$CACHE_DIR/job_${PBS_JOBID:-local}"
+
+ABS_BOUND="1e-4"
+
+SYS_GCC_LIBDIR="/usr/lib64"
+
+mkdir -p "$WORK" "$CACHE_DIR"
+cd "$WORK"
+
+echo "== environment setup =="
+source "$SPACK_ROOT/share/spack/setup-env.sh"
+spack env activate -d "$SPACK_ENV_DIR"
+
+export LD_LIBRARY_PATH="${SYS_GCC_LIBDIR}:${SPACK_ENV}/.spack-env/view/lib:${LD_LIBRARY_PATH:-}"
+
+export HDF5_PLUGIN_PATH="$VOL_BUILD_DIR"
+unset HDF5_VOL_CONNECTOR
+
+for t in h5repack h5diff h5cc; do
+  command -v "$t" >/dev/null || { echo "FATAL: $t not on PATH (wrong env?)"; exit 99; }
+done
+ls "$VOL_BUILD_DIR"/libhdf5_vol_passthrough.so >/dev/null \
+  || { echo "FATAL: libhdf5_vol_passthrough.so not in $VOL_BUILD_DIR"; exit 99; }
+echo "h5repack: $(command -v h5repack)"; h5repack --version
+
+if [[ ! -f "$NATIVE_H5" ]]; then
+  echo "== ingesting $FIELD_FILE -> $NATIVE_H5 =="
+  cat > ingest.c <<'EOF'
+#include "hdf5.h"
+#include <stdio.h>
+#include <stdlib.h>
+int main(int argc, char **argv) {
+    if (argc != 7) { fprintf(stderr, "usage: ingest raw out dset nx ny nz\n"); return 2; }
+    const char *raw = argv[1], *out = argv[2], *dset = argv[3];
+    hsize_t nx = strtoull(argv[4], 0, 10);
+    hsize_t ny = strtoull(argv[5], 0, 10);
+    hsize_t nz = strtoull(argv[6], 0, 10);
+    hsize_t n = nx * ny * nz;
+    double *buf = (double *) malloc(n * sizeof(double));
+    if (!buf) { fprintf(stderr, "malloc failed\n"); return 3; }
+    FILE *f = fopen(raw, "rb");
+    if (!f) { perror("fopen"); return 3; }
+    if (fread(buf, sizeof(double), n, f) != n) { fprintf(stderr, "short read\n"); return 3; }
+    fclose(f);
+    hid_t fid = H5Fcreate(out, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    hsize_t dims[3] = {nx, ny, nz};
+    hid_t sid = H5Screate_simple(3, dims, NULL);
+    hid_t dcpl = H5Pcreate(H5P_DATASET_CREATE);
+    hsize_t chunk[3] = {nx, ny, nz};   /* single full-dataset chunk; tune if desired */
+    H5Pset_chunk(dcpl, 3, chunk);
+    hid_t did = H5Dcreate2(fid, dset, H5T_IEEE_F64LE, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    H5Dwrite(did, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
+    H5Dclose(did); H5Pclose(dcpl); H5Sclose(sid); H5Fclose(fid); free(buf);
+    return 0;
+}
+EOF
+  h5cc -O2 ingest.c -o ingest
+  ./ingest "$MIRANDA_DIR/$FIELD_FILE" "$NATIVE_H5" "$DSET" "$NX" "$NY" "$NZ"
+fi
+echo "native source size: $(stat -c%s "$NATIVE_H5") bytes"
+
+FAILS=0
+declare -a SUMMARY=()
+
+roundtrip () {
+  local comp="$1" mode="$2"
+  local comp_h5="comp_${comp}.h5" dec_h5="dec_${comp}.h5"
+  echo "============================================================"
+  echo "== compressor: $comp   (mode: $mode) =="
+
+  export HDF5_VOL_PRESSIO_COMPRESSOR="$comp"
+  if [[ "$mode" != "lossless" ]]; then
+    # carries the abs error bound into the connector (maps to pressio:abs for
+    # cuszp in your setup -- adjust if your env var name/semantics differ)
+    export HDF5_VOL_PRESSIO_LEVEL="$mode"
+  else
+    unset HDF5_VOL_PRESSIO_LEVEL || true
+  fi
+
+  # (1) compress: native source (default VOL), passthrough destination
+  if ! h5repack --dst-vol-name="$VOL_NAME" --enable-error-stack \
+        "$NATIVE_H5" "$comp_h5"; then
+    echo "  [FAIL] compress leg failed for $comp"
+    SUMMARY+=("$comp: FAIL (compress)"); FAILS=$((FAILS+1)); return
+  fi
+
+  # (2) decompress: passthrough source, native destination (default VOL)
+  if ! h5repack --src-vol-name="$VOL_NAME" --enable-error-stack \
+        "$comp_h5" "$dec_h5"; then
+    echo "  [FAIL] decompress leg failed for $comp"
+    SUMMARY+=("$comp: FAIL (decompress)"); FAILS=$((FAILS+1)); return
+  fi
+
+  # (3) compare recovered data vs original native
+  local rc
+  if [[ "$mode" == "lossless" ]]; then
+    h5diff "$NATIVE_H5" "$dec_h5" "$DSET" "$DSET"; rc=$?      # 0 = bit-identical
+  else
+    h5diff -d "$mode" "$NATIVE_H5" "$dec_h5" "$DSET" "$DSET"; rc=$?  # 0 = all within bound
+  fi
+
+  local csz nsz
+  csz=$(stat -c%s "$comp_h5"); nsz=$(stat -c%s "$NATIVE_H5")
+  echo "  size: native=$nsz  compressed=$csz  ratio=$(awk "BEGIN{printf \"%.2f\", $nsz/$csz}")x"
+
+  if [[ $rc -eq 0 ]]; then
+    echo "  [PASS] $comp round-trip within tolerance"
+    SUMMARY+=("$comp: PASS")
+  else
+    echo "  [FAIL] $comp h5diff rc=$rc (differences exceed tolerance)"
+    SUMMARY+=("$comp: FAIL (diff rc=$rc)"); FAILS=$((FAILS+1))
+  fi
+}
+
+roundtrip noop     lossless
+roundtrip bzip2    lossless
+roundtrip cuszp    "$ABS_BOUND"
+
+echo "============================================================"
+echo "RESULTS:"
+for line in "${SUMMARY[@]}"; do echo "  $line"; done
+echo "FAILURES: $FAILS"
+exit $FAILS
