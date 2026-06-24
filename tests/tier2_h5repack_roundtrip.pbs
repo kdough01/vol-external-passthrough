@@ -36,6 +36,9 @@ spack env activate -d "$SPACK_ENV_DIR"
 export LD_LIBRARY_PATH="${SYS_GCC_LIBDIR}:${SPACK_ENV}/.spack-env/view/lib:${LD_LIBRARY_PATH:-}"
 
 export HDF5_PLUGIN_PATH="$VOL_BUILD_DIR"
+echo "== Checking plugin dependencies on compute node =="
+ldd "$VOL_BUILD_DIR"/libhdf5_vol_passthrough.so
+echo "=================================================="
 unset HDF5_VOL_CONNECTOR
 
 for t in h5repack h5diff h5cc; do
