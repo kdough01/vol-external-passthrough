@@ -38,10 +38,15 @@ module load cuda/12.6.0
 LP_VIEW=/home/kdougherty/libpressio_cuda/.spack-env/view
 GCC_LIB=/usr/lib/gcc/x86_64-linux-gnu/11
 
+export PATH="${LP_VIEW}/bin:${PATH}"
+
 export LD_LIBRARY_PATH=${GCC_LIB}:${LP_VIEW}/lib64:${LP_VIEW}/lib:${LD_LIBRARY_PATH:-}
 export HDF5_PLUGIN_PATH="$VOL_BUILD_DIR"
 
 export HDF5_VOL_CONNECTOR="pass_through_ext under_vol=0;under_info={}"
+
+/home/kdougherty/libpressio_cuda/.spack-env/view/bin/h5ls "$NATIVE_H5"
+
 echo "=================================================="
 unset HDF5_VOL_CONNECTOR
 

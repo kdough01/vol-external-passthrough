@@ -1,0 +1,146 @@
+== environment setup ==
+HDF5-DIAG: Error detected in HDF5 (1.14.6):
+  #000: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5E.c line 204 in H5Eclose_msg(): unable to decrement ref count on error message
+    major: Error API
+    minor: Unable to decrement reference count
+  #001: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Iint.c line 1087 in H5I_dec_app_ref(): can't decrement ID ref count
+    major: Object ID
+    minor: Unable to decrement reference count
+  #002: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Iint.c line 1042 in H5I__dec_app_ref(): can't decrement ID ref count
+    major: Object ID
+    minor: Unable to decrement reference count
+  #003: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Iint.c line 948 in H5I__dec_ref(): can't locate ID
+    major: Object ID
+    minor: Unable to find ID information (already closed?)
+------- EXT PASS THROUGH VOL INIT
+------- EXT PASS THROUGH VOL INFO String To Info
+------- EXT PASS THROUGH VOL INFO Copy
+------- EXT PASS THROUGH VOL INFO Copy
+------- EXT PASS THROUGH VOL FILE Open
+------- EXT PASS THROUGH VOL INFO Copy
+------- EXT PASS THROUGH VOL INFO Copy
+------- EXT PASS THROUGH VOL INFO Free
+------- EXT PASS THROUGH VOL INFO Copy
+------- EXT PASS THROUGH VOL INFO Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL INTROSPECT OptQuery
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL File Optional
+------- EXT PASS THROUGH VOL WRAP Object
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL INTROSPECT GetConnCls
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL OBJECT Get
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL GROUP Open
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL OBJECT Get
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL LINK Specific
+------- EXT PASS THROUGH VOL WRAP Object
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL OBJECT Get
+------- EXT PASS THROUGH VOL WRAP CTX Free
+field                    Dataset------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL OBJECT Open
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Get
+------- EXT PASS THROUGH VOL WRAP CTX Free
+ {256, 384, 384}
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL GROUP Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL GROUP Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL FILE Close
+------- EXT PASS THROUGH VOL INFO Free
+------- EXT PASS THROUGH VOL UNWRAP Object
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL INFO Free
+------- EXT PASS THROUGH VOL INFO Free
+------- EXT PASS THROUGH VOL INFO Free
+------- EXT PASS THROUGH VOL TERM
+==================================================
+h5repack: /home/kdougherty/libpressio_cuda/.spack-env/view/bin/h5repack
+h5repack: Version 1.14.6
+native source size: 301994424 bytes
+============================================================
+== compressor: noop   (mode: lossless) ==
+HDF5-DIAG: Error detected in HDF5 (1.14.6):
+  #000: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5F.c line 653 in H5Fcreate(): unable to synchronously create file
+    major: File accessibility
+    minor: Unable to create file
+  #001: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5F.c line 608 in H5F__create_api_common(): unable to create file
+    major: File accessibility
+    minor: Unable to open file
+  #002: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5VLcallback.c line 3445 in H5VL_file_create(): file create failed
+    major: Virtual Object Layer
+    minor: Unable to create file
+  #003: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5VLcallback.c line 3411 in H5VL__file_create(): file create failed
+    major: Virtual Object Layer
+    minor: Unable to create file
+H5tools-DIAG: Error detected in HDF5:tools (1.14.6):
+  #000: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/tools/src/h5repack/h5repack_copy.c line 305 in copy_objects(): H5Fcreate could not create file <comp_noop.h5>:
+    major: Failure in tools library
+    minor: error in function
+/var/spool/pbs/mom_priv/jobs/43783.gpumgt1.SC: line 99: 3746258 Segmentation fault      (core dumped) h5repack --dst-vol-name="$VOL_NAME" --enable-error-stack "$NATIVE_H5" "$comp_h5"
+  [FAIL] compress leg failed for noop
+============================================================
+== compressor: bzip2   (mode: lossless) ==
+HDF5-DIAG: Error detected in HDF5 (1.14.6):
+  #000: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5F.c line 653 in H5Fcreate(): unable to synchronously create file
+    major: File accessibility
+    minor: Unable to create file
+  #001: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5F.c line 608 in H5F__create_api_common(): unable to create file
+    major: File accessibility
+    minor: Unable to open file
+  #002: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5VLcallback.c line 3445 in H5VL_file_create(): file create failed
+    major: Virtual Object Layer
+    minor: Unable to create file
+  #003: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5VLcallback.c line 3411 in H5VL__file_create(): file create failed
+    major: Virtual Object Layer
+    minor: Unable to create file
+H5tools-DIAG: Error detected in HDF5:tools (1.14.6):
+  #000: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/tools/src/h5repack/h5repack_copy.c line 305 in copy_objects(): H5Fcreate could not create file <comp_bzip2.h5>:
+    major: Failure in tools library
+    minor: error in function
+/var/spool/pbs/mom_priv/jobs/43783.gpumgt1.SC: line 99: 3746266 Segmentation fault      (core dumped) h5repack --dst-vol-name="$VOL_NAME" --enable-error-stack "$NATIVE_H5" "$comp_h5"
+  [FAIL] compress leg failed for bzip2
+============================================================
+== compressor: cuszp   (mode: 1e-4) ==
+HDF5-DIAG: Error detected in HDF5 (1.14.6):
+  #000: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5F.c line 653 in H5Fcreate(): unable to synchronously create file
+    major: File accessibility
+    minor: Unable to create file
+  #001: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5F.c line 608 in H5F__create_api_common(): unable to create file
+    major: File accessibility
+    minor: Unable to open file
+  #002: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5VLcallback.c line 3445 in H5VL_file_create(): file create failed
+    major: Virtual Object Layer
+    minor: Unable to create file
+  #003: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5VLcallback.c line 3411 in H5VL__file_create(): file create failed
+    major: Virtual Object Layer
+    minor: Unable to create file
+H5tools-DIAG: Error detected in HDF5:tools (1.14.6):
+  #000: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/tools/src/h5repack/h5repack_copy.c line 305 in copy_objects(): H5Fcreate could not create file <comp_cuszp.h5>:
+    major: Failure in tools library
+    minor: error in function
+/var/spool/pbs/mom_priv/jobs/43783.gpumgt1.SC: line 99: 3746276 Segmentation fault      (core dumped) h5repack --dst-vol-name="$VOL_NAME" --enable-error-stack "$NATIVE_H5" "$comp_h5"
+  [FAIL] compress leg failed for cuszp
+============================================================
+RESULTS:
+  noop: FAIL (compress)
+  bzip2: FAIL (compress)
+  cuszp: FAIL (compress)
+FAILURES: 3
