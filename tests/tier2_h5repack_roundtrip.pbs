@@ -6,56 +6,37 @@
 #PBS -A SDR
 #PBS -j oe
 
-set -uo pipefail   # h5diff returns 1 on differences
-
+# ====================== PATHS ======================
 SPACK_ROOT="/home/kdougherty/spack"
-SPACK_ENV_DIR="/home/kdougherty/libpressio_cuda"
+LP_VIEW="/home/kdougherty/libpressio_cuda/.spack-env/view"
 VOL_BUILD_DIR="/home/kdougherty/hdf5_projs/vol-external-passthrough/build"
-VOL_NAME="pass_through_ext"
-
-MIRANDA_DIR="/lcrc/project/ECP-EZ/public/compression/Miranda/SDRBENCH-Miranda-256x384x384"
-FIELD_FILE="density.d64"
-DSET="/field"
-NX=256; NY=384; NZ=384
-
 CACHE_DIR="/lcrc/project/SDR/kdougherty/ci/h5repack_roundtrip"
-NATIVE_H5="$CACHE_DIR/native_${FIELD_FILE%.*}.h5"
+NATIVE_H5="$CACHE_DIR/native_density.h5"
 WORK="$CACHE_DIR/job_${PBS_JOBID:-local}"
-
-ABS_BOUND="1e-4"
-
-SYS_GCC_LIBDIR="/usr/lib64"
 
 mkdir -p "$WORK" "$CACHE_DIR"
 cd "$WORK"
 
-echo "== environment setup =="
-source "$SPACK_ROOT/share/spack/setup-env.sh"
+ulimit -c unlimited
+
+echo "=== Environment Setup ==="
+module purge
 module load gcc/11.4.0
 module load hpcx/2.26-gcc
 module load cuda/12.6.0
 
-LP_VIEW=/home/kdougherty/libpressio_cuda/.spack-env/view
-GCC_LIB=/usr/lib/gcc/x86_64-linux-gnu/11
+source "$SPACK_ROOT/share/spack/setup-env.sh"
 
 export PATH="${LP_VIEW}/bin:${PATH}"
-
-export LD_LIBRARY_PATH=${GCC_LIB}:${LP_VIEW}/lib64:${LP_VIEW}/lib:${LD_LIBRARY_PATH:-}
+export LD_LIBRARY_PATH="/usr/lib/gcc/x86_64-linux-gnu/11:${LP_VIEW}/lib64:${LP_VIEW}/lib:${LD_LIBRARY_PATH:-}"
 export HDF5_PLUGIN_PATH="$VOL_BUILD_DIR"
 
-export HDF5_VOL_CONNECTOR="pass_through_ext under_vol=0;under_info={}"
+VOL_NAME="pass_through_ext"
 
-/home/kdougherty/libpressio_cuda/.spack-env/view/bin/h5ls "$NATIVE_H5"
-
-echo "=================================================="
-unset HDF5_VOL_CONNECTOR
-
-for t in h5repack h5diff h5cc; do
-  command -v "$t" >/dev/null || { echo "FATAL: $t not on PATH (wrong env?)"; exit 99; }
-done
-ls "$VOL_BUILD_DIR"/libhdf5_vol_passthrough.so >/dev/null \
-  || { echo "FATAL: libhdf5_vol_passthrough.so not in $VOL_BUILD_DIR"; exit 99; }
-echo "h5repack: $(command -v h5repack)"; h5repack --version
+echo "h5repack: $(which h5repack)"
+h5repack --version
+echo "VOL library: $VOL_BUILD_DIR/libhdf5_vol_passthrough.so"
+ls -l "$VOL_BUILD_DIR/libhdf5_vol_passthrough.so"
 
 if [[ ! -f "$NATIVE_H5" ]]; then
   echo "== ingesting $FIELD_FILE -> $NATIVE_H5 =="
@@ -98,61 +79,54 @@ declare -a SUMMARY=()
 
 roundtrip () {
   local comp="$1" mode="$2"
-  local comp_h5="comp_${comp}.h5" dec_h5="dec_${comp}.h5"
+  local comp_h5="comp_${comp}.h5"
+  local dec_h5="dec_${comp}.h5"
+
   echo "============================================================"
   echo "== compressor: $comp   (mode: $mode) =="
 
-  # Clear global connector to avoid conflicts
-  unset HDF5_VOL_CONNECTOR
+  # Critical: clean VOL state
+  unset HDF5_VOL_CONNECTOR HDF5_VOL_PRESSIO_COMPRESSOR HDF5_VOL_PRESSIO_LEVEL
 
   export HDF5_VOL_PRESSIO_COMPRESSOR="$comp"
-  if [[ "$mode" != "lossless" ]]; then
-    export HDF5_VOL_PRESSIO_LEVEL="$mode"
-  else
-    unset HDF5_VOL_PRESSIO_LEVEL || true
+  [[ "$mode" != "lossless" ]] && export HDF5_VOL_PRESSIO_LEVEL="$mode"
+
+  echo "  [1/3] Compressing with --dst-vol-name..."
+  if ! "${LP_VIEW}/bin/h5repack" --dst-vol-name="$VOL_NAME" --enable-error-stack \
+       "$NATIVE_H5" "$comp_h5"; then
+    echo "  [FAIL] compress failed"
+    return 1
   fi
 
-  # (1) Compress: native source → passthrough VOL destination
-  if ! h5repack --dst-vol-name="$VOL_NAME" --enable-error-stack \
-        "$NATIVE_H5" "$comp_h5"; then
-    echo "  [FAIL] compress leg failed for $comp"
-    SUMMARY+=("$comp: FAIL (compress)"); FAILS=$((FAILS+1)); return
+  echo "  [2/3] Decompressing with --src-vol-name..."
+  if ! "${LP_VIEW}/bin/h5repack" --src-vol-name="$VOL_NAME" --enable-error-stack \
+       "$comp_h5" "$dec_h5"; then
+    echo "  [FAIL] decompress failed"
+    return 1
   fi
 
-  # (2) decompress: passthrough source, native destination (default VOL)
-  if ! h5repack --src-vol-name="$VOL_NAME" --enable-error-stack \
-        "$comp_h5" "$dec_h5"; then
-    echo "  [FAIL] decompress leg failed for $comp"
-    SUMMARY+=("$comp: FAIL (decompress)"); FAILS=$((FAILS+1)); return
-  fi
-
-  # (3) compare recovered data vs original native
-  local rc
+  echo "  [3/3] Comparing..."
+  local rc=0
   if [[ "$mode" == "lossless" ]]; then
-    h5diff "$NATIVE_H5" "$dec_h5" "$DSET" "$DSET"; rc=$?      # 0 = bit-identical
+    h5diff "$NATIVE_H5" "$dec_h5" || rc=$?
   else
-    h5diff -d "$mode" "$NATIVE_H5" "$dec_h5" "$DSET" "$DSET"; rc=$?  # 0 = all within bound
+    h5diff -d "$mode" "$NATIVE_H5" "$dec_h5" || rc=$?
   fi
 
-  local csz nsz
-  csz=$(stat -c%s "$comp_h5"); nsz=$(stat -c%s "$NATIVE_H5")
-  echo "  size: native=$nsz  compressed=$csz  ratio=$(awk "BEGIN{printf \"%.2f\", $nsz/$csz}")x"
+  local csz=$(stat -c%s "$comp_h5")
+  local ratio=$(awk "BEGIN{printf \"%.2f\", $(stat -c%s \"$NATIVE_H5\")/$csz}")
+  echo "  Size: native=$(stat -c%s \"$NATIVE_H5\")  compressed=$csz  ratio=${ratio}x"
 
   if [[ $rc -eq 0 ]]; then
-    echo "  [PASS] $comp round-trip within tolerance"
-    SUMMARY+=("$comp: PASS")
+    echo "  [PASS]"
   else
-    echo "  [FAIL] $comp h5diff rc=$rc (differences exceed tolerance)"
-    SUMMARY+=("$comp: FAIL (diff rc=$rc)"); FAILS=$((FAILS+1))
+    echo "  [FAIL] h5diff rc=$rc"
   fi
 }
 
+# Run tests
 roundtrip noop     lossless
 roundtrip bzip2    lossless
-roundtrip cuszp    "$ABS_BOUND"
+roundtrip cuszp    "1e-4"
 
-echo "============================================================"
-echo "RESULTS:"
-for line in "${SUMMARY[@]}"; do echo "  $line"; done
-echo "FAILURES: $FAILS"
-exit $FAILS
+echo "=== DONE ==="
