@@ -1,7 +1,7 @@
 #!/bin/bash
 #PBS -N vol_h5repack_roundtrip
 #PBS -l select=1:ncpus=4:ngpus=1:mpiprocs=1
-#PBS -l walltime=00:15:00
+#PBS -l walltime=00:25:00
 #PBS -j oe
 #PBS -A SDR
 #PBS -q gpu
@@ -9,7 +9,8 @@
 # ====================== PATHS ======================
 SPACK_ROOT="/home/kdougherty/spack"
 LP_VIEW="/home/kdougherty/libpressio_cuda/.spack-env/view"
-VOL_BUILD_DIR="/home/kdougherty/hdf5_projs/vol-external-passthrough/build"
+PROJECT_ROOT="/home/kdougherty/hdf5_projs/vol-external-passthrough"
+VOL_BUILD_DIR="$PROJECT_ROOT/build"
 CACHE_DIR="/lcrc/project/SDR/kdougherty/ci/h5repack_roundtrip"
 NATIVE_H5="$CACHE_DIR/native_density.h5"
 WORK="$CACHE_DIR/job_${PBS_JOBID:-local}"
@@ -24,7 +25,6 @@ VOL_NAME="pass_through_ext"
 VOL_INFO="under_vol=0;under_info={}"
 
 mkdir -p "$WORK" "$CACHE_DIR"
-cd "$WORK"
 ulimit -c unlimited
 
 echo "=== Environment Setup ==="
@@ -38,23 +38,81 @@ GCC_LIB=$(gcc --print-file-name=libstdc++.so | xargs dirname 2>/dev/null)
 [ "$GCC_LIB" = "." ] && GCC_LIB=/usr/lib/gcc/x86_64-linux-gnu/11
 echo "GCC_LIB: $GCC_LIB"
 
+# ============================================================================
+# BUILD PHASE  (isolated env; lifted from the known-good build job)
+# ============================================================================
+echo "=== Building VOL ==="
+cd "$PROJECT_ROOT"
+
+SYSTEM_MPICC=$(which mpicc)
+SYSTEM_MPICXX=$(which mpicxx)
+echo "mpicc:  $SYSTEM_MPICC"
+echo "mpicxx: $SYSTEM_MPICXX"
+echo "nvcc:   $(which nvcc)"
+"$SYSTEM_MPICC" --version >/dev/null || { echo "FATAL: mpicc broken"; exit 1; }
+
+# Find LibPressio cmake config -- check both lib and lib64
+LP_CMAKE_DIR=""
+for candidate in \
+    "${LP_VIEW}/lib64/cmake/LibPressio" \
+    "${LP_VIEW}/lib/cmake/LibPressio" \
+    "${LP_VIEW}/lib64/cmake/libpressio" \
+    "${LP_VIEW}/lib/cmake/libpressio"
+do
+    if [ -f "${candidate}/LibPressioConfig.cmake" ] || \
+       [ -f "${candidate}/libpressio-config.cmake" ]; then
+        LP_CMAKE_DIR="$candidate"; break
+    fi
+done
+if [ -z "$LP_CMAKE_DIR" ]; then
+    echo "FATAL: Cannot find LibPressioConfig.cmake under $LP_VIEW"
+    find "$LP_VIEW" -name "*ressio*onfig.cmake" 2>/dev/null
+    exit 1
+fi
+echo "LibPressio cmake dir: $LP_CMAKE_DIR"
+
+# strip the spack view from PATH so cmake picks system GCC, not the view toolchain
+CLEAN_PATH=$(echo "$PATH" | tr ':' '\n' | grep -v spack-env | tr '\n' ':')
+
+rm -rf build
+env PATH="$CLEAN_PATH" LD_LIBRARY_PATH="$GCC_LIB" \
+cmake -S . -B build \
+    -DCMAKE_C_COMPILER="$SYSTEM_MPICC" \
+    -DCMAKE_CXX_COMPILER="$SYSTEM_MPICXX" \
+    -DUSE_CUDA=ON \
+    -DCMAKE_PREFIX_PATH="$LP_VIEW" \
+    -DLibPressio_DIR="$LP_CMAKE_DIR" \
+    -Wno-dev || { echo "FATAL: cmake configure failed"; exit 1; }
+
+env PATH="$CLEAN_PATH" LD_LIBRARY_PATH="$GCC_LIB" \
+cmake --build build -j4 || { echo "FATAL: cmake build failed"; exit 1; }
+
+echo "=== Build result ==="
+ls -l "$VOL_BUILD_DIR/libhdf5_vol_passthrough.so" \
+  || { echo "FATAL: build did not produce libhdf5_vol_passthrough.so"; exit 99; }
+
+# ============================================================================
+# RUNTIME PHASE
+# ============================================================================
 export LD_LIBRARY_PATH=${GCC_LIB}:${LP_VIEW}/lib64:${LP_VIEW}/lib
 export HDF5_PLUGIN_PATH="$VOL_BUILD_DIR"
-unset HDF5_VOL_CONNECTOR
+unset HDF5_VOL_CONNECTOR          # keep the default side native
 
 H5REPACK="${LP_VIEW}/bin/h5repack"
 H5DIFF="${LP_VIEW}/bin/h5diff"
 H5CC="${LP_VIEW}/bin/h5cc"
 
 echo "h5repack: $H5REPACK"; "$H5REPACK" --version
-echo "VOL library:"; ls -l "$VOL_BUILD_DIR/libhdf5_vol_passthrough.so" \
-  || { echo "FATAL: VOL .so not found -- run the build job first"; exit 99; }
 for t in "$H5REPACK" "$H5DIFF" "$H5CC"; do
   [ -x "$t" ] || { echo "FATAL: $t not found/executable"; exit 99; }
 done
 
+cd "$WORK"
 set -uo pipefail
 
+# ---------------------------------------------------------------------------
+# Step 0: ingest raw Miranda binary -> plain native HDF5 (cached)
+# ---------------------------------------------------------------------------
 if [[ ! -f "$NATIVE_H5" ]]; then
   [[ -f "$MIRANDA_DIR/$FIELD_FILE" ]] \
     || { echo "FATAL: raw data not found at $MIRANDA_DIR/$FIELD_FILE -- check MIRANDA_DIR/FIELD_FILE"; exit 98; }
@@ -93,6 +151,9 @@ EOF
 fi
 echo "native source size: $(stat -c%s "$NATIVE_H5") bytes"
 
+# ---------------------------------------------------------------------------
+# round-trip helper:  $1 = compressor id   $2 = "lossless" | abs-bound
+# ---------------------------------------------------------------------------
 FAILS=0
 declare -a SUMMARY=()
 
