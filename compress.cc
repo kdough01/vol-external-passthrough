@@ -102,6 +102,12 @@ H5VL_pass_through_ext_transfer_compress(compression_ctx *ctx, const void *data, 
     input  = pressio_data_new_nonowning_domain(in_dtype, (void *)data, in_ndims, in_dims, "malloc");
     output = pressio_data_new_empty(pressio_byte_dtype, 0, NULL);
 
+
+    fprintf(stderr, "PRE-COMPRESS: buf=%p dims=[%zu,%zu,%zu] in_bytes=%zu has_data=%d\n",
+    input, (size_t)dims[0], (size_t)dims[1], (size_t)dims[2],
+    pressio_data_get_bytes(input),           /* should be 301989888 */
+    pressio_data_has_data(input));           /* should be 1 / non-null */
+
     if (pressio_compressor_compress(ctx->compressor, input, output)) {
         H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
                 vol_err_class, maj_compression, min_compress_failed,
