@@ -19,6 +19,9 @@ typedef struct compression_ctx {
     size_t compressed_chunk_size;
     uint64_t last_uncompressed_bytes;
     uint64_t last_compressed_bytes;
+    void   *stage_buf;
+    size_t  stage_total;
+    size_t  stage_filled;
 } compression_ctx;
 
 typedef struct datatype_ctx {

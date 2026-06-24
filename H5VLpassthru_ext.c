@@ -553,6 +553,10 @@ compression_ctx* compression_ctx_create(int rank, hsize_t *h5dims, enum pressio_
     comp_ctx->compressed_buf = NULL;
     comp_ctx->compressed_chunk_size = 0;
 
+    comp_ctx->stage_buf    = NULL;
+    comp_ctx->stage_total  = 0;
+    comp_ctx->stage_filled = 0;
+
     return comp_ctx;
 }
 
@@ -1969,7 +1973,6 @@ H5VL_pass_through_ext_dataset_write(
     hid_t file_space_id[], hid_t plist_id, const void *buf[], void **req)
 {
     herr_t ret_val = 0;
-    // hid_t err_id = H5Eget_current_stack();
 
     for (size_t u = 0; u < count; u++) {
         H5VL_pass_through_ext_t *d = (H5VL_pass_through_ext_t *)dset[u];
@@ -1979,7 +1982,6 @@ H5VL_pass_through_ext_dataset_write(
 
         if (!ctx) {
             if (ds_ctx && ds_ctx->compression_requested) {
-                /* A compressor was specified but ctx creation failed — hard error */
                 H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
                         vol_err_class, maj_compression, min_compressor_unavail,
                         "compression was requested but no compression context is available "
@@ -1987,7 +1989,6 @@ H5VL_pass_through_ext_dataset_write(
                 ret_val = -1;
                 continue;
             }
-            /* No compressor was specified, data may passthrough without compression */
             const void *wbufs[] = { buf[u] };
             herr_t r = H5VLdataset_write(
                 1, &under, d->under_vol_id, &mem_type_id[u],
@@ -2001,14 +2002,109 @@ H5VL_pass_through_ext_dataset_write(
             continue;
         }
 
-        /* Calculate bytes based on the original ND context */
-        hsize_t nelem = 1;
-        for(int i=0; i<ctx->ndims; i++) nelem *= ctx->dims[i];
-        size_t nbytes = nelem * pressio_dtype_size(ctx->dtype);
+        /* ---- Total logical size of the dataset (from the recorded shape) ---- */
+        const size_t dsize = pressio_dtype_size(ctx->dtype);
+        size_t total_elems = 1;
+        for (int i = 0; i < (int)ctx->ndims; i++) total_elems *= ctx->dims[i];
+        const size_t total_bytes = total_elems * dsize;
 
-        /* Compress the N-dimensional buffer */
-        herr_t cret;
-        cret = H5VL_pass_through_ext_transfer_compress(ctx, buf[u], nbytes);
+        /* ---- Locate THIS write within the logical array ----
+         * h5repack delivers large datasets as hyperslab strips, so buf[u] is
+         * only part of the array. Figure out the linear byte offset + length
+         * of this strip from the file-space selection. */
+        size_t off_bytes, len_bytes;
+
+        if (file_space_id[u] == H5S_ALL || ctx->ndims == 0) {
+            /* Whole dataset in one shot (or scalar). */
+            off_bytes = 0;
+            len_bytes = total_bytes;
+        } else {
+            hssize_t np = H5Sget_select_npoints(file_space_id[u]);
+            if (np < 0) {
+                H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                        vol_err_class, maj_compression, min_compress_failed,
+                        "could not query file selection for dataset %zu", u);
+                ret_val = -1; continue;
+            }
+
+            hsize_t start[H5S_MAX_RANK], end[H5S_MAX_RANK];
+            if (H5Sget_select_bounds(file_space_id[u], start, end) < 0) {
+                H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                        vol_err_class, maj_compression, min_compress_failed,
+                        "could not get selection bounds for dataset %zu", u);
+                ret_val = -1; continue;
+            }
+
+            /* Only contiguous row-major blocks (full in all dims but dim 0)
+             * map to a single linear range. That covers h5repack's strips;
+             * anything else we reject rather than silently corrupt. */
+            int contiguous = 1;
+            hsize_t block_elems = 1;
+            for (int i = 0; i < (int)ctx->ndims; i++) {
+                block_elems *= (end[i] - start[i] + 1);
+                if (i >= 1 && (start[i] != 0 || end[i] != ctx->dims[i] - 1))
+                    contiguous = 0;
+            }
+            if (!contiguous || block_elems != (hsize_t)np) {
+                H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                        vol_err_class, maj_compression, min_compress_failed,
+                        "dataset %zu: non-contiguous partial write not supported "
+                        "by the compression VOL", u);
+                ret_val = -1; continue;
+            }
+
+            /* Row-major linear element offset of the strip's first element. */
+            hsize_t lin = 0, stride = 1;
+            for (int i = (int)ctx->ndims - 1; i >= 0; i--) {
+                lin += start[i] * stride;
+                stride *= ctx->dims[i];
+            }
+            off_bytes = (size_t)lin * dsize;
+            len_bytes = (size_t)np  * dsize;
+        }
+
+        if (off_bytes + len_bytes > total_bytes) {
+            H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                    vol_err_class, maj_compression, min_compress_failed,
+                    "dataset %zu: write [%zu,%zu) exceeds logical size %zu",
+                    u, off_bytes, off_bytes + len_bytes, total_bytes);
+            ret_val = -1; continue;
+        }
+
+        /* ---- Stage into a full-size buffer; compress only once complete ---- */
+        if (!ctx->stage_buf) {
+            ctx->stage_buf = malloc(total_bytes);
+            if (!ctx->stage_buf) {
+                H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                        vol_err_class, maj_compression, min_compress_failed,
+                        "out of memory staging %zu bytes for dataset %zu",
+                        total_bytes, u);
+                ret_val = -1; continue;
+            }
+            ctx->stage_total  = total_bytes;
+            ctx->stage_filled = 0;
+        }
+
+        memcpy((char *)ctx->stage_buf + off_bytes, buf[u], len_bytes);
+        ctx->stage_filled += len_bytes;
+
+#ifdef ENABLE_EXT_PASSTHRU_LOGGING
+        printf("------- DATASET Write strip: off=%zu len=%zu filled=%zu/%zu\n",
+               off_bytes, len_bytes, ctx->stage_filled, ctx->stage_total);
+#endif
+
+        /* Wait for the rest of the dataset before compressing. */
+        if (ctx->stage_filled < ctx->stage_total)
+            continue;
+
+        /* ---- Full dataset assembled: compress the whole buffer once ---- */
+        herr_t cret = H5VL_pass_through_ext_transfer_compress(
+            ctx, ctx->stage_buf, ctx->stage_total);
+
+        free(ctx->stage_buf);
+        ctx->stage_buf    = NULL;
+        ctx->stage_filled = 0;
+        ctx->stage_total  = 0;
 
         if (cret < 0) {
             H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
@@ -2022,7 +2118,6 @@ H5VL_pass_through_ext_dataset_write(
         uint64_t csize = ctx->compressed_chunk_size;
         size_t total = sizeof(uint64_t) + csize;
 
-        /* Resize the underlying 1D dataset */
         hsize_t new_size[1] = { total };
         H5VL_dataset_specific_args_t sargs;
         sargs.op_type = H5VL_DATASET_SET_EXTENT;
@@ -2032,13 +2127,13 @@ H5VL_pass_through_ext_dataset_write(
                     vol_err_class, maj_compression, min_compress_failed,
                     "failed to resize dataset %zu to %zu bytes", u, total);
             ret_val = -1;
+            free(ctx->compressed_buf); ctx->compressed_buf = NULL;
             continue;
         }
 
         /* --- Write Header --- */
         hsize_t zero = 0;
         hsize_t hsz = sizeof(uint64_t);
-
         hid_t mspace_hdr = H5Screate_simple(1, &hsz, NULL);
         hid_t fspace_hdr = H5Screate_simple(1, &total, NULL);
         H5Sselect_hyperslab(fspace_hdr, H5S_SELECT_SET, &zero, NULL, &hsz, NULL);
@@ -2047,7 +2142,6 @@ H5VL_pass_through_ext_dataset_write(
         herr_t hret = H5VLdataset_write(
             1, &under, d->under_vol_id, (hid_t[]){H5T_NATIVE_UCHAR},
             &mspace_hdr, &fspace_hdr, plist_id, hbufs, NULL);
-
         H5Sclose(mspace_hdr);
         H5Sclose(fspace_hdr);
 
@@ -2056,13 +2150,13 @@ H5VL_pass_through_ext_dataset_write(
                     vol_err_class, maj_compression, min_compress_failed,
                     "header write failed for dataset %zu", u);
             ret_val = -1;
+            free(ctx->compressed_buf); ctx->compressed_buf = NULL;
             continue;
         }
 
         /* --- Write Payload --- */
         hsize_t poff = sizeof(uint64_t);
         hsize_t ps = csize;
-
         hid_t mspace_payload = H5Screate_simple(1, &ps, NULL);
         hid_t fspace_payload = H5Screate_simple(1, &total, NULL);
         H5Sselect_hyperslab(fspace_payload, H5S_SELECT_SET, &poff, NULL, &ps, NULL);
@@ -2071,7 +2165,6 @@ H5VL_pass_through_ext_dataset_write(
         herr_t wret = H5VLdataset_write(
             1, &under, d->under_vol_id, (hid_t[]){H5T_NATIVE_UCHAR},
             &mspace_payload, &fspace_payload, plist_id, cbufs, NULL);
-
         H5Sclose(mspace_payload);
         H5Sclose(fspace_payload);
 
@@ -2086,7 +2179,6 @@ H5VL_pass_through_ext_dataset_write(
         ctx->compressed_buf = NULL;
     }
 
-    // H5Eset_current_stack(err_id);
     return ret_val;
 } /* end H5VL_pass_through_ext_dataset_write() */
 
@@ -2244,6 +2336,14 @@ H5VL_pass_through_ext_dataset_close(void *dset, hid_t dxpl_id, void **req)
 #ifdef ENABLE_EXT_PASSTHRU_LOGGING
     printf("------- EXT PASS THROUGH VOL DATASET Close\n");
 #endif
+
+    gpu_vol_dataset_t *ds_ctx = (gpu_vol_dataset_t *)o->custom_data;
+    if (ds_ctx && ds_ctx->comp_ctx && ds_ctx->comp_ctx->stage_buf) {
+        free(ds_ctx->comp_ctx->stage_buf);
+        ds_ctx->comp_ctx->stage_buf    = NULL;
+        ds_ctx->comp_ctx->stage_filled = 0;
+        ds_ctx->comp_ctx->stage_total  = 0;
+    }
 
     ret_value = H5VLdataset_close(o->under_object, o->under_vol_id, dxpl_id, req);
 

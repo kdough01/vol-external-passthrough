@@ -87,6 +87,21 @@ H5VL_pass_through_ext_transfer_compress(compression_ctx *ctx, const void *data, 
                     ctx->compressor_id);
             return -1;
         }
+
+        /* libpressio sizes the clone/copy from the declared shape, NOT from
+         * nbytes. If the recorded dims imply a different size than the buffer
+         * HDF5 actually handed us, the copy runs off the end and segfaults.
+         * Catch it here as a clean error instead. */
+        size_t logical = vol_logical_nbytes(ctx);   /* dtype_size * prod(ctx->dims) */
+        if (logical != nbytes) {
+            H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                    vol_err_class, maj_compression, min_compress_failed,
+                    "shape/size mismatch for '%s': recorded dims imply %zu bytes "
+                    "but the write buffer is %zu bytes",
+                    ctx->compressor_id, logical, nbytes);
+            return -1;
+        }
+
         in_dtype = ctx->dtype;
         in_ndims = ctx->ndims;
         in_dims  = ctx->dims;
@@ -102,11 +117,21 @@ H5VL_pass_through_ext_transfer_compress(compression_ctx *ctx, const void *data, 
     input  = pressio_data_new_nonowning_domain(in_dtype, (void *)data, in_ndims, in_dims, "malloc");
     output = pressio_data_new_empty(pressio_byte_dtype, 0, NULL);
 
-
-    fprintf(stderr, "PRE-COMPRESS: buf=%p dims=[%zu,%zu,%zu] in_bytes=%zu has_data=%d\n",
-    input, (size_t)dims[0], (size_t)dims[1], (size_t)dims[2],
-    pressio_data_get_bytes(input),           /* should be 301989888 */
-    pressio_data_has_data(input));           /* should be 1 / non-null */
+#ifdef ENABLE_EXT_PASSTHRU_LOGGING
+    {
+        size_t shape_bytes = pressio_dtype_size(in_dtype);
+        for (size_t i = 0; i < in_ndims; i++)
+            shape_bytes *= in_dims[i];
+        fprintf(stderr,
+                "PRE-COMPRESS: data=%p nbytes=%zu ndims=%zu shape-bytes=%zu "
+                "pressio_bytes=%zu has_data=%d  dims=[",
+                data, nbytes, in_ndims, shape_bytes,
+                pressio_data_get_bytes(input), pressio_data_has_data(input));
+        for (size_t i = 0; i < in_ndims; i++)
+            fprintf(stderr, "%zu%s", in_dims[i], (i + 1 < in_ndims) ? "," : "");
+        fprintf(stderr, "]\n");
+    }
+#endif
 
     if (pressio_compressor_compress(ctx->compressor, input, output)) {
         H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
