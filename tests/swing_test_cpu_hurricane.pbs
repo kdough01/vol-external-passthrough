@@ -85,6 +85,6 @@ export HDF5_PLUGIN_PATH=$(pwd)/build
 
 echo ""
 echo "=== Miranda test ==="
-./build/tests/test_time_miranda
+./build/tests/test_error_miranda
 
 echo "Job finished on $(date)"

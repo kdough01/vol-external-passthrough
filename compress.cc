@@ -1,36 +1,3 @@
-/*
- * H5VLpassthru_ext_transfer.cc
- *
- * Unified compress/decompress transfer path for the passthrough VOL.
- *
- * This replaces the separate CPU (.c) and GPU (.cu) transfer files. There is
- * no longer a CPU-vs-GPU branch at the call site: a single pair of functions
- * works for every libpressio compressor. Memory placement is delegated to
- * libpressio's domain manager:
- *
- *   - We always hand libpressio HOST memory, tagged with the "malloc" domain.
- *   - GPU compressors (cuszp / cusz / zfp-cuda) internally call
- *         domain_manager().make_readable(build("cudamalloc"), input)
- *     so the host->device copy happens inside libpressio.
- *   - Their result is left on the device. We pull it back with
- *         domain_manager().make_readable(build("malloc"), output)
- *     which is a no-op for CPU compressors (already host-resident) and a
- *     device->host copy for GPU compressors.
- *
- * Consequence: this file contains NO CUDA calls and does not need to link
- * CUDA. All device work lives inside libpressio. Whether a GPU compressor is
- * usable depends solely on how *libpressio* was built, not on how this
- * connector was built. compressor_is_gpu() / gpu_ctx / the persistent device
- * buffer / the USE_CUDA transfer-path branch are all gone.
- *
- * Stream note: current cuszp creates and owns its own cudaStream_t per call
- * and reads no stream option, so none is plumbed here. If your installed
- * cuszp/nvcomp version requires an externally supplied stream, verify with
- * pressio_compressor_get_options() and re-apply it where the compressor is
- * configured (e.g. at dataset-create, stored on compression_ctx). Doing so
- * re-couples this file to CUDA, so prefer letting the compressor own it.
- */
-
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -43,6 +10,7 @@ extern "C" {
 #include "metadata_structs.h"
 #include "vol_errors.h"
 }
+
 #include <libpressio_ext/cpp/data.h>
 #include <libpressio_ext/cpp/domain.h>
 #include <libpressio_ext/cpp/domain_manager.h>

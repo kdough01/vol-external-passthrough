@@ -46,10 +46,6 @@
 #include "metadata_structs.h"
 #include "vol_errors.h"
 
-#ifdef USE_CUDA
-#include <cuda_runtime.h>
-#endif
-
 
 /**********/
 /* Macros */
@@ -209,7 +205,6 @@ int    H5VL_pass_through_ext_compressor_available(const char *compressor_id);
 
 /* Destroy Functions */
 void config_params_destroy(config_params *p);
-void gpu_context_destroy(gpu_context_t *gpu_ctx);
 
 /* Error Handling */
 hid_t vol_err_class          = H5I_INVALID_HID;
@@ -373,10 +368,6 @@ enum pressio_dtype hdf5_to_pressio_dtype(hid_t type_id) {
     return pressio_byte_dtype;
 }
 
-static int compressor_is_gpu(const char *id) {
-    return strncmp(id, "nvcomp", 6) == 0 || strncmp(id, "cusz", 4) == 0;
-}
-
 config_params *config_params_create(hid_t fapl_id)
 {
     (void)fapl_id;
@@ -398,44 +389,8 @@ config_params *config_params_create(hid_t fapl_id)
 
     p->default_compression_id  = strdup(compressor ? compressor : "noop");
     p->compression_level       = level ? (int)strtol(level, NULL, 10) : 1;
-    p->device_id               = 0;
-    p->min_size_for_gpu        = 256 * 1024;
-    p->max_device_memory_bytes = 2ULL * 1024 * 1024 * 1024;
 
     return p;
-}
-
-gpu_context_t* gpu_context_create(config_params *conf_params)
-{
-#ifdef USE_CUDA
-    gpu_context_t *gpu_ctx = (gpu_context_t*)calloc(1, sizeof(gpu_context_t));
-    if (!gpu_ctx) return NULL;
-
-    gpu_ctx->device_id = conf_params->device_id;
-    if (cudaSetDevice(gpu_ctx->device_id) != cudaSuccess) goto fail;
-    if (cudaStreamCreate(&gpu_ctx->stream) != cudaSuccess) goto fail;
-
-    size_t cap = conf_params->max_device_memory_bytes;
-    if (cap == 0 || cap > (1ull << 40)) {
-        fprintf(stderr, "bad max_device_memory_bytes=%zu\n", cap);
-        goto fail;
-    }
-    gpu_ctx->d_in_capacity  = cap;
-    gpu_ctx->d_out_capacity = cap;
-
-    if (cudaMalloc(&gpu_ctx->d_in,  cap) != cudaSuccess) goto fail;
-    if (cudaMalloc(&gpu_ctx->d_out, cap) != cudaSuccess) goto fail;
-    return gpu_ctx;
-
-    fail:
-        if (gpu_ctx) {
-            if (gpu_ctx->d_in)   cudaFree(gpu_ctx->d_in);
-            if (gpu_ctx->stream) cudaStreamDestroy(gpu_ctx->stream);
-            free(gpu_ctx);
-        }
-    return NULL;
-#endif
-    return NULL;
 }
 
 datatype_ctx* datatype_ctx_create(hid_t dataset_id)
@@ -499,7 +454,7 @@ void compression_ctx_destroy(compression_ctx *comp_ctx) {
     free(comp_ctx);
 }
 
-compression_ctx* compression_ctx_create(int rank, hsize_t *h5dims, enum pressio_dtype dtype, hid_t dcpl_id, config_params *defaults, gpu_context_t *gpu_ctx, const char *compressor_override)
+compression_ctx* compression_ctx_create(int rank, hsize_t *h5dims, enum pressio_dtype dtype, hid_t dcpl_id, config_params *defaults, const char *compressor_override)
 {
 #ifdef ENABLE_EXT_PASSTHRU_LOGGING
     printf("------- EXT PASS THROUGH COMPRESSION CTX\n");
@@ -595,18 +550,6 @@ compression_ctx* compression_ctx_create(int rank, hsize_t *h5dims, enum pressio_
         pressio_options_free(opts);
     }
 
-#ifdef USE_CUDA
-    if (compressor_is_gpu(comp_ctx->compressor_id)) {
-        struct pressio_options* gpu_opts = pressio_options_new();
-        pressio_options_set_userptr(gpu_opts, "nvcomp:stream", (void*)gpu_ctx->stream);
-        pressio_options_set_integer(gpu_opts, "nvcomp:device_id", gpu_ctx->device_id);
-        pressio_compressor_set_options(comp_ctx->compressor, gpu_opts);
-        pressio_options_free(gpu_opts);
-    } else {
-        printf("DEBUG: CUDA configured for non-CUDA compressor: %s\n", comp_ctx->compressor_id);
-    }
-#endif
-
     comp_ctx->compressed_buf = NULL;
     comp_ctx->compressed_chunk_size = 0;
 
@@ -630,12 +573,10 @@ gpu_vol_dataset_t* gpu_vol_dataset_wrap(void *under_dataset,
     gpu_dataset_ctx->under_dataset = under_dataset;
     gpu_dataset_ctx->under_vol_id = under_vol_id;
     gpu_dataset_ctx->file_ctx = file_ctx;
-    gpu_dataset_ctx->gpu_ctx = file_ctx->gpu_ctx;
 
     gpu_dataset_ctx->comp_ctx = compression_ctx_create(rank, h5dims, pressio_dt,
                                                         dcpl_id,
                                                         file_ctx->config_params,
-                                                        file_ctx->gpu_ctx,
                                                         compressor_override);
     return gpu_dataset_ctx;
 }
@@ -644,7 +585,6 @@ void gpu_vol_file_destroy(gpu_vol_file_t *file_ctx) {
     if (!file_ctx) return;
 
     config_params_destroy(file_ctx->config_params);
-    gpu_context_destroy(file_ctx->gpu_ctx);
 
     free(file_ctx);
 }
@@ -653,16 +593,6 @@ void config_params_destroy(config_params *p) {
     if (!p) return;
     free(p->default_compression_id);
     free(p);
-}
-
-void gpu_context_destroy(gpu_context_t *gpu_ctx) {
-    if (!gpu_ctx) return;
-#ifdef USE_CUDA
-    cudaFree(gpu_ctx->d_in);
-    cudaFree(gpu_ctx->d_out);
-    cudaStreamDestroy(gpu_ctx->stream);
-#endif
-    free(gpu_ctx);
 }
 
 gpu_vol_file_t* gpu_vol_file_wrap(hid_t fapl_id, hid_t under_vol_id, void *under_file)
@@ -674,8 +604,6 @@ gpu_vol_file_t* gpu_vol_file_wrap(hid_t fapl_id, hid_t under_vol_id, void *under
     ctx->under_vol_id = under_vol_id;
     ctx->config_params = config_params_create(fapl_id);
     if (!ctx->config_params) { free(ctx); return NULL; }
-
-    ctx->gpu_ctx = gpu_context_create(ctx->config_params);
 
     return ctx;
 }
@@ -1711,11 +1639,6 @@ H5VL_pass_through_ext_dataset_create(void *obj,
                         }
                         H5Pclose(json_acpl);
                         H5Pclose(json_aapl);
-                        if (attr_json) {
-                            H5VLattr_write(attr_json, o->under_vol_id,
-                                           json_str_type, json, dxpl_id, NULL);
-                            H5VLattr_close(attr_json, o->under_vol_id, dxpl_id, NULL);
-                        }
                         H5Sclose(json_space);
                         H5Tclose(json_str_type);
                         free(json);
@@ -1871,18 +1794,9 @@ H5VL_pass_through_ext_dataset_open(void *obj,
                 pressio_compressor_set_options(ds_ctx->comp_ctx->compressor, opts);
                 pressio_options_free(opts);
             }
-            free(json_buf);
             json_buf = NULL;
-
-            /* JSON cannot carry cudaStream_t (userptr) — must be set separately */
-            const char *stream_key = gpu_stream_key(ds_ctx->comp_ctx->compressor_id);
-            if (stream_key && ds_ctx->gpu_ctx) {
-                struct pressio_options *sopts = pressio_options_new();
-                pressio_options_set_userptr(sopts, stream_key, ds_ctx->gpu_ctx->stream);
-                pressio_compressor_set_options(ds_ctx->comp_ctx->compressor, sopts);
-                pressio_options_free(sopts);
-            }
         }
+        free(json_buf);
 
         H5Pclose(real_dcpl_id);
         if (recovered_dims) free(recovered_dims);
@@ -2022,7 +1936,7 @@ H5VL_pass_through_ext_dataset_read(
         size_t nbytes = nelem_read * pressio_dtype_size(ctx->dtype);
 
         herr_t dret;
-        dret = H5VL_pass_through_ext_transfer_decompress(ctx, buf[u], nbytes);
+        herr_t dret = H5VL_pass_through_ext_transfer_decompress(ctx, cbuf, csize, buf[u]);
 
         if (dret < 0) {
             H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
@@ -2096,7 +2010,7 @@ H5VL_pass_through_ext_dataset_write(
         /* Compress the N-dimensional buffer */
         herr_t cret;
         cret = H5VL_pass_through_ext_transfer_compress(ctx, buf[u], nbytes);
-        
+
         if (cret < 0) {
             H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
                     vol_err_class, maj_compression, min_compress_failed,
