@@ -8,9 +8,9 @@
 
 set -uo pipefail   # h5diff returns 1 on differences
 
-SPACK_ROOT="$HOME/spack"
-SPACK_ENV_DIR="$HOME/libpressio_cuda"
-VOL_BUILD_DIR="$HOME/hdf5_projs/vol-external-passthrough/build"
+SPACK_ROOT="home/kdougherty/spack"
+SPACK_ENV_DIR="home/kdougherty/libpressio_cuda"
+VOL_BUILD_DIR="home/kdougherty/hdf5_projs/vol-external-passthrough/build"
 VOL_NAME="pass_through_ext"
 
 MIRANDA_DIR="/lcrc/project/SDR/public/compression/Miranda/SDRBENCH-Miranda-256x384x384"

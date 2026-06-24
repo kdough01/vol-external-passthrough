@@ -25,6 +25,7 @@ jobs:
         with:
           repository: robertu94/spack_packages
           path: ./robertu94_packages
+          ref: v1.2.3
 
       - name: System MPI for the test targets
         run: |
@@ -34,6 +35,7 @@ jobs:
       - name: Set up Spack
         uses: spack/setup-spack@v3
         with:
+          spack_ref: releases/v0.23
           buildcache: true
 
       - name: Add robertu94 package repo

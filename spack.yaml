@@ -17,9 +17,10 @@ spack:
     all:
       require: target=x86_64_v3
 
-  mirrors:
+  mirrors::
     local-buildcache:
       url: oci://ghcr.io/kdough01/spack-buildcache
+      binary: true
       signed: false
       access_pair:
         id_variable: GITHUB_USER
