@@ -1935,7 +1935,6 @@ H5VL_pass_through_ext_dataset_read(
         for (int i = 0; i < ctx->ndims; i++) nelem_read *= ctx->dims[i];
         size_t nbytes = nelem_read * pressio_dtype_size(ctx->dtype);
 
-        herr_t dret;
         herr_t dret = H5VL_pass_through_ext_transfer_decompress(ctx, cbuf, csize, buf[u]);
 
         if (dret < 0) {
