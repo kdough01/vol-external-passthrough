@@ -1,0 +1,425 @@
+Job started on Wed Jun 24 12:30:12 CDT 2026
+Running on: gpu4
+PWD: /home/kdougherty/hdf5_projs/vol-external-passthrough
+mpicc:   /gpfs/fs1/home/software/swing/HPCX/hpcx-v2.26-gcc-doca_ofed-ubuntu22.04-cuda13-x86_64/ompi4/bin/mpicc
+nvcc:    /gpfs/fs1/soft/swing/software/spack-built/linux-ubuntu22.04-x86_64/gcc-11.4.0/cuda-12.6.0-qb3dlng/bin/nvcc
+gcc:     gcc (Ubuntu 11.4.0-1ubuntu1~22.04.2) 11.4.0
+GCC_LIB: /usr/lib/gcc/x86_64-linux-gnu/11
+gcc (Ubuntu 11.4.0-1ubuntu1~22.04.2) 11.4.0
+Copyright (C) 2021 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+LibPressio cmake dir: /home/kdougherty/libpressio_cuda/.spack-env/view/lib/cmake/LibPressio
+
+=== Building ===
+-- The C compiler identification is GNU 11.4.0
+-- The CXX compiler identification is GNU 11.4.0
+-- The CUDA compiler identification is NVIDIA 12.9.86
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /gpfs/fs1/home/software/swing/HPCX/hpcx-v2.26-gcc-doca_ofed-ubuntu22.04-cuda13-x86_64/ompi4/bin/mpicc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /gpfs/fs1/home/software/swing/HPCX/hpcx-v2.26-gcc-doca_ofed-ubuntu22.04-cuda13-x86_64/ompi4/bin/mpicxx - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Detecting CUDA compiler ABI info
+-- Detecting CUDA compiler ABI info - done
+-- Check for working CUDA compiler: /home/kdougherty/libpressio_cuda/.spack-env/view/bin/nvcc - skipped
+-- Detecting CUDA compile features
+-- Detecting CUDA compile features - done
+-- Found HDF5: hdf5-shared (found version "1.14.6")  
+-- Found OpenMP_C: -fopenmp (found version "4.5") 
+-- Found OpenMP_CXX: -fopenmp (found version "4.5") 
+-- Found OpenMP: TRUE (found version "4.5")  
+-- Found BZip2: /home/kdougherty/libpressio_cuda/.spack-env/view/lib/libbz2.so (found version "1.0.8") 
+-- Looking for BZ2_bzCompressInit
+-- Looking for BZ2_bzCompressInit - found
+-- Found ZFP: /home/kdougherty/libpressio_cuda/.spack-env/view/lib/cmake/zfp/zfp-config.cmake (found version "0.5.5") 
+-- Found OpenMP_C: -fopenmp (found version "4.5") 
+-- Found OpenMP_CXX: -fopenmp (found version "4.5") 
+-- Found PkgConfig: /home/kdougherty/libpressio_cuda/.spack-env/view/bin/pkg-config (found version "2.5.1") 
+-- Found GSL: /home/kdougherty/libpressio_cuda/.spack-env/view/include (found version "2.8") 
+-- Checking for one of the modules 'libzstd'
+-- Checking for one of the modules 'blosc'
+-- Found CUDAToolkit: /home/kdougherty/libpressio_cuda/.spack-env/view/include (found version "12.9.86") 
+-- Looking for pthread.h
+-- Looking for pthread.h - found
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE  
+-- Found HDF5: hdf5-shared (found version "1.14.6") found components: C 
+-- Found MPI_C: /gpfs/fs1/home/software/swing/HPCX/hpcx-v2.26-gcc-doca_ofed-ubuntu22.04-cuda13-x86_64/ompi4/bin/mpicc (found version "3.1") 
+-- Found MPI_CXX: /gpfs/fs1/home/software/swing/HPCX/hpcx-v2.26-gcc-doca_ofed-ubuntu22.04-cuda13-x86_64/ompi4/bin/mpicxx (found version "3.1") 
+-- Found MPI: TRUE (found version "3.1")  
+-- Found MPI: TRUE (found version "3.1") found components: CXX 
+-- Checking for one of the modules 'lua;luajit'
+-- Found nlohmann_json: /home/kdougherty/libpressio_cuda/.spack-env/view/share/cmake/nlohmann_json/nlohmann_jsonConfig.cmake (found version "3.12.0") 
+-- Found Python3: /home/kdougherty/libpressio_cuda/.spack-env/view/bin/python3 (found version "3.14.5") found components: Interpreter Development NumPy Development.Module Development.Embed 
+-- Found SWIG: /home/kdougherty/libpressio_cuda/.spack-env/view/bin/swig4.0 (found version "4.1.1")  
+-- Found MPI: TRUE (found version "3.1")  
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/kdougherty/hdf5_projs/vol-external-passthrough/build
+[ 15%] Building C object CMakeFiles/hdf5_vol_passthrough.dir/H5VLpassthru_ext.c.o
+[ 15%] Building CXX object CMakeFiles/hdf5_vol_passthrough.dir/compress.cc.o
+/home/kdougherty/hdf5_projs/vol-external-passthrough/H5VLpassthru_ext.c:57: warning: "ENABLE_EXT_PASSTHRU_LOGGING" redefined
+   57 | #define ENABLE_EXT_PASSTHRU_LOGGING
+      | 
+<command-line>: note: this is the location of the previous definition
+[ 23%] Linking CXX shared library libhdf5_vol_passthrough.so
+[ 23%] Built target hdf5_vol_passthrough
+[ 46%] Building C object tests/CMakeFiles/test_time_hurricane.dir/test_time_hurricane.c.o
+[ 46%] Building C object tests/CMakeFiles/test_time_miranda.dir/test_time_miranda.c.o
+[ 53%] Building C object tests/CMakeFiles/test_cpu_write.dir/test_cpu_write.c.o
+[ 53%] Building C object tests/CMakeFiles/test_ci.dir/test_ci.c.o
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/test_ci.c: In function 'test_roundtrip':
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/test_ci.c:108:5: warning: implicit declaration of function 'print'; did you mean 'printf'? [-Wimplicit-function-declaration]
+  108 |     print("[%s] PASS (max abs error: %.6e)\n", compressor, err);
+      |     ^~~~~
+      |     printf
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/test_ci.c: In function 'test_bad_compressor':
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/test_ci.c:149:5: warning: implicit declaration of function 'H5set_auto'; did you mean 'H5Eset_auto'? [-Wimplicit-function-declaration]
+  149 |     H5set_auto(H5E_DEFAULT, (H5E_auto_t)H5Eprint2, stderr);
+      |     ^~~~~~~~~~
+      |     H5Eset_auto
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/test_ci.c: In function 'main':
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/test_ci.c:169:12: warning: too many arguments for format [-Wformat-extra-args]
+  169 |     printf("\n----- %s (%d failures) -----\n",
+      |            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[ 61%] Linking C executable test_cpu_write
+[ 69%] Linking C executable test_time_hurricane
+[ 76%] Linking C executable test_ci
+[ 84%] Linking C executable test_time_miranda
+[ 84%] Built target test_cpu_write
+[ 84%] Built target test_time_hurricane
+/bin/ld: CMakeFiles/test_ci.dir/test_ci.c.o: in function `test_roundtrip':
+test_ci.c:(.text+0x64c): undefined reference to `print'
+/bin/ld: CMakeFiles/test_ci.dir/test_ci.c.o: in function `test_bad_compressor':
+test_ci.c:(.text+0x873): undefined reference to `H5set_auto'
+collect2: error: ld returned 1 exit status
+gmake[2]: *** [tests/CMakeFiles/test_ci.dir/build.make:101: tests/test_ci] Error 1
+gmake[1]: *** [CMakeFiles/Makefile2:212: tests/CMakeFiles/test_ci.dir/all] Error 2
+gmake[1]: *** Waiting for unfinished jobs....
+[ 92%] Building C object tests/CMakeFiles/test_error_miranda.dir/test_error_miranda.c.o
+[ 92%] Built target test_time_miranda
+[100%] Linking C executable test_error_miranda
+[100%] Built target test_error_miranda
+gmake: *** [Makefile:136: all] Error 2
+--- build/ ---
+CMakeCache.txt
+CMakeFiles
+Makefile
+cmake_install.cmake
+libhdf5_vol_passthrough.so
+tests
+--- build/tests/ ---
+CMakeFiles
+Makefile
+cmake_install.cmake
+test_cpu_write
+test_error_miranda
+test_time_hurricane
+test_time_miranda
+
+=== Miranda test ===
+GPU Hurricane test starting
+------- EXT PASS THROUGH VOL INIT
+------- EXT PASS THROUGH VOL INFO String To Info
+------- EXT PASS THROUGH VOL INFO Copy
+Loaded /lcrc/project/ECP-EZ/public/compression/Hurricane-ISABEL/nonclean-data/CLOUDf01.bin (25000000 floats)
+Raw field first 10 values:
+  [0] = 1.133244e-31
+  [1] = 1.133244e-31
+  [2] = 1.133244e-31
+  [3] = 1.133244e-31
+  [4] = 1.133244e-31
+  [5] = 1.133244e-31
+  [6] = 1.133244e-31
+  [7] = 1.133244e-31
+  [8] = 1.133244e-31
+  [9] = 1.133244e-31
+HDF5-DIAG: Error detected in HDF5 (1.14.6):
+  #000: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5D.c line 186 in H5Dcreate2(): unable to synchronously create dataset
+    major: Dataset
+    minor: Unable to create file
+  #001: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5D.c line 135 in H5D__create_api_common(): unable to create dataset
+    major: Dataset
+    minor: Unable to create file
+  #002: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5VLcallback.c line 1865 in H5VL_dataset_create(): dataset create failed
+    major: Virtual Object Layer
+    minor: Unable to create file
+  #003: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5VLcallback.c line 1830 in H5VL__dataset_create(): dataset create failed
+    major: Virtual Object Layer
+    minor: Unable to create file
+VOL Passthrough-DIAG: Error detected in vol_passthrough (1.0):
+  #004: /home/kdougherty/hdf5_projs/vol-external-passthrough/H5VLpassthru_ext.c line 1608 in H5VL_pass_through_ext_dataset_create(): dataset 'Pf48_nvcomp' creation aborted: compressor 'nvcomp' could not be initialized
+    major: Compression
+    minor: Compressor not available
+  #005: /home/kdougherty/hdf5_projs/vol-external-passthrough/H5VLpassthru_ext.c line 500 in compression_ctx_create(): compressor 'nvcomp' not found in libpressio registry: invalid compressor id nvcomp
+    major: Compression
+    minor: Compressor not available
+HDF5-DIAG: Error detected in HDF5 (1.14.6):
+  #000: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5D.c line 1347 in H5Dwrite(): can't synchronously write data
+    major: Dataset
+    minor: Write failed
+  #001: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5D.c line 1263 in H5D__write_api_common(): dset_id is not a dataset ID
+    major: Invalid arguments to routine
+    minor: Inappropriate type
+------- EXT PASS THROUGH VOL FILE Create
+------- EXT PASS THROUGH VOL INFO Copy
+Info: 0x55a1fca14d00
+------- EXT PASS THROUGH VOL INFO Copy
+------- EXT PASS THROUGH VOL INFO Free
+------- EXT PASS THROUGH VOL INFO Copy
+DEBUG config: compressor='(not set)' level='(not set)'
+------- EXT PASS THROUGH VOL INFO Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL INTROSPECT OptQuery
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL File Optional
+------- EXT PASS THROUGH VOL WRAP Object
+------- EXT PASS THROUGH VOL WRAP CTX Free
+
+--- Writes ---
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Create
+DEBUG wrap: compressor_override='(null)'
+------- EXT PASS THROUGH COMPRESSION CTX
+DEBUG ctx_create_entry: override='(null)'
+DEBUG ctx_create: id='nvcomp' compressor=(nil)
+------- EXT PASS THROUGH VOL WRAP CTX Free
+  Write Pf48_nvcomp           compressor=nvcomp      ret=-1  time=0.067 ms
+HDF5-DIAG: Error detected in HDF5 (1.14.6):
+  #000: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5D.c line 468 in H5Dclose(): not a dataset ID
+    major: Invalid arguments to routine
+    minor: Inappropriate type
+HDF5-DIAG: Error detected in HDF5 (1.14.6):
+  #000: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5D.c line 186 in H5Dcreate2(): unable to synchronously create dataset
+    major: Dataset
+    minor: Unable to create file
+  #001: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5D.c line 135 in H5D__create_api_common(): unable to create dataset
+    major: Dataset
+    minor: Unable to create file
+  #002: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5VLcallback.c line 1865 in H5VL_dataset_create(): dataset create failed
+    major: Virtual Object Layer
+    minor: Unable to create file
+  #003: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5VLcallback.c line 1830 in H5VL__dataset_create(): dataset create failed
+    major: Virtual Object Layer
+    minor: Unable to create file
+VOL Passthrough-DIAG: Error detected in vol_passthrough (1.0):
+  #004: /home/kdougherty/hdf5_projs/vol-external-passthrough/H5VLpassthru_ext.c line 1608 in H5VL_pass_through_ext_dataset_create(): dataset 'Pf48_cusz' creation aborted: compressor 'cusz' could not be initialized
+    major: Compression
+    minor: Compressor not available
+  #005: /home/kdougherty/hdf5_projs/vol-external-passthrough/H5VLpassthru_ext.c line 500 in compression_ctx_create(): compressor 'cusz' not found in libpressio registry: invalid compressor id cusz
+    major: Compression
+    minor: Compressor not available
+HDF5-DIAG: Error detected in HDF5 (1.14.6):
+  #000: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5D.c line 1347 in H5Dwrite(): can't synchronously write data
+    major: Dataset
+    minor: Write failed
+  #001: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5D.c line 1263 in H5D__write_api_common(): dset_id is not a dataset ID
+    major: Invalid arguments to routine
+    minor: Inappropriate type
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Create
+DEBUG wrap: compressor_override='(null)'
+------- EXT PASS THROUGH COMPRESSION CTX
+DEBUG ctx_create_entry: override='(null)'
+DEBUG ctx_create: id='cusz' compressor=(nil)
+------- EXT PASS THROUGH VOL WRAP CTX Free
+  Write Pf48_cusz             compressor=cusz        ret=-1  time=0.048 ms
+HDF5-DIAG: Error detected in HDF5 (1.14.6):
+  #000: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5D.c line 468 in H5Dclose(): not a dataset ID
+    major: Invalid arguments to routine
+    minor: Inappropriate type
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Create
+DEBUG wrap: compressor_override='(null)'
+------- EXT PASS THROUGH COMPRESSION CTX
+DEBUG ctx_create_entry: override='(null)'
+DEBUG ctx_create: id='cuszp' compressor=0x55a1fca2ef50
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- TRANSFER COMPRESS: id=cuszp nbytes=100000000 dtype=1 ndims=3
+TRANSFER COMPRESS OK: id=cuszp comp_size=28836664 original_nbytes=100000000
+------- EXT PASS THROUGH VOL WRAP CTX Free
+  Write Pf48_cuszp            compressor=cuszp       ret= 0  time=747.500 ms
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Create
+DEBUG wrap: compressor_override='(null)'
+------- EXT PASS THROUGH COMPRESSION CTX
+DEBUG ctx_create_entry: override='(null)'
+DEBUG ctx_create: id='noop' compressor=0x55a1fd7aa6a0
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- TRANSFER COMPRESS: id=noop nbytes=100000000 dtype=1 ndims=3
+TRANSFER COMPRESS OK: id=noop comp_size=100000000 original_nbytes=100000000
+------- EXT PASS THROUGH VOL WRAP CTX Free
+  Write Pf48_reference        compressor=noop        ret= 0  time=209.955 ms
+HDF5-DIAG: Error detected in HDF5 (1.14.6):
+  #000: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5VLcallback.c line 1162 in H5VLattr_open(): unable to open attribute
+    major: Virtual Object Layer
+    minor: Can't open object
+  #001: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5VLcallback.c line 1092 in H5VL__attr_open(): attribute open failed
+    major: Virtual Object Layer
+    minor: Can't open object
+  #002: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5VLnative_attr.c line 164 in H5VL__native_attr_open(): unable to open attribute: '_VOL_OPTIONS_JSON'
+    major: Attribute
+    minor: Can't open object
+  #003: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Aint.c line 513 in H5A__open(): unable to load attribute info from object header for attribute: '_VOL_OPTIONS_JSON'
+    major: Attribute
+    minor: Can't open object
+  #004: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Oattribute.c line 498 in H5O__attr_open_by_name(): can't locate attribute: '_VOL_OPTIONS_JSON'
+    major: Attribute
+    minor: Object not found
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+
+--- Reads ---
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Open
+DEBUG wrap: compressor_override='nvcomp'
+------- EXT PASS THROUGH COMPRESSION CTX
+DEBUG ctx_create_entry: override='nvcomp'
+DEBUG ctx_create: id='nvcomp' compressor=(nil)
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL WRAP CTX Free
+  Read  Pf48_nvcomp           ret= 0  time=0.039 ms
+  First 10 values [Pf48_nvcomp]:
+    [0] orig=1.133244e-31  decomp=0.000000e+00  diff=1.13e-31
+    [1] orig=1.133244e-31  decomp=0.000000e+00  diff=1.13e-31
+    [2] orig=1.133244e-31  decomp=0.000000e+00  diff=1.13e-31
+    [3] orig=1.133244e-31  decomp=0.000000e+00  diff=1.13e-31
+    [4] orig=1.133244e-31  decomp=0.000000e+00  diff=1.13e-31
+    [5] orig=1.133244e-31  decomp=0.000000e+00  diff=1.13e-31
+    [6] orig=1.133244e-31  decomp=0.000000e+00  diff=1.13e-31
+    [7] orig=1.133244e-31  decomp=0.000000e+00  diff=1.13e-31
+    [8] orig=1.133244e-31  decomp=0.000000e+00  diff=1.13e-31
+    [9] orig=1.133244e-31  decomp=0.000000e+00  diff=1.13e-31
+HDF5-DIAG: Error detected in HDF5 (1.14.6):
+  #000: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5VLcallback.c line 1162 in H5VLattr_open(): unable to open attribute
+    major: Virtual Object Layer
+    minor: Can't open object
+  #001: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5VLcallback.c line 1092 in H5VL__attr_open(): attribute open failed
+    major: Virtual Object Layer
+    minor: Can't open object
+  #002: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5VLnative_attr.c line 164 in H5VL__native_attr_open(): unable to open attribute: '_VOL_OPTIONS_JSON'
+    major: Attribute
+    minor: Can't open object
+  #003: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Aint.c line 513 in H5A__open(): unable to load attribute info from object header for attribute: '_VOL_OPTIONS_JSON'
+    major: Attribute
+    minor: Can't open object
+  #004: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Oattribute.c line 498 in H5O__attr_open_by_name(): can't locate attribute: '_VOL_OPTIONS_JSON'
+    major: Attribute
+    minor: Object not found
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Open
+DEBUG wrap: compressor_override='cusz'
+------- EXT PASS THROUGH COMPRESSION CTX
+DEBUG ctx_create_entry: override='cusz'
+DEBUG ctx_create: id='cusz' compressor=(nil)
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL WRAP CTX Free
+  Read  Pf48_cusz             ret= 0  time=0.005 ms
+  First 10 values [Pf48_cusz]:
+    [0] orig=1.133244e-31  decomp=0.000000e+00  diff=1.13e-31
+    [1] orig=1.133244e-31  decomp=0.000000e+00  diff=1.13e-31
+    [2] orig=1.133244e-31  decomp=0.000000e+00  diff=1.13e-31
+    [3] orig=1.133244e-31  decomp=0.000000e+00  diff=1.13e-31
+    [4] orig=1.133244e-31  decomp=0.000000e+00  diff=1.13e-31
+    [5] orig=1.133244e-31  decomp=0.000000e+00  diff=1.13e-31
+    [6] orig=1.133244e-31  decomp=0.000000e+00  diff=1.13e-31
+    [7] orig=1.133244e-31  decomp=0.000000e+00  diff=1.13e-31
+    [8] orig=1.133244e-31  decomp=0.000000e+00  diff=1.13e-31
+    [9] orig=1.133244e-31  decomp=0.000000e+00  diff=1.13e-31
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Open
+DEBUG wrap: compressor_override='cuszp'
+------- EXT PASS THROUGH COMPRESSION CTX
+DEBUG ctx_create_entry: override='cuszp'
+DEBUG ctx_create: id='cuszp' compressor=0x55a1fd6b9e20
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- TRANSFER DECOMPRESS: id=cuszp compressed_size=28836664 out_nbytes=100000000 dtype=1 ndims=3
+TRANSFER DECOMPRESS OK: id=cuszp actual_bytes=100000000 in_place=0
+------- EXT PASS THROUGH VOL WRAP CTX Free
+  Read  Pf48_cuszp            ret= 0  time=163.833 ms
+  First 10 values [Pf48_cuszp]:
+    [0] orig=1.133244e-31  decomp=0.000000e+00  diff=1.13e-31
+    [1] orig=1.133244e-31  decomp=0.000000e+00  diff=1.13e-31
+    [2] orig=1.133244e-31  decomp=0.000000e+00  diff=1.13e-31
+    [3] orig=1.133244e-31  decomp=0.000000e+00  diff=1.13e-31
+    [4] orig=1.133244e-31  decomp=0.000000e+00  diff=1.13e-31
+    [5] orig=1.133244e-31  decomp=0.000000e+00  diff=1.13e-31
+    [6] orig=1.133244e-31  decomp=0.000000e+00  diff=1.13e-31
+    [7] orig=1.133244e-31  decomp=0.000000e+00  diff=1.13e-31
+    [8] orig=1.133244e-31  decomp=0.000000e+00  diff=1.13e-31
+    [9] orig=1.133244e-31  decomp=0.000000e+00  diff=1.13e-31
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Open
+DEBUG wrap: compressor_override='noop'
+------- EXT PASS THROUGH COMPRESSION CTX
+DEBUG ctx_create_entry: override='noop'
+DEBUG ctx_create: id='noop' compressor=0x55a1fd6b9ea0
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL WRAP CTX Free
+  Read  Pf48_reference        ret= 0  time=168.842 ms
+  First 10 values [Pf48_reference]:
+    [0] orig=1.133244e-31  decomp=1.133244e-31  diff=0.00e+00
+    [1] orig=1.133244e-31  decomp=1.133244e-31  diff=0.00e+00
+    [2] orig=1.133244e-31  decomp=1.133244e-31  diff=0.00e+00
+    [3] orig=1.133244e-31  decomp=1.133244e-31  diff=0.00e+00
+    [4] orig=1.133244e-31  decomp=1.133244e-31  diff=0.00e+00
+    [5] orig=1.133244e-31  decomp=1.133244e-31  diff=0.00e+00
+    [6] orig=1.133244e-31  decomp=1.133244e-31  diff=0.00e+00
+    [7] orig=1.133244e-31  decomp=1.133244e-31  diff=0.00e+00
+    [8] orig=1.133244e-31  decomp=1.133244e-31  diff=0.00e+00
+    [9] orig=1.133244e-31  decomp=1.133244e-31  diff=0.00e+00
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL FILE Close
+------- EXT PASS THROUGH VOL INFO Free
+------- EXT PASS THROUGH VOL UNWRAP Object
+------- EXT PASS THROUGH VOL WRAP CTX Free
+
+GPU Hurricane test done.
+HDF5-DIAG: Error detected in HDF5 (1.14.6):
+  #000: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5E.c line 204 in H5Eclose_msg(): unable to decrement ref count on error message
+    major: Error API
+    minor: Unable to decrement reference count
+  #001: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Iint.c line 1087 in H5I_dec_app_ref(): can't decrement ID ref count
+    major: Object ID
+    minor: Unable to decrement reference count
+  #002: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Iint.c line 1042 in H5I__dec_app_ref(): can't decrement ID ref count
+    major: Object ID
+    minor: Unable to decrement reference count
+  #003: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Iint.c line 948 in H5I__dec_ref(): can't locate ID
+    major: Object ID
+    minor: Unable to find ID information (already closed?)
+------- EXT PASS THROUGH VOL INFO Free
+------- EXT PASS THROUGH VOL INFO Free
+------- EXT PASS THROUGH VOL TERM
+Job finished on Wed Jun 24 12:30:32 CDT 2026

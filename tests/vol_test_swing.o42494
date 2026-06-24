@@ -1,0 +1,224 @@
+Job started on Tue Jun 16 12:38:03 CDT 2026
+Running on: gpu1
+PWD: /home/kdougherty/hdf5_projs/vol-external-passthrough
+mpicc:   /gpfs/fs1/home/software/swing/HPCX/hpcx-v2.26-gcc-doca_ofed-ubuntu22.04-cuda13-x86_64/ompi4/bin/mpicc
+nvcc:    /gpfs/fs1/soft/swing/software/spack-built/linux-ubuntu22.04-x86_64/gcc-11.4.0/cuda-12.6.0-qb3dlng/bin/nvcc
+gcc:     gcc (Ubuntu 11.4.0-1ubuntu1~22.04.2) 11.4.0
+GCC_LIB: /usr/lib/gcc/x86_64-linux-gnu/11
+gcc (Ubuntu 11.4.0-1ubuntu1~22.04.2) 11.4.0
+Copyright (C) 2021 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+LibPressio cmake dir: /home/kdougherty/libpressio_cuda/.spack-env/view/lib/cmake/LibPressio
+
+=== Building ===
+-- The C compiler identification is GNU 11.4.0
+-- The CUDA compiler identification is NVIDIA 12.9.86
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /gpfs/fs1/home/software/swing/HPCX/hpcx-v2.26-gcc-doca_ofed-ubuntu22.04-cuda13-x86_64/ompi4/bin/mpicc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CUDA compiler ABI info
+-- Detecting CUDA compiler ABI info - done
+-- Check for working CUDA compiler: /home/kdougherty/libpressio_cuda/.spack-env/view/bin/nvcc - skipped
+-- Detecting CUDA compile features
+-- Detecting CUDA compile features - done
+-- Found MPI_C: /gpfs/fs1/home/software/swing/HPCX/hpcx-v2.26-gcc-doca_ofed-ubuntu22.04-cuda13-x86_64/ompi4/bin/mpicc (found version "3.1") 
+-- Found MPI: TRUE (found version "3.1")  
+-- Found HDF5: hdf5-shared (found version "1.14.6")  
+-- Found OpenMP_C: -fopenmp (found version "4.5") 
+-- Found OpenMP: TRUE (found version "4.5")  
+-- Found BZip2: /home/kdougherty/libpressio_cuda/.spack-env/view/lib/libbz2.so (found version "1.0.8") 
+-- Looking for BZ2_bzCompressInit
+-- Looking for BZ2_bzCompressInit - found
+-- Found ZFP: /home/kdougherty/libpressio_cuda/.spack-env/view/lib/cmake/zfp/zfp-config.cmake (found version "0.5.5") 
+-- Found OpenMP_C: -fopenmp (found version "4.5") 
+-- Found PkgConfig: /home/kdougherty/libpressio_cuda/.spack-env/view/bin/pkg-config (found version "2.5.1") 
+-- Found GSL: /home/kdougherty/libpressio_cuda/.spack-env/view/include (found version "2.8") 
+-- Checking for one of the modules 'libzstd'
+-- Checking for one of the modules 'blosc'
+-- Found CUDAToolkit: /home/kdougherty/libpressio_cuda/.spack-env/view/include (found version "12.9.86") 
+-- Looking for pthread.h
+-- Looking for pthread.h - found
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE  
+-- Found HDF5: hdf5-shared (found version "1.14.6") found components: C 
+-- Could NOT find MPI (missing: MPI_CXX_FOUND CXX) 
+    Reason given by package: MPI component 'CXX' was requested, but language CXX is not enabled.  
+
+-- Checking for one of the modules 'lua;luajit'
+-- Found nlohmann_json: /home/kdougherty/libpressio_cuda/.spack-env/view/share/cmake/nlohmann_json/nlohmann_jsonConfig.cmake (found version "3.12.0") 
+-- Found Python3: /home/kdougherty/libpressio_cuda/.spack-env/view/bin/python3 (found version "3.14.5") found components: Interpreter Development NumPy Development.Module Development.Embed 
+-- Found SWIG: /home/kdougherty/libpressio_cuda/.spack-env/view/bin/swig4.0 (found version "4.1.1")  
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/kdougherty/hdf5_projs/vol-external-passthrough/build
+[ 27%] Building C object CMakeFiles/hdf5_vol_passthrough.dir/H5VLpassthru_ext.c.o
+[ 27%] Building C object CMakeFiles/hdf5_vol_passthrough.dir/cpu_compress.c.o
+[ 27%] Building CUDA object CMakeFiles/hdf5_vol_passthrough.dir/gpu_transform.cu.o
+nvcc warning : Support for offline compilation for architectures prior to '<compute/sm/lto>_75' will be removed in a future release (Use -Wno-deprecated-gpu-targets to suppress warning).
+/home/kdougherty/hdf5_projs/vol-external-passthrough/H5VLpassthru_ext.c:61: warning: "ENABLE_EXT_PASSTHRU_LOGGING" redefined
+   61 | #define ENABLE_EXT_PASSTHRU_LOGGING
+      | 
+<command-line>: note: this is the location of the previous definition
+/home/kdougherty/hdf5_projs/vol-external-passthrough/gpu_transform.cu(14): warning #177-D: function "cuda_deleter" was declared but never referenced
+  static void cuda_deleter(void* data, void* meta) {
+              ^
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+[ 36%] Linking CUDA device code CMakeFiles/hdf5_vol_passthrough.dir/cmake_device_link.o
+[ 45%] Linking CUDA shared library libhdf5_vol_passthrough.so
+[ 45%] Built target hdf5_vol_passthrough
+[ 63%] Building C object tests/CMakeFiles/test_cpu_hurricane.dir/test_cpu_hurricane.c.o
+[ 72%] Building C object tests/CMakeFiles/miranda.dir/miranda.c.o
+[ 72%] Building C object tests/CMakeFiles/test_cpu_write.dir/test_cpu_write.c.o
+[ 81%] Linking C executable test_cpu_write
+[ 90%] Linking C executable test_cpu_hurricane
+[100%] Linking C executable miranda
+[100%] Built target test_cpu_write
+[100%] Built target test_cpu_hurricane
+[100%] Built target miranda
+--- build/ ---
+CMakeCache.txt
+CMakeFiles
+Makefile
+cmake_install.cmake
+libhdf5_vol_passthrough.so
+tests
+--- build/tests/ ---
+CMakeFiles
+Makefile
+cmake_install.cmake
+miranda
+test_cpu_hurricane
+test_cpu_write
+
+=== Hurricane test ===
+GPU Hurricane test starting
+------- EXT PASS THROUGH VOL INIT
+------- EXT PASS THROUGH VOL INFO String To Info
+------- EXT PASS THROUGH VOL INFO Copy
+Loaded /lcrc/project/ECP-EZ/public/compression/Hurricane-ISABEL/nonclean-data/CLOUDf01.bin (25000000 floats)
+Raw field first 10 values:
+  [0] = 0.000000
+  [1] = 0.000000
+  [2] = 0.000000
+  [3] = 0.000000
+  [4] = 0.000000
+  [5] = 0.000000
+  [6] = 0.000000
+  [7] = 0.000000
+  [8] = 0.000000
+  [9] = 0.000000
+[gpu] entry: cudaGetDevice rc=0 dev=0 d_in=0x146760000000 cap=2147483648 stream=0x55fe4565cb50
+create:
+------- EXT PASS THROUGH VOL FILE Create
+------- EXT PASS THROUGH VOL INFO Copy
+Info: 0x55fe44ac8dd0
+------- EXT PASS THROUGH VOL INFO Copy
+------- EXT PASS THROUGH VOL INFO Free
+------- EXT PASS THROUGH VOL INFO Copy
+DEBUG config: compressor='(not set)' level='(not set)'
+------- EXT PASS THROUGH VOL INFO Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL INTROSPECT OptQuery
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL File Optional
+------- EXT PASS THROUGH VOL WRAP Object
+------- EXT PASS THROUGH VOL WRAP CTX Free
+compressor:
+create again:
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Create
+DEBUG wrap: compressor_override='(null)'
+------- EXT PASS THROUGH COMPRESSION CTX
+DEBUG ctx_create_entry: override='(null)'
+DEBUG ctx_create: id='cuszp' compressor=0x55fe4566dbc0
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+GPU COMPRESSION CALLED: id=cuszp nbytes=100000000 dtype=1 ndims=3
+GPU compress OK: id=cuszp comp_size=28836664
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Create
+DEBUG wrap: compressor_override='(null)'
+------- EXT PASS THROUGH COMPRESSION CTX
+DEBUG ctx_create_entry: override='(null)'
+DEBUG ctx_create: id='noop' compressor=0x55fe4585d650
+DEBUG: CUDA configured for non-CUDA compressor: noop
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- CPU COMPRESSION CALLED
+DEBUG compress: comp_size=100000000 original_nbytes=100000000 dtype=1
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Open
+DEBUG wrap: compressor_override='cuszp'
+------- EXT PASS THROUGH COMPRESSION CTX
+DEBUG ctx_create_entry: override='cuszp'
+DEBUG ctx_create: id='cuszp' compressor=0x55fe45773130
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL WRAP CTX Get
+GPU DECOMPRESSION CALLED: id=cuszp compressed_size=28836664 output_nbytes=100000000 dtype=1
+------- EXT PASS THROUGH VOL WRAP CTX Free
+H5Dread returned: 0
+rbuf first 10 raw values:
+  [0] = 0.000000
+  [1] = 0.000000
+  [2] = 0.000000
+  [3] = 0.000000
+  [4] = 0.000000
+  [5] = 0.000000
+  [6] = 0.000000
+  [7] = 0.000000
+  [8] = 0.000000
+  [9] = 0.000000
+Pf48_gpu_lz4 first 10 values:
+  [0] orig=1.133244e-31  decomp=0.000000e+00  diff=1.13e-31
+  [1] orig=1.133244e-31  decomp=0.000000e+00  diff=1.13e-31
+  [2] orig=1.133244e-31  decomp=0.000000e+00  diff=1.13e-31
+  [3] orig=1.133244e-31  decomp=0.000000e+00  diff=1.13e-31
+  [4] orig=1.133244e-31  decomp=0.000000e+00  diff=1.13e-31
+  [5] orig=1.133244e-31  decomp=0.000000e+00  diff=1.13e-31
+  [6] orig=1.133244e-31  decomp=0.000000e+00  diff=1.13e-31
+  [7] orig=1.133244e-31  decomp=0.000000e+00  diff=1.13e-31
+  [8] orig=1.133244e-31  decomp=0.000000e+00  diff=1.13e-31
+  [9] orig=1.133244e-31  decomp=0.000000e+00  diff=1.13e-31
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL FILE Close
+------- EXT PASS THROUGH VOL WRAP CTX Free
+GPU Hurricane test done.
+HDF5-DIAG: Error detected in HDF5 (1.14.6):
+  #000: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5E.c line 204 in H5Eclose_msg(): unable to decrement ref count on error message
+    major: Error API
+    minor: Unable to decrement reference count
+  #001: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Iint.c line 1087 in H5I_dec_app_ref(): can't decrement ID ref count
+    major: Object ID
+    minor: Unable to decrement reference count
+  #002: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Iint.c line 1042 in H5I__dec_app_ref(): can't decrement ID ref count
+    major: Object ID
+    minor: Unable to decrement reference count
+  #003: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Iint.c line 948 in H5I__dec_ref(): can't locate ID
+    major: Object ID
+    minor: Unable to find ID information (already closed?)
+------- EXT PASS THROUGH VOL WRAP CTX Get
+------- EXT PASS THROUGH VOL DATASET Close
+------- EXT PASS THROUGH VOL Get object
+------- EXT PASS THROUGH VOL INFO Free
+------- EXT PASS THROUGH VOL UNWRAP Object
+------- EXT PASS THROUGH VOL WRAP CTX Free
+------- EXT PASS THROUGH VOL INFO Free
+------- EXT PASS THROUGH VOL INFO Free
+------- EXT PASS THROUGH VOL TERM
+Job finished on Tue Jun 16 12:38:19 CDT 2026

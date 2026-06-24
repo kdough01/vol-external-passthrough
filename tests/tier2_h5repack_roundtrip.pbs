@@ -8,12 +8,12 @@
 
 set -uo pipefail   # h5diff returns 1 on differences
 
-SPACK_ROOT="home/kdougherty/spack"
-SPACK_ENV_DIR="home/kdougherty/libpressio_cuda"
-VOL_BUILD_DIR="home/kdougherty/hdf5_projs/vol-external-passthrough/build"
+SPACK_ROOT="/home/kdougherty/spack"
+SPACK_ENV_DIR="/home/kdougherty/libpressio_cuda"
+VOL_BUILD_DIR="/home/kdougherty/hdf5_projs/vol-external-passthrough/build"
 VOL_NAME="pass_through_ext"
 
-MIRANDA_DIR="/lcrc/project/SDR/public/compression/Miranda/SDRBENCH-Miranda-256x384x384"
+MIRANDA_DIR="/lcrc/project/ECP-EZ/public/compression/Miranda/SDRBENCH-Miranda-256x384x384"
 FIELD_FILE="density.d64"
 DSET="/field"
 NX=256; NY=384; NZ=384
@@ -88,6 +88,7 @@ FAILS=0
 declare -a SUMMARY=()
 
 roundtrip () {
+  export HDF5_VOL_CONNECTOR="pass_through_ext under_vol=0;under_info={}"
   local comp="$1" mode="$2"
   local comp_h5="comp_${comp}.h5" dec_h5="dec_${comp}.h5"
   echo "============================================================"
