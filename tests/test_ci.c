@@ -11,15 +11,15 @@
 
 static void fill_data(double *buf, size_t n)
 {
-    for (size_t i=0;i<n;i++) {
-        buf[i] = sin((double)i * 0.0);
+    for (size_t i = 0; i < n; i++) {
+        buf[i] = sin((double)i * 0.01);
     }
 }
 
 static double max_abs_diff(const double *a, const double *b, size_t n)
 {
     double mx = 0.0;
-    for (size_t i=0;i<n;i++) {
+    for (size_t i = 0; i < n; i++) {
         double d = fabs(a[i] - b[i]);
         if (d > mx) mx = d;
     }
@@ -40,7 +40,7 @@ static int test_roundtrip(const char *compressor, double tol)
     snprintf(fname, sizeof(fname), "/tmp/test_ci_%s.h5", compressor);
 
     wbuf = (double *) malloc(NELEMS * sizeof(double));
-    rbuf = (double *)calloc(NELEMS, sizeof(double));
+    rbuf = (double *) calloc(NELEMS, sizeof(double));
 
     if (!wbuf || !rbuf) {
         fprintf(stderr, "[%s] FAIL: malloc\n", compressor);
@@ -68,7 +68,6 @@ static int test_roundtrip(const char *compressor, double tol)
     }
 
     did = H5Dcreate2(fid, "data", H5T_NATIVE_DOUBLE, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-
     if (did < 0) {
         fprintf(stderr, "[%s] FAIL: H5Dcreate2\n", compressor);
         ret = 1;
@@ -82,8 +81,8 @@ static int test_roundtrip(const char *compressor, double tol)
     }
 
     H5Dclose(did); did = H5I_INVALID_HID;
-    H5Dclose(sid); sid = H5I_INVALID_HID;
-    H5Dclose(fid); fid = H5I_INVALID_HID;
+    H5Sclose(sid); sid = H5I_INVALID_HID;
+    H5Fclose(fid); fid = H5I_INVALID_HID;
 
     fid = H5Fopen(fname, H5F_ACC_RDONLY, H5P_DEFAULT);
     if (fid < 0) {
@@ -99,18 +98,24 @@ static int test_roundtrip(const char *compressor, double tol)
         goto done;
     }
 
+    if (H5Dread(did, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0) {
+        fprintf(stderr, "[%s] FAIL: H5Dread\n", compressor);
+        ret = 1;
+        goto done;
+    }
+
     double err = max_abs_diff(wbuf, rbuf, NELEMS);
     if (err > tol) {
         fprintf(stderr, "[%s] FAIL: max abs error %.6e > tol %.6e\n", compressor, err, tol);
         ret = 1;
         goto done;
     }
-    print("[%s] PASS (max abs error: %.6e)\n", compressor, err);
+    printf("[%s] PASS (max abs error: %.6e)\n", compressor, err);
 
 done:
     if (did != H5I_INVALID_HID) H5Dclose(did);
-    if (sid != H5I_INVALID_HID) H5Dclose(sid);
-    if (fid != H5I_INVALID_HID) H5Dclose(fid);
+    if (sid != H5I_INVALID_HID) H5Sclose(sid);
+    if (fid != H5I_INVALID_HID) H5Fclose(fid);
     free(wbuf);
     free(rbuf);
     return ret;
@@ -129,9 +134,8 @@ static int test_bad_compressor(void)
     H5Eset_auto(H5E_DEFAULT, NULL, NULL);
 
     fid = H5Fcreate("/tmp/test_ci_bad.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-
     if (fid < 0) {
-        printf("[bad comrpessor] PASS (file create rejected unavailable compressor)\n");
+        printf("[bad_compressor] PASS (file create rejected unavailable compressor)\n");
         goto done;
     }
 
@@ -146,7 +150,7 @@ static int test_bad_compressor(void)
     }
 
 done:
-    H5set_auto(H5E_DEFAULT, (H5E_auto_t)H5Eprint2, stderr);
+    H5Eset_auto(H5E_DEFAULT, (H5E_auto_t)H5Eprint2, stderr);
     if (sid != H5I_INVALID_HID) H5Sclose(sid);
     if (fid != H5I_INVALID_HID) H5Fclose(fid);
     return ret;
@@ -155,7 +159,7 @@ done:
 int main(void)
 {
     int failures = 0;
-    printf("----- VOL Compression Tests -----");
+    printf("----- VOL Compression Tests -----\n");
 
     failures += test_roundtrip("noop", 0.0);
     failures += test_roundtrip("bzip2", 0.0);
@@ -166,10 +170,10 @@ int main(void)
 
     setenv("HDF5_VOL_PRESSIO_COMPRESSOR", "noop", 1);
 
-    printf("\n----- %s (%d failures) -----\n",
-            failures == 0 ? "ALL TESTS PASSED" : "TESTS FAILED",
-            failures,
-            failures == 1 ? "" : "s");
+    printf("\n----- %s (%d failure%s) -----\n",
+           failures == 0 ? "ALL TESTS PASSED" : "TESTS FAILED",
+           failures,
+           failures == 1 ? "" : "s");
 
     return failures > 0 ? 1 : 0;
 }
