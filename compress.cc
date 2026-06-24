@@ -117,7 +117,9 @@ H5VL_pass_through_ext_transfer_compress(compression_ctx *ctx, const void *data, 
     input  = pressio_data_new_nonowning_domain(in_dtype, (void *)data, in_ndims, in_dims, "malloc");
     {
         pressio_data out_cpp = pressio_data::owning(
-            pressio_byte_dtype, std::vector<size_t>{}, std::string("malloc"));
+            pressio_byte_dtype,
+            std::vector<size_t>{},
+            libpressio::domain_plugins().build("malloc"));   // shared_ptr, matches line 152
         output = new pressio_data(std::move(out_cpp));
     }
 
