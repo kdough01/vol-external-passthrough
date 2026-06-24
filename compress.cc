@@ -115,7 +115,7 @@ H5VL_pass_through_ext_transfer_compress(compression_ctx *ctx, const void *data, 
     /* Always hand libpressio host memory; GPU compressors migrate it to the
      * device themselves via the domain manager. */
     input  = pressio_data_new_nonowning_domain(in_dtype, (void *)data, in_ndims, in_dims, "malloc");
-    output = pressio_data_new_empty(pressio_byte_dtype, 0, NULL);
+    output = pressio_data_new_owning_domain(pressio_byte_dtype, 0, NULL, "malloc");
 
 #ifdef ENABLE_EXT_PASSTHRU_LOGGING
     {
