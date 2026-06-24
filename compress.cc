@@ -114,20 +114,10 @@ H5VL_pass_through_ext_transfer_compress(compression_ctx *ctx, const void *data, 
 
     /* Always hand libpressio host memory; GPU compressors migrate it to the
      * device themselves via the domain manager. */
+    input  = pressio_data_new_nonowning_domain(in_dtype, (void *)data, in_ndims, in_dims, "malloc");
     {
-        std::vector<size_t> in_dims_vec(in_dims, in_dims + in_ndims);
-        pressio_data in_cpp = pressio_data::nonowning(
-            in_dtype,
-            libpressio::domain_plugins().build("malloc"),
-            (void *)data,
-            in_dims_vec);
-        input = new pressio_data(std::move(in_cpp));
-    }
-    {
-        std::vector<size_t> empty_dims;
         pressio_data out_cpp = pressio_data::owning(
-            pressio_byte_dtype, empty_dims,
-            libpressio::domain_plugins().build("malloc"));
+            pressio_byte_dtype, std::vector<size_t>{}, std::string("malloc"));
         output = new pressio_data(std::move(out_cpp));
     }
 
@@ -145,11 +135,6 @@ H5VL_pass_through_ext_transfer_compress(compression_ctx *ctx, const void *data, 
             fprintf(stderr, "%zu%s", in_dims[i], (i + 1 < in_ndims) ? "," : "");
         fprintf(stderr, "]\n");
     }
-
-    fprintf(stderr, "PRE-COMPRESS domains: in='%s' out='%s'  out_bytes=%zu out_has_data=%d\n",
-        input->domain()  ? input->domain()->prefix().c_str()  : "(null)",
-        output->domain() ? output->domain()->prefix().c_str() : "(null)",
-        pressio_data_get_bytes(output), pressio_data_has_data(output));
 #endif
 
     if (pressio_compressor_compress(ctx->compressor, input, output)) {
