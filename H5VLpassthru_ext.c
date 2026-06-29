@@ -830,7 +830,7 @@ H5VL_pass_through_ext_term(void)
         min_config_missing = H5I_INVALID_HID;
     }
 
-    H5Eset_auto(H5E_DEFAULT, NULL, NULL);
+    // H5Eset_auto(H5E_DEFAULT, NULL, NULL);
 
     return 0;
 } /* end H5VL_pass_through_ext_term() */
