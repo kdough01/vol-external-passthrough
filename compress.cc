@@ -139,7 +139,7 @@ H5VL_pass_through_ext_transfer_compress(compression_ctx *ctx, const void *data, 
                 (void *)output, pressio_data_get_bytes(output),
                 pressio_data_get_capacity_in_bytes(output),
                 pressio_data_domain_id(output));
-        const char* comp_id = pressio_compressor_get_id(ctx->compressor);
+        const char* comp_id = pressio_compressor_get_name(ctx->compressor);
         fprintf(stderr, "DEBUG: Current compressor ID is: %s\n", comp_id);
         fflush(stderr);
     }
