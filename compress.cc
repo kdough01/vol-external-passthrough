@@ -34,8 +34,13 @@ vol_logical_nbytes(const compression_ctx *ctx)
 static void
 vol_make_host_resident(struct pressio_data *data)
 {
-    pressio_data *d = data;
-    *d = domain_manager().make_readable(libpressio::domain_plugins().build("malloc"), std::move(*d));
+    if (!data) return;
+    
+    if (strcmp(pressio_data_domain_id(data), "malloc") != 0) {
+        pressio_data *d = data;
+        *d = domain_manager().make_readable(
+            libpressio::domain_plugins().build("malloc"), std::move(*d));
+    }
 }
 
 extern "C" {

@@ -2136,7 +2136,12 @@ H5VL_pass_through_ext_dataset_write(
         uint64_t csize = ctx->compressed_chunk_size;
         size_t total = sizeof(uint64_t) + csize;
 
-        hsize_t new_size[1] = { total };
+        hsize_t new_size[H5S_MAX_RANK] = {0};
+        new_size[0] = total;
+        H5VL_dataset_specific_args_t sargs;
+        sargs.op_type = H5VL_DATASET_SET_EXTENT;
+        sargs.args.set_extent.size = new_size;
+
         H5VL_dataset_specific_args_t sargs;
         sargs.op_type = H5VL_DATASET_SET_EXTENT;
         sargs.args.set_extent.size = new_size;
