@@ -804,31 +804,31 @@ H5VL_pass_through_ext_term(void)
     } /* end if */
 
     /* Clean up error class and codes */
-    if(H5I_INVALID_HID != min_decompress_failed) {
-        H5Eclose_msg(min_decompress_failed);
-        min_decompress_failed = H5I_INVALID_HID;
-    }
-    if(H5I_INVALID_HID != min_compress_failed) {
-        H5Eclose_msg(min_compress_failed);
-        min_compress_failed = H5I_INVALID_HID;
-    }
-    if(H5I_INVALID_HID != min_compressor_unavail) {
-        H5Eclose_msg(min_compressor_unavail);
-        min_compressor_unavail = H5I_INVALID_HID;
-    }
-    if(H5I_INVALID_HID != maj_compression) {
-        H5Eclose_msg(maj_compression);
-        maj_compression = H5I_INVALID_HID;
-    }
-    if(H5I_INVALID_HID != vol_err_class) {
-        H5Eunregister_class(vol_err_class);
-        vol_err_class = H5I_INVALID_HID;
-    }
+    // if(H5I_INVALID_HID != min_decompress_failed) {
+    //     H5Eclose_msg(min_decompress_failed);
+    //     min_decompress_failed = H5I_INVALID_HID;
+    // }
+    // if(H5I_INVALID_HID != min_compress_failed) {
+    //     H5Eclose_msg(min_compress_failed);
+    //     min_compress_failed = H5I_INVALID_HID;
+    // }
+    // if(H5I_INVALID_HID != min_compressor_unavail) {
+    //     H5Eclose_msg(min_compressor_unavail);
+    //     min_compressor_unavail = H5I_INVALID_HID;
+    // }
+    // if(H5I_INVALID_HID != maj_compression) {
+    //     H5Eclose_msg(maj_compression);
+    //     maj_compression = H5I_INVALID_HID;
+    // }
+    // if(H5I_INVALID_HID != vol_err_class) {
+    //     H5Eunregister_class(vol_err_class);
+    //     vol_err_class = H5I_INVALID_HID;
+    // }
 
-    if(H5I_INVALID_HID != min_config_missing) {
-        H5Eclose_msg(min_config_missing);
-        min_config_missing = H5I_INVALID_HID;
-    }
+    // if(H5I_INVALID_HID != min_config_missing) {
+    //     H5Eclose_msg(min_config_missing);
+    //     min_config_missing = H5I_INVALID_HID;
+    // }
 
     // H5Eset_auto(H5E_DEFAULT, NULL, NULL);
 
