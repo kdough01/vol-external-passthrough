@@ -145,6 +145,23 @@ H5VL_pass_through_ext_transfer_compress(compression_ctx *ctx, const void *data, 
     }
 #endif
 
+    if (!ctx) {
+        fprintf(stderr, "CRITICAL CRASH AVOIDED: ctx is NULL!\n");
+        abort();
+    }
+    if (!ctx->compressor) {
+        fprintf(stderr, "CRITICAL CRASH AVOIDED: ctx->compressor is NULL!\n");
+        abort();
+    }
+
+    size_t out_cap = pressio_data_get_capacity_in_bytes(output);
+    fprintf(stderr, "DEBUG: Right before compress. Compressor=%p, Output Capacity=%zu bytes\n", 
+            (void*)ctx->compressor, out_cap);
+
+    if (out_cap == 0) {
+        fprintf(stderr, "WARNING: Passing a 0-capacity output buffer to the compressor.\n");
+    }
+
     if (pressio_compressor_compress(ctx->compressor, input, output)) {
         H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
                 vol_err_class, maj_compression, min_compress_failed,

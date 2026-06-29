@@ -522,20 +522,19 @@ compression_ctx* compression_ctx_create(int rank, hsize_t *h5dims, enum pressio_
 
     // configure metrics for the compressor - this is default and overidden if JSON is present
     comp_ctx->compressor_opts = pressio_options_new();
-    if (strcmp(comp_ctx->compressor_id, "noop") != 0) {
-        char level_key[128];
-        snprintf(level_key, sizeof(level_key), "%s:compression_level", comp_ctx->compressor_id);
-        pressio_options_set_integer(comp_ctx->compressor_opts, level_key, defaults->compression_level);
+    char level_key[128];
+    snprintf(level_key, sizeof(level_key), "%s:compression_level", comp_ctx->compressor_id);
+    pressio_options_set_integer(comp_ctx->compressor_opts, level_key, defaults->compression_level);
 
-        // 2. Change this to a WARNING rather than a FATAL error
-        if(pressio_compressor_set_options(comp_ctx->compressor, comp_ctx->compressor_opts)) {
-            printf("WARNING: Default option '%s' not supported by '%s'. Relying on JSON opts.\n", 
-                   level_key, comp_ctx->compressor_id);
-            // We do NOT destroy the context here anymore. 
-            // The compressor is still valid, it just rejected the default integer level.
-        }
+    if(pressio_compressor_set_options(comp_ctx->compressor, comp_ctx->compressor_opts)) {
+        H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                vol_err_class, maj_compression, min_compress_failed,
+                "pressio_compressor_set_options failed for '%s': %s",
+                comp_ctx->compressor_id,
+                pressio_compressor_error_msg(comp_ctx->compressor));
+        compression_ctx_destroy(comp_ctx);
+        return NULL;
     }
-
 
     // JSON
     if (json_opts[0] != '\0') {
