@@ -107,6 +107,9 @@ for t in "$H5REPACK" "$H5DIFF" "$H5CC"; do
   [ -x "$t" ] || { echo "FATAL: $t not found/executable"; exit 99; }
 done
 
+echo "=== h5repack dependencies ==="
+ldd "$H5REPACK"
+
 cd "$WORK"
 set -uo pipefail
 
@@ -208,6 +211,8 @@ roundtrip () {
     SUMMARY+=("$comp: FAIL (diff rc=$rc)"); FAILS=$((FAILS+1))
   fi
 }
+
+export LD_PRELOAD="$VOL_BUILD_DIR/libhdf5_vol_passthrough.so"
 
 roundtrip noop     lossless
 roundtrip bzip2    lossless
