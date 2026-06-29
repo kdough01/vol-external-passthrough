@@ -593,6 +593,16 @@ void gpu_vol_file_destroy(gpu_vol_file_t *file_ctx) {
     free(file_ctx);
 }
 
+void gpu_vol_dataset_destroy(gpu_vol_dataset_t *ds_ctx)
+{
+    if (!ds_ctx) return;
+
+    if (ds_ctx->comp_ctx)
+        compression_ctx_destroy(ds_ctx->comp_ctx);
+
+    free(ds_ctx);
+}
+
 void config_params_destroy(config_params *p) {
     if (!p) return;
     free(p->default_compression_id);
@@ -2338,12 +2348,6 @@ H5VL_pass_through_ext_dataset_close(void *dset, hid_t dxpl_id, void **req)
 #endif
 
     gpu_vol_dataset_t *ds_ctx = (gpu_vol_dataset_t *)o->custom_data;
-    if (ds_ctx && ds_ctx->comp_ctx && ds_ctx->comp_ctx->stage_buf) {
-        free(ds_ctx->comp_ctx->stage_buf);
-        ds_ctx->comp_ctx->stage_buf    = NULL;
-        ds_ctx->comp_ctx->stage_filled = 0;
-        ds_ctx->comp_ctx->stage_total  = 0;
-    }
 
     ret_value = H5VLdataset_close(o->under_object, o->under_vol_id, dxpl_id, req);
 
@@ -2352,8 +2356,10 @@ H5VL_pass_through_ext_dataset_close(void *dset, hid_t dxpl_id, void **req)
         *req = H5VL_pass_through_ext_new_obj(*req, o->under_vol_id);
 
     /* Release our wrapper, if underlying dataset was closed */
-    if(ret_value >= 0)
+    if(ret_value >= 0) {
+        if (ds_ctx) gpu_vol_dataset_destroy(ds_ctx);
         H5VL_pass_through_ext_free_obj(o);
+    }
 
     return ret_value;
 } /* end H5VL_pass_through_ext_dataset_close() */
