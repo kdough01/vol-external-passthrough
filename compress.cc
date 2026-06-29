@@ -139,6 +139,24 @@ H5VL_pass_through_ext_transfer_compress(compression_ctx *ctx, const void *data, 
     }
 #endif
 
+    fprintf(stderr, "PRE-COMPRESS: ctx=%p compressor=%p id=%s\n",
+            (void *)ctx, (void *)ctx->compressor, ctx->compressor_id);
+    fflush(stderr);
+
+    if (!ctx->compressor) {
+        H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                vol_err_class, maj_compression, min_compress_failed,
+                "dataset '%s' has no compressor handle at write time "
+                "(was it created without instantiating the compressor?)",
+                ctx->compressor_id);
+        ret_val = -1;
+        goto done;
+    }
+
+    fprintf(stderr, "  handle ok, error_code=%d\n",
+            pressio_compressor_error_code(ctx->compressor));
+    fflush(stderr);
+
     if (pressio_compressor_compress(ctx->compressor, input, output)) {
         H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
                 vol_err_class, maj_compression, min_compress_failed,
