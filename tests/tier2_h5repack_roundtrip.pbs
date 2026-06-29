@@ -77,6 +77,7 @@ CLEAN_PATH=$(echo "$PATH" | tr ':' '\n' | grep -v spack-env | tr '\n' ':')
 rm -rf build
 env PATH="$CLEAN_PATH" LD_LIBRARY_PATH="$GCC_LIB" \
 cmake -S . -B build \
+    -DCMAKE_BUILD_TYPE=RelWithDebInfo \
     -DCMAKE_C_COMPILER="$SYSTEM_MPICC" \
     -DCMAKE_CXX_COMPILER="$SYSTEM_MPICXX" \
     -DUSE_CUDA=ON \
@@ -93,10 +94,20 @@ ls -l "$VOL_BUILD_DIR/libhdf5_vol_passthrough.so" \
 
 # ============================================================================
 # RUNTIME PHASE
+# ----------------------------------------------------------------------------
+# Load the VOL the way HDF5 intends: via HDF5_PLUGIN_PATH (dlopen, RTLD_LOCAL,
+# after libhdf5 init). Do NOT LD_PRELOAD the VOL -- preloading maps it a second
+# time before HDF5 initializes and pulls its deps ahead of libhdf5, corrupting
+# HDF5's free lists and crashing in H5FL_garbage_coll at H5close.
+#
+# HDF5_VOL_CONNECTOR stays UNSET: this is an asymmetric round-trip where the
+# connector is selected per-leg via --dst-vol-name / --src-vol-name. Setting it
+# globally would route BOTH legs through the passthrough VOL.
 # ============================================================================
 export LD_LIBRARY_PATH=${GCC_LIB}:${LP_VIEW}/lib64:${LP_VIEW}/lib
 export HDF5_PLUGIN_PATH="$VOL_BUILD_DIR"
-unset HDF5_VOL_CONNECTOR          # keep the default side native
+unset HDF5_VOL_CONNECTOR
+unset LD_PRELOAD          # ensure nothing preloads the VOL
 
 H5REPACK="${LP_VIEW}/bin/h5repack"
 H5DIFF="${LP_VIEW}/bin/h5diff"
@@ -156,6 +167,11 @@ echo "native source size: $(stat -c%s "$NATIVE_H5") bytes"
 
 # ---------------------------------------------------------------------------
 # round-trip helper:  $1 = compressor id   $2 = "lossless" | abs-bound
+#
+# Only the per-compressor env vars vary here. The library/plugin environment
+# (LD_LIBRARY_PATH, HDF5_PLUGIN_PATH, HDF5_VOL_CONNECTOR) is set ONCE in the
+# RUNTIME PHASE above and must NOT be overridden per-leg -- in particular do
+# not LD_PRELOAD the VOL or re-prepend LD_LIBRARY_PATH.
 # ---------------------------------------------------------------------------
 FAILS=0
 declare -a SUMMARY=()
@@ -172,9 +188,6 @@ roundtrip () {
   else
     unset HDF5_VOL_PRESSIO_LEVEL || true
   fi
-
-  export LD_PRELOAD="$VOL_BUILD_DIR/libhdf5_vol_passthrough.so"
-  export LD_LIBRARY_PATH="$VOL_BUILD_DIR:${LP_VIEW}/lib64:${LP_VIEW}/lib:$LD_LIBRARY_PATH"
 
   # (1) compress: native source (default VOL), passthrough destination
   echo "  [1/3] compress (--dst-vol-name=$VOL_NAME)"
@@ -214,8 +227,6 @@ roundtrip () {
     SUMMARY+=("$comp: FAIL (diff rc=$rc)"); FAILS=$((FAILS+1))
   fi
 }
-
-export LD_PRELOAD="$VOL_BUILD_DIR/libhdf5_vol_passthrough.so"
 
 roundtrip noop     lossless
 roundtrip bzip2    lossless
