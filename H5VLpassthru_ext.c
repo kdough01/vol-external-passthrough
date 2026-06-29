@@ -1723,7 +1723,7 @@ H5VL_pass_through_ext_dataset_open(void *obj,
 
     dset = H5VL_pass_through_ext_new_obj(under, o->under_vol_id);
     gpu_vol_file_t *file_ctx = (gpu_vol_file_t*)o->custom_data;
-    config_params *config_ctx = file_ctx->config_params;
+    config_params *config_ctx = file_ctx ? file_ctx->config_params : NULL;
 
     if (config_ctx) {
         /* 1. Get underlying dataset's DCPL handle */
