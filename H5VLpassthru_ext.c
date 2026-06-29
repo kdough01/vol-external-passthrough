@@ -2142,9 +2142,6 @@ H5VL_pass_through_ext_dataset_write(
         sargs.op_type = H5VL_DATASET_SET_EXTENT;
         sargs.args.set_extent.size = new_size;
 
-        H5VL_dataset_specific_args_t sargs;
-        sargs.op_type = H5VL_DATASET_SET_EXTENT;
-        sargs.args.set_extent.size = new_size;
         if (H5VLdataset_specific(under, d->under_vol_id, &sargs, plist_id, NULL) < 0) {
             H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
                     vol_err_class, maj_compression, min_compress_failed,
