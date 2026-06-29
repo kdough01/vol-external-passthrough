@@ -115,13 +115,7 @@ H5VL_pass_through_ext_transfer_compress(compression_ctx *ctx, const void *data, 
     /* Always hand libpressio host memory; GPU compressors migrate it to the
      * device themselves via the domain manager. */
     input  = pressio_data_new_nonowning_domain(in_dtype, (void *)data, in_ndims, in_dims, "malloc");
-    {
-        pressio_data out_cpp = pressio_data::owning(
-            pressio_byte_dtype,
-            std::vector<size_t>{},
-            libpressio::domain_plugins().build("malloc"));   // shared_ptr, matches line 152
-        output = new pressio_data(std::move(out_cpp));
-    }
+    output = pressio_data_new_empty(pressio_byte_dtype, 0, NULL);
 
 #ifdef ENABLE_EXT_PASSTHRU_LOGGING
     {
@@ -136,26 +130,13 @@ H5VL_pass_through_ext_transfer_compress(compression_ctx *ctx, const void *data, 
         for (size_t i = 0; i < in_ndims; i++)
             fprintf(stderr, "%zu%s", in_dims[i], (i + 1 < in_ndims) ? "," : "");
         fprintf(stderr, "]\n");
+        fprintf(stderr, "  output=%p get_bytes=%zu capacity=%zu domain_id=%s\n",
+                (void *)output, pressio_data_get_bytes(output),
+                pressio_data_get_capacity_in_bytes(output),
+                pressio_data_domain_id(output));
+        fflush(stderr);
     }
 #endif
-
-    fprintf(stderr, "PRE-COMPRESS: ctx=%p compressor=%p id=%s\n",
-            (void *)ctx, (void *)ctx->compressor, ctx->compressor_id);
-    fflush(stderr);
-
-    if (!ctx->compressor) {
-        H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
-                vol_err_class, maj_compression, min_compress_failed,
-                "dataset '%s' has no compressor handle at write time "
-                "(was it created without instantiating the compressor?)",
-                ctx->compressor_id);
-        ret_val = -1;
-        goto done;
-    }
-
-    fprintf(stderr, "  handle ok, error_code=%d\n",
-            pressio_compressor_error_code(ctx->compressor));
-    fflush(stderr);
 
     if (pressio_compressor_compress(ctx->compressor, input, output)) {
         H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
