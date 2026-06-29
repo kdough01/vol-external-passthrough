@@ -758,7 +758,7 @@ H5VL_pass_through_ext_init(hid_t vipl_id)
         min_compress_failed < 0 || min_decompress_failed < 0)
         return(-1);
         
-    H5Eset_auto(H5E_DEFAULT, (H5E_auto2_t)H5Eprint, stderr);
+    // H5Eset_auto(H5E_DEFAULT, (H5E_auto2_t)H5Eprint, stderr);
     return 0;
 } /* end H5VL_pass_through_ext_init() */
 
