@@ -173,6 +173,9 @@ roundtrip () {
     unset HDF5_VOL_PRESSIO_LEVEL || true
   fi
 
+  export LD_PRELOAD="$VOL_BUILD_DIR/libhdf5_vol_passthrough.so"
+  export LD_LIBRARY_PATH="$VOL_BUILD_DIR:${LP_VIEW}/lib64:${LP_VIEW}/lib:$LD_LIBRARY_PATH"
+
   # (1) compress: native source (default VOL), passthrough destination
   echo "  [1/3] compress (--dst-vol-name=$VOL_NAME)"
   if ! "$H5REPACK" --dst-vol-name="$VOL_NAME" --dst-vol-info="$VOL_INFO" \
