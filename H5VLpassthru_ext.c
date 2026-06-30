@@ -1535,7 +1535,7 @@ H5VL_pass_through_ext_dataset_create(void *obj,
     hid_t underlying_type_id = type_id;
 
     /* If compression is active, rewrite the creation parameters to 1D bytes */
-    if (config_ctx) {
+    if (config_ctx && file_ctx && file_ctx->compress_on_write) {
         /* Create 1D array with unlimited space for compressed bytes */
         hsize_t byte_dims[1] = {0};
         hsize_t max_byte_dims[1] = {H5S_UNLIMITED};
@@ -2020,9 +2020,15 @@ H5VL_pass_through_ext_dataset_read(
                     "could not query memory selection for dataset %zu", u);
             ret_val = -1; continue;
         }
-        size_t want = (size_t)sel_elems;
 
-        /* Clamp the final strip so we never read past the decompressed buffer. */
+        size_t want;
+        if (mem_space_id[u] == H5S_ALL) {
+            want = ctx->decomp_size - ctx->read_served;   /* whole remaining */
+        } else {
+            hssize_t sel_elems = H5Sget_select_npoints(mem_space_id[u]);
+            if (sel_elems < 0) { H5Epush(...); ret_val = -1; continue; }
+            want = (size_t)sel_elems;                     /* bytes (uchar container) */
+        }
         if (ctx->read_served + want > ctx->decomp_size)
             want = ctx->decomp_size - ctx->read_served;
 
