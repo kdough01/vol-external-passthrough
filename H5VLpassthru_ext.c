@@ -2021,8 +2021,7 @@ H5VL_pass_through_ext_dataset_read(
         }
 
 #ifdef ENABLE_EXT_PASSTHRU_LOGGING
-        printf("------- DATASET Read strip: off=%zu len=%zu (decomp_size=%zu)\n",
-               off_bytes, len_bytes, ctx->decomp_size);
+        printf("------- DATASET Read strip: (decomp_size=%zu)\n", ctx->decomp_size);
 #endif
     }
 
