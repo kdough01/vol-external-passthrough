@@ -6,6 +6,14 @@
 #include "hdf5.h"
 #include <libpressio/libpressio.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+size_t vol_logical_nbytes(const compression_ctx *ctx);
+#ifdef __cplusplus
+}
+#endif
+
 /* Must come first — used by datatype_ctx */
 typedef struct compression_ctx {
     char *compressor_id;

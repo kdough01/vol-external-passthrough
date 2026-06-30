@@ -22,15 +22,6 @@ vol_is_byte_stream(const char *id)
     return strncmp(id, "nvcomp", 6) == 0;
 }
 
-static size_t
-vol_logical_nbytes(const compression_ctx *ctx)
-{
-    size_t n = (size_t)pressio_dtype_size(ctx->dtype);
-    for (size_t i = 0; i < ctx->ndims; i++)
-        n *= ctx->dims[i];
-    return n;
-}
-
 static void
 vol_make_host_resident(struct pressio_data *data)
 {
@@ -44,6 +35,15 @@ vol_make_host_resident(struct pressio_data *data)
 }
 
 extern "C" {
+
+size_t
+vol_logical_nbytes(const compression_ctx *ctx)
+{
+    size_t n = (size_t)pressio_dtype_size(ctx->dtype);
+    for (size_t i = 0; i < ctx->ndims; i++)
+        n *= ctx->dims[i];
+    return n;
+}
 
 int
 H5VL_pass_through_ext_compressor_available(const char *compressor_id)
