@@ -2041,7 +2041,7 @@ H5VL_pass_through_ext_dataset_read(
                         "could not query memory selection for dataset %zu", u);
                 ret_val = -1; continue;
             }
-            want = (size_t)sel_pts;
+            want = (size_t)sel_pts * pressio_dtype_size(ctx->dtype);
         }
         if (ctx->read_served >= ctx->decomp_size) want = 0;
         else if (ctx->read_served + want > ctx->decomp_size)
