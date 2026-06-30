@@ -209,9 +209,11 @@ roundtrip () {
   echo "  [3/3] compare"
   local rc=0
   if [[ "$mode" == "lossless" ]]; then
-    "$H5DIFF" "$NATIVE_H5" "$dec_h5" "$DSET" "$DSET" || rc=$?      # 0 = bit-identical
+    env -u HDF5_PLUGIN_PATH -u HDF5_VOL_CONNECTOR \
+        "$H5DIFF" "$NATIVE_H5" "$dec_h5" "$DSET" "$DSET" || rc=$?
   else
-    "$H5DIFF" -d "$mode" "$NATIVE_H5" "$dec_h5" "$DSET" "$DSET" || rc=$?  # 0 = all within bound
+    env -u HDF5_PLUGIN_PATH -u HDF5_VOL_CONNECTOR \
+        "$H5DIFF" -d "$mode" "$NATIVE_H5" "$dec_h5" "$DSET" "$DSET" || rc=$?
   fi
 
   local nsz csz ratio
