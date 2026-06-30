@@ -1999,6 +1999,22 @@ H5VL_pass_through_ext_dataset_read(
             len_bytes = total_bytes;
         } else {
             hssize_t np = H5Sget_select_npoints(file_space_id[u]);
+
+            {   /* DIAGNOSTIC — remove once understood */
+                hsize_t s[H5S_MAX_RANK], e[H5S_MAX_RANK];
+                H5Sget_select_bounds(file_space_id[u], s, e);
+                int seltype = H5Sget_select_type(file_space_id[u]);
+                fprintf(stderr, "READ SEL: seltype=%d npoints=%lld bounds=[", seltype, (long long)np);
+                for (int i=0;i<(int)ctx->ndims;i++)
+                    fprintf(stderr,"%llu..%llu%s",(unsigned long long)s[i],(unsigned long long)e[i],
+                            i+1<(int)ctx->ndims?",":"");
+                fprintf(stderr,"] dims=[");
+                for (int i=0;i<(int)ctx->ndims;i++)
+                    fprintf(stderr,"%zu%s",ctx->dims[i],i+1<(int)ctx->ndims?",":"");
+                fprintf(stderr,"] total_elems=%zu\n",
+                        (size_t)( (hsize_t)ctx->dims[0]*ctx->dims[1]*ctx->dims[2]));
+                fflush(stderr);
+            }
             if (np < 0) {
                 H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
                         vol_err_class, maj_compression, min_decompress_failed,
