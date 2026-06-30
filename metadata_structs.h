@@ -71,4 +71,10 @@ typedef struct gpu_vol_dataset_t {
     int compression_requested;
 } gpu_vol_dataset_t;
 
+typedef struct {
+    const unsigned char *buf;
+    size_t               nbytes;
+    size_t               off;
+} vol_scatter_ctx;
+
 #endif

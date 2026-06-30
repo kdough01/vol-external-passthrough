@@ -625,6 +625,17 @@ gpu_vol_file_t* gpu_vol_file_wrap(hid_t fapl_id, hid_t under_vol_id, void *under
     return ctx;
 }
 
+static herr_t
+vol_scatter_cb(const void **data_out, size_t *len_out, void *op_data)
+{
+    vol_scatter_ctx *s = (vol_scatter_ctx *)op_data;
+    size_t remaining = s->nbytes - s->off;
+    *data_out = s->buf + s->off;
+    *len_out  = remaining;
+    s->off    = s->nbytes;
+    return 0;
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5VL__pass_through_new_obj
@@ -1997,25 +2008,17 @@ H5VL_pass_through_ext_dataset_read(
          * Serve only THIS read's selection out of the full decompressed buffer.
          * Selection math is identical to dataset_write's strip handling.
          * ==================================================================== */
-        size_t off_bytes, len_bytes;
-
-        if (file_space_id[u] == H5S_ALL || ctx->ndims == 0) {
-            off_bytes = ctx->read_served;          /* running offset, see below */
-            len_bytes = total_bytes - ctx->read_served;
-        } else {
-            /* destination capacity from the MEMORY space (elements * dsize) */
-            hssize_t mnp = H5Sget_select_npoints(mem_space_id[u]);
-            if (mnp < 0) { /* H5Epush; ret_val=-1; continue; */ }
-            len_bytes = (size_t)mnp * dsize;
-            off_bytes = ctx->read_served;          /* serve sequentially */
+        /* Hand the full decompressed array to HDF5 and let it scatter into
+         * buf[u] per mem_space_id — HDF5 owns the destination sizing. */
+        vol_scatter_ctx sctx = {
+            (const unsigned char *)ctx->decomp_buf, ctx->decomp_size, 0
+        };
+        if (H5Dscatter(vol_scatter_cb, &sctx, mem_type_id[u], mem_space_id[u], buf[u]) < 0) {
+            H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                    vol_err_class, maj_compression, min_decompress_failed,
+                    "H5Dscatter failed for dataset %zu", u);
+            ret_val = -1; continue;
         }
-
-        if (off_bytes + len_bytes > ctx->decomp_size)
-            len_bytes = ctx->decomp_size - off_bytes;   /* clamp tail */
-
-        memcpy(buf[u], (char *)ctx->decomp_buf + off_bytes, len_bytes);
-
-        ctx->read_served += len_bytes;
 
 #ifdef ENABLE_EXT_PASSTHRU_LOGGING
         printf("------- DATASET Read strip: off=%zu len=%zu (decomp_size=%zu)\n",
