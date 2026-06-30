@@ -24,6 +24,7 @@ typedef struct compression_ctx {
     size_t  stage_filled;
     void  *decomp_buf;
     size_t decomp_size;
+    size_t read_served;
 } compression_ctx;
 
 #ifdef __cplusplus
