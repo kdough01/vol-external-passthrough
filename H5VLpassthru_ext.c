@@ -2686,8 +2686,7 @@ H5VL_pass_through_ext_file_open(const char *name, unsigned flags, hid_t fapl_id,
     if(under) {
         file = H5VL_pass_through_ext_new_obj(under, info->under_vol_id);
 
-        config_params *cfg = config_params_create(fapl_id);
-        file->custom_data = gpu_vol_file_wrap(under, info->under_vol_id, cfg);
+        file->custom_data = gpu_vol_file_wrap(under_fapl_id, info->under_vol_id, under);
 
         /* Check for async request */
         if(req && *req)
