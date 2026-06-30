@@ -2020,7 +2020,7 @@ H5VL_pass_through_ext_dataset_read(
                     "could not query memory selection for dataset %zu", u);
             ret_val = -1; continue;
         }
-        size_t want = (size_t)sel_elems * dsize;
+        size_t want = (size_t)sel_elems;
 
         /* Clamp the final strip so we never read past the decompressed buffer. */
         if (ctx->read_served + want > ctx->decomp_size)
