@@ -2006,40 +2006,48 @@ H5VL_pass_through_ext_dataset_read(
                 ret_val = -1; continue;
             }
 
-            hsize_t start[H5S_MAX_RANK], end[H5S_MAX_RANK];
-            if (H5Sget_select_bounds(file_space_id[u], start, end) < 0) {
-                H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
-                        vol_err_class, maj_compression, min_decompress_failed,
-                        "could not get selection bounds for dataset %zu", u);
-                ret_val = -1; continue;
-            }
+            /* Full-dataset read expressed as a hyperslab (h5repack often does
+             * this instead of using H5S_ALL) → treat exactly like H5S_ALL. */
+            hsize_t total_elems = 1;
+            for (int i = 0; i < (int)ctx->ndims; i++) total_elems *= ctx->dims[i];
 
-            /* Only contiguous row-major blocks (full in all dims but dim 0)
-             * map to a single linear range. That covers h5repack's strips;
-             * anything else we reject rather than silently corrupt. */
-            int     contiguous  = 1;
-            hsize_t block_elems = 1;
-            for (int i = 0; i < (int)ctx->ndims; i++) {
-                block_elems *= (end[i] - start[i] + 1);
-                if (i >= 1 && (start[i] != 0 || end[i] != ctx->dims[i] - 1))
-                    contiguous = 0;
-            }
-            if (!contiguous || block_elems != (hsize_t)np) {
-                H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
-                        vol_err_class, maj_compression, min_decompress_failed,
-                        "dataset %zu: non-contiguous partial read not supported "
-                        "by the compression VOL", u);
-                ret_val = -1; continue;
-            }
+            if (np == (hssize_t)total_elems) {
+                off_bytes = 0;
+                len_bytes = total_bytes;
+            } else {
+                /* Partial strip: require a contiguous row-major block
+                 * (full in all dims but dim 0), same as dataset_write. */
+                hsize_t start[H5S_MAX_RANK], end[H5S_MAX_RANK];
+                if (H5Sget_select_bounds(file_space_id[u], start, end) < 0) {
+                    H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                            vol_err_class, maj_compression, min_decompress_failed,
+                            "could not get selection bounds for dataset %zu", u);
+                    ret_val = -1; continue;
+                }
 
-            /* Row-major linear element offset of the strip's first element. */
-            hsize_t lin = 0, stride = 1;
-            for (int i = (int)ctx->ndims - 1; i >= 0; i--) {
-                lin    += start[i] * stride;
-                stride *= ctx->dims[i];
+                int     contiguous  = 1;
+                hsize_t block_elems = 1;
+                for (int i = 0; i < (int)ctx->ndims; i++) {
+                    block_elems *= (end[i] - start[i] + 1);
+                    if (i >= 1 && (start[i] != 0 || end[i] != ctx->dims[i] - 1))
+                        contiguous = 0;
+                }
+                if (!contiguous || block_elems != (hsize_t)np) {
+                    H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                            vol_err_class, maj_compression, min_decompress_failed,
+                            "dataset %zu: non-contiguous partial read not supported "
+                            "by the compression VOL", u);
+                    ret_val = -1; continue;
+                }
+
+                hsize_t lin = 0, stride = 1;
+                for (int i = (int)ctx->ndims - 1; i >= 0; i--) {
+                    lin    += start[i] * stride;
+                    stride *= ctx->dims[i];
+                }
+                off_bytes = (size_t)lin * dsize;
+                len_bytes = (size_t)np  * dsize;
             }
-            off_bytes = (size_t)lin * dsize;
-            len_bytes = (size_t)np  * dsize;
         }
 
         if (off_bytes + len_bytes > ctx->decomp_size) {
