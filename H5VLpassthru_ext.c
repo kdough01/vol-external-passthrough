@@ -1519,7 +1519,7 @@ H5VL_pass_through_ext_dataset_create(void *obj,
 #endif
 
     gpu_vol_file_t *file_ctx = (gpu_vol_file_t*)o->custom_data;
-    config_params *config_ctx = file_ctx->config_params;
+    config_params *config_ctx = file_ctx ? file_ctx->config_params : NULL;
 
     /* Extract original N-dimensional shape info */
     int rank = H5Sget_simple_extent_ndims(space_id);
@@ -1534,8 +1534,10 @@ H5VL_pass_through_ext_dataset_create(void *obj,
     hid_t underlying_dcpl_id = dcpl_id;
     hid_t underlying_type_id = type_id;
 
+    int do_compress = (config_ctx && file_ctx && file_ctx->compress_on_write);
+
     /* If compression is active, rewrite the creation parameters to 1D bytes */
-    if (config_ctx && file_ctx && file_ctx->compress_on_write) {
+    if (do_compress) {
         /* Create 1D array with unlimited space for compressed bytes */
         hsize_t byte_dims[1] = {0};
         hsize_t max_byte_dims[1] = {H5S_UNLIMITED};
@@ -1563,7 +1565,7 @@ H5VL_pass_through_ext_dataset_create(void *obj,
     if (under) {
         dset = H5VL_pass_through_ext_new_obj(under, o->under_vol_id);
 
-        if (config_ctx) {
+        if (do_compress) {
             /* Store the hidden attributes as metadata for when we want to open the dataset */
             H5VL_loc_params_t attr_loc;
             attr_loc.type = H5VL_OBJECT_BY_SELF;
@@ -2026,8 +2028,12 @@ H5VL_pass_through_ext_dataset_read(
             want = ctx->decomp_size - ctx->read_served;   /* whole remaining */
         } else {
             hssize_t sel_elems = H5Sget_select_npoints(mem_space_id[u]);
-            if (sel_elems < 0) { H5Epush(...); ret_val = -1; continue; }
-            want = (size_t)sel_elems;                     /* bytes (uchar container) */
+            if (sel_elems < 0) {
+                H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                        vol_err_class, maj_compression, min_decompress_failed,
+                        "could not query memory selection for dataset %zu", u);
+                ret_val = -1; continue;
+            }
         }
         if (ctx->read_served + want > ctx->decomp_size)
             want = ctx->decomp_size - ctx->read_served;
@@ -2700,6 +2706,7 @@ H5VL_pass_through_ext_file_create(const char *name, unsigned flags, hid_t fcpl_i
 
         /* Set the config params */
         file->custom_data = gpu_vol_file_wrap(under_fapl_id, info->under_vol_id, under);
+        ((gpu_vol_file_t*)file->custom_data)->compress_on_write = 1;
 
         /* Check for async request */
         if(req && *req)
@@ -2760,6 +2767,7 @@ H5VL_pass_through_ext_file_open(const char *name, unsigned flags, hid_t fapl_id,
         file = H5VL_pass_through_ext_new_obj(under, info->under_vol_id);
 
         file->custom_data = gpu_vol_file_wrap(under_fapl_id, info->under_vol_id, under);
+        ((gpu_vol_file_t*)file->custom_data)->compress_on_write = 0;
 
         /* Check for async request */
         if(req && *req)

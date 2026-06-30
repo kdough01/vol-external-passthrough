@@ -59,6 +59,7 @@ typedef struct gpu_vol_file_t {
     void *under_file;
     hid_t under_vol_id;
     config_params *config_params;
+    int compress_on_write;
 } gpu_vol_file_t;
 
 typedef struct gpu_vol_dataset_t {
