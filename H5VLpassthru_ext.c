@@ -2314,10 +2314,6 @@ H5VL_pass_through_ext_dataset_get(void *dset, H5VL_dataset_get_args_t *args,
     gpu_vol_dataset_t *ds_ctx = (gpu_vol_dataset_t *)o->custom_data;
     compression_ctx   *ctx    = ds_ctx ? ds_ctx->comp_ctx : NULL;
 
-    /* If this is a compressed dataset, report the LOGICAL shape/type we
-     * recovered from the _VOL_* attributes, not the 1-D byte container the
-     * data is physically stored as. h5repack uses these to create the
-     * destination dataset, so it must see 3-D float64, not 1-D uint8. */
     if (ctx && ctx->ndims > 0 && ctx->dims) {
         if (args->op_type == H5VL_DATASET_GET_SPACE) {
             hsize_t dims[H5S_MAX_RANK];
@@ -2334,7 +2330,7 @@ H5VL_pass_through_ext_dataset_get(void *dset, H5VL_dataset_get_args_t *args,
             return 0;
         }
         if (args->op_type == H5VL_DATASET_GET_TYPE) {
-            hid_t tid = pressio_to_hdf5_dtype(ctx->dtype);   /* logical element type */
+            hid_t tid = pressio_to_hdf5_dtype(ctx->dtype);
             if (tid < 0) {
                 H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
                         vol_err_class, maj_compression, min_decompress_failed,
@@ -2344,8 +2340,37 @@ H5VL_pass_through_ext_dataset_get(void *dset, H5VL_dataset_get_args_t *args,
             args->args.get_type.type_id = tid;
             return 0;
         }
-        /* GET_DCPL, GET_DAPL, GET_STORAGE_SIZE, etc. fall through to native */
+
+        if (args->op_type == H5VL_DATASET_GET_DCPL) {
+            hid_t dcpl = H5Pcreate(H5P_DATASET_CREATE);
+            if (dcpl < 0) {
+                H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                        vol_err_class, maj_compression, min_decompress_failed,
+                        "could not build logical DCPL for compressed dataset");
+                return -1;
+            }
+            hsize_t chunk[H5S_MAX_RANK];
+            for (size_t i = 0; i < ctx->ndims; i++)
+                chunk[i] = (hsize_t)ctx->dims[i];
+            if (H5Pset_chunk(dcpl, (int)ctx->ndims, chunk) < 0) {
+                H5Pclose(dcpl);
+                H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                        vol_err_class, maj_compression, min_decompress_failed,
+                        "could not set chunk on logical DCPL for compressed dataset");
+                return -1;
+            }
+            args->args.get_dcpl.dcpl_id = dcpl;
+            return 0;
+        }
+
     }
+
+    ret_value = H5VLdataset_get(o->under_object, o->under_vol_id, args, dxpl_id, req);
+
+    if(req && *req)
+        *req = H5VL_pass_through_ext_new_obj(*req, o->under_vol_id);
+
+    return ret_value;
 
     ret_value = H5VLdataset_get(o->under_object, o->under_vol_id, args, dxpl_id, req);
 
