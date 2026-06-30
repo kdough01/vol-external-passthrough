@@ -1,3 +1,54 @@
+kdougherty@gpulogin1:~/hdf5_projs/vol-external-passthrough/tests$ J=/lcrc/project/SDR/kdougherty/ci/h5repack_roundtrip/job_44920.gpumgt1
+kdougherty@gpulogin1:~/hdf5_projs/vol-external-passthrough/tests$ "$LP_VIEW/bin/h5diff" -v "$J/../native_density.h5" "$J/dec_noop.h5" /field /field 2>&1 | head -40
+dataset: </field> and </field>
+0 differences found
+kdougherty@gpulogin1:~/hdf5_projs/vol-external-passthrough/tests$ "$LP_VIEW/bin/h5diff" -v "$J/../native_density.h5" "$J/dec_bzip2.h5" /field /field 2>&1 | head -40
+dataset: </field> and </field>
+0 differences found
+kdougherty@gpulogin1:~/hdf5_projs/vol-external-passthrough/tests$ "$LP_VIEW/bin/h5diff" -v "$J/../native_density.h5" "$J/dec_cuszp.h5" /field /field 2>&1 | head -40
+dataset: </field> and </field>
+size:           [256x384x384]           [256x384x384]
+position        field           field           difference          
+------------------------------------------------------------
+[ 0 0 0 ]          1               1               2.52621e-08    
+[ 0 0 1 ]          1               1               2.52621e-08    
+[ 0 0 2 ]          1               1               2.52621e-08    
+[ 0 0 3 ]          1               1               2.52621e-08    
+[ 0 0 4 ]          1               1               2.52621e-08    
+[ 0 0 5 ]          1               1               2.52621e-08    
+[ 0 0 6 ]          1               1               2.52621e-08    
+[ 0 0 7 ]          1               1               2.52621e-08    
+[ 0 0 8 ]          1               1               2.52621e-08    
+[ 0 0 9 ]          1               1               2.52621e-08    
+[ 0 0 10 ]          1               1               2.52621e-08    
+[ 0 0 11 ]          1               1               2.52621e-08    
+[ 0 0 12 ]          1               1               2.52621e-08    
+[ 0 0 13 ]          1               1               2.52621e-08    
+[ 0 0 14 ]          1               1               2.52621e-08    
+[ 0 0 15 ]          1               1               2.52621e-08    
+[ 0 0 16 ]          1               1               2.52621e-08    
+[ 0 0 17 ]          1               1               2.52621e-08    
+[ 0 0 18 ]          1               1               2.52621e-08    
+[ 0 0 19 ]          1               1               2.52621e-08    
+[ 0 0 20 ]          1               1               2.52621e-08    
+[ 0 0 21 ]          1               1               2.52621e-08    
+[ 0 0 22 ]          1               1               2.52621e-08    
+[ 0 0 23 ]          1               1               2.52621e-08    
+[ 0 0 24 ]          1               1               2.52621e-08    
+[ 0 0 25 ]          1               1               2.52621e-08    
+[ 0 0 26 ]          1               1               2.52621e-08    
+[ 0 0 27 ]          1               1               2.52621e-08    
+[ 0 0 28 ]          1               1               2.52621e-08    
+[ 0 0 29 ]          1               1               2.52621e-08    
+[ 0 0 30 ]          1               1               2.52621e-08    
+[ 0 0 31 ]          1               1               2.52621e-08    
+[ 0 0 32 ]          1               1               2.52621e-08    
+[ 0 0 33 ]          1               1               2.52621e-08    
+[ 0 0 34 ]          1               1               2.52621e-08    
+[ 0 0 35 ]          1               1               2.52621e-08    
+kdougherty@gpulogin1:~/hdf5_projs/vol-external-passthrough/tests$
+
+
 === Environment Setup ===
 GCC_LIB: /usr/lib/gcc/x86_64-linux-gnu/11
 === Building VOL ===
