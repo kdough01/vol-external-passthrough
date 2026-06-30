@@ -244,9 +244,20 @@ H5VL_pass_through_ext_transfer_decompress(compression_ctx *ctx,
         return -1;
     }
 
+    fprintf(stderr,
+        "DECOMP ENTER: id=%s compressed_size=%zu logical=%zu out_ptr=%p\n",
+        ctx->compressor_id, compressed_size, vol_logical_nbytes(ctx), output_buf);
+    fflush(stderr);
+
     /* noop: libpressio's noop rejects a typed output buffer, so copy directly. */
     if (strcmp(ctx->compressor_id, "noop") == 0) {
-        memcpy(output_buf, compressed_data, compressed_size);
+        size_t logical = vol_logical_nbytes(ctx);
+        fprintf(stderr, "NOOP DECOMP: compressed_size=%zu logical=%zu output_buf=%p\n",
+                compressed_size, logical, output_buf);
+        fflush(stderr);
+        /* never copy more than the logical dataset size */
+        size_t n = compressed_size < logical ? compressed_size : logical;
+        memcpy(output_buf, compressed_data, n);
         return 0;
     }
 
