@@ -22,6 +22,8 @@ typedef struct compression_ctx {
     void   *stage_buf;
     size_t  stage_total;
     size_t  stage_filled;
+    void  *decomp_buf;
+    size_t decomp_size;
 } compression_ctx;
 
 typedef struct datatype_ctx {
