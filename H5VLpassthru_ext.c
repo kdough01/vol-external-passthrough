@@ -1987,6 +1987,12 @@ H5VL_pass_through_ext_dataset_read(
             ctx->decomp_size = total_bytes;
         }
 
+        fprintf(stderr, "FSEL: type=%d np=%lld   MSEL: type=%d np=%lld   dsize=%zu\n",
+        H5Sget_select_type(file_space_id[u]), (long long)H5Sget_select_npoints(file_space_id[u]),
+        H5Sget_select_type(mem_space_id[u]),  (long long)H5Sget_select_npoints(mem_space_id[u]),
+        dsize);
+        fflush(stderr);
+
         /* ====================================================================
          * Serve only THIS read's selection out of the full decompressed buffer.
          * Selection math is identical to dataset_write's strip handling.
@@ -1994,47 +2000,22 @@ H5VL_pass_through_ext_dataset_read(
         size_t off_bytes, len_bytes;
 
         if (file_space_id[u] == H5S_ALL || ctx->ndims == 0) {
-            off_bytes = 0;
-            len_bytes = total_bytes;
+            off_bytes = ctx->read_served;          /* running offset, see below */
+            len_bytes = total_bytes - ctx->read_served;
         } else {
-            /* h5repack reads from the underlying 1-D byte container in strips,
-             * so the file-space selection is 1-D and linear over the byte
-             * stream — which is exactly decomp_buf's layout. Use it directly;
-             * do NOT interpret it against the 3-D logical dims. */
-            hssize_t np = H5Sget_select_npoints(file_space_id[u]);
-            if (np < 0) {
-                H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
-                        vol_err_class, maj_compression, min_decompress_failed,
-                        "could not query file selection for dataset %zu", u);
-                ret_val = -1; continue;
-            }
-
-            hsize_t s1 = 0, e1 = 0;
-            if (H5Sget_select_bounds(file_space_id[u], &s1, &e1) < 0) {
-                H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
-                        vol_err_class, maj_compression, min_decompress_failed,
-                        "could not get selection bounds for dataset %zu", u);
-                ret_val = -1; continue;
-            }
-
-            /* The selection is in ELEMENTS of the logical dataset; convert to
-             * bytes. (For a 1-D linear read these map straight through.) */
-            off_bytes = (size_t)s1 * dsize;
-            len_bytes = (size_t)np * dsize;
+            /* destination capacity from the MEMORY space (elements * dsize) */
+            hssize_t mnp = H5Sget_select_npoints(mem_space_id[u]);
+            if (mnp < 0) { /* H5Epush; ret_val=-1; continue; */ }
+            len_bytes = (size_t)mnp * dsize;
+            off_bytes = ctx->read_served;          /* serve sequentially */
         }
 
-        if (off_bytes + len_bytes > ctx->decomp_size) {
-            H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
-                    vol_err_class, maj_compression, min_decompress_failed,
-                    "dataset %zu: read [%zu,%zu) exceeds decompressed size %zu",
-                    u, off_bytes, off_bytes + len_bytes, ctx->decomp_size);
-            ret_val = -1; continue;
-        }
-
-        fprintf(stderr, "SERVE: off_bytes=%zu len_bytes=%zu decomp_size=%zu\n",
-        off_bytes, len_bytes, ctx->decomp_size); fflush(stderr);
+        if (off_bytes + len_bytes > ctx->decomp_size)
+            len_bytes = ctx->decomp_size - off_bytes;   /* clamp tail */
 
         memcpy(buf[u], (char *)ctx->decomp_buf + off_bytes, len_bytes);
+
+        ctx->read_served += len_bytes;
 
 #ifdef ENABLE_EXT_PASSTHRU_LOGGING
         printf("------- DATASET Read strip: off=%zu len=%zu (decomp_size=%zu)\n",
