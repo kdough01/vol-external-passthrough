@@ -1895,15 +1895,13 @@ H5VL_pass_through_ext_dataset_read(
         }
 
         /* ---- Total logical size of the dataset (from the recorded shape) ---- */
-        const size_t dsize       = pressio_dtype_size(ctx->dtype);
-        const size_t total_bytes = vol_logical_nbytes(ctx);   /* dsize * prod(ctx->dims) */
+        const size_t total_bytes = vol_logical_nbytes(ctx);   /* dtype_size * prod(dims) */
 
         /* ====================================================================
          * Decompress the WHOLE dataset exactly once, cache it on ctx.
-         * h5repack reads the source in chunk-sized strips, calling this
-         * function repeatedly; buf[u] is only ONE strip, not the whole array.
-         * So we decompress the full payload into a VOL-owned buffer once and
-         * then serve each strip out of it.
+         * h5repack reads the underlying 1-D byte container in strips, calling
+         * this repeatedly; buf[u] is only ONE strip. Decompress the full
+         * payload once into a VOL-owned buffer, then serve each strip from it.
          * ==================================================================== */
         if (!ctx->decomp_buf) {
             uint64_t csize;
@@ -1993,56 +1991,32 @@ H5VL_pass_through_ext_dataset_read(
                         "decompression failed for dataset %zu compressor='%s'",
                         u, ctx->compressor_id);
                 free(ctx->decomp_buf);
-                ctx->decomp_buf  = NULL;
+                ctx->decomp_buf = NULL;
                 ret_val = -1; continue;
             }
 
-            ctx->decomp_size = total_bytes;
+            /* Set size AND reset cursor together, before any serving. */
+            ctx->decomp_size  = total_bytes;
+            ctx->read_served  = 0;
         }
 
-        fprintf(stderr, "FSEL: type=%d np=%lld   MSEL: type=%d np=%lld   dsize=%zu\n",
-        H5Sget_select_type(file_space_id[u]), (long long)H5Sget_select_npoints(file_space_id[u]),
-        H5Sget_select_type(mem_space_id[u]),  (long long)H5Sget_select_npoints(mem_space_id[u]),
-        dsize);
-        fflush(stderr);
-
         /* ====================================================================
-         * Serve only THIS read's selection out of the full decompressed buffer.
-         * Selection math is identical to dataset_write's strip handling.
+         * Serve THIS read's bytes out of the full decompressed buffer.
+         * The underlying container is 1-D H5T_NATIVE_UCHAR, so the memory
+         * selection's npoints is already a BYTE count. Size the copy from it,
+         * advance read_served, and never read past decomp_size (tail strip).
+         * No "whole remainder" shortcut — that overruns the strip buffer.
          * ==================================================================== */
-        /* Hand the full decompressed array to HDF5 and let it scatter into
-         * buf[u] per mem_space_id — HDF5 owns the destination sizing. */
-        /* Destination wants this many elements (from the MEMORY selection);
-         * convert to bytes. This is the strip size h5repack actually allocated
-         * buf[u] for -- NOT the full-array length. */
-        hssize_t sel_elems = H5Sget_select_npoints(mem_space_id[u]);
-        if (sel_elems < 0) {
+        hssize_t sel_pts = H5Sget_select_npoints(mem_space_id[u]);
+        if (sel_pts < 0) {
             H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
                     vol_err_class, maj_compression, min_decompress_failed,
                     "could not query memory selection for dataset %zu", u);
             ret_val = -1; continue;
         }
 
-/* ---- Serve this read's bytes out of the full decompressed buffer ----
-         * h5repack reads the underlying 1-D uchar container, so the selection
-         * is in BYTES (element size 1), NOT logical elements. Size the copy
-         * from the memory selection's point count directly; advance a cursor
-         * so successive strips read the right source bytes. */
-        size_t want;
-        if (mem_space_id[u] == H5S_ALL) {
-            want = ctx->decomp_size - ctx->read_served;     /* whole remainder */
-        } else {
-            hssize_t sel_pts = H5Sget_select_npoints(mem_space_id[u]);
-            if (sel_pts < 0) {
-                H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
-                        vol_err_class, maj_compression, min_decompress_failed,
-                        "could not query memory selection for dataset %zu", u);
-                ret_val = -1; continue;
-            }
-            want = (size_t)sel_pts;                          /* BYTES (uchar container) */
-        }
+        size_t want = (size_t)sel_pts;   /* BYTES (1-byte container elements) */
 
-        /* never read past the decompressed buffer (handles the tail strip) */
         if (ctx->read_served >= ctx->decomp_size) {
             want = 0;
         } else if (ctx->read_served + want > ctx->decomp_size) {
@@ -2059,7 +2033,6 @@ H5VL_pass_through_ext_dataset_read(
             memcpy(buf[u], (char *)ctx->decomp_buf + ctx->read_served, want);
             ctx->read_served += want;
         }
-
     }
 
     return ret_val;
