@@ -2692,7 +2692,7 @@ H5VL_pass_through_ext_file_open(const char *name, unsigned flags, hid_t fapl_id,
         /* Check for async request */
         if(req && *req)
             *req = H5VL_pass_through_ext_new_obj(*req, info->under_vol_id);
-    }
+    } /* end if */
     else
         file = NULL;
 
