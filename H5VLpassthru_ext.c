@@ -2023,29 +2023,42 @@ H5VL_pass_through_ext_dataset_read(
             ret_val = -1; continue;
         }
 
+/* ---- Serve this read's bytes out of the full decompressed buffer ----
+         * h5repack reads the underlying 1-D uchar container, so the selection
+         * is in BYTES (element size 1), NOT logical elements. Size the copy
+         * from the memory selection's point count directly; advance a cursor
+         * so successive strips read the right source bytes. */
         size_t want;
         if (mem_space_id[u] == H5S_ALL) {
-            want = ctx->decomp_size - ctx->read_served;   /* whole remaining */
+            want = ctx->decomp_size - ctx->read_served;     /* whole remainder */
         } else {
-            hssize_t sel_elems = H5Sget_select_npoints(mem_space_id[u]);
-            if (sel_elems < 0) {
+            hssize_t sel_pts = H5Sget_select_npoints(mem_space_id[u]);
+            if (sel_pts < 0) {
                 H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
                         vol_err_class, maj_compression, min_decompress_failed,
                         "could not query memory selection for dataset %zu", u);
                 ret_val = -1; continue;
             }
+            want = (size_t)sel_pts;                          /* BYTES (uchar container) */
         }
-        if (ctx->read_served + want > ctx->decomp_size)
+
+        /* never read past the decompressed buffer (handles the tail strip) */
+        if (ctx->read_served >= ctx->decomp_size) {
+            want = 0;
+        } else if (ctx->read_served + want > ctx->decomp_size) {
             want = ctx->decomp_size - ctx->read_served;
+        }
 
 #ifdef ENABLE_EXT_PASSTHRU_LOGGING
-        fprintf(stderr, "SERVE: sel_elems=%lld want=%zu served=%zu/%zu dest=%p\n",
-                (long long)sel_elems, want, ctx->read_served, ctx->decomp_size, buf[u]);
+        fprintf(stderr, "SERVE: want=%zu served=%zu/%zu dest=%p\n",
+                want, ctx->read_served, ctx->decomp_size, buf[u]);
         fflush(stderr);
 #endif
 
-        memcpy(buf[u], (char *)ctx->decomp_buf + ctx->read_served, want);
-        ctx->read_served += want;
+        if (want > 0) {
+            memcpy(buf[u], (char *)ctx->decomp_buf + ctx->read_served, want);
+            ctx->read_served += want;
+        }
 
     }
 
