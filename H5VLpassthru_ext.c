@@ -368,6 +368,21 @@ enum pressio_dtype hdf5_to_pressio_dtype(hid_t type_id) {
     return pressio_byte_dtype;
 }
 
+hid_t pressio_to_hdf5_dtype(enum pressio_dtype dt) {
+    switch (dt) {
+        case pressio_float_dtype:  return H5Tcopy(H5T_NATIVE_FLOAT);
+        case pressio_double_dtype: return H5Tcopy(H5T_NATIVE_DOUBLE);
+        case pressio_int32_dtype:  return H5Tcopy(H5T_NATIVE_INT32);
+        case pressio_int64_dtype:  return H5Tcopy(H5T_NATIVE_INT64);
+        case pressio_uint32_dtype: return H5Tcopy(H5T_NATIVE_UINT32);
+        case pressio_uint64_dtype: return H5Tcopy(H5T_NATIVE_UINT64);
+        case pressio_int8_dtype:   return H5Tcopy(H5T_NATIVE_INT8);
+        case pressio_uint8_dtype:
+        case pressio_byte_dtype:   return H5Tcopy(H5T_NATIVE_UCHAR);
+        default:                   return H5Tcopy(H5T_NATIVE_UCHAR);
+    }
+}
+
 config_params *config_params_create(hid_t fapl_id)
 {
     (void)fapl_id;
@@ -2015,13 +2030,22 @@ H5VL_pass_through_ext_dataset_read(
             ret_val = -1; continue;
         }
 
-        size_t want = (size_t)sel_pts;   /* BYTES (1-byte container elements) */
-
-        if (ctx->read_served >= ctx->decomp_size) {
-            want = 0;
-        } else if (ctx->read_served + want > ctx->decomp_size) {
-            want = ctx->decomp_size - ctx->read_served;
+        size_t want;
+        if (mem_space_id[u] == H5S_ALL) {
+            want = ctx->decomp_size - ctx->read_served;   /* full read */
+        } else {
+            hssize_t sel_pts = H5Sget_select_npoints(mem_space_id[u]);
+            if (sel_pts < 0) {
+                H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                        vol_err_class, maj_compression, min_decompress_failed,
+                        "could not query memory selection for dataset %zu", u);
+                ret_val = -1; continue;
+            }
+            want = (size_t)sel_pts;
         }
+        if (ctx->read_served >= ctx->decomp_size) want = 0;
+        else if (ctx->read_served + want > ctx->decomp_size)
+            want = ctx->decomp_size - ctx->read_served;
 
 #ifdef ENABLE_EXT_PASSTHRU_LOGGING
         fprintf(stderr, "SERVE: want=%zu served=%zu/%zu dest=%p\n",
@@ -2287,9 +2311,44 @@ H5VL_pass_through_ext_dataset_get(void *dset, H5VL_dataset_get_args_t *args,
     printf("------- EXT PASS THROUGH VOL DATASET Get\n");
 #endif
 
+    gpu_vol_dataset_t *ds_ctx = (gpu_vol_dataset_t *)o->custom_data;
+    compression_ctx   *ctx    = ds_ctx ? ds_ctx->comp_ctx : NULL;
+
+    /* If this is a compressed dataset, report the LOGICAL shape/type we
+     * recovered from the _VOL_* attributes, not the 1-D byte container the
+     * data is physically stored as. h5repack uses these to create the
+     * destination dataset, so it must see 3-D float64, not 1-D uint8. */
+    if (ctx && ctx->ndims > 0 && ctx->dims) {
+        if (args->op_type == H5VL_DATASET_GET_SPACE) {
+            hsize_t dims[H5S_MAX_RANK];
+            for (size_t i = 0; i < ctx->ndims; i++)
+                dims[i] = (hsize_t)ctx->dims[i];
+            hid_t sid = H5Screate_simple((int)ctx->ndims, dims, NULL);
+            if (sid < 0) {
+                H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                        vol_err_class, maj_compression, min_decompress_failed,
+                        "could not build logical dataspace for compressed dataset");
+                return -1;
+            }
+            args->args.get_space.space_id = sid;
+            return 0;
+        }
+        if (args->op_type == H5VL_DATASET_GET_TYPE) {
+            hid_t tid = pressio_to_hdf5_dtype(ctx->dtype);   /* logical element type */
+            if (tid < 0) {
+                H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                        vol_err_class, maj_compression, min_decompress_failed,
+                        "could not build logical datatype for compressed dataset");
+                return -1;
+            }
+            args->args.get_type.type_id = tid;
+            return 0;
+        }
+        /* GET_DCPL, GET_DAPL, GET_STORAGE_SIZE, etc. fall through to native */
+    }
+
     ret_value = H5VLdataset_get(o->under_object, o->under_vol_id, args, dxpl_id, req);
 
-    /* Check for async request */
     if(req && *req)
         *req = H5VL_pass_through_ext_new_obj(*req, o->under_vol_id);
 
