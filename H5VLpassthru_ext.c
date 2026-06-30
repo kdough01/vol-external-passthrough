@@ -1994,27 +1994,14 @@ H5VL_pass_through_ext_dataset_read(
         size_t off_bytes, len_bytes;
 
         if (file_space_id[u] == H5S_ALL || ctx->ndims == 0) {
-            /* Whole dataset in one shot (or scalar). */
             off_bytes = 0;
             len_bytes = total_bytes;
         } else {
+            /* h5repack reads from the underlying 1-D byte container in strips,
+             * so the file-space selection is 1-D and linear over the byte
+             * stream — which is exactly decomp_buf's layout. Use it directly;
+             * do NOT interpret it against the 3-D logical dims. */
             hssize_t np = H5Sget_select_npoints(file_space_id[u]);
-
-            {   /* DIAGNOSTIC — remove once understood */
-                hsize_t s[H5S_MAX_RANK], e[H5S_MAX_RANK];
-                H5Sget_select_bounds(file_space_id[u], s, e);
-                int seltype = H5Sget_select_type(file_space_id[u]);
-                fprintf(stderr, "READ SEL: seltype=%d npoints=%lld bounds=[", seltype, (long long)np);
-                for (int i=0;i<(int)ctx->ndims;i++)
-                    fprintf(stderr,"%llu..%llu%s",(unsigned long long)s[i],(unsigned long long)e[i],
-                            i+1<(int)ctx->ndims?",":"");
-                fprintf(stderr,"] dims=[");
-                for (int i=0;i<(int)ctx->ndims;i++)
-                    fprintf(stderr,"%zu%s",ctx->dims[i],i+1<(int)ctx->ndims?",":"");
-                fprintf(stderr,"] total_elems=%zu\n",
-                        (size_t)( (hsize_t)ctx->dims[0]*ctx->dims[1]*ctx->dims[2]));
-                fflush(stderr);
-            }
             if (np < 0) {
                 H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
                         vol_err_class, maj_compression, min_decompress_failed,
@@ -2022,48 +2009,18 @@ H5VL_pass_through_ext_dataset_read(
                 ret_val = -1; continue;
             }
 
-            /* Full-dataset read expressed as a hyperslab (h5repack often does
-             * this instead of using H5S_ALL) → treat exactly like H5S_ALL. */
-            hsize_t total_elems = 1;
-            for (int i = 0; i < (int)ctx->ndims; i++) total_elems *= ctx->dims[i];
-
-            if (np == (hssize_t)total_elems) {
-                off_bytes = 0;
-                len_bytes = total_bytes;
-            } else {
-                /* Partial strip: require a contiguous row-major block
-                 * (full in all dims but dim 0), same as dataset_write. */
-                hsize_t start[H5S_MAX_RANK], end[H5S_MAX_RANK];
-                if (H5Sget_select_bounds(file_space_id[u], start, end) < 0) {
-                    H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
-                            vol_err_class, maj_compression, min_decompress_failed,
-                            "could not get selection bounds for dataset %zu", u);
-                    ret_val = -1; continue;
-                }
-
-                int     contiguous  = 1;
-                hsize_t block_elems = 1;
-                for (int i = 0; i < (int)ctx->ndims; i++) {
-                    block_elems *= (end[i] - start[i] + 1);
-                    if (i >= 1 && (start[i] != 0 || end[i] != ctx->dims[i] - 1))
-                        contiguous = 0;
-                }
-                if (!contiguous || block_elems != (hsize_t)np) {
-                    H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
-                            vol_err_class, maj_compression, min_decompress_failed,
-                            "dataset %zu: non-contiguous partial read not supported "
-                            "by the compression VOL", u);
-                    ret_val = -1; continue;
-                }
-
-                hsize_t lin = 0, stride = 1;
-                for (int i = (int)ctx->ndims - 1; i >= 0; i--) {
-                    lin    += start[i] * stride;
-                    stride *= ctx->dims[i];
-                }
-                off_bytes = (size_t)lin * dsize;
-                len_bytes = (size_t)np  * dsize;
+            hsize_t s1 = 0, e1 = 0;
+            if (H5Sget_select_bounds(file_space_id[u], &s1, &e1) < 0) {
+                H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                        vol_err_class, maj_compression, min_decompress_failed,
+                        "could not get selection bounds for dataset %zu", u);
+                ret_val = -1; continue;
             }
+
+            /* The selection is in ELEMENTS of the logical dataset; convert to
+             * bytes. (For a 1-D linear read these map straight through.) */
+            off_bytes = (size_t)s1 * dsize;
+            len_bytes = (size_t)np * dsize;
         }
 
         if (off_bytes + len_bytes > ctx->decomp_size) {
@@ -2073,6 +2030,9 @@ H5VL_pass_through_ext_dataset_read(
                     u, off_bytes, off_bytes + len_bytes, ctx->decomp_size);
             ret_val = -1; continue;
         }
+
+        fprintf(stderr, "SERVE: off_bytes=%zu len_bytes=%zu decomp_size=%zu\n",
+        off_bytes, len_bytes, ctx->decomp_size); fflush(stderr);
 
         memcpy(buf[u], (char *)ctx->decomp_buf + off_bytes, len_bytes);
 
