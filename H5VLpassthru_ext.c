@@ -2022,14 +2022,7 @@ H5VL_pass_through_ext_dataset_read(
          * advance read_served, and never read past decomp_size (tail strip).
          * No "whole remainder" shortcut — that overruns the strip buffer.
          * ==================================================================== */
-        hssize_t sel_pts = H5Sget_select_npoints(mem_space_id[u]);
-        if (sel_pts < 0) {
-            H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
-                    vol_err_class, maj_compression, min_decompress_failed,
-                    "could not query memory selection for dataset %zu", u);
-            ret_val = -1; continue;
-        }
-
+        
         size_t want;
         if (mem_space_id[u] == H5S_ALL) {
             want = ctx->decomp_size - ctx->read_served;   /* full read */
