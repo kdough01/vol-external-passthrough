@@ -319,6 +319,7 @@ H5VL_pass_through_ext_transfer_decompress(compression_ctx *ctx,
         ret_val = -1;
         goto done;
     }
+    fprintf(stderr, "DECOMP domain id = %s\n", pressio_data_domain_id(output));
 
     /* Pull the result home: device -> host for GPU compressors, no-op for CPU. */
     vol_make_host_resident(output);
