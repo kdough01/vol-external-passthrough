@@ -1,11 +1,7 @@
-//  Times end-to-end HDF5 write/read through the vol-external-passthrough
-//  write_ms = compress + I/O ; read_ms = I/O + decompress.
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include <math.h>
 #include "hdf5.h"
 #include "bench_config.h"
 
@@ -19,6 +15,7 @@ static hid_t dt_h5(bench_dtype_t t) {
     return (t == DT_F32) ? H5T_NATIVE_FLOAT : H5T_NATIVE_DOUBLE;
 }
 
+/* ── VOL property registration (matches your existing tests) ─────────────── */
 static void register_vol_properties(void) {
     if (H5Pexist(H5P_DATASET_CREATE, "pressio:compressor") <= 0) {
         static char d[64] = "noop";
@@ -61,28 +58,6 @@ static void *read_raw(const char *path, size_t nelem, bench_dtype_t t) {
     return buf;
 }
 
-static void err_metrics(const void *a, const void *b, size_t n, bench_dtype_t t,
-                        double *maxabs, double *rmse) {
-    double m = 0.0, s = 0.0;
-    if (t == DT_F32) {
-        const float *x = a, *y = b;
-        for (size_t i = 0; i < n; i++) {
-            double d = fabs((double)x[i] - (double)y[i]);
-            if (d > m) m = d;
-            s += d * d;
-        }
-    } else {
-        const double *x = a, *y = b;
-        for (size_t i = 0; i < n; i++) {
-            double d = fabs(x[i] - y[i]);
-            if (d > m) m = d;
-            s += d * d;
-        }
-    }
-    *maxabs = m;
-    *rmse   = sqrt(s / (double)n);
-}
-
 int main(void) {
     register_vol_properties();
 
@@ -90,8 +65,9 @@ int main(void) {
     if (!scratch || !*scratch) scratch = ".";
 
     printf("# VOL-path timing (through vol-external-passthrough)\n");
-    printf("# %-20s %-8s %12s %12s %8s %12s %12s\n",
-           "dataset", "comp", "write_ms", "read_ms", "ratio", "max_abs", "rmse");
+    printf("# %-20s %-8s %11s %11s %7s %12s %12s %8s %5s\n",
+           "dataset", "comp", "write_ms", "read_ms", "ratio",
+           "max_abs", "rmse", "special", "bad");
     fflush(stdout);
 
     for (int d = 0; d < BENCH_N_DATASETS; d++) {
@@ -153,12 +129,15 @@ int main(void) {
             }
 
             double maxabs = 0.0, rmse = 0.0;
-            err_metrics(field, rbuf, nelem, ds->dtype, &maxabs, &rmse);
+            size_t n_special = 0, n_bad = 0;
+            bench_err_metrics(field, rbuf, nelem, ds->dtype,
+                              &maxabs, &rmse, &n_special, &n_bad);
             double ratio = (storage > 0)
                          ? (double)(nelem * esize) / (double)storage : 0.0;
 
-            printf("  %-20s %-8s %12.2f %12.2f %8.2f %12.3e %12.3e\n",
-                   ds->name, cc->label, wms, rms, ratio, maxabs, rmse);
+            printf("  %-20s %-8s %11.2f %11.2f %7.2f %12.3e %12.3e %8zu %5zu\n",
+                   ds->name, cc->label, wms, rms, ratio,
+                   maxabs, rmse, n_special, n_bad);
             fflush(stdout);
 
             H5Pclose(dcpl);

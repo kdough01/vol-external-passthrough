@@ -1,10 +1,7 @@
-// Times RAW libpressio compress/decompress
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include <math.h>
 
 #include <libpressio/libpressio.h>
 #ifdef USE_CUDA
@@ -36,28 +33,6 @@ static void *read_raw(const char *path, size_t nelem, bench_dtype_t t) {
     return buf;
 }
 
-static void err_metrics(const void *a, const void *b, size_t n, bench_dtype_t t,
-                        double *maxabs, double *rmse) {
-    double m = 0.0, s = 0.0;
-    if (t == DT_F32) {
-        const float *x = a, *y = b;
-        for (size_t i = 0; i < n; i++) {
-            double d = fabs((double)x[i] - (double)y[i]);
-            if (d > m) m = d;
-            s += d * d;
-        }
-    } else {
-        const double *x = a, *y = b;
-        for (size_t i = 0; i < n; i++) {
-            double d = fabs(x[i] - y[i]);
-            if (d > m) m = d;
-            s += d * d;
-        }
-    }
-    *maxabs = m;
-    *rmse   = sqrt(s / (double)n);
-}
-
 int main(void) {
     struct pressio *library = pressio_instance();
 
@@ -70,8 +45,9 @@ int main(void) {
 #endif
 
     printf("# libpressio-only timing (no HDF5, no VOL)\n");
-    printf("# %-20s %-8s %12s %12s %8s %12s %12s\n",
-           "dataset", "comp", "compress_ms", "decompress_ms", "ratio", "max_abs", "rmse");
+    printf("# %-20s %-8s %13s %13s %7s %12s %12s %8s %5s\n",
+           "dataset", "comp", "compress_ms", "decompress_ms", "ratio",
+           "max_abs", "rmse", "special", "bad");
     fflush(stdout);
 
     for (int d = 0; d < BENCH_N_DATASETS; d++) {
@@ -157,24 +133,29 @@ int main(void) {
             clock_gettime(CLOCK_MONOTONIC, &t1);
             double dms = elapsed_ms(t0, t1);
 
-            double maxabs = 0.0, rmse = 0.0;
-            if (dret == 0) {
-                size_t out_bytes = 0;
-                void *out = pressio_data_ptr(decompressed, &out_bytes);
-                if (out && out_bytes >= nelem * esize)
-                    err_metrics(field, out, nelem, ds->dtype, &maxabs, &rmse);
-            }
-
             double ratio = (comp_bytes > 0)
                          ? (double)(nelem * esize) / (double)comp_bytes : 0.0;
 
             if (dret != 0) {
-                printf("  %-20s %-8s %12.2f %12s %8.2f %12s %12s  (decompress failed: %s)\n",
-                       ds->name, cc->label, cms, "-", ratio, "-", "-",
+                printf("  %-20s %-8s %13.2f %13s %7.2f %12s %12s %8s %5s  (decompress failed: %s)\n",
+                       ds->name, cc->label, cms, "-", ratio, "-", "-", "-", "-",
                        pressio_compressor_error_msg(comp));
+            } else if (cc->is_gpu) {
+                /* Output may be device-resident; can't score it from host C. */
+                printf("  %-20s %-8s %13.2f %13.2f %7.2f %12s %12s %8s %5s\n",
+                       ds->name, cc->label, cms, dms, ratio,
+                       "gpu", "gpu", "-", "-");
             } else {
-                printf("  %-20s %-8s %12.2f %12.2f %8.2f %12.3e %12.3e\n",
-                       ds->name, cc->label, cms, dms, ratio, maxabs, rmse);
+                size_t out_bytes = 0;
+                void *out = pressio_data_ptr(decompressed, &out_bytes);
+                double maxabs = 0.0, rmse = 0.0;
+                size_t n_special = 0, n_bad = 0;
+                if (out && out_bytes >= nelem * esize)
+                    bench_err_metrics(field, out, nelem, ds->dtype,
+                                      &maxabs, &rmse, &n_special, &n_bad);
+                printf("  %-20s %-8s %13.2f %13.2f %7.2f %12.3e %12.3e %8zu %5zu\n",
+                       ds->name, cc->label, cms, dms, ratio,
+                       maxabs, rmse, n_special, n_bad);
             }
             fflush(stdout);
 
