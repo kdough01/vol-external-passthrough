@@ -294,11 +294,21 @@ H5VL_pass_through_ext_transfer_decompress(compression_ctx *ctx,
                                               (void *)compressed_data,
                                               1, comp_dims, "malloc");
 
-    /* Wrap the caller's buffer as host memory. CPU compressors decompress
-     * into it directly (zero copy); GPU compressors decompress on the device
-     * and we copy back below. */
-    output = pressio_data_new_nonowning_domain(out_dtype, output_buf,
-                                               out_ndims, out_dims, "malloc");
+    /* Give libpressio an OWNING output, exactly like the compress path.
+     * GPU compressors (cuszp) decompress into device memory; if we pre-bind
+     * the caller's buffer as nonowning host, make_writeable can't relocate it
+     * to the device, the result never comes back, and output_buf is left
+     * uninitialized. Let libpressio place the output wherever it needs, pull
+     * it home, then copy into the caller's buffer. */
+    output = pressio_data_new_owning(out_dtype, out_ndims, out_dims);
+    if (!output) {
+        H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                vol_err_class, maj_compression, min_decompress_failed,
+                "out of memory allocating %zu-byte decompress output for '%s'",
+                out_nbytes, ctx->compressor_id);
+        ret_val = -1;
+        goto done;
+    }
 
     if (pressio_compressor_decompress(ctx->compressor, input, output)) {
         H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
@@ -310,13 +320,21 @@ H5VL_pass_through_ext_transfer_decompress(compression_ctx *ctx,
         goto done;
     }
 
-    /* Pull the result home (no-op if it already landed in output_buf). */
+    /* Pull the result home: device -> host for GPU compressors, no-op for CPU. */
     vol_make_host_resident(output);
 
     {
         size_t actual_bytes = 0;
         void  *out_ptr = pressio_data_ptr(output, &actual_bytes);
 
+        if (!out_ptr || actual_bytes == 0) {
+            H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                    vol_err_class, maj_compression, min_decompress_failed,
+                    "decompress of '%s' produced no host-resident output",
+                    ctx->compressor_id);
+            ret_val = -1;
+            goto done;
+        }
         if (actual_bytes > out_nbytes) {
             H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
                     vol_err_class, maj_compression, min_decompress_failed,
@@ -326,14 +344,11 @@ H5VL_pass_through_ext_transfer_decompress(compression_ctx *ctx,
             goto done;
         }
 
-        /* If libpressio reused output_buf in place, out_ptr == output_buf and
-         * this is skipped; otherwise copy the result into the caller buffer. */
-        if (out_ptr && out_ptr != output_buf)
-            memcpy(output_buf, out_ptr, actual_bytes);
+        memcpy(output_buf, out_ptr, actual_bytes);
 
 #ifdef ENABLE_EXT_PASSTHRU_LOGGING
-        printf("TRANSFER DECOMPRESS OK: id=%s actual_bytes=%zu in_place=%d\n",
-               ctx->compressor_id, actual_bytes, (int)(out_ptr == output_buf));
+        printf("TRANSFER DECOMPRESS OK: id=%s actual_bytes=%zu\n",
+               ctx->compressor_id, actual_bytes);
 #endif
     }
 
@@ -351,5 +366,4 @@ done:
     if (output) pressio_data_free(output);
     return ret_val;
 }
-
-} /* extern "C" */
+} /* extern C */

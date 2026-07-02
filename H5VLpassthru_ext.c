@@ -398,9 +398,9 @@ config_params *config_params_create(hid_t fapl_id)
     const char *compressor = getenv("HDF5_VOL_PRESSIO_COMPRESSOR");
     const char *level      = getenv("HDF5_VOL_PRESSIO_LEVEL");
 
-    printf("DEBUG config: compressor='%s' level='%s'\n",
-       compressor ? compressor : "(not set)",
-       level      ? level      : "(not set)");
+    // printf("DEBUG config: compressor='%s' level='%s'\n",
+    //    compressor ? compressor : "(not set)",
+    //    level      ? level      : "(not set)");
 
     p->default_compression_id  = strdup(compressor ? compressor : "noop");
     p->compression_level       = level ? (int)strtol(level, NULL, 10) : 1;
@@ -479,7 +479,7 @@ compression_ctx* compression_ctx_create(int rank, hsize_t *h5dims, enum pressio_
 #endif
 
 
-    printf("DEBUG ctx_create_entry: override='%s'\n", compressor_override ? compressor_override : "(null)");
+    // printf("DEBUG ctx_create_entry: override='%s'\n", compressor_override ? compressor_override : "(null)");
 
     compression_ctx *comp_ctx = (compression_ctx*)calloc(1, sizeof(compression_ctx));
 
@@ -512,7 +512,7 @@ compression_ctx* compression_ctx_create(int rank, hsize_t *h5dims, enum pressio_
     comp_ctx->library = pressio_instance();
     comp_ctx->compressor = pressio_get_compressor(comp_ctx->library, comp_ctx->compressor_id);
 
-    printf("DEBUG ctx_create: id='%s' compressor=%p\n", comp_ctx->compressor_id, (void*)comp_ctx->compressor);
+    // printf("DEBUG ctx_create: id='%s' compressor=%p\n", comp_ctx->compressor_id, (void*)comp_ctx->compressor);
 
     // make sure the compressor specified exists and is known by libpressio
     if (!comp_ctx->compressor) {
@@ -587,8 +587,8 @@ gpu_vol_dataset_t* gpu_vol_dataset_wrap(void *under_dataset,
                                         gpu_vol_file_t *file_ctx,
                                         const char *compressor_override)
 {
-    printf("DEBUG wrap: compressor_override='%s'\n",
-       compressor_override ? compressor_override : "(null)");
+    // printf("DEBUG wrap: compressor_override='%s'\n",
+    //    compressor_override ? compressor_override : "(null)");
        
     gpu_vol_dataset_t *gpu_dataset_ctx = (gpu_vol_dataset_t*)calloc(1, sizeof(gpu_vol_dataset_t));
 
