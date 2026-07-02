@@ -54,7 +54,7 @@
 /* Whether to display log messge when callback is invoked */
 /* (Uncomment to enable) */
 /* #define ENABLE_EXT_PASSTHRU_LOGGING */
-#define ENABLE_EXT_PASSTHRU_LOGGING
+// #define ENABLE_EXT_PASSTHRU_LOGGING
 
 /* Hack for missing va_copy() in old Visual Studio editions
  * (from H5win2_defs.h - used on VS2012 and earlier)
@@ -2022,7 +2022,7 @@ H5VL_pass_through_ext_dataset_read(
          * advance read_served, and never read past decomp_size (tail strip).
          * No "whole remainder" shortcut — that overruns the strip buffer.
          * ==================================================================== */
-        
+
         size_t want;
         if (mem_space_id[u] == H5S_ALL) {
             want = ctx->decomp_size - ctx->read_served;   /* full read */

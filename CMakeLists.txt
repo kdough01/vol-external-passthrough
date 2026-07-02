@@ -37,7 +37,7 @@ if(MPI_FOUND)
     target_compile_definitions(hdf5_vol_passthrough PRIVATE HAVE_MPI)
 endif()
 
-target_compile_definitions(hdf5_vol_passthrough PRIVATE ENABLE_EXT_PASSTHRU_LOGGING)
+# target_compile_definitions(hdf5_vol_passthrough PRIVATE ENABLE_EXT_PASSTHRU_LOGGING)
 target_compile_features(hdf5_vol_passthrough PRIVATE cxx_std_17)
 
 if(USE_CUDA)

@@ -1,0 +1,73 @@
+#!/bin/bash
+#PBS -N pressio_bench_timing
+#PBS -l select=1:ncpus=4:ngpus=1:mpiprocs=1
+#PBS -l walltime=00:15:00
+#PBS -j oe
+#PBS -A SDR
+#PBS -q gpu
+
+# libpressio timing, no HDF5 and no VOL in the path.
+#     write_ms - compress_ms   ~= write-side I/O overhead
+#     read_ms  - decompress_ms ~= read-side  I/O overhead
+
+cd $PBS_O_WORKDIR/..
+PROJECT_ROOT=$(pwd)
+echo "Job started on $(date)"
+echo "Running on:   $(hostname)"
+echo "Project root: $PROJECT_ROOT"
+
+module load gcc/11.4.0
+module load cuda/12.6.0
+
+GCC_LIB=$(gcc --print-file-name=libstdc++.so | xargs dirname 2>/dev/null)
+[ "$GCC_LIB" = "." ] && GCC_LIB=/usr/lib/gcc/x86_64-linux-gnu/11
+CUDA_DIR=$(dirname "$(dirname "$(which nvcc)")")
+
+echo "gcc:      $(gcc --version | head -1)"
+echo "nvcc:     $(which nvcc)"
+echo "CUDA_DIR: $CUDA_DIR"
+echo "GCC_LIB:  $GCC_LIB"
+
+LP_VIEW=/home/kdougherty/libpressio_cuda/.spack-env/view
+
+# Locate libpressio
+LP_LIB=""
+for d in "$LP_VIEW/lib64" "$LP_VIEW/lib"; do
+    if ls "$d"/liblibpressio.* >/dev/null 2>&1; then LP_LIB="$d"; break; fi
+done
+if [ -z "$LP_LIB" ]; then
+    echo "ERROR: could not find liblibpressio.* under $LP_VIEW"
+    find "$LP_VIEW" -name 'liblibpressio.*' 2>/dev/null
+    exit 1
+fi
+echo "LP_LIB:   $LP_LIB"
+
+CLEAN_PATH=$(echo "$PATH" | tr ':' '\n' | grep -v spack-env | tr '\n' ':')
+
+WORK=/lcrc/project/SDR/kdougherty/bench/job_${PBS_JOBID:-local}
+mkdir -p "$WORK"
+BIN="$WORK/bench_pressio_timing"
+SRC="tests/bench_pressio_timing.c"
+
+echo ""
+echo "=== Compiling $SRC ==="
+env PATH="$CLEAN_PATH" LD_LIBRARY_PATH="$GCC_LIB" \
+gcc -O2 -std=c11 -DUSE_CUDA "$SRC" \
+    -Itests \
+    -I"$LP_VIEW/include" \
+    -I"$CUDA_DIR/include" \
+    -L"$LP_LIB"   -Wl,-rpath,"$LP_LIB"   -llibpressio \
+    -L"$CUDA_DIR/lib64" -Wl,-rpath,"$CUDA_DIR/lib64" -lcudart \
+    -lstdc++ -lm \
+    -o "$BIN" \
+  || { echo "compile failed"; exit 1; }
+
+export LD_LIBRARY_PATH=${GCC_LIB}:${LP_LIB}:${CUDA_DIR}/lib64
+
+RESULTS="$WORK/bench_pressio_results.txt"
+echo ""
+echo "=== libpressio-only timing (results -> $RESULTS) ==="
+"$BIN" | tee "$RESULTS"
+
+echo ""
+echo "Job finished on $(date)"
