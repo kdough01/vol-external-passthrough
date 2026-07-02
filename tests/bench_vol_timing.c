@@ -15,7 +15,6 @@ static hid_t dt_h5(bench_dtype_t t) {
     return (t == DT_F32) ? H5T_NATIVE_FLOAT : H5T_NATIVE_DOUBLE;
 }
 
-/* ── VOL property registration (matches your existing tests) ─────────────── */
 static void register_vol_properties(void) {
     if (H5Pexist(H5P_DATASET_CREATE, "pressio:compressor") <= 0) {
         static char d[64] = "noop";
@@ -65,9 +64,9 @@ int main(void) {
     if (!scratch || !*scratch) scratch = ".";
 
     printf("# VOL-path timing (through vol-external-passthrough)\n");
-    printf("# %-20s %-8s %11s %11s %7s %12s %12s %8s %5s\n",
+    printf("# %-20s %-8s %11s %11s %7s %11s %11s %11s %12s\n",
            "dataset", "comp", "write_ms", "read_ms", "ratio",
-           "max_abs", "rmse", "special", "bad");
+           "min", "max", "mean", "rmse");
     fflush(stdout);
 
     for (int d = 0; d < BENCH_N_DATASETS; d++) {
@@ -128,16 +127,13 @@ int main(void) {
                 continue;
             }
 
-            double maxabs = 0.0, rmse = 0.0;
-            size_t n_special = 0, n_bad = 0;
-            bench_err_metrics(field, rbuf, nelem, ds->dtype,
-                              &maxabs, &rmse, &n_special, &n_bad);
+            Stats st = bench_compute_stats(field, rbuf, nelem, ds->dtype);
             double ratio = (storage > 0)
                          ? (double)(nelem * esize) / (double)storage : 0.0;
 
-            printf("  %-20s %-8s %11.2f %11.2f %7.2f %12.3e %12.3e %8zu %5zu\n",
+            printf("  %-20s %-8s %11.2f %11.2f %7.2f %11.4g %11.4g %11.4g %12.4e\n",
                    ds->name, cc->label, wms, rms, ratio,
-                   maxabs, rmse, n_special, n_bad);
+                   st.min, st.max, st.mean, st.rmse);
             fflush(stdout);
 
             H5Pclose(dcpl);

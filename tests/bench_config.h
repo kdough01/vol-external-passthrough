@@ -28,6 +28,7 @@ static const bench_dataset_t BENCH_DATASETS[] = {
     { "miranda_density",
       "/lcrc/project/ECP-EZ/public/compression/Miranda/SDRBENCH-Miranda-256x384x384/density.f64",
       256, 384, 384, DT_F64 },
+
 };
 #define BENCH_N_DATASETS ((int)(sizeof(BENCH_DATASETS) / sizeof(BENCH_DATASETS[0])))
 
@@ -49,32 +50,31 @@ static inline size_t bench_dt_size(bench_dtype_t t) {
     return (t == DT_F32) ? sizeof(float) : sizeof(double);
 }
 
-static inline void
-bench_err_metrics(const void *a, const void *b, size_t n, bench_dtype_t t,
-                  double *maxabs, double *rmse,
-                  size_t *n_special, size_t *n_bad)
+typedef struct { double min, max, mean, rmse; } Stats;
+
+static inline Stats
+bench_compute_stats(const void *orig, const void *decomp, size_t n, bench_dtype_t t)
 {
-    double m = 0.0, s = 0.0;
-    size_t cmp = 0, special = 0, bad = 0;
+    double o0 = (t == DT_F32) ? (double)((const float  *)orig)[0]
+                              :         ((const double *)orig)[0];
+    Stats s = { o0, o0, 0.0, 0.0 };
+    double sum = 0.0, sse = 0.0;
 
     for (size_t i = 0; i < n; i++) {
-        double xv, yv;
-        if (t == DT_F32) { xv = ((const float  *)a)[i]; yv = ((const float  *)b)[i]; }
-        else             { xv = ((const double *)a)[i]; yv = ((const double *)b)[i]; }
+        double ov, dv;
+        if (t == DT_F32) { ov = ((const float  *)orig)[i]; dv = ((const float  *)decomp)[i]; }
+        else             { ov = ((const double *)orig)[i]; dv = ((const double *)decomp)[i]; }
 
-        if (!isfinite(xv)) { special++; continue; }
-        if (!isfinite(yv)) { bad++;     continue; }
-
-        double d = fabs(xv - yv);
-        if (d > m) m = d;
-        s += d * d;
-        cmp++;
+        if (ov < s.min) s.min = ov;
+        if (ov > s.max) s.max = ov;
+        sum += ov;
+        double diff = ov - dv;
+        sse += diff * diff;
     }
 
-    *maxabs    = m;
-    *rmse      = cmp ? sqrt(s / (double)cmp) : 0.0;
-    *n_special = special;
-    *n_bad     = bad;
+    s.mean = sum / (double)n;
+    s.rmse = sqrt(sse / (double)n);
+    return s;
 }
 
 #endif /* BENCH_CONFIG_H */

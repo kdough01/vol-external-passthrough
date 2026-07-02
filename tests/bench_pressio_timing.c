@@ -45,9 +45,9 @@ int main(void) {
 #endif
 
     printf("# libpressio-only timing (no HDF5, no VOL)\n");
-    printf("# %-20s %-8s %13s %13s %7s %12s %12s %8s %5s\n",
+    printf("# %-20s %-8s %13s %13s %7s %11s %11s %11s %12s\n",
            "dataset", "comp", "compress_ms", "decompress_ms", "ratio",
-           "max_abs", "rmse", "special", "bad");
+           "min", "max", "mean", "rmse");
     fflush(stdout);
 
     for (int d = 0; d < BENCH_N_DATASETS; d++) {
@@ -143,25 +143,23 @@ int main(void) {
                          ? (double)(nelem * esize) / (double)comp_bytes : 0.0;
 
             if (dret != 0) {
-                printf("  %-20s %-8s %13.2f %13s %7.2f %12s %12s %8s %5s  (decompress failed: %s)\n",
+                printf("  %-20s %-8s %13.2f %13s %7.2f %11s %11s %11s %12s  (decompress failed: %s)\n",
                        ds->name, cc->label, cms, "-", ratio, "-", "-", "-", "-",
                        pressio_compressor_error_msg(comp));
             } else if (cc->is_gpu) {
                 /* Output may be device-resident; can't score it from host C. */
-                printf("  %-20s %-8s %13.2f %13.2f %7.2f %12s %12s %8s %5s\n",
+                printf("  %-20s %-8s %13.2f %13.2f %7.2f %11s %11s %11s %12s\n",
                        ds->name, cc->label, cms, dms, ratio,
-                       "gpu", "gpu", "-", "-");
+                       "gpu", "gpu", "gpu", "gpu");
             } else {
                 size_t out_bytes = 0;
                 void *out = pressio_data_ptr(decompressed, &out_bytes);
-                double maxabs = 0.0, rmse = 0.0;
-                size_t n_special = 0, n_bad = 0;
+                Stats st = { 0, 0, 0, 0 };
                 if (out && out_bytes >= nelem * esize)
-                    bench_err_metrics(field, out, nelem, ds->dtype,
-                                      &maxabs, &rmse, &n_special, &n_bad);
-                printf("  %-20s %-8s %13.2f %13.2f %7.2f %12.3e %12.3e %8zu %5zu\n",
+                    st = bench_compute_stats(field, out, nelem, ds->dtype);
+                printf("  %-20s %-8s %13.2f %13.2f %7.2f %11.4g %11.4g %11.4g %12.4e\n",
                        ds->name, cc->label, cms, dms, ratio,
-                       maxabs, rmse, n_special, n_bad);
+                       st.min, st.max, st.mean, st.rmse);
             }
             fflush(stdout);
 
