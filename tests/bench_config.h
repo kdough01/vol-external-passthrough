@@ -1,20 +1,6 @@
 #ifndef BENCH_CONFIG_H
 #define BENCH_CONFIG_H
 
-/* ============================================================================
- *  Shared benchmark configuration + error metric.
- *
- *  Both bench_vol_timing.c (through the passthrough VOL) and
- *  bench_pressio_timing.c (raw libpressio, no HDF5) include THIS file, so the
- *  two runs exercise an identical matrix of datasets x compressors and score
- *  fidelity the same way. That is what makes the timing subtraction meaningful:
- *
- *      H5Dwrite_ms - compress_ms   ~=  write-side HDF5 + I/O overhead
- *      H5Dread_ms  - decompress_ms ~=  read-side  HDF5 + I/O overhead
- *
- *  Edit the two tables below to add SDRBench fields or compressors.
- * ========================================================================== */
-
 #include <stddef.h>
 #include <math.h>
 
@@ -30,8 +16,6 @@ typedef struct {
 typedef struct {
     const char *label;
     const char *pressio_id;
-    double      abs;
-    const char *mode_str;
     int         is_gpu;
     const char *opts_json;
 } bench_comp_t;
@@ -48,14 +32,15 @@ static const bench_dataset_t BENCH_DATASETS[] = {
 #define BENCH_N_DATASETS ((int)(sizeof(BENCH_DATASETS) / sizeof(BENCH_DATASETS[0])))
 
 static const bench_comp_t BENCH_COMPRESSORS[] = {
-    { "noop",  "noop",  -1.0,  NULL,      0, NULL },
-    { "bzip2", "bzip2", -1.0,  NULL,      0, NULL },
-    { "sz3",   "sz3",   1e-3,  NULL,      0, "{\"pressio:abs\": 1e-3}" },
-    { "cuszp", "cuszp", 1e-3,  "outlier", 1,
+    { "noop",  "noop",  0, NULL },
+    { "bzip2", "bzip2", 0, "{\"bzip2:block_size\": 9}" },
+    { "sz3",   "sz3",   0,
+      "{\"sz3:error_bound_mode_str\": \"abs\", \"sz3:abs_error_bound\": 1e-3}" },
+    { "cuszp", "cuszp", 1,
       "{\"pressio:abs\": 1e-3, \"cuszp:mode_str\": \"outlier\"}" },
 
-    /* { "nvcomp", "nvcomp", -1.0, NULL, 1, NULL }, */
-    /* { "cusz",   "cusz",   1e-3, NULL, 1, "{\"pressio:abs\": 1e-3}" }, */
+    /* { "nvcomp", "nvcomp", 1, NULL }, */
+    /* { "cusz",   "cusz",   1, "{\"pressio:abs\": 1e-3}" }, */
 };
 #define BENCH_N_COMPRESSORS \
     ((int)(sizeof(BENCH_COMPRESSORS) / sizeof(BENCH_COMPRESSORS[0])))

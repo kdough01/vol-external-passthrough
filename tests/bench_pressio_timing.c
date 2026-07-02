@@ -77,16 +77,22 @@ int main(void) {
                 continue;
             }
 
-            /* Options: mirror the JSON used on the VOL side, key-by-key. */
-            struct pressio_options *opts = pressio_compressor_get_options(comp);
-            if (cc->abs >= 0.0)   pressio_options_set_double(opts, "pressio:abs", cc->abs);
-            if (cc->mode_str)     pressio_options_set_string(opts, "cuszp:mode_str", cc->mode_str);
-#ifdef USE_CUDA
-            if (cc->is_gpu && stream) {
-                /* cudaStream_t is an opaque pointer; hand it over as a userptr.
-                 * Adjust the key if your build expects a different one. */
-                pressio_options_set_userptr(opts, "cuszp:stream", (void *)stream);
+            /* Options from the SAME JSON the VOL replays. Native keys (sz3:*,
+             * bzip2:*) and generic keys (pressio:*) both flow through here. */
+            struct pressio_options *opts =
+                cc->opts_json ? pressio_options_new_json(library, cc->opts_json)
+                              : pressio_compressor_get_options(comp);
+            if (!opts) {
+                printf("  %-20s %-8s   (could not parse opts_json)\n", ds->name, cc->label);
+                pressio_compressor_release(comp);
+                fflush(stdout);
+                continue;
             }
+#ifdef USE_CUDA
+            /* userptrs can't ride in JSON; set the CUDA stream separately
+             * (two-phase init). Adjust the key if your build expects another. */
+            if (cc->is_gpu && stream)
+                pressio_options_set_userptr(opts, "cuszp:stream", (void *)stream);
 #endif
             if (pressio_compressor_set_options(comp, opts) != 0) {
                 printf("  %-20s %-8s   (set_options failed: %s)\n",
