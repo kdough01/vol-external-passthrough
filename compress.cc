@@ -14,6 +14,7 @@ extern "C" {
 #include <libpressio_ext/cpp/data.h>
 #include <libpressio_ext/cpp/domain.h>
 #include <libpressio_ext/cpp/domain_manager.h>
+#include "vol_timing_sink.h"
 
 /* Helpers */
 static int
@@ -78,6 +79,7 @@ H5VL_pass_through_ext_transfer_compress(compression_ctx *ctx, const void *data, 
     size_t  in_ndims;
     size_t *in_dims;
     size_t  byte_dims[1];
+    ctx->compress_ms = 0.0;
 
     if (vol_is_byte_stream(ctx->compressor_id)) {
         in_dtype     = pressio_byte_dtype;
@@ -172,6 +174,7 @@ H5VL_pass_through_ext_transfer_compress(compression_ctx *ctx, const void *data, 
         fprintf(stderr, "WARNING: Passing a 0-capacity output buffer to the compressor.\n");
     }
 
+    double _c0 = bench_now_ms();
     if (pressio_compressor_compress(ctx->compressor, input, output)) {
         H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
                 vol_err_class, maj_compression, min_compress_failed,
@@ -182,8 +185,9 @@ H5VL_pass_through_ext_transfer_compress(compression_ctx *ctx, const void *data, 
         goto done;
     }
 
-    /* The result may be device-resident (GPU compressors). Pull it home. */
+    /* The result may be device-resident (GPU compressors). */
     vol_make_host_resident(output);
+    ctx->compress_ms = bench_now_ms() - _c0;
 
     {
         size_t comp_size = 0;
@@ -271,6 +275,7 @@ H5VL_pass_through_ext_transfer_decompress(compression_ctx *ctx,
     size_t  out_ndims;
     size_t *out_dims;
     size_t  byte_dims[1];
+    ctx->compress_ms = 0.0;
 
     if (vol_is_byte_stream(ctx->compressor_id)) {
         out_dtype    = pressio_byte_dtype;
@@ -310,6 +315,7 @@ H5VL_pass_through_ext_transfer_decompress(compression_ctx *ctx,
         goto done;
     }
 
+    double _c0 = bench_now_ms();
     if (pressio_compressor_decompress(ctx->compressor, input, output)) {
         H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
                 vol_err_class, maj_compression, min_decompress_failed,
@@ -321,8 +327,9 @@ H5VL_pass_through_ext_transfer_decompress(compression_ctx *ctx,
     }
     fprintf(stderr, "DECOMP domain id = %s\n", pressio_data_domain_id(output));
 
-    /* Pull the result home: device -> host for GPU compressors, no-op for CPU. */
+    /* device -> host for GPU compressors, no-op for CPU. */
     vol_make_host_resident(output);
+    ctx->compress_ms = bench_now_ms() - _c0;
 
     {
         size_t actual_bytes = 0;

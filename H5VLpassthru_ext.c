@@ -45,7 +45,7 @@
 #include <libpressio_ext/json/pressio_options_json.h>
 #include "metadata_structs.h"
 #include "vol_errors.h"
-
+#include "vol_timing_sink.h"
 
 /**********/
 /* Macros */
@@ -1880,10 +1880,15 @@ H5VL_pass_through_ext_dataset_read(
     herr_t ret_val = 0;
 
     for (size_t u = 0; u < count; u++) {
+        double _d0 = bench_now_ms();
+        double io_ms = 0.0;
+        double decomp_ms = 0.0;
+
         H5VL_pass_through_ext_t *d = (H5VL_pass_through_ext_t *)dset[u];
         void *under = d->under_object;
         gpu_vol_dataset_t *ds_ctx = (gpu_vol_dataset_t*)d->custom_data;
         compression_ctx *ctx = ds_ctx ? ds_ctx->comp_ctx : NULL;
+        const char *dset_name = ctx ? ctx->compressor_id : "none";
 
         if (!ctx) {
             if (ds_ctx && ds_ctx->compression_requested) {
@@ -1897,15 +1902,18 @@ H5VL_pass_through_ext_dataset_read(
             }
             /* No compressor was specified, data may passthrough without compression */
             void *rbufs[] = { buf[u] };
+            double _io0 = bench_now_ms();
             herr_t r = H5VLdataset_read(
                 1, &under, d->under_vol_id, &mem_type_id[u],
                 &mem_space_id[u], &file_space_id[u], plist_id, rbufs, NULL);
+            io_ms += bench_now_ms() - _io0;
             if (r < 0) {
                 H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
                         vol_err_class, maj_compression, min_decompress_failed,
                         "passthrough dataset_read failed for dataset %zu", u);
                 ret_val = -1;
             }
+            vol_timing_emit(dset_name, "none", "read", bench_now_ms() - _d0, 0.0, io_ms);
             continue;
         }
 
@@ -1939,9 +1947,11 @@ H5VL_pass_through_ext_dataset_read(
             H5Sselect_hyperslab(underlying_fspace, H5S_SELECT_SET, &zero, NULL, &hsz, NULL);
 
             void *header_bufs[] = { &csize };
+            double _io0 = bench_now_ms();
             herr_t hret = H5VLdataset_read(
                 1, &under, d->under_vol_id, (hid_t[]){H5T_NATIVE_UCHAR},
                 &mspace_hdr, &underlying_fspace, plist_id, header_bufs, NULL);
+            io_ms += bench_now_ms() - _io0;
             H5Sclose(mspace_hdr);
 
             if (hret < 0) {
@@ -1970,9 +1980,11 @@ H5VL_pass_through_ext_dataset_read(
             H5Sselect_hyperslab(underlying_fspace, H5S_SELECT_SET, &poff, NULL, &ps, NULL);
 
             void *payload_bufs[] = { cbuf };
+            _io0 = bench_now_ms();
             herr_t pret = H5VLdataset_read(
                 1, &under, d->under_vol_id, (hid_t[]){H5T_NATIVE_UCHAR},
                 &mspace_payload, &underlying_fspace, plist_id, payload_bufs, NULL);
+            io_ms += bench_now_ms() - _io0;
 
             H5Sclose(mspace_payload);
             H5Sclose(underlying_fspace);
@@ -1996,8 +2008,10 @@ H5VL_pass_through_ext_dataset_read(
                 ret_val = -1; continue;
             }
 
+            double _c0 = bench_now_ms();
             herr_t dret = H5VL_pass_through_ext_transfer_decompress(
                               ctx, cbuf, (size_t)csize, ctx->decomp_buf);
+            decomp_ms = bench_now_ms() - _c0;
             free(cbuf);
 
             if (dret < 0) {
@@ -2050,6 +2064,9 @@ H5VL_pass_through_ext_dataset_read(
             memcpy(buf[u], (char *)ctx->decomp_buf + ctx->read_served, want);
             ctx->read_served += want;
         }
+
+        vol_timing_emit(dset_name, ctx->compressor_id, "read",
+                        bench_now_ms() - _d0, decomp_ms, io_ms);
     }
 
     return ret_val;
@@ -2074,10 +2091,15 @@ H5VL_pass_through_ext_dataset_write(
     herr_t ret_val = 0;
 
     for (size_t u = 0; u < count; u++) {
+        double _d0 = bench_now_ms();
+        double io_ms = 0.0;
+        double compress_ms = 0.0;
+
         H5VL_pass_through_ext_t *d = (H5VL_pass_through_ext_t *)dset[u];
         void *under = d->under_object;
         gpu_vol_dataset_t *ds_ctx = (gpu_vol_dataset_t*)d->custom_data;
         compression_ctx *ctx = ds_ctx ? ds_ctx->comp_ctx : NULL;
+        const char *dset_name = ctx ? ctx->compressor_id : "none";
 
         if (!ctx) {
             if (ds_ctx && ds_ctx->compression_requested) {
@@ -2089,15 +2111,18 @@ H5VL_pass_through_ext_dataset_write(
                 continue;
             }
             const void *wbufs[] = { buf[u] };
+            double _io0 = bench_now_ms();
             herr_t r = H5VLdataset_write(
                 1, &under, d->under_vol_id, &mem_type_id[u],
                 &mem_space_id[u], &file_space_id[u], plist_id, wbufs, NULL);
+            io_ms += bench_now_ms() - _io0;
             if (r < 0) {
                 H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
                         vol_err_class, maj_compression, min_compress_failed,
                         "passthrough dataset_write failed for dataset %zu", u);
                 ret_val = -1;
             }
+            vol_timing_emit(dset_name, "none", "write", bench_now_ms() - _d0, 0.0, io_ms);
             continue;
         }
 
@@ -2193,11 +2218,16 @@ H5VL_pass_through_ext_dataset_write(
 #endif
 
         /* Wait for the rest of the dataset before compressing. */
-        if (ctx->stage_filled < ctx->stage_total)
+        if (ctx->stage_filled < ctx->stage_total) {
+            vol_timing_emit(dset_name, ctx->compressor_id, "write",
+                            bench_now_ms() - _d0, 0.0, 0.0);
             continue;
+        }
 
         /* ---- Full dataset assembled: compress the whole buffer once ---- */
+        double _c0 = bench_now_ms();
         herr_t cret = H5VL_pass_through_ext_transfer_compress(ctx, ctx->stage_buf, ctx->stage_total);
+        compress_ms = bench_now_ms() - _c0;
 
         free(ctx->stage_buf);
         ctx->stage_buf    = NULL;
@@ -2239,9 +2269,11 @@ H5VL_pass_through_ext_dataset_write(
         H5Sselect_hyperslab(fspace_hdr, H5S_SELECT_SET, &zero, NULL, &hsz, NULL);
 
         const void *hbufs[] = { &csize };
+        double _io0 = bench_now_ms();
         herr_t hret = H5VLdataset_write(
             1, &under, d->under_vol_id, (hid_t[]){H5T_NATIVE_UCHAR},
             &mspace_hdr, &fspace_hdr, plist_id, hbufs, NULL);
+        io_ms += bench_now_ms() - _io0;
         H5Sclose(mspace_hdr);
         H5Sclose(fspace_hdr);
 
@@ -2262,9 +2294,11 @@ H5VL_pass_through_ext_dataset_write(
         H5Sselect_hyperslab(fspace_payload, H5S_SELECT_SET, &poff, NULL, &ps, NULL);
 
         const void *cbufs[] = { ctx->compressed_buf };
+        _io0 = bench_now_ms();
         herr_t wret = H5VLdataset_write(
             1, &under, d->under_vol_id, (hid_t[]){H5T_NATIVE_UCHAR},
             &mspace_payload, &fspace_payload, plist_id, cbufs, NULL);
+        io_ms += bench_now_ms() - _io0;
         H5Sclose(mspace_payload);
         H5Sclose(fspace_payload);
 
@@ -2277,11 +2311,13 @@ H5VL_pass_through_ext_dataset_write(
 
         free(ctx->compressed_buf);
         ctx->compressed_buf = NULL;
+
+        vol_timing_emit(dset_name, ctx->compressor_id, "write",
+                        bench_now_ms() - _d0, compress_ms, io_ms);
     }
 
     return ret_val;
 } /* end H5VL_pass_through_ext_dataset_write() */
-
 
 /*-------------------------------------------------------------------------
  * Function:    H5VL_pass_through_ext_dataset_get
