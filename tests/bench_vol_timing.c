@@ -13,8 +13,7 @@
 #include "bench_compressors.h"
 #include "bench_timing.h"
 
-void  register_vol_properties(void);
-hid_t make_dcpl(const char *compressor, const char *opts_json);
+#include "miranda.h"
 
 typedef struct { double min, max, mean, rmse; } bench_stats;
 
