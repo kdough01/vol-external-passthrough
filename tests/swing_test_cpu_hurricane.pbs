@@ -77,6 +77,7 @@ ls build/tests/ || { echo "No tests/ in build"; exit 1; }
 export LD_LIBRARY_PATH=${GCC_LIB}:${LP_VIEW}/lib64:${LP_VIEW}/lib
 export HDF5_VOL_CONNECTOR="pass_through_ext under_vol=0;under_info={}"
 export HDF5_PLUGIN_PATH=$(pwd)/build
+export BENCH_CSV=$PBS_O_WORKDIR/connector_phases.csv
 
 echo ""
 echo "=== VOL timing: miranda, hurricane, s3d ==="
