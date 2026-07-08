@@ -46,7 +46,7 @@ static const bench_dataset_t BENCH_DATASETS[] = {
      * 256x384x384 x 8B = 301,989,888 B (~288 MiB). */
     {
         "miranda",
-        BENCH_DATA_ROOT "/Miranda/SDRBENCH-Miranda-256x384x384/density.f64",
+        BENCH_DATA_ROOT "/Miranda/SDRBENCH-Miranda-256x384x384/density.d64",
         3, {256, 384, 384, 0}, BENCH_F64,
         BENCH_BOUND_REL, 1e-3, 1,
         "Clean f64; cuszp returns RMSE~2.7e-4 here. SDRBench names it density.d64."
@@ -56,7 +56,7 @@ static const bench_dataset_t BENCH_DATASETS[] = {
      * 100x500x500 x 4B = 100,000,000 B (~95 MiB). */
     {
         "hurricane",
-        BENCH_DATA_ROOT "/Hurricane-ISABEL/Pf48.bin.f32",
+        BENCH_DATA_ROOT "/Hurricane-ISABEL/nonclean-data/Pf48.bin.f32",
         3, {100, 500, 500, 0}, BENCH_F32,
         BENCH_BOUND_REL, 1e-3, 1,
         "Use a CLEARED field. nonclean-data fields contain NaN fill -> bad for fidelity."
