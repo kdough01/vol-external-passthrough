@@ -1,7 +1,7 @@
 #!/bin/bash
 #PBS -N vol_test_swing
 #PBS -l select=1:ncpus=4:ngpus=1:mpiprocs=1
-#PBS -l walltime=00:10:00
+#PBS -l walltime=00:05:00
 #PBS -j oe
 #PBS -A SDR
 #PBS -q gpu
@@ -80,7 +80,6 @@ export HDF5_PLUGIN_PATH=$(pwd)/build
 
 echo ""
 echo "=== VOL timing: miranda, hurricane, s3d ==="
-export BENCH_ONLY="miranda,hurricane,s3d"
 ./build/tests/bench_vol_timing bench_out.h5 results_vol.csv
 
 echo "Job finished on $(date)"
