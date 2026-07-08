@@ -44,15 +44,15 @@ typedef struct {
 static const bench_dataset_t BENCH_DATASETS[] = {
     {
         "miranda",
-        BENCH_DATA_ROOT "/Miranda/SDRBENCH-Miranda-256x384x384/density.f64",
+        BENCH_DATA_ROOT "/Miranda/SDRBENCH-Miranda-256x384x384/density.d64",
         3, {256, 384, 384, 0}, BENCH_F64,
         BENCH_BOUND_REL, 1e-3, 1,
-        "Clean f64; cuszp returns RMSE~2.7e-4 here. SDRBench names it density.d64."
+        "Clean d64; cuszp returns RMSE~2.7e-4 here. SDRBench names it density.d64."
     },
 
     {
         "hurricane",
-        BENCH_DATA_ROOT "/Hurricane-ISABEL/Pf48.bin.f32",
+        BENCH_DATA_ROOT "/Hurricane-ISABEL/nonclean-data/Pf48.bin.f32",
         3, {100, 500, 500, 0}, BENCH_F32,
         BENCH_BOUND_REL, 1e-3, 1,
         "Use a CLEARED field. nonclean-data fields contain NaN fill -> bad for fidelity."

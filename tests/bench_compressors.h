@@ -25,12 +25,12 @@ typedef struct {
 } bench_compressor_t;
 
 static const bench_compressor_t BENCH_COMPRESSORS[] = {
-    { "noop", NULL, NULL, BENCH_CPU_CODEC, 1, NULL,
+    { "noop", "noop", NULL, BENCH_CPU_CODEC, 1, NULL,
       "Connector default (no compressor). Bit-exact baseline; isolates overhead." },
 
     { "cuszp", "cuszp",
       "{\"pressio:abs\": 1e-3, \"cuszp:mode_str\": \"outlier\"}",
-      BENCH_GPU_CODEC, 0, "cuszp:cuda_stream",   /* <<< CONFIRM stream key */
+      BENCH_GPU_CODEC, 0, "cuszp:cuda_stream",
       "GPU error-bounded lossy (A100). abs=1e-3 suits Miranda; for f32 sets "
       "consider \"pressio:rel\": 1e-3 so one config is comparable across datasets." },
 
@@ -88,7 +88,7 @@ static inline int bench_compressor_vol_info_json(const bench_compressor_t *c,
                                                  char *buf, size_t n) {
     char opts[256];
     bench_compressor_opts_json(c, d, opts, sizeof(opts));
-    if (!c->pressio_id)   /* noop / connector default */
+    if (!c->pressio_id)
         return snprintf(buf, n, "{\"compressor\": null, \"options\": %s}", opts);
     return snprintf(buf, n,
         "{\"compressor\": \"%s\", \"options\": %s}", c->pressio_id, opts);
