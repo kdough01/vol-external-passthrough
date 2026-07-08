@@ -83,4 +83,7 @@ echo ""
 echo "=== VOL timing: miranda, hurricane, s3d ==="
 ./build/tests/bench_vol_timing bench_out.h5 results_vol.csv
 
+echo "=== Pressio-only compressor timing ==="
+./build/tests/bench_pressio_timing results_pressio.csv
+
 echo "Job finished on $(date)"
