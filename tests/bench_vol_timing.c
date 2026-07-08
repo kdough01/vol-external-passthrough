@@ -1,149 +1,167 @@
-#include <stdio.h>
+/* ============================================================================
+ * bench_vol_timing_example.c
+ * ----------------------------------------------------------------------------
+ * Reference harness showing how bench_datasets.h + bench_timing.h wire together
+ * for the "total write / total read time" experiments across every dataset.
+ *
+ * The VOL adaptor is selected transparently via environment, so this harness is
+ * PLAIN HDF5 -- the same code benchmarks the native path, the H5Z-filter path,
+ * and your passthrough VOL. That transparency is itself one of the paper's
+ * claims (see experiment_design.md).
+ *
+ *   # your VOL adaptor
+ *   HDF5_PLUGIN_PATH=... \
+ *   HDF5_VOL_CONNECTOR="pass_through_ext under_vol=0;under_info={}" \
+ *   ./bench_vol_timing_example out.h5 results_vol.csv
+ *
+ *   # native (no connector) -> baseline
+ *   ./bench_vol_timing_example out.h5 results_native.csv
+ *
+ *   # H5Z filter path -> set the filter in code / via a plist variant
+ *
+ * Build:
+ *   h5cc -O2 -std=c11 bench_vol_timing_example.c -o bench_vol_timing_example
+ *   (or: cc -O2 -std=c11 bench_vol_timing_example.c -lhdf5 -o ...)
+ *
+ * COMPRESS and IO are measured INSIDE the connector; this harness measures
+ * TOTAL and reads back the connector's per-op breakdown via the thread-local
+ * report (Note 3, option b). Against native/filters the connector breakdown is
+ * simply absent and overhead is derived as TOTAL - COMPRESS - IO = TOTAL.
+ * ==========================================================================*/
+#include <hdf5.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
-#include <time.h>
-#include "hdf5.h"
-#include "bench_config.h"
 
-#define DEFAULT_COMPRESSOR "noop"
+#define BENCH_DATASETS_ENABLE_HDF5   /* enable the H5T_* / hsize_t helpers */
+#include "bench_datasets.h"
+#include "bench_timing.h"
 
-static double elapsed_ms(struct timespec a, struct timespec b) {
-    return (b.tv_sec - a.tv_sec) * 1000.0 + (b.tv_nsec - a.tv_nsec) / 1e6;
-}
-
-static hid_t dt_h5(bench_dtype_t t) {
-    return (t == DT_F32) ? H5T_NATIVE_FLOAT : H5T_NATIVE_DOUBLE;
-}
-
-static void register_vol_properties(void) {
-    if (H5Pexist(H5P_DATASET_CREATE, "pressio:compressor") <= 0) {
-        static char d[64] = "noop";
-        H5Pregister2(H5P_DATASET_CREATE, "pressio:compressor",
-                     sizeof(d), d, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
-    }
-    if (H5Pexist(H5P_DATASET_CREATE, "vol:options_json") <= 0) {
-        static char d[4096] = "";
-        H5Pregister2(H5P_DATASET_CREATE, "vol:options_json",
-                     sizeof(d), d, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
-    }
-}
-
-static hid_t make_dcpl(const char *compressor, const char *json_opts) {
-    hid_t dcpl = H5Pcreate(H5P_DATASET_CREATE);
-    char buf[64];
-    strncpy(buf, compressor ? compressor : DEFAULT_COMPRESSOR, sizeof(buf) - 1);
-    buf[sizeof(buf) - 1] = '\0';
-    H5Pset(dcpl, "pressio:compressor", buf);
-    if (json_opts) {
-        char jbuf[4096] = "";
-        strncpy(jbuf, json_opts, sizeof(jbuf) - 1);
-        H5Pset(dcpl, "vol:options_json", jbuf);
-    }
-    return dcpl;
-}
-
-static void *read_raw(const char *path, size_t nelem, bench_dtype_t t) {
-    FILE *f = fopen(path, "rb");
-    if (!f) { fprintf(stderr, "  cannot open %s\n", path); return NULL; }
-    size_t es = bench_dt_size(t);
-    void *buf = malloc(nelem * es);
-    if (!buf) { fclose(f); return NULL; }
-    size_t got = fread(buf, es, nelem, f);
+/* Load one raw binary field into a malloc'd buffer. Returns bytes read. */
+static size_t load_field(const bench_dataset_t *d, void **out) {
+    size_t nbytes = bench_num_bytes(d);
+    void *buf = malloc(nbytes);
+    if (!buf) { fprintf(stderr, "OOM for %s\n", d->name); return 0; }
+    FILE *f = fopen(d->path, "rb");
+    if (!f) { fprintf(stderr, "open %s failed\n", d->path); free(buf); return 0; }
+    size_t got = fread(buf, 1, nbytes, f);
     fclose(f);
-    if (got != nelem) {
-        fprintf(stderr, "  short read %s: got %zu, expected %zu\n", path, got, nelem);
-        free(buf); return NULL;
+    if (got != nbytes) {
+        fprintf(stderr, "%s: read %zu of %zu bytes\n", d->name, got, nbytes);
+        free(buf); return 0;
     }
-    return buf;
+    *out = buf;
+    return nbytes;
 }
 
-int main(void) {
-    register_vol_properties();
+/* One dataset: write then read, timing TOTAL around the H5D calls. */
+static int run_one(const bench_dataset_t *d, const char *h5path, FILE *csv) {
+    void *hbuf = NULL;
+    if (!load_field(d, &hbuf)) return -1;
 
-    const char *scratch = getenv("BENCH_SCRATCH");
-    if (!scratch || !*scratch) scratch = ".";
+    hsize_t dims[BENCH_MAX_RANK];
+    bench_dataset_h5dims(d, dims);
+    hid_t htype = bench_dataset_h5type(d);
 
-    printf("# VOL-path timing (through vol-external-passthrough)\n");
-    printf("# %-20s %-8s %11s %11s %7s %11s %11s %11s %12s\n",
-           "dataset", "comp", "write_ms", "read_ms", "ratio",
-           "min", "max", "mean", "rmse");
-    fflush(stdout);
+    /* ---- WRITE ---------------------------------------------------------- */
+    bench_report_t wr; bench_report_reset(&wr, NULL);
+    char wlabel[128];
+    snprintf(wlabel, sizeof(wlabel), "%s/write", d->name);
+    wr.label = wlabel;
 
-    for (int d = 0; d < BENCH_N_DATASETS; d++) {
-        const bench_dataset_t *ds = &BENCH_DATASETS[d];
-        size_t nelem = ds->nx * ds->ny * ds->nz;
-        size_t esize = bench_dt_size(ds->dtype);
+    hid_t fapl = H5Pcreate(H5P_FILE_ACCESS);   /* VOL comes from env */
+    hid_t file = H5Fcreate(h5path, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    hid_t space = H5Screate_simple(d->rank, dims, NULL);
+    hid_t dset  = H5Dcreate2(file, d->name, htype, space,
+                             H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
-        void *field = read_raw(ds->path, nelem, ds->dtype);
-        if (!field) { fprintf(stderr, "  skipping %s (read failed)\n", ds->name); continue; }
+    /* Note 3(b): expose this op's report to the connector's callbacks. */
+    bench_tls_set(&wr);
+    bench_scope_t sw = bench_scope_begin(&wr, BENCH_PHASE_TOTAL);
+    herr_t status = H5Dwrite(dset, htype, H5S_ALL, H5S_ALL, H5P_DEFAULT, hbuf);
+    bench_scope_end(&sw);
+    bench_tls_set(NULL);
+    if (status < 0) fprintf(stderr, "%s: H5Dwrite failed\n", d->name);
 
-        char h5path[1024];
-        snprintf(h5path, sizeof(h5path), "%s/bench_%s.h5", scratch, ds->name);
-        hid_t fid = H5Fcreate(h5path, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-        if (fid < 0) { fprintf(stderr, "  H5Fcreate failed for %s\n", h5path); free(field); continue; }
+    bench_report_derive_overhead(&wr);
+    bench_report_csv_row(csv, &wr);
 
-        hsize_t dims[3] = { ds->nx, ds->ny, ds->nz };
-        hid_t sid   = H5Screate_simple(3, dims, NULL);
-        hid_t htype = dt_h5(ds->dtype);
-        void *rbuf  = malloc(nelem * esize);
+    H5Dclose(dset); H5Sclose(space); H5Fclose(file);
 
-        for (int c = 0; c < BENCH_N_COMPRESSORS; c++) {
-            const bench_comp_t *cc = &BENCH_COMPRESSORS[c];
-            char dname[160];
-            snprintf(dname, sizeof(dname), "%s_%s", ds->name, cc->label);
+    /* ---- READ ----------------------------------------------------------- */
+    bench_report_t rd; bench_report_reset(&rd, NULL);
+    char rlabel[128];
+    snprintf(rlabel, sizeof(rlabel), "%s/read", d->name);
+    rd.label = rlabel;
 
-            hid_t dcpl = make_dcpl(cc->pressio_id, cc->opts_json);
-            hid_t dset = H5Dcreate2(fid, dname, htype, sid,
-                                    H5P_DEFAULT, dcpl, H5P_DEFAULT);
-            if (dset < 0) {
-                printf("  %-20s %-8s   (dataset create failed -- compressor unavailable?)\n",
-                       ds->name, cc->label);
-                H5Pclose(dcpl);
-                fflush(stdout);
-                continue;
-            }
+    void *rbuf = malloc(bench_num_bytes(d));
+    file = H5Fopen(h5path, H5F_ACC_RDONLY, fapl);
+    dset = H5Dopen2(file, d->name, H5P_DEFAULT);
 
-            struct timespec t0, t1;
-            clock_gettime(CLOCK_MONOTONIC, &t0);
-            herr_t wret = H5Dwrite(dset, htype, H5S_ALL, H5S_ALL, H5P_DEFAULT, field);
-            clock_gettime(CLOCK_MONOTONIC, &t1);
-            double wms = elapsed_ms(t0, t1);
+    bench_tls_set(&rd);
+    bench_scope_t sr = bench_scope_begin(&rd, BENCH_PHASE_TOTAL);
+    status = H5Dread(dset, htype, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf);
+    bench_scope_end(&sr);
+    bench_tls_set(NULL);
+    if (status < 0) fprintf(stderr, "%s: H5Dread failed\n", d->name);
 
-            hsize_t storage = H5Dget_storage_size(dset);
-            H5Dclose(dset);
+    bench_report_derive_overhead(&rd);
+    bench_report_csv_row(csv, &rd);
 
-            hid_t rdset = H5Dopen2(fid, dname, H5P_DEFAULT);
-            clock_gettime(CLOCK_MONOTONIC, &t0);
-            herr_t rret = H5Dread(rdset, htype, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf);
-            clock_gettime(CLOCK_MONOTONIC, &t1);
-            double rms = elapsed_ms(t0, t1);
-            H5Dclose(rdset);
-
-            if (wret < 0 || rret < 0) {
-                printf("  %-20s %-8s   (io error wret=%d rret=%d)\n",
-                       ds->name, cc->label, (int)wret, (int)rret);
-                H5Pclose(dcpl);
-                fflush(stdout);
-                continue;
-            }
-
-            Stats st = bench_compute_stats(field, rbuf, nelem, ds->dtype);
-            double ratio = (storage > 0)
-                         ? (double)(nelem * esize) / (double)storage : 0.0;
-
-            printf("  %-20s %-8s %11.2f %11.2f %7.2f %11.4g %11.4g %11.4g %12.4e\n",
-                   ds->name, cc->label, wms, rms, ratio,
-                   st.min, st.max, st.mean, st.rmse);
-            fflush(stdout);
-
-            H5Pclose(dcpl);
-        }
-
-        free(rbuf);
-        H5Sclose(sid);
-        H5Fclose(fid);
-        free(field);
-    }
-
+    H5Dclose(dset); H5Fclose(file); H5Pclose(fapl);
+    free(rbuf); free(hbuf);
     return 0;
 }
+
+int main(int argc, char **argv) {
+    const char *h5path = (argc > 1) ? argv[1] : "bench_out.h5";
+    const char *csvpath = (argc > 2) ? argv[2] : "results.csv";
+
+    /* Fail loudly on any misnamed cluster path before doing real work. */
+    bench_datasets_validate();
+
+    FILE *csv = fopen(csvpath, "w");
+    if (!csv) { perror("csv"); return 1; }
+    bench_report_csv_header(csv);
+
+    for (int i = 0; i < BENCH_NUM_DATASETS; ++i) {
+        const bench_dataset_t *d = &BENCH_DATASETS[i];
+        if (access(d->path, R_OK) != 0) {
+            fprintf(stderr, "skip %s (path not readable)\n", d->name);
+            continue;
+        }
+        run_one(d, h5path, csv);
+    }
+    fclose(csv);
+    fprintf(stderr, "wrote %s\n", csvpath);
+    return 0;
+}
+
+/* ----------------------------------------------------------------------------
+ * SKETCH: what the connector does INSIDE its dataset_write callback, so that
+ * COMPRESS (GPU-correct) and IO fold into the same report this harness set via
+ * bench_tls_set(). Lives in compress.cc, compiled with nvcc + BENCH_TIMING_WITH_CUDA.
+ *
+ *   bench_report_t *rep = bench_tls_get();   // may be NULL under native/filter
+ *
+ *   // --- compressor (GPU): events on the SAME stream cuszp uses ----------
+ *   #ifdef BENCH_TIMING_WITH_CUDA
+ *     bench_gpu_timer_t g = bench_gpu_timer_create(stream);  // your userptr stream
+ *     bench_gpu_timer_start(&g);
+ *     pressio_compress(compressor, in_data, &out_data);      // enqueues on stream
+ *     bench_gpu_timer_stop(&g);
+ *     bench_report_add_gpu(rep, BENCH_PHASE_COMPRESS, bench_gpu_timer_elapsed_ms(&g));
+ *     bench_gpu_timer_destroy(&g);
+ *   #else
+ *     bench_scope_t sc = bench_scope_begin(rep, BENCH_PHASE_COMPRESS);
+ *     pressio_compress(compressor, in_data, &out_data);      // CPU codec
+ *     bench_scope_end(&sc);
+ *   #endif
+ *
+ *   // --- IO: the underlying H5VLdataset_write of the compressed bytes -----
+ *   bench_scope_t si = bench_scope_begin(rep, BENCH_PHASE_IO);
+ *   H5VLdataset_write(under, ...);
+ *   bench_scope_end(&si);
+ *
+ *   // TOTAL is measured by the harness; OVERHEAD = TOTAL - COMPRESS - IO.
+ * ------------------------------------------------------------------------- */

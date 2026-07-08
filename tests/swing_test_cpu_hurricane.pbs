@@ -75,16 +75,12 @@ echo "--- build/tests/ ---"
 ls build/tests/ || { echo "No tests/ in build"; exit 1; }
 
 export LD_LIBRARY_PATH=${GCC_LIB}:${LP_VIEW}/lib64:${LP_VIEW}/lib
-
 export HDF5_VOL_CONNECTOR="pass_through_ext under_vol=0;under_info={}"
 export HDF5_PLUGIN_PATH=$(pwd)/build
 
-# echo ""
-# echo "=== Small write test (bzip2 / sz3 / zfp) ==="
-# ./build/tests/test_cpu_write
-
 echo ""
-echo "=== Miranda test ==="
-./build/tests/test_time_hurricane
+echo "=== VOL timing: miranda, hurricane, s3d ==="
+export BENCH_ONLY="miranda,hurricane,s3d"
+./build/tests/bench_vol_timing bench_out.h5 results_vol.csv
 
 echo "Job finished on $(date)"
