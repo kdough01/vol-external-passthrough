@@ -42,28 +42,22 @@ typedef struct {
 } bench_dataset_t;
 
 static const bench_dataset_t BENCH_DATASETS[] = {
-    /* Miranda -- clean float64, the fidelity/correctness reference.
-     * 256x384x384 x 8B = 301,989,888 B (~288 MiB). */
     {
         "miranda",
-        BENCH_DATA_ROOT "/Miranda/SDRBENCH-Miranda-256x384x384/density.d64",
+        BENCH_DATA_ROOT "/Miranda/SDRBENCH-Miranda-256x384x384/density.f64",
         3, {256, 384, 384, 0}, BENCH_F64,
         BENCH_BOUND_REL, 1e-3, 1,
         "Clean f64; cuszp returns RMSE~2.7e-4 here. SDRBench names it density.d64."
     },
 
-    /* Hurricane-ISABEL -- float32 weather sim, 13 fields, 100x500x500.
-     * 100x500x500 x 4B = 100,000,000 B (~95 MiB). */
     {
         "hurricane",
-        BENCH_DATA_ROOT "/Hurricane-ISABEL/nonclean-data/Pf48.bin.f32",
+        BENCH_DATA_ROOT "/Hurricane-ISABEL/Pf48.bin.f32",
         3, {100, 500, 500, 0}, BENCH_F32,
         BENCH_BOUND_REL, 1e-3, 1,
         "Use a CLEARED field. nonclean-data fields contain NaN fill -> bad for fidelity."
     },
 
-    /* NYX (EXASKY) -- float32 cosmology, 512^3.
-     * 512^3 x 4B = 536,870,912 B (~512 MiB). */
     {
         "nyx",
         BENCH_DATA_ROOT "/NYX_baryon_density_512/baryon_density.f32",
@@ -72,35 +66,29 @@ static const bench_dataset_t BENCH_DATASETS[] = {
         "Confirm field name; SDRBench canonical also ships temperature.f32 etc."
     },
 
-    /* S3D -- DOUBLE precision combustion, 11 fields, 500x500x500.
-     * 500^3 x 8B = 1,000,000,000 B (~954 MiB). Largest single field. */
-    // {
-    //     "s3d",
-    //     BENCH_DATA_ROOT "/S3D/stat_planar.1.1000E-03.field.d64",
-    //     3, {500, 500, 500, 0}, BENCH_F64,
-    //     BENCH_BOUND_REL, 1e-3, 1,
-    //     "SDRBench lists S3D as f64 (.d64) despite one stray f32 line on the site."
-    // },
+    {
+        "s3d",
+        BENCH_DATA_ROOT "/S3D/stat_planar.1.1000E-03.field.d64",
+        3, {500, 500, 500, 0}, BENCH_F64,
+        BENCH_BOUND_REL, 1e-3, 1,
+        "SDRBench lists S3D as f64 (.d64) despite one stray f32 line on the site."
+    },
 
-    /* CESM-ATM Dataset1 -- float32 climate, 2D single field, 1800x3600.
-     * 1800x3600 x 4B = 25,920,000 B (~24.7 MiB). The 2D case. */
-    // {
-    //     "cesm_atm_2d",
-    //     BENCH_DATA_ROOT "/cesm/CLDHGH_1_1800_3600.f32",
-    //     2, {1800, 3600, 0, 0}, BENCH_F32,
-    //     BENCH_BOUND_REL, 1e-2, 0,
-    //     "2D f32. Cluster may hold only the 26x1800x3600 3D version -- confirm path."
-    // },
+    {
+        "cesm_atm_2d",
+        BENCH_DATA_ROOT "/cesm/CLDHGH_1_1800_3600.f32",
+        2, {1800, 3600, 0, 0}, BENCH_F32,
+        BENCH_BOUND_REL, 1e-2, 0,
+        "2D f32. Cluster may hold only the 26x1800x3600 3D version -- confirm path."
+    },
 
-    /* SCALE-LETKF -- float32 climate, 13 fields, 98x1200x1200.
-     * 98x1200x1200 x 4B = 564,480,000 B (~538 MiB). */
-    // {
-    //     "scale_letkf",
-    //     BENCH_DATA_ROOT "/scale-letkf/PRES-98x1200x1200.f32",
-    //     3, {98, 1200, 1200, 0}, BENCH_F32,
-    //     BENCH_BOUND_REL, 1e-3, 1,
-    //     "Confirm which variable/field file is present (T-, PRES-, U-, ...)."
-    // },
+    {
+        "scale_letkf",
+        BENCH_DATA_ROOT "/scale-letkf/PRES-98x1200x1200.f32",
+        3, {98, 1200, 1200, 0}, BENCH_F32,
+        BENCH_BOUND_REL, 1e-3, 1,
+        "Confirm which variable/field file is present (T-, PRES-, U-, ...)."
+    },
 };
 
 #define BENCH_NUM_DATASETS \
@@ -111,7 +99,7 @@ static inline size_t bench_dtype_size(bench_dtype_t t) {
 }
 
 static inline const char *bench_dtype_name(bench_dtype_t t) {
-    return (t == BENCH_F64) ? "double" : "float";
+    return (t == BENCH_F64) ? "double" : "float";  /* libpressio dtype string */
 }
 
 static inline size_t bench_num_elements(const bench_dataset_t *d) {
@@ -159,7 +147,11 @@ static inline int bench_datasets_validate(void) {
 
 #ifdef BENCH_DATASETS_ENABLE_HDF5
 static inline hid_t bench_dataset_h5type(const bench_dataset_t *d) {
-    return (d->dtype == BENCH_F64) ? H5T_IEEE_F64LE : H5T_IEEE_F32LE;
+    return (d->dtype == BENCH_F64) ? H5T_IEEE_F64LE : H5T_IEEE_F32LE;  /* file type */
+}
+
+static inline hid_t bench_dataset_h5native(const bench_dataset_t *d) {
+    return (d->dtype == BENCH_F64) ? H5T_NATIVE_DOUBLE : H5T_NATIVE_FLOAT;
 }
 
 static inline void bench_dataset_h5dims(const bench_dataset_t *d, hsize_t out[]) {
@@ -170,6 +162,10 @@ static inline void bench_dataset_h5dims(const bench_dataset_t *d, hsize_t out[])
 #ifdef BENCH_DATASETS_ENABLE_PRESSIO
 static inline enum pressio_dtype bench_dataset_pressio_dtype(const bench_dataset_t *d) {
     return (d->dtype == BENCH_F64) ? pressio_double_dtype : pressio_float_dtype;
+}
+
+static inline void bench_dataset_pressio_dims(const bench_dataset_t *d, size_t out[]) {
+    for (int i = 0; i < d->rank; ++i) out[i] = d->dims[d->rank - 1 - i];
 }
 #endif /* BENCH_DATASETS_ENABLE_PRESSIO */
 
