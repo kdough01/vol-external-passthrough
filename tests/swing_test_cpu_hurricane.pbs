@@ -86,4 +86,6 @@ echo "=== VOL timing: miranda, hurricane, s3d ==="
 echo "=== Pressio-only compressor timing ==="
 ./build/tests/bench_pressio_timing results_pressio.csv
 
+column -t -s, $PBS_O_WORKDIR/connector_phases.csv
+
 echo "Job finished on $(date)"

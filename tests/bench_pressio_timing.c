@@ -6,21 +6,11 @@
  * write the compressed payload straight to a file with fwrite. Subtracting this
  * TOTAL from the VOL/filter TOTAL is what isolates the abstraction's overhead.
  *
- * Phases here:
- *   COMPRESS  = pressio_compressor_compress / _decompress   (GPU events or steady)
- *   IO        = fwrite / fread of the compressed payload
- *   OVERHEAD  = ~0 by construction (there is no wrapper) -> sanity check
- *   TOTAL     = COMPRESS + IO
- *
  * Build (CPU only):
  *   cc  -O2 -std=gnu11 bench_pressio_timing.c -lpressio -o bench_pressio_timing
- * Build (with GPU-event timing for cuszp):
+ * Build (GPU-event timing for cuszp):
  *   nvcc -O2 -x cu -DBENCH_TIMING_WITH_CUDA bench_pressio_timing.c \
  *        -lpressio -lcudart -o bench_pressio_timing
- *
- * NOTE on the JSON call: this uses pressio_options_new_json(), matching the
- * connector's option-replay path. If your libpressio build exposes it under a
- * different name, swap it in one place (make_options below).
  * ==========================================================================*/
 #include <stdlib.h>
 #include <stdio.h>
@@ -30,6 +20,13 @@
 #ifdef BENCH_TIMING_WITH_CUDA
 #include <cuda_runtime.h>
 #endif
+
+/* <libpressio.h> in some builds does NOT declare the JSON options builder, so it
+ * gets an implicit int return -> the 64-bit pointer is truncated -> segfault.
+ * Declare it explicitly. CONFIRM the exact name/signature for your build with:
+ *     grep -rn "options.*json\|from_json" $LP_VIEW/include
+ * If your build has no C JSON loader, set options programmatically instead. */
+struct pressio_options *pressio_options_new_json(struct pressio *library, const char *json);
 
 #define BENCH_DATASETS_ENABLE_PRESSIO   /* dtype + reversed-dims helpers */
 #include "bench_datasets.h"
@@ -58,22 +55,31 @@ make_compressor(struct pressio *library, const bench_compressor_t *c,
                 , cudaStream_t stream
 #endif
                 ) {
-    struct pressio_compressor *comp = pressio_get_compressor(library, c->pressio_id);
+    /* noop's config carries pressio_id == NULL (it means "connector default" on
+     * the VOL path). libpressio needs a real id, and its own id IS "noop". */
+    const char *pid = (c->pressio_id && c->pressio_id[0]) ? c->pressio_id : "noop";
+
+    struct pressio_compressor *comp = pressio_get_compressor(library, pid);
     if (!comp) {
-        fprintf(stderr, "no such compressor: %s (%s)\n", c->name, pressio_error_msg(library));
+        fprintf(stderr, "no such compressor: %s (id=%s): %s\n",
+                c->name, pid, pressio_error_msg(library));
         return NULL;
     }
     char json[256];
     bench_compressor_opts_json(c, d, json, sizeof(json));
 
-    /* Phase 1: JSON-serializable options (matches connector replay). */
     struct pressio_options *opts = pressio_options_new_json(library, json);
+    if (!opts) {
+        fprintf(stderr, "%s: JSON parse failed for '%s'\n", c->name, json);
+        pressio_compressor_release(comp);
+        return NULL;
+    }
     if (pressio_compressor_set_options(comp, opts) != 0)
         fprintf(stderr, "%s set_options: %s\n", c->name, pressio_compressor_error_msg(comp));
     pressio_options_free(opts);
 
 #ifdef BENCH_TIMING_WITH_CUDA
-    /* Phase 2: userptrs CANNOT survive JSON -- re-attach the stream separately. */
+    /* userptrs CANNOT survive JSON -- re-attach the stream separately. */
     if (c->kind == BENCH_GPU_CODEC && c->stream_opt_key) {
         struct pressio_options *so = pressio_options_new();
         pressio_options_set_userptr(so, c->stream_opt_key, (void *)stream);
@@ -114,12 +120,13 @@ static int run_one(struct pressio *library, const bench_compressor_t *c,
     struct pressio_data *output     = pressio_data_new_owning(pt, d->rank, pdims);
 
     /* ---------------- WRITE side: COMPRESS then IO ---------------- */
+    int cerr = 0;
     double t0 = bench_now_ms();
 #ifdef BENCH_TIMING_WITH_CUDA
     if (c->kind == BENCH_GPU_CODEC) {
         bench_gpu_timer_t g = bench_gpu_timer_create(stream);   /* same stream! */
         bench_gpu_timer_start(&g);
-        pressio_compressor_compress(comp, input, compressed);   /* enqueues on stream */
+        cerr = pressio_compressor_compress(comp, input, compressed);
         bench_gpu_timer_stop(&g);
         bench_report_add_gpu(&wr, BENCH_PHASE_COMPRESS, bench_gpu_timer_elapsed_ms(&g));
         bench_gpu_timer_destroy(&g);
@@ -127,12 +134,18 @@ static int run_one(struct pressio *library, const bench_compressor_t *c,
 #endif
     {
         bench_scope_t sc = bench_scope_begin(&wr, BENCH_PHASE_COMPRESS);
-        pressio_compressor_compress(comp, input, compressed);   /* CPU codec */
+        cerr = pressio_compressor_compress(comp, input, compressed);
         bench_scope_end(&sc);
     }
+    if (cerr) fprintf(stderr, "%s compress failed: %s\n",
+                      wlabel, pressio_compressor_error_msg(comp));
 
     size_t csize = 0;
     void  *cptr  = pressio_data_ptr(compressed, &csize);
+    if (cerr || !cptr || csize == 0) {
+        fprintf(stderr, "%s: no compressed output, skipping\n", wlabel);
+        goto cleanup;
+    }
     {   /* IO: write the compressed payload to disk */
         bench_scope_t si = bench_scope_begin(&wr, BENCH_PHASE_IO);
         FILE *pf = fopen(payload_path, "wb");
@@ -140,50 +153,56 @@ static int run_one(struct pressio *library, const bench_compressor_t *c,
         bench_scope_end(&si);
     }
     wr.cpu_ms[BENCH_PHASE_TOTAL] = bench_now_ms() - t0;
-    bench_report_derive_overhead(&wr);   /* ~0: proves the harness itself is thin */
+    bench_report_derive_overhead(&wr);
     fprintf(stderr, "%-28s ratio=%.2fx\n", wlabel, (double)bench_num_bytes(d) / (double)csize);
 
     /* ---------------- READ side: IO then DECOMPRESS ---------------- */
-    double r0 = bench_now_ms();
-    struct pressio_data *reloaded = pressio_data_new_empty(pressio_byte_dtype, 0, NULL);
-    {   /* IO: read the compressed payload back */
-        bench_scope_t si = bench_scope_begin(&rd, BENCH_PHASE_IO);
-        FILE *pf = fopen(payload_path, "rb");
-        if (pf) {
-            void *tmp = malloc(csize);
-            size_t got = fread(tmp, 1, csize, pf);
-            fclose(pf);
-            pressio_data_free(reloaded);
-            reloaded = pressio_data_new_move(pressio_byte_dtype, tmp, 1, &got,
-                                             pressio_data_libc_free_fn, NULL);
-        }
-        bench_scope_end(&si);
-    }
-#ifdef BENCH_TIMING_WITH_CUDA
-    if (c->kind == BENCH_GPU_CODEC) {
-        bench_gpu_timer_t g = bench_gpu_timer_create(stream);
-        bench_gpu_timer_start(&g);
-        pressio_compressor_decompress(comp, reloaded, output);
-        bench_gpu_timer_stop(&g);
-        bench_report_add_gpu(&rd, BENCH_PHASE_COMPRESS, bench_gpu_timer_elapsed_ms(&g));
-        bench_gpu_timer_destroy(&g);
-    } else
-#endif
     {
-        bench_scope_t sc = bench_scope_begin(&rd, BENCH_PHASE_COMPRESS);
-        pressio_compressor_decompress(comp, reloaded, output);
-        bench_scope_end(&sc);
+        double r0 = bench_now_ms();
+        struct pressio_data *reloaded = pressio_data_new_empty(pressio_byte_dtype, 0, NULL);
+        {   /* IO: read the compressed payload back */
+            bench_scope_t si = bench_scope_begin(&rd, BENCH_PHASE_IO);
+            FILE *pf = fopen(payload_path, "rb");
+            if (pf) {
+                void *tmp = malloc(csize);
+                size_t got = fread(tmp, 1, csize, pf);
+                fclose(pf);
+                pressio_data_free(reloaded);
+                reloaded = pressio_data_new_move(pressio_byte_dtype, tmp, 1, &got,
+                                                 pressio_data_libc_free_fn, NULL);
+            }
+            bench_scope_end(&si);
+        }
+        int derr = 0;
+#ifdef BENCH_TIMING_WITH_CUDA
+        if (c->kind == BENCH_GPU_CODEC) {
+            bench_gpu_timer_t g = bench_gpu_timer_create(stream);
+            bench_gpu_timer_start(&g);
+            derr = pressio_compressor_decompress(comp, reloaded, output);
+            bench_gpu_timer_stop(&g);
+            bench_report_add_gpu(&rd, BENCH_PHASE_COMPRESS, bench_gpu_timer_elapsed_ms(&g));
+            bench_gpu_timer_destroy(&g);
+        } else
+#endif
+        {
+            bench_scope_t sc = bench_scope_begin(&rd, BENCH_PHASE_COMPRESS);
+            derr = pressio_compressor_decompress(comp, reloaded, output);
+            bench_scope_end(&sc);
+        }
+        if (derr) fprintf(stderr, "%s decompress failed: %s\n",
+                          rlabel, pressio_compressor_error_msg(comp));
+        rd.cpu_ms[BENCH_PHASE_TOTAL] = bench_now_ms() - r0;
+        bench_report_derive_overhead(&rd);
+        pressio_data_free(reloaded);
     }
-    rd.cpu_ms[BENCH_PHASE_TOTAL] = bench_now_ms() - r0;
-    bench_report_derive_overhead(&rd);
 
     bench_report_csv_row(csv, &wr);
     bench_report_csv_row(csv, &rd);
 
+cleanup:
     pressio_data_free(input);
     pressio_data_free(compressed);
     pressio_data_free(output);
-    pressio_data_free(reloaded);
     pressio_compressor_release(comp);
 #ifdef BENCH_TIMING_WITH_CUDA
     if (c->kind == BENCH_GPU_CODEC) cudaStreamDestroy(stream);
