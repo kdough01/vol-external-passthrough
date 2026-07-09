@@ -1,0 +1,227 @@
+Job started on Wed Jul  8 20:27:56 CDT 2026
+Running on: gpu2
+PWD: /home/kdougherty/hdf5_projs/vol-external-passthrough
+mpicc:   /gpfs/fs1/home/software/swing/HPCX/hpcx-v2.26-gcc-doca_ofed-ubuntu22.04-cuda13-x86_64/ompi4/bin/mpicc
+nvcc:    /gpfs/fs1/soft/swing/software/spack-built/linux-ubuntu22.04-x86_64/gcc-11.4.0/cuda-12.6.0-qb3dlng/bin/nvcc
+gcc:     gcc (Ubuntu 11.4.0-1ubuntu1~22.04.2) 11.4.0
+GCC_LIB: /usr/lib/gcc/x86_64-linux-gnu/11
+gcc (Ubuntu 11.4.0-1ubuntu1~22.04.2) 11.4.0
+Copyright (C) 2021 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+LibPressio cmake dir: /home/kdougherty/libpressio_cuda/.spack-env/view/lib/cmake/LibPressio
+
+=== Building ===
+-- The C compiler identification is GNU 11.4.0
+-- The CXX compiler identification is GNU 11.4.0
+-- The CUDA compiler identification is NVIDIA 12.9.86
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /gpfs/fs1/home/software/swing/HPCX/hpcx-v2.26-gcc-doca_ofed-ubuntu22.04-cuda13-x86_64/ompi4/bin/mpicc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /gpfs/fs1/home/software/swing/HPCX/hpcx-v2.26-gcc-doca_ofed-ubuntu22.04-cuda13-x86_64/ompi4/bin/mpicxx - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Detecting CUDA compiler ABI info
+-- Detecting CUDA compiler ABI info - done
+-- Check for working CUDA compiler: /home/kdougherty/libpressio_cuda/.spack-env/view/bin/nvcc - skipped
+-- Detecting CUDA compile features
+-- Detecting CUDA compile features - done
+-- Found HDF5: hdf5-shared (found version "1.14.6")  
+-- Found OpenMP_C: -fopenmp (found version "4.5") 
+-- Found OpenMP_CXX: -fopenmp (found version "4.5") 
+-- Found OpenMP: TRUE (found version "4.5")  
+-- Found BZip2: /home/kdougherty/libpressio_cuda/.spack-env/view/lib/libbz2.so (found version "1.0.8") 
+-- Looking for BZ2_bzCompressInit
+-- Looking for BZ2_bzCompressInit - found
+-- Found ZFP: /home/kdougherty/libpressio_cuda/.spack-env/view/lib/cmake/zfp/zfp-config.cmake (found version "0.5.5") 
+-- Found OpenMP_C: -fopenmp (found version "4.5") 
+-- Found OpenMP_CXX: -fopenmp (found version "4.5") 
+-- Found PkgConfig: /home/kdougherty/libpressio_cuda/.spack-env/view/bin/pkg-config (found version "2.5.1") 
+-- Found GSL: /home/kdougherty/libpressio_cuda/.spack-env/view/include (found version "2.8") 
+-- Checking for one of the modules 'libzstd'
+-- Checking for one of the modules 'blosc'
+-- Found CUDAToolkit: /home/kdougherty/libpressio_cuda/.spack-env/view/include (found version "12.9.86") 
+-- Looking for pthread.h
+-- Looking for pthread.h - found
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE  
+-- Found HDF5: hdf5-shared (found version "1.14.6") found components: C 
+-- Found MPI_C: /gpfs/fs1/home/software/swing/HPCX/hpcx-v2.26-gcc-doca_ofed-ubuntu22.04-cuda13-x86_64/ompi4/bin/mpicc (found version "3.1") 
+-- Found MPI_CXX: /gpfs/fs1/home/software/swing/HPCX/hpcx-v2.26-gcc-doca_ofed-ubuntu22.04-cuda13-x86_64/ompi4/bin/mpicxx (found version "3.1") 
+-- Found MPI: TRUE (found version "3.1")  
+-- Found MPI: TRUE (found version "3.1") found components: CXX 
+-- Checking for one of the modules 'lua;luajit'
+-- Found nlohmann_json: /home/kdougherty/libpressio_cuda/.spack-env/view/share/cmake/nlohmann_json/nlohmann_jsonConfig.cmake (found version "3.12.0") 
+-- Found Python3: /home/kdougherty/libpressio_cuda/.spack-env/view/bin/python3 (found version "3.14.5") found components: Interpreter Development NumPy Development.Module Development.Embed 
+-- Found SWIG: /home/kdougherty/libpressio_cuda/.spack-env/view/bin/swig4.0 (found version "4.1.1")  
+-- Found MPI: TRUE (found version "3.1")  
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/kdougherty/hdf5_projs/vol-external-passthrough/build
+[  5%] Building C object CMakeFiles/hdf5_vol_passthrough.dir/H5VLpassthru_ext.c.o
+[ 10%] Building CXX object CMakeFiles/hdf5_vol_passthrough.dir/compress.cc.o
+[ 15%] Linking CXX shared library libhdf5_vol_passthrough.so
+[ 15%] Built target hdf5_vol_passthrough
+[ 21%] Building C object tests/CMakeFiles/test_time_hurricane.dir/test_time_hurricane.c.o
+[ 26%] Building C object tests/CMakeFiles/test_cpu_write.dir/test_cpu_write.c.o
+[ 31%] Building C object tests/CMakeFiles/test_time_miranda.dir/test_time_miranda.c.o
+[ 36%] Building C object tests/CMakeFiles/test_ci.dir/test_ci.c.o
+[ 42%] Linking C executable test_time_hurricane
+[ 47%] Linking C executable test_ci
+[ 52%] Linking C executable test_cpu_write
+[ 52%] Built target test_time_hurricane
+[ 52%] Built target test_ci
+[ 57%] Building C object tests/CMakeFiles/test_error_miranda.dir/test_error_miranda.c.o
+[ 63%] Building C object tests/CMakeFiles/bench_vol_timing.dir/bench_vol_timing.c.o
+[ 63%] Built target test_cpu_write
+[ 68%] Linking C executable test_time_miranda
+[ 73%] Building C object tests/CMakeFiles/bench_pressio_timing.dir/bench_pressio_timing.c.o
+[ 73%] Built target test_time_miranda
+[ 78%] Building C object tests/CMakeFiles/bench_filter_timing.dir/bench_filter_timing.c.o
+[ 84%] Linking C executable bench_pressio_timing
+[ 89%] Linking C executable test_error_miranda
+[ 94%] Linking C executable bench_vol_timing
+[100%] Linking C executable bench_filter_timing
+[100%] Built target test_error_miranda
+[100%] Built target bench_pressio_timing
+[100%] Built target bench_vol_timing
+[100%] Built target bench_filter_timing
+--- build/ ---
+CMakeCache.txt
+CMakeFiles
+Makefile
+cmake_install.cmake
+libhdf5_vol_passthrough.so
+tests
+--- build/tests/ ---
+CMakeFiles
+Makefile
+bench_filter_timing
+bench_pressio_timing
+bench_vol_timing
+cmake_install.cmake
+test_ci
+test_cpu_write
+test_error_miranda
+test_time_hurricane
+test_time_miranda
+
+=== VOL timing: miranda, hurricane, s3d ===
+name           dtype  rank dims                   MiB        exists
+miranda        double 3    256x384x384            288.0      yes
+hurricane      float  3    100x500x500            95.4       NO  <-- fix path
+nyx            float  3    512x512x512            512.0      yes
+s3d            double 3    500x500x500            953.7      NO  <-- fix path
+cesm_atm_2d    float  2    1800x3600              24.7       NO  <-- fix path
+scale_letkf    float  3    98x1200x1200           538.3      yes
+3/6 dataset paths readable
+csv path: /gpfs/fs1/home/kdougherty/hdf5_projs/vol-external-passthrough/results_vol.csv
+DEBUG: Right before compress. Compressor=0x56006ba74130, Output Capacity=301993984 bytes
+Info: 0x56006ba63d10
+
+=== miranda (288.0 MiB, double) ===
+  miranda_noop                 W=  773.62 ms  R=  369.08 ms  ratio=  1.00x  RMSE=0.000e+00
+DEBUG: Right before compress. Compressor=0x56006ba90070, Output Capacity=301993984 bytes
+DECOMP domain id = cudamalloc
+  miranda_cuszp                W=  810.70 ms  R=  373.55 ms  ratio= 20.57x  RMSE=2.720e-04
+DEBUG: Right before compress. Compressor=0x56006c8dd680, Output Capacity=301993984 bytes
+DECOMP domain id = malloc
+  miranda_sz3_1e3              W= 1072.45 ms  R=  783.67 ms  ratio= 41.14x  RMSE=2.792e-04
+DEBUG: Right before compress. Compressor=0x56006ba8e500, Output Capacity=301993984 bytes
+DECOMP domain id = malloc
+  miranda_sz3_1e6              W= 1406.92 ms  R=  975.89 ms  ratio=  8.73x  RMSE=2.709e-07
+DEBUG: Right before compress. Compressor=0x56006ba8e500, Output Capacity=301993984 bytes
+DECOMP domain id = malloc
+  miranda_bzip2                W=22527.45 ms  R=11474.57 ms  ratio=  2.34x  RMSE=0.000e+00
+skip hurricane (path)
+DEBUG: Right before compress. Compressor=0x56006bc69640, Output Capacity=536875008 bytes
+
+=== nyx (512.0 MiB, float) ===
+  nyx_noop                     W= 1132.76 ms  R=  660.93 ms  ratio=  1.00x  RMSE=0.000e+00
+DEBUG: Right before compress. Compressor=0x56006cbfcad0, Output Capacity=536875008 bytes
+DECOMP domain id = cudamalloc
+  nyx_cuszp                    W=  588.46 ms  R=  760.21 ms  ratio=  3.76x  RMSE=5.774e-04
+DEBUG: Right before compress. Compressor=0x56006cc4bac0, Output Capacity=536875008 bytes
+DECOMP domain id = malloc
+  nyx_sz3_1e3                  W= 4578.57 ms  R= 3540.59 ms  ratio=  6.17x  RMSE=5.626e-04
+DEBUG: Right before compress. Compressor=0x56006cc6ce50, Output Capacity=536875008 bytes
+DECOMP domain id = malloc
+  nyx_sz3_1e6                  W= 7320.24 ms  R= 9485.70 ms  ratio=  2.00x  RMSE=5.394e-07
+DEBUG: Right before compress. Compressor=0x56006ba97730, Output Capacity=536875008 bytes
+DECOMP domain id = malloc
+  nyx_bzip2                    W=53254.89 ms  R=29818.49 ms  ratio=  1.10x  RMSE=0.000e+00
+skip s3d (path)
+skip cesm_atm_2d (path)
+DEBUG: Right before compress. Compressor=0x56006ccb8f00, Output Capacity=564484096 bytes
+
+=== scale_letkf (538.3 MiB, float) ===
+  scale_letkf_noop             W= 1198.63 ms  R=  694.78 ms  ratio=  1.00x  RMSE=0.000e+00
+DEBUG: Right before compress. Compressor=0x56006cbac340, Output Capacity=564484096 bytes
+DECOMP domain id = cudamalloc
+  scale_letkf_cuszp            W=  800.67 ms  R=  867.80 ms  ratio=  2.05x  RMSE=1.960e-03
+DEBUG: Right before compress. Compressor=0x56006baae840, Output Capacity=564484096 bytes
+DECOMP domain id = malloc
+  scale_letkf_sz3_1e3          W=11120.40 ms  R= 7880.33 ms  ratio=  1.79x  RMSE=3.269e-04
+DEBUG: Right before compress. Compressor=0x56006ca84740, Output Capacity=564484096 bytes
+DECOMP domain id = malloc
+  scale_letkf_sz3_1e6          W=12078.36 ms  R= 1480.67 ms  ratio=  1.35x  RMSE=0.000e+00
+DEBUG: Right before compress. Compressor=0x56006cbc25a0, Output Capacity=564484096 bytes
+DECOMP domain id = malloc
+  scale_letkf_bzip2            W=51743.04 ms  R=23954.25 ms  ratio=  1.69x  RMSE=0.000e+00
+wrote results_vol.csv
+=== Pressio-only compressor timing ===
+name           dtype  rank dims                   MiB        exists
+miranda        double 3    256x384x384            288.0      yes
+hurricane      float  3    100x500x500            95.4       NO  <-- fix path
+nyx            float  3    512x512x512            512.0      yes
+s3d            double 3    500x500x500            953.7      NO  <-- fix path
+cesm_atm_2d    float  2    1800x3600              24.7       NO  <-- fix path
+scale_letkf    float  3    98x1200x1200           538.3      yes
+3/6 dataset paths readable
+miranda/noop/pressio/write   ratio=1.00x
+miranda/cuszp/pressio/write  ratio=21.06x
+miranda/sz3_1e3/pressio/write ratio=164.57x
+miranda/sz3_1e6/pressio/write ratio=21.21x
+miranda/bzip2/pressio/write  ratio=2.36x
+nyx/noop/pressio/write       ratio=1.00x
+terminate called after throwing an instance of 'std::bad_alloc'
+  what():  std::bad_alloc
+/var/spool/pbs/mom_priv/jobs/45898.gpumgt1.SC: line 87: 3451790 Aborted                 (core dumped) ./build/tests/bench_pressio_timing results_pressio.csv
+dataset  compressor  op     total_ms    compress_ms  io_ms     overhead_ms  overhead_pct
+noop     noop        write  765.6261    332.9327     224.1358  208.5576     27.24
+noop     noop        read   368.9844    153.2094     169.8011  45.9739      12.46
+cuszp    cuszp       write  810.6511    624.0675     4.7920    181.7916     22.43
+cuszp    cuszp       read   373.4517    346.4479     8.1758    18.8279      5.04
+sz3      sz3         write  1072.4018   890.2396     2.1100    180.0523     16.79
+sz3      sz3         read   783.5655    692.4583     1.6400    89.4672      11.42
+sz3      sz3         write  1406.8556   1184.6045    9.8917    212.3594     15.09
+sz3      sz3         read   975.7869    934.0189     19.0966   22.6714      2.32
+bzip2    bzip2       write  22527.3943  22294.9753   37.7925   194.6266     0.86
+bzip2    bzip2       read   11474.4494  11300.1472   73.9078   100.3945     0.87
+noop     noop        write  1132.6159   598.3406     154.9175  379.3578     33.49
+noop     noop        read   660.8329    276.9508     304.2834  79.5986      12.05
+cuszp    cuszp       write  588.4014    212.2745     41.1651   334.9619     56.93
+cuszp    cuszp       read   760.1155    633.6690     81.3763   45.0702      5.93
+sz3      sz3         write  4578.5090   4223.6165    25.3092   329.5832     7.20
+sz3      sz3         read   3540.4907   3450.6409    49.3497   40.5001      1.14
+sz3      sz3         write  7320.1385   6894.2008    78.9799   346.9577     4.74
+sz3      sz3         read   9485.5998   9150.5867    153.3473  181.6658     1.92
+bzip2    bzip2       write  53254.7420  52749.2312   141.8223  363.6886     0.68
+bzip2    bzip2       read   29818.3692  29338.8878   279.7648  199.7166     0.67
+noop     noop        write  1198.4694   632.2656     173.7332  392.4706     32.75
+noop     noop        read   694.6782    290.5473     322.6627  81.4681      11.73
+cuszp    cuszp       write  800.5894    359.0294     78.6248   362.9353     45.33
+cuszp    cuszp       read   867.6872    656.9879     151.0582  59.6411      6.87
+sz3      sz3         write  11120.2907  10672.0300   90.0857   358.1750     3.22
+sz3      sz3         read   7880.2350   7582.5820    173.4950  124.1580     1.58
+sz3      sz3         write  12078.2176  11594.6439   117.4210  366.1527     3.03
+sz3      sz3         read   1480.5810   1177.9909    231.6059  70.9843      4.79
+bzip2    bzip2       write  51742.9327  51286.5717   96.8735   359.4875     0.69
+bzip2    bzip2       read   23954.1508  23573.6754   190.8479  189.6276     0.79
+Job finished on Wed Jul  8 20:33:42 CDT 2026

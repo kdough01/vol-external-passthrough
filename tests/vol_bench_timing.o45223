@@ -1,0 +1,130 @@
+Job started on Thu Jul  2 10:56:49 CDT 2026
+Running on:   gpu2
+Project root: /home/kdougherty/hdf5_projs/vol-external-passthrough
+mpicc:   /gpfs/fs1/home/software/swing/HPCX/hpcx-v2.26-gcc-doca_ofed-ubuntu22.04-cuda13-x86_64/ompi4/bin/mpicc
+nvcc:    /gpfs/fs1/soft/swing/software/spack-built/linux-ubuntu22.04-x86_64/gcc-11.4.0/cuda-12.6.0-qb3dlng/bin/nvcc
+gcc:     gcc (Ubuntu 11.4.0-1ubuntu1~22.04.2) 11.4.0
+GCC_LIB: /usr/lib/gcc/x86_64-linux-gnu/11
+gcc (Ubuntu 11.4.0-1ubuntu1~22.04.2) 11.4.0
+Copyright (C) 2021 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+LibPressio cmake dir: /home/kdougherty/libpressio_cuda/.spack-env/view/lib/cmake/LibPressio
+
+=== Building ===
+-- The C compiler identification is GNU 11.4.0
+-- The CXX compiler identification is GNU 11.4.0
+-- The CUDA compiler identification is NVIDIA 12.9.86
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /gpfs/fs1/home/software/swing/HPCX/hpcx-v2.26-gcc-doca_ofed-ubuntu22.04-cuda13-x86_64/ompi4/bin/mpicc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /gpfs/fs1/home/software/swing/HPCX/hpcx-v2.26-gcc-doca_ofed-ubuntu22.04-cuda13-x86_64/ompi4/bin/mpicxx - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Detecting CUDA compiler ABI info
+-- Detecting CUDA compiler ABI info - done
+-- Check for working CUDA compiler: /home/kdougherty/libpressio_cuda/.spack-env/view/bin/nvcc - skipped
+-- Detecting CUDA compile features
+-- Detecting CUDA compile features - done
+-- Found HDF5: hdf5-shared (found version "1.14.6")  
+-- Found OpenMP_C: -fopenmp (found version "4.5") 
+-- Found OpenMP_CXX: -fopenmp (found version "4.5") 
+-- Found OpenMP: TRUE (found version "4.5")  
+-- Found BZip2: /home/kdougherty/libpressio_cuda/.spack-env/view/lib/libbz2.so (found version "1.0.8") 
+-- Looking for BZ2_bzCompressInit
+-- Looking for BZ2_bzCompressInit - found
+-- Found ZFP: /home/kdougherty/libpressio_cuda/.spack-env/view/lib/cmake/zfp/zfp-config.cmake (found version "0.5.5") 
+-- Found OpenMP_C: -fopenmp (found version "4.5") 
+-- Found OpenMP_CXX: -fopenmp (found version "4.5") 
+-- Found PkgConfig: /home/kdougherty/libpressio_cuda/.spack-env/view/bin/pkg-config (found version "2.5.1") 
+-- Found GSL: /home/kdougherty/libpressio_cuda/.spack-env/view/include (found version "2.8") 
+-- Checking for one of the modules 'libzstd'
+-- Checking for one of the modules 'blosc'
+-- Found CUDAToolkit: /home/kdougherty/libpressio_cuda/.spack-env/view/include (found version "12.9.86") 
+-- Looking for pthread.h
+-- Looking for pthread.h - found
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE  
+-- Found HDF5: hdf5-shared (found version "1.14.6") found components: C 
+-- Found MPI_C: /gpfs/fs1/home/software/swing/HPCX/hpcx-v2.26-gcc-doca_ofed-ubuntu22.04-cuda13-x86_64/ompi4/bin/mpicc (found version "3.1") 
+-- Found MPI_CXX: /gpfs/fs1/home/software/swing/HPCX/hpcx-v2.26-gcc-doca_ofed-ubuntu22.04-cuda13-x86_64/ompi4/bin/mpicxx (found version "3.1") 
+-- Found MPI: TRUE (found version "3.1")  
+-- Found MPI: TRUE (found version "3.1") found components: CXX 
+-- Checking for one of the modules 'lua;luajit'
+-- Found nlohmann_json: /home/kdougherty/libpressio_cuda/.spack-env/view/share/cmake/nlohmann_json/nlohmann_jsonConfig.cmake (found version "3.12.0") 
+-- Found Python3: /home/kdougherty/libpressio_cuda/.spack-env/view/bin/python3 (found version "3.14.5") found components: Interpreter Development NumPy Development.Module Development.Embed 
+-- Found SWIG: /home/kdougherty/libpressio_cuda/.spack-env/view/bin/swig4.0 (found version "4.1.1")  
+-- Found MPI: TRUE (found version "3.1")  
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/kdougherty/hdf5_projs/vol-external-passthrough/build
+[  5%] Building C object CMakeFiles/hdf5_vol_passthrough.dir/H5VLpassthru_ext.c.o
+[ 11%] Building CXX object CMakeFiles/hdf5_vol_passthrough.dir/compress.cc.o
+[ 17%] Linking CXX shared library libhdf5_vol_passthrough.so
+[ 17%] Built target hdf5_vol_passthrough
+[ 29%] Building C object tests/CMakeFiles/test_time_miranda.dir/test_time_miranda.c.o
+[ 29%] Building C object tests/CMakeFiles/test_time_hurricane.dir/test_time_hurricane.c.o
+[ 35%] Building C object tests/CMakeFiles/test_ci.dir/test_ci.c.o
+[ 41%] Building C object tests/CMakeFiles/test_cpu_write.dir/test_cpu_write.c.o
+[ 47%] Linking C executable test_cpu_write
+[ 52%] Linking C executable test_time_hurricane
+[ 58%] Linking C executable test_ci
+[ 64%] Linking C executable test_time_miranda
+[ 64%] Built target test_cpu_write
+[ 64%] Built target test_time_hurricane
+[ 70%] Building C object tests/CMakeFiles/test_error_miranda.dir/test_error_miranda.c.o
+[ 70%] Built target test_ci
+[ 76%] Building C object tests/CMakeFiles/bench_vol_timing.dir/bench_vol_timing.c.o
+[ 76%] Built target test_time_miranda
+[ 82%] Building C object tests/CMakeFiles/bench_pressio_timing.dir/bench_pressio_timing.c.o
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_pressio_timing.c: In function 'main':
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_pressio_timing.c:83:33: warning: implicit declaration of function 'pressio_options_new_json'; did you mean 'pressio_option_new_bool'? [-Wimplicit-function-declaration]
+   83 |                 cc->opts_json ? pressio_options_new_json(library, cc->opts_json)
+      |                                 ^~~~~~~~~~~~~~~~~~~~~~~~
+      |                                 pressio_option_new_bool
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_pressio_timing.c:84:31: warning: pointer/integer type mismatch in conditional expression
+   84 |                               : pressio_compressor_get_options(comp);
+      |                               ^
+[ 88%] Linking C executable test_error_miranda
+[ 94%] Linking C executable bench_pressio_timing
+[100%] Linking C executable bench_vol_timing
+[100%] Built target test_error_miranda
+[100%] Built target bench_vol_timing
+[100%] Built target bench_pressio_timing
+--- build/tests/ ---
+CMakeFiles
+Makefile
+bench_pressio_timing
+bench_vol_timing
+cmake_install.cmake
+test_ci
+test_cpu_write
+test_error_miranda
+test_time_hurricane
+test_time_miranda
+
+=== VOL-path timing (results -> /lcrc/project/SDR/kdougherty/bench/job_45223.gpumgt1/bench_vol_results.txt) ===
+# VOL-path timing (through vol-external-passthrough)
+# dataset              comp        write_ms     read_ms   ratio         min         max        mean         rmse
+DEBUG: Right before compress. Compressor=0x56284d9c8b90, Output Capacity=100004096 bytes
+Info: 0x56284d9bad00
+  hurricane_CLOUDf01   noop          538.59      300.07    0.99  -3.403e+38   3.402e+38        -nan         -nan
+DEBUG: Right before compress. Compressor=0x56284d9e3850, Output Capacity=100004096 bytes
+DECOMP domain id = malloc
+  hurricane_CLOUDf01   bzip2        3700.55     1821.71    4.33  -3.403e+38   3.402e+38        -nan         -nan
+DEBUG: Right before compress. Compressor=0x56284d9f07a0, Output Capacity=100004096 bytes
+DECOMP domain id = malloc
+  hurricane_CLOUDf01   sz3           885.13      488.94    4.77  -3.403e+38   3.402e+38        -nan         -nan
+DEBUG: Right before compress. Compressor=0x56284da21040, Output Capacity=100004096 bytes
+DECOMP domain id = cudamalloc
+  hurricane_CLOUDf01   cuszp         549.84      298.42    3.41  -3.403e+38   3.402e+38        -nan         -nan
+  cannot open /lcrc/project/ECP-EZ/public/compression/Miranda/SDRBENCH-Miranda-256x384x384/density.f64
+  skipping miranda_density (read failed)
+
+Job finished on Thu Jul  2 10:57:06 CDT 2026
