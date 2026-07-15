@@ -458,6 +458,27 @@ chunking_ctx* chunking_ctx_create(hid_t dataset_id)
     return chunk_ctx;
 }
 
+gpu_vol_dataset_t *gpu_vol_dataset_wrap(void *under_dataset,
+                                        int rank, hsize_t *h5dims,
+                                        hid_t type_id,
+                                        enum pressio_dtype pressio_dt,
+                                        hid_t dcpl_id,
+                                        hid_t under_vol_id,
+                                        gpu_vol_file_t *file_ctx,
+                                        const char *compressor_override)
+{
+    gpu_vol_dataset_t *gpu_dataset_ctx =
+        (gpu_vol_dataset_t *)calloc(1, sizeof(gpu_vol_dataset_t));
+    gpu_dataset_ctx->under_dataset = under_dataset;
+    gpu_dataset_ctx->under_vol_id  = under_vol_id;
+    gpu_dataset_ctx->file_ctx      = file_ctx;
+    gpu_dataset_ctx->comp_ctx = compression_ctx_create(rank, h5dims, pressio_dt,
+                                                       dcpl_id,
+                                                       file_ctx->config_params,
+                                                       compressor_override);
+    return gpu_dataset_ctx;
+}
+
 void compression_ctx_destroy(compression_ctx *comp_ctx) {
     if (!comp_ctx) return;
     
