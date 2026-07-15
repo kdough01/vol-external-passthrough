@@ -1,0 +1,7 @@
+dataset,compressor,path,op,phase,ms,ratio,rmse
+miranda,deflate,filter,write,total,7144.5031,2.0948,
+miranda,deflate,filter,read,total,1016.8191,,
+nyx,deflate,filter,write,total,16529.9982,1.1219,
+nyx,deflate,filter,read,total,2612.9849,,
+scale_letkf,deflate,filter,write,total,16617.3856,1.3273,
+scale_letkf,deflate,filter,read,total,2723.1028,,

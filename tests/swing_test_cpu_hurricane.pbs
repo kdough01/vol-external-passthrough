@@ -1,7 +1,7 @@
 #!/bin/bash
 #PBS -N vol_test_swing
-#PBS -l select=1:ncpus=4:ngpus=1:mpiprocs=1
-#PBS -l walltime=00:30:00
+#PBS -l select=1:ncpus=4:ngpus=1:mpiprocs=1:mem=8gb
+#PBS -l walltime=00:07:00
 #PBS -j oe
 #PBS -A SDR
 #PBS -q gpu
@@ -79,7 +79,7 @@ ls build/tests/ || { echo "No tests/ in build"; exit 1; }
 export LD_LIBRARY_PATH=${GCC_LIB}:${LP_VIEW}/lib64:${LP_VIEW}/lib
 
 # Which datasets to sweep (matches the run below). Comment out for "all readable".
-export BENCH_ONLY="miranda,hurricane,s3d"
+# export BENCH_ONLY="miranda,hurricane,s3d"
 
 echo ""
 echo "=== [1/3] VOL timing: $BENCH_ONLY ==="
