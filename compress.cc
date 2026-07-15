@@ -14,13 +14,26 @@ extern "C" {
 #include <libpressio_ext/cpp/data.h>
 #include <libpressio_ext/cpp/domain.h>
 #include <libpressio_ext/cpp/domain_manager.h>
-#include "bench_timing.h"   /* BenchCpuTimer + shared CSV schema (was vol_timing_sink.h) */
+#include "vol_timing_sink.h"
+
+#ifdef USE_CUDA
+#include <cuda_runtime.h>
+#endif
 
 /* Helpers */
 static int
 vol_is_byte_stream(const char *id)
 {
     return strncmp(id, "nvcomp", 6) == 0;
+}
+
+/* Codecs whose work runs on a CUDA stream and should be timed with events. */
+static int
+vol_is_gpu_codec(const char *id)
+{
+    return strncmp(id, "cuszp",  5) == 0 ||
+           strncmp(id, "cusz",   4) == 0 ||
+           strncmp(id, "nvcomp", 6) == 0;
 }
 
 static void
@@ -33,36 +46,6 @@ vol_make_host_resident(struct pressio_data *data)
         *d = domain_manager().make_readable(
             libpressio::domain_plugins().build("malloc"), std::move(*d));
     }
-}
-
-/* ----------------------------------------------------------------------------
- * Connector-side phase sink.
- *
- * The .so can't share the harness's results_vol.csv FILE*, so it writes its own
- * CSV (same schema as bench_timing.h) and you join on (dataset, compressor) in
- * post. Path from $VOL_PHASES_CSV, default "connector_phases.csv"; opened once,
- * appended per call. Emits path="vol" so it slots next to the harness's
- * "vol/write/total" and "vol/read/total" rows.
- *
- * NOTE: ctx doesn't carry the HDF5 dataset name here, so the dataset column is
- * left blank. If you add a name to compression_ctx (or pass one in), put it in
- * the first field for a clean join instead of relying on row order.
- * ------------------------------------------------------------------------- */
-static void
-vol_phase_emit(const char *compressor_id, const char *op, const char *phase,
-               double ms, double ratio)
-{
-    static FILE *f     = NULL;
-    static int   tried = 0;
-    if (!f && !tried) {
-        tried = 1;
-        const char *p = getenv("VOL_PHASES_CSV");
-        f = fopen(p ? p : "connector_phases.csv", "w");
-        if (f) bench_csv_header(f);
-    }
-    if (!f) return;
-    bench_csv_row(f, "" /*dataset*/, compressor_id ? compressor_id : "",
-                  "vol", op, phase, ms, ratio, -1.0);
 }
 
 extern "C" {
@@ -109,12 +92,6 @@ H5VL_pass_through_ext_transfer_compress(compression_ctx *ctx, const void *data, 
     size_t  in_ndims;
     size_t *in_dims;
     size_t  byte_dims[1];
-
-    /* Timing: steady_clock spans compress + the device->host pull below, so for
-     * GPU codecs it captures kernel AND transfers; make_host_resident forces the
-     * sync, so the CPU clock is accurate. */
-    BenchCpuTimer _wtm;
-    double        _compress_ms = 0.0;
 
     if (vol_is_byte_stream(ctx->compressor_id)) {
         in_dtype     = pressio_byte_dtype;
@@ -209,7 +186,42 @@ H5VL_pass_through_ext_transfer_compress(compression_ctx *ctx, const void *data, 
         fprintf(stderr, "WARNING: Passing a 0-capacity output buffer to the compressor.\n");
     }
 
-    _wtm.start();
+    ctx->compress_ms = 0.0;   /* 0 => caller uses its wall clock (CPU codecs) */
+
+#ifdef USE_CUDA
+    {
+        int _gpu = vol_is_gpu_codec(ctx->compressor_id);
+        cudaEvent_t _ev0 = NULL, _ev1 = NULL;
+        cudaStream_t _stream = (cudaStream_t)ctx->stream;   /* 0 => default stream */
+        if (_gpu) {
+            cudaEventCreate(&_ev0);
+            cudaEventCreate(&_ev1);
+            cudaEventRecord(_ev0, _stream);
+        }
+
+        int _cerr = pressio_compressor_compress(ctx->compressor, input, output);
+
+        if (_gpu) {
+            cudaEventRecord(_ev1, _stream);
+            cudaEventSynchronize(_ev1);           /* wait for H2D + kernel */
+            float _ms = 0.f;
+            cudaEventElapsedTime(&_ms, _ev0, _ev1);
+            ctx->compress_ms = (double)_ms;       /* device compress time */
+            cudaEventDestroy(_ev0);
+            cudaEventDestroy(_ev1);
+        }
+
+        if (_cerr) {
+            H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                    vol_err_class, maj_compression, min_compress_failed,
+                    "pressio_compressor_compress failed for '%s': %s",
+                    ctx->compressor_id,
+                    pressio_compressor_error_msg(ctx->compressor));
+            ret_val = -1;
+            goto done;
+        }
+    }
+#else
     if (pressio_compressor_compress(ctx->compressor, input, output)) {
         H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
                 vol_err_class, maj_compression, min_compress_failed,
@@ -219,10 +231,10 @@ H5VL_pass_through_ext_transfer_compress(compression_ctx *ctx, const void *data, 
         ret_val = -1;
         goto done;
     }
+#endif
 
     /* The result may be device-resident (GPU compressors). */
     vol_make_host_resident(output);
-    _compress_ms = _wtm.stop_ms();   /* compress + D2H, one accurate span */
 
     {
         size_t comp_size = 0;
@@ -248,10 +260,6 @@ H5VL_pass_through_ext_transfer_compress(compression_ctx *ctx, const void *data, 
 
         memcpy(ctx->compressed_buf, comp_ptr, comp_size);
         ctx->compressed_chunk_size = comp_size;
-
-        /* phase row: compress time + compression ratio for this dataset */
-        vol_phase_emit(ctx->compressor_id, "write", "compress", _compress_ms,
-                       comp_size ? (double)nbytes / (double)comp_size : 0.0);
 
 #ifdef ENABLE_EXT_PASSTHRU_LOGGING
         printf("TRANSFER COMPRESS OK: id=%s comp_size=%zu original_nbytes=%zu\n",
@@ -289,11 +297,9 @@ H5VL_pass_through_ext_transfer_decompress(compression_ctx *ctx,
 
     /* noop: libpressio's noop rejects a typed output buffer, so copy directly. */
     if (strcmp(ctx->compressor_id, "noop") == 0) {
-        BenchCpuTimer _ntm; _ntm.start();
         size_t logical = vol_logical_nbytes(ctx);
         size_t n = compressed_size < logical ? compressed_size : logical;
         memcpy(output_buf, compressed_data, n);
-        vol_phase_emit(ctx->compressor_id, "read", "decompress", _ntm.stop_ms(), -1.0);
         return 0;
     }
 
@@ -309,9 +315,6 @@ H5VL_pass_through_ext_transfer_decompress(compression_ctx *ctx,
     struct pressio_data *input  = NULL;
     struct pressio_data *output = NULL;
     size_t comp_dims[1] = { compressed_size };
-
-    BenchCpuTimer _rtm;
-    double        _decompress_ms = 0.0;
 
     const size_t out_nbytes = vol_logical_nbytes(ctx);
 
@@ -358,7 +361,42 @@ H5VL_pass_through_ext_transfer_decompress(compression_ctx *ctx,
         goto done;
     }
 
-    _rtm.start();
+    ctx->compress_ms = 0.0;   /* reused as device codec time for this leg */
+
+#ifdef USE_CUDA
+    {
+        int _gpu = vol_is_gpu_codec(ctx->compressor_id);
+        cudaEvent_t _ev0 = NULL, _ev1 = NULL;
+        cudaStream_t _stream = (cudaStream_t)ctx->stream;   /* 0 => default stream */
+        if (_gpu) {
+            cudaEventCreate(&_ev0);
+            cudaEventCreate(&_ev1);
+            cudaEventRecord(_ev0, _stream);
+        }
+
+        int _derr = pressio_compressor_decompress(ctx->compressor, input, output);
+
+        if (_gpu) {
+            cudaEventRecord(_ev1, _stream);
+            cudaEventSynchronize(_ev1);
+            float _ms = 0.f;
+            cudaEventElapsedTime(&_ms, _ev0, _ev1);
+            ctx->compress_ms = (double)_ms;       /* device decompress time */
+            cudaEventDestroy(_ev0);
+            cudaEventDestroy(_ev1);
+        }
+
+        if (_derr) {
+            H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                    vol_err_class, maj_compression, min_decompress_failed,
+                    "pressio_compressor_decompress failed for '%s': %s",
+                    ctx->compressor_id,
+                    pressio_compressor_error_msg(ctx->compressor));
+            ret_val = -1;
+            goto done;
+        }
+    }
+#else
     if (pressio_compressor_decompress(ctx->compressor, input, output)) {
         H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
                 vol_err_class, maj_compression, min_decompress_failed,
@@ -368,12 +406,11 @@ H5VL_pass_through_ext_transfer_decompress(compression_ctx *ctx,
         ret_val = -1;
         goto done;
     }
+#endif
     fprintf(stderr, "DECOMP domain id = %s\n", pressio_data_domain_id(output));
 
     /* device -> host for GPU compressors, no-op for CPU. */
     vol_make_host_resident(output);
-    _decompress_ms = _rtm.stop_ms();   /* decompress + D2H */
-    vol_phase_emit(ctx->compressor_id, "read", "decompress", _decompress_ms, -1.0);
 
     {
         size_t actual_bytes = 0;

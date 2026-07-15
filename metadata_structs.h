@@ -25,7 +25,9 @@ typedef struct compression_ctx {
     void  *decomp_buf;
     size_t decomp_size;
     size_t read_served;
-    double compress_ms;
+    double compress_ms;      /* device codec time (ms) from CUDA events; 0 => use caller wall clock */
+    void  *stream;
+    char dataset_name[256];
 } compression_ctx;
 
 #ifdef __cplusplus
