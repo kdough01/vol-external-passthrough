@@ -81,4 +81,20 @@ typedef struct {
     size_t               off;
 } vol_scatter_ctx;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+gpu_vol_dataset_t *gpu_vol_dataset_wrap(void *under_dataset,
+                                        int rank, hsize_t *h5dims,
+                                        hid_t type_id,
+                                        enum pressio_dtype pressio_dt,
+                                        hid_t dcpl_id,
+                                        hid_t under_vol_id,
+                                        gpu_vol_file_t *file_ctx,
+                                        const char *compressor_override);
+void gpu_vol_dataset_destroy(gpu_vol_dataset_t *ds_ctx);
+#ifdef __cplusplus
+}
+#endif
+
 #endif

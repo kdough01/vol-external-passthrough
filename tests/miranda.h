@@ -68,7 +68,7 @@ static double *read_raw_double(const char *path, size_t *out_nelem)
     }
 
     size_t nelem = (size_t)fsize / sizeof(double);
-    double *data = malloc(nelem * sizeof(double));
+    double *data = (double *)malloc(nelem * sizeof(double));
     if (!data) { fprintf(stderr, "OOM for %zu doubles\n", nelem); fclose(f); return NULL; }
 
     size_t got = fread(data, sizeof(double), nelem, f);
