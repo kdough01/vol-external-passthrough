@@ -7,26 +7,29 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>   /* access */
-#include "bench_timing.h"   /* bench_now_ms() */
+
+/* Clock headers must be included OUTSIDE extern "C": wrapping <chrono> in
+ * extern "C" gives its templates C linkage and fails to compile. */
+#ifdef __cplusplus
+#include <chrono>
+#else
+#include <time.h>
+#endif
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#ifdef __cplusplus
-#include <chrono>
 static inline double bench_now_ms(void) {
+#ifdef __cplusplus
     return std::chrono::duration<double, std::milli>(
         std::chrono::steady_clock::now().time_since_epoch()).count();
-}
 #else
-#include <time.h>
-static inline double bench_now_ms(void) {
     struct timespec t;
     clock_gettime(CLOCK_MONOTONIC, &t);  /* steady_clock's source on Linux */
     return (double)t.tv_sec * 1e3 + (double)t.tv_nsec / 1e6;
-}
 #endif
+}
 
 /* Opened once, appended thereafter. Header written only if the file is new. */
 static inline FILE *vol_timing_csv(void) {
