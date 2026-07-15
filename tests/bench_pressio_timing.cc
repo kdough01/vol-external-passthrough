@@ -126,8 +126,8 @@ static int run_one(struct pressio *library, const bench_compressor_t *c,
 
     struct pressio_data *input =
         pressio_data_new_nonowning(pt, hbuf, d->rank, pdims);
-    struct pressio_data *compressed =
-        pressio_data_new_empty(pressio_byte_dtype, 0, NULL);
+    size_t cap_dims[1] = { raw + 4096 };
+    struct pressio_data *compressed = pressio_data_new_owning(pressio_byte_dtype, 1, cap_dims);
 
     /* ---------------- WRITE: compress, then io ---------------- */
     BenchCpuTimer wtotal; wtotal.start();
