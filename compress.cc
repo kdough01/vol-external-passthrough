@@ -14,7 +14,7 @@ extern "C" {
 #include <libpressio_ext/cpp/data.h>
 #include <libpressio_ext/cpp/domain.h>
 #include <libpressio_ext/cpp/domain_manager.h>
-#include "vol_timing_sink.h"
+#include "bench_timing.h"   /* BenchCpuTimer + shared CSV schema (was vol_timing_sink.h) */
 
 /* Helpers */
 static int
@@ -27,12 +27,42 @@ static void
 vol_make_host_resident(struct pressio_data *data)
 {
     if (!data) return;
-    
+
     if (strcmp(pressio_data_domain_id(data), "malloc") != 0) {
         pressio_data *d = data;
         *d = domain_manager().make_readable(
             libpressio::domain_plugins().build("malloc"), std::move(*d));
     }
+}
+
+/* ----------------------------------------------------------------------------
+ * Connector-side phase sink.
+ *
+ * The .so can't share the harness's results_vol.csv FILE*, so it writes its own
+ * CSV (same schema as bench_timing.h) and you join on (dataset, compressor) in
+ * post. Path from $VOL_PHASES_CSV, default "connector_phases.csv"; opened once,
+ * appended per call. Emits path="vol" so it slots next to the harness's
+ * "vol/write/total" and "vol/read/total" rows.
+ *
+ * NOTE: ctx doesn't carry the HDF5 dataset name here, so the dataset column is
+ * left blank. If you add a name to compression_ctx (or pass one in), put it in
+ * the first field for a clean join instead of relying on row order.
+ * ------------------------------------------------------------------------- */
+static void
+vol_phase_emit(const char *compressor_id, const char *op, const char *phase,
+               double ms, double ratio)
+{
+    static FILE *f     = NULL;
+    static int   tried = 0;
+    if (!f && !tried) {
+        tried = 1;
+        const char *p = getenv("VOL_PHASES_CSV");
+        f = fopen(p ? p : "connector_phases.csv", "w");
+        if (f) bench_csv_header(f);
+    }
+    if (!f) return;
+    bench_csv_row(f, "" /*dataset*/, compressor_id ? compressor_id : "",
+                  "vol", op, phase, ms, ratio, -1.0);
 }
 
 extern "C" {
@@ -80,6 +110,12 @@ H5VL_pass_through_ext_transfer_compress(compression_ctx *ctx, const void *data, 
     size_t *in_dims;
     size_t  byte_dims[1];
 
+    /* Timing: steady_clock spans compress + the device->host pull below, so for
+     * GPU codecs it captures kernel AND transfers; make_host_resident forces the
+     * sync, so the CPU clock is accurate. */
+    BenchCpuTimer _wtm;
+    double        _compress_ms = 0.0;
+
     if (vol_is_byte_stream(ctx->compressor_id)) {
         in_dtype     = pressio_byte_dtype;
         in_ndims     = 1;
@@ -123,7 +159,7 @@ H5VL_pass_through_ext_transfer_compress(compression_ctx *ctx, const void *data, 
     input  = pressio_data_new_nonowning_domain(in_dtype, (void *)data, in_ndims, in_dims, "malloc");
     // output = pressio_data_new_empty(pressio_byte_dtype, 0, NULL);
 
-    size_t max_comp_size = nbytes + 4096; 
+    size_t max_comp_size = nbytes + 4096;
     size_t out_dims[1] = { max_comp_size };
 
     output = pressio_data_new_owning(pressio_byte_dtype, 1, out_dims);
@@ -166,13 +202,14 @@ H5VL_pass_through_ext_transfer_compress(compression_ctx *ctx, const void *data, 
     }
 
     size_t out_cap = pressio_data_get_capacity_in_bytes(output);
-    fprintf(stderr, "DEBUG: Right before compress. Compressor=%p, Output Capacity=%zu bytes\n", 
+    fprintf(stderr, "DEBUG: Right before compress. Compressor=%p, Output Capacity=%zu bytes\n",
             (void*)ctx->compressor, out_cap);
 
     if (out_cap == 0) {
         fprintf(stderr, "WARNING: Passing a 0-capacity output buffer to the compressor.\n");
     }
 
+    _wtm.start();
     if (pressio_compressor_compress(ctx->compressor, input, output)) {
         H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
                 vol_err_class, maj_compression, min_compress_failed,
@@ -185,6 +222,7 @@ H5VL_pass_through_ext_transfer_compress(compression_ctx *ctx, const void *data, 
 
     /* The result may be device-resident (GPU compressors). */
     vol_make_host_resident(output);
+    _compress_ms = _wtm.stop_ms();   /* compress + D2H, one accurate span */
 
     {
         size_t comp_size = 0;
@@ -210,6 +248,10 @@ H5VL_pass_through_ext_transfer_compress(compression_ctx *ctx, const void *data, 
 
         memcpy(ctx->compressed_buf, comp_ptr, comp_size);
         ctx->compressed_chunk_size = comp_size;
+
+        /* phase row: compress time + compression ratio for this dataset */
+        vol_phase_emit(ctx->compressor_id, "write", "compress", _compress_ms,
+                       comp_size ? (double)nbytes / (double)comp_size : 0.0);
 
 #ifdef ENABLE_EXT_PASSTHRU_LOGGING
         printf("TRANSFER COMPRESS OK: id=%s comp_size=%zu original_nbytes=%zu\n",
@@ -247,9 +289,11 @@ H5VL_pass_through_ext_transfer_decompress(compression_ctx *ctx,
 
     /* noop: libpressio's noop rejects a typed output buffer, so copy directly. */
     if (strcmp(ctx->compressor_id, "noop") == 0) {
+        BenchCpuTimer _ntm; _ntm.start();
         size_t logical = vol_logical_nbytes(ctx);
         size_t n = compressed_size < logical ? compressed_size : logical;
         memcpy(output_buf, compressed_data, n);
+        vol_phase_emit(ctx->compressor_id, "read", "decompress", _ntm.stop_ms(), -1.0);
         return 0;
     }
 
@@ -265,6 +309,9 @@ H5VL_pass_through_ext_transfer_decompress(compression_ctx *ctx,
     struct pressio_data *input  = NULL;
     struct pressio_data *output = NULL;
     size_t comp_dims[1] = { compressed_size };
+
+    BenchCpuTimer _rtm;
+    double        _decompress_ms = 0.0;
 
     const size_t out_nbytes = vol_logical_nbytes(ctx);
 
@@ -311,6 +358,7 @@ H5VL_pass_through_ext_transfer_decompress(compression_ctx *ctx,
         goto done;
     }
 
+    _rtm.start();
     if (pressio_compressor_decompress(ctx->compressor, input, output)) {
         H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
                 vol_err_class, maj_compression, min_decompress_failed,
@@ -324,6 +372,8 @@ H5VL_pass_through_ext_transfer_decompress(compression_ctx *ctx,
 
     /* device -> host for GPU compressors, no-op for CPU. */
     vol_make_host_resident(output);
+    _decompress_ms = _rtm.stop_ms();   /* decompress + D2H */
+    vol_phase_emit(ctx->compressor_id, "read", "decompress", _decompress_ms, -1.0);
 
     {
         size_t actual_bytes = 0;

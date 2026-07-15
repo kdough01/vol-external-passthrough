@@ -1,5 +1,14 @@
-#ifndef BENCH_DATASETS_H
-#define BENCH_DATASETS_H
+/* ============================================================================
+ * bench_config.h  --  datasets + compressors in one place
+ * ----------------------------------------------------------------------------
+ * Merge of the former bench_datasets.h and bench_compressors.h. Edit the two
+ * tables below to change what the harnesses sweep. Optional per-backend helpers
+ * are gated by:
+ *     #define BENCH_CONFIG_ENABLE_HDF5      before include -> HDF5 type helpers
+ *     #define BENCH_CONFIG_ENABLE_PRESSIO   before include -> libpressio helpers
+ * ==========================================================================*/
+#ifndef BENCH_CONFIG_H
+#define BENCH_CONFIG_H
 
 #ifndef _POSIX_C_SOURCE
 #define _POSIX_C_SOURCE 200809L
@@ -7,12 +16,16 @@
 
 #include <stddef.h>
 #include <stdio.h>
+#include <string.h>
 #include <unistd.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+/* ==========================================================================
+ * DATASETS
+ * ========================================================================== */
 #ifndef BENCH_DATA_ROOT
 #define BENCH_DATA_ROOT "/lcrc/project/ECP-EZ/public/compression"
 #endif
@@ -20,12 +33,12 @@ extern "C" {
 #define BENCH_MAX_RANK 4
 
 typedef enum {
-    BENCH_F32 = 0,   /* IEEE single precision, little-endian (.f32) */
+    BENCH_F32 = 0,   /* IEEE single precision, little-endian (.f32)      */
     BENCH_F64 = 1    /* IEEE double precision, little-endian (.f64/.d64) */
 } bench_dtype_t;
 
 typedef enum {
-    BENCH_BOUND_ABS = 0,   /* pointwise absolute error bound */
+    BENCH_BOUND_ABS = 0,   /* pointwise absolute error bound  */
     BENCH_BOUND_REL = 1    /* value-range relative error bound */
 } bench_bound_mode_t;
 
@@ -49,7 +62,6 @@ static const bench_dataset_t BENCH_DATASETS[] = {
         BENCH_BOUND_REL, 1e-3, 1,
         "Clean d64; cuszp returns RMSE~2.7e-4 here. SDRBench names it density.d64."
     },
-
     {
         "hurricane",
         BENCH_DATA_ROOT "/Hurricane-ISABEL/nonclean-data/Pf48.bin.f32",
@@ -57,7 +69,6 @@ static const bench_dataset_t BENCH_DATASETS[] = {
         BENCH_BOUND_REL, 1e-3, 1,
         "Use a CLEARED field. nonclean-data fields contain NaN fill -> bad for fidelity."
     },
-
     {
         "nyx",
         BENCH_DATA_ROOT "/NYX_baryon_density_512/baryon_density.f32",
@@ -65,7 +76,6 @@ static const bench_dataset_t BENCH_DATASETS[] = {
         BENCH_BOUND_REL, 1e-3, 1,
         "Confirm field name; SDRBench canonical also ships temperature.f32 etc."
     },
-
     {
         "s3d",
         BENCH_DATA_ROOT "/S3D/stat_planar.1.1000E-03.field.d64",
@@ -73,7 +83,6 @@ static const bench_dataset_t BENCH_DATASETS[] = {
         BENCH_BOUND_REL, 1e-3, 1,
         "SDRBench lists S3D as f64 (.d64) despite one stray f32 line on the site."
     },
-
     {
         "cesm_atm_2d",
         BENCH_DATA_ROOT "/cesm/CLDHGH_1_1800_3600.f32",
@@ -81,7 +90,6 @@ static const bench_dataset_t BENCH_DATASETS[] = {
         BENCH_BOUND_REL, 1e-2, 0,
         "2D f32. Cluster may hold only the 26x1800x3600 3D version -- confirm path."
     },
-
     {
         "scale_letkf",
         BENCH_DATA_ROOT "/scale-letkf/PRES-98x1200x1200.f32",
@@ -97,33 +105,27 @@ static const bench_dataset_t BENCH_DATASETS[] = {
 static inline size_t bench_dtype_size(bench_dtype_t t) {
     return (t == BENCH_F64) ? 8u : 4u;
 }
-
 static inline const char *bench_dtype_name(bench_dtype_t t) {
-    return (t == BENCH_F64) ? "double" : "float";  /* libpressio dtype string */
+    return (t == BENCH_F64) ? "double" : "float";
 }
-
 static inline size_t bench_num_elements(const bench_dataset_t *d) {
     size_t n = 1;
     for (int i = 0; i < d->rank; ++i) n *= d->dims[i];
     return n;
 }
-
 static inline size_t bench_num_bytes(const bench_dataset_t *d) {
     return bench_num_elements(d) * bench_dtype_size(d->dtype);
 }
-
 static inline const char *bench_bound_mode_name(bench_bound_mode_t m) {
     return (m == BENCH_BOUND_ABS) ? "abs" : "rel";
 }
-
 static inline const bench_dataset_t *bench_dataset_by_name(const char *name) {
     for (int i = 0; i < BENCH_NUM_DATASETS; ++i)
         if (name && BENCH_DATASETS[i].name &&
-            0 == __builtin_strcmp(name, BENCH_DATASETS[i].name))
+            0 == strcmp(name, BENCH_DATASETS[i].name))
             return &BENCH_DATASETS[i];
     return NULL;
 }
-
 static inline int bench_datasets_validate(void) {
     int found = 0;
     fprintf(stderr, "%-14s %-6s %-4s %-22s %-10s %s\n",
@@ -145,32 +147,111 @@ static inline int bench_datasets_validate(void) {
     return found;
 }
 
-#ifdef BENCH_DATASETS_ENABLE_HDF5
+#ifdef BENCH_CONFIG_ENABLE_HDF5
 static inline hid_t bench_dataset_h5type(const bench_dataset_t *d) {
     return (d->dtype == BENCH_F64) ? H5T_IEEE_F64LE : H5T_IEEE_F32LE;  /* file type */
 }
-
 static inline hid_t bench_dataset_h5native(const bench_dataset_t *d) {
     return (d->dtype == BENCH_F64) ? H5T_NATIVE_DOUBLE : H5T_NATIVE_FLOAT;
 }
-
 static inline void bench_dataset_h5dims(const bench_dataset_t *d, hsize_t out[]) {
     for (int i = 0; i < d->rank; ++i) out[i] = (hsize_t)d->dims[i];
 }
-#endif /* BENCH_DATASETS_ENABLE_HDF5 */
+#endif /* BENCH_CONFIG_ENABLE_HDF5 */
 
-#ifdef BENCH_DATASETS_ENABLE_PRESSIO
+#ifdef BENCH_CONFIG_ENABLE_PRESSIO
 static inline enum pressio_dtype bench_dataset_pressio_dtype(const bench_dataset_t *d) {
     return (d->dtype == BENCH_F64) ? pressio_double_dtype : pressio_float_dtype;
 }
-
 static inline void bench_dataset_pressio_dims(const bench_dataset_t *d, size_t out[]) {
+    /* pressio wants fastest-varying dimension first (reverse of HDF5 order) */
     for (int i = 0; i < d->rank; ++i) out[i] = d->dims[d->rank - 1 - i];
 }
-#endif /* BENCH_DATASETS_ENABLE_PRESSIO */
+#endif /* BENCH_CONFIG_ENABLE_PRESSIO */
+
+/* ==========================================================================
+ * COMPRESSORS
+ * ========================================================================== */
+typedef enum {
+    BENCH_CPU_CODEC = 0,
+    BENCH_GPU_CODEC = 1
+} bench_codec_kind_t;
+
+typedef struct {
+    const char        *name;          /* config label / dataset suffix / CSV tag */
+    const char        *pressio_id;    /* compressor id for make_dcpl; NULL=default*/
+    const char        *opts_json;     /* literal libpressio options JSON; NULL=none*/
+    bench_codec_kind_t kind;
+    int                lossless;      /* 1 => bit-exact expected                  */
+    const char        *stream_opt_key;/* GPU: userptr key for the cudaStream_t    */
+    const char        *note;
+} bench_compressor_t;
+
+static const bench_compressor_t BENCH_COMPRESSORS[] = {
+    { "noop", "noop", NULL, BENCH_CPU_CODEC, 1, NULL,
+      "Connector default (no compressor). Bit-exact baseline; isolates overhead." },
+
+    { "cuszp", "cuszp",
+      "{\"pressio:abs\": 1e-3, \"cuszp:mode_str\": \"outlier\"}",
+      BENCH_GPU_CODEC, 0, "cuszp:cuda_stream",
+      "GPU error-bounded lossy (A100). abs=1e-3 suits Miranda; for f32 sets "
+      "consider \"pressio:rel\": 1e-3 so one config is comparable across datasets." },
+
+    { "sz3_1e3", "sz3",
+      "{\"sz3:error_bound_mode_str\":\"abs\",\"sz3:abs_error_bound\":1e-3}",
+      BENCH_CPU_CODEC, 0, NULL, "CPU error-bounded lossy, abs 1e-3." },
+
+    { "sz3_1e6", "sz3",
+      "{\"sz3:error_bound_mode_str\":\"abs\",\"sz3:abs_error_bound\":1e-6}",
+      BENCH_CPU_CODEC, 0, NULL, "CPU error-bounded lossy, abs 1e-6 (tighter)." },
+
+    { "bzip2", "bzip2",
+      "{\"bzip2:block_size\":9}",
+      BENCH_CPU_CODEC, 1, NULL, "CPU lossless, general purpose. CPU comparator." },
+};
+
+#define BENCH_NUM_COMPRESSORS \
+    ((int)(sizeof(BENCH_COMPRESSORS) / sizeof(BENCH_COMPRESSORS[0])))
+
+static inline const char *bench_codec_kind_name(bench_codec_kind_t k) {
+    return (k == BENCH_GPU_CODEC) ? "gpu" : "cpu";
+}
+static inline const bench_compressor_t *bench_compressor_by_name(const char *name) {
+    for (int i = 0; i < BENCH_NUM_COMPRESSORS; ++i)
+        if (name && 0 == strcmp(name, BENCH_COMPRESSORS[i].name))
+            return &BENCH_COMPRESSORS[i];
+    return NULL;
+}
+/* The options JSON to hand to make_dcpl / pressio: literal opts_json or "{}". */
+static inline const char *bench_compressor_opts(const bench_compressor_t *c) {
+    return (c->opts_json && c->opts_json[0]) ? c->opts_json : "{}";
+}
+/* Same, into a buffer; if no literal opts_json, fall back to a generic bound
+ * generated from the DATASET (used by the pressio/filter harnesses). */
+static inline int bench_compressor_opts_json(const bench_compressor_t *c,
+                                             const bench_dataset_t *d,
+                                             char *buf, size_t n) {
+    if (c->opts_json && c->opts_json[0]) return snprintf(buf, n, "%s", c->opts_json);
+    if (c->lossless) return snprintf(buf, n, "{}");
+    const char *mode = (d->bound_mode == BENCH_BOUND_ABS) ? "pressio:abs"
+                                                          : "pressio:rel";
+    return snprintf(buf, n, "{\"%s\": %g}", mode, d->bound);
+}
+/* JSON describing codec + options, to embed in the connector's under_info so
+ * the VOL path uses the SAME configuration as the other two harnesses. */
+static inline int bench_compressor_vol_info_json(const bench_compressor_t *c,
+                                                 const bench_dataset_t *d,
+                                                 char *buf, size_t n) {
+    char opts[256];
+    bench_compressor_opts_json(c, d, opts, sizeof(opts));
+    if (!c->pressio_id)
+        return snprintf(buf, n, "{\"compressor\": null, \"options\": %s}", opts);
+    return snprintf(buf, n,
+        "{\"compressor\": \"%s\", \"options\": %s}", c->pressio_id, opts);
+}
 
 #ifdef __cplusplus
 }  /* extern "C" */
 #endif
 
-#endif /* BENCH_DATASETS_H */
+#endif /* BENCH_CONFIG_H */

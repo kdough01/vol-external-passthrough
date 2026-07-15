@@ -578,30 +578,6 @@ compression_ctx* compression_ctx_create(int rank, hsize_t *h5dims, enum pressio_
     return comp_ctx;
 }
 
-gpu_vol_dataset_t* gpu_vol_dataset_wrap(void *under_dataset,
-                                        int rank, hsize_t *h5dims,
-                                        hid_t type_id,
-                                        enum pressio_dtype pressio_dt,
-                                        hid_t dcpl_id,
-                                        hid_t under_vol_id,
-                                        gpu_vol_file_t *file_ctx,
-                                        const char *compressor_override)
-{
-    // printf("DEBUG wrap: compressor_override='%s'\n",
-    //    compressor_override ? compressor_override : "(null)");
-       
-    gpu_vol_dataset_t *gpu_dataset_ctx = (gpu_vol_dataset_t*)calloc(1, sizeof(gpu_vol_dataset_t));
-
-    gpu_dataset_ctx->under_dataset = under_dataset;
-    gpu_dataset_ctx->under_vol_id = under_vol_id;
-    gpu_dataset_ctx->file_ctx = file_ctx;
-
-    gpu_dataset_ctx->comp_ctx = compression_ctx_create(rank, h5dims, pressio_dt,
-                                                        dcpl_id,
-                                                        file_ctx->config_params,
-                                                        compressor_override);
-    return gpu_dataset_ctx;
-}
 
 void gpu_vol_file_destroy(gpu_vol_file_t *file_ctx) {
     if (!file_ctx) return;
@@ -1646,6 +1622,13 @@ H5VL_pass_through_ext_dataset_create(void *obj,
 
             gpu_vol_dataset_t *ds_ctx = (gpu_vol_dataset_t*)dset->custom_data;
 
+            // add in dataset label for timing output
+            if (ds_ctx && ds_ctx->comp_ctx && name) {
+                strncpy(ds_ctx->comp_ctx->dataset_name, name,
+                        sizeof(ds_ctx->comp_ctx->dataset_name) - 1);
+                ds_ctx->comp_ctx->dataset_name[sizeof(ds_ctx->comp_ctx->dataset_name) - 1] = '\0';
+            }
+
             /* Flag whether compression was explicitly requested */
             if (ds_ctx) {
                 ds_ctx->compression_requested =
@@ -1838,6 +1821,13 @@ H5VL_pass_through_ext_dataset_open(void *obj,
 
         /* Replay options into the compressor handle, then re-apply the CUDA stream */
         gpu_vol_dataset_t *ds_ctx = (gpu_vol_dataset_t*)dset->custom_data;
+
+        if (ds_ctx && ds_ctx->comp_ctx && name) {
+            strncpy(ds_ctx->comp_ctx->dataset_name, name,
+                    sizeof(ds_ctx->comp_ctx->dataset_name) - 1);
+            ds_ctx->comp_ctx->dataset_name[sizeof(ds_ctx->comp_ctx->dataset_name) - 1] = '\0';
+        }
+
         if (json_buf && ds_ctx && ds_ctx->comp_ctx && ds_ctx->comp_ctx->compressor) {
             struct pressio_options *opts = pressio_options_new_json(ds_ctx->comp_ctx->library, json_buf);
             if (opts) {
@@ -1888,7 +1878,7 @@ H5VL_pass_through_ext_dataset_read(
         void *under = d->under_object;
         gpu_vol_dataset_t *ds_ctx = (gpu_vol_dataset_t*)d->custom_data;
         compression_ctx *ctx = ds_ctx ? ds_ctx->comp_ctx : NULL;
-        const char *dset_name = ctx ? ctx->compressor_id : "none";
+        const char *dset_name = (ctx && ctx->dataset_name[0]) ? ctx->dataset_name : "none";
 
         if (!ctx) {
             if (ds_ctx && ds_ctx->compression_requested) {
@@ -2009,9 +1999,8 @@ H5VL_pass_through_ext_dataset_read(
             }
 
             double _c0 = bench_now_ms();
-            herr_t dret = H5VL_pass_through_ext_transfer_decompress(
-                              ctx, cbuf, (size_t)csize, ctx->decomp_buf);
-            decomp_ms = bench_now_ms() - _c0;
+            herr_t dret = H5VL_pass_through_ext_transfer_decompress(ctx, cbuf, (size_t)csize, ctx->decomp_buf);
+            decomp_ms = (ctx->compress_ms > 0.0) ? ctx->compress_ms : (bench_now_ms() - _c0);
             free(cbuf);
 
             if (dret < 0) {
@@ -2099,7 +2088,7 @@ H5VL_pass_through_ext_dataset_write(
         void *under = d->under_object;
         gpu_vol_dataset_t *ds_ctx = (gpu_vol_dataset_t*)d->custom_data;
         compression_ctx *ctx = ds_ctx ? ds_ctx->comp_ctx : NULL;
-        const char *dset_name = ctx ? ctx->compressor_id : "none";
+        const char *dset_name = (ctx && ctx->dataset_name[0]) ? ctx->dataset_name : "none";
 
         if (!ctx) {
             if (ds_ctx && ds_ctx->compression_requested) {
@@ -2227,7 +2216,7 @@ H5VL_pass_through_ext_dataset_write(
         /* ---- Full dataset assembled: compress the whole buffer once ---- */
         double _c0 = bench_now_ms();
         herr_t cret = H5VL_pass_through_ext_transfer_compress(ctx, ctx->stage_buf, ctx->stage_total);
-        compress_ms = bench_now_ms() - _c0;
+        compress_ms = (ctx->compress_ms > 0.0) ? ctx->compress_ms : (bench_now_ms() - _c0);
 
         free(ctx->stage_buf);
         ctx->stage_buf    = NULL;
