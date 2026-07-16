@@ -141,10 +141,10 @@ H5VL_pass_through_ext_transfer_compress(compression_ctx *ctx, const void *data, 
 
     // output = pressio_data_new_owning(pressio_byte_dtype, 1, out_dims);
 
-    if (!output) {
-        fprintf(stderr, "FATAL: Failed to allocate output buffer of size %zu\n", max_comp_size);
-        abort();
-    }
+    // if (!output) {
+    //     fprintf(stderr, "FATAL: Failed to allocate output buffer of size %zu\n", max_comp_size);
+    //     abort();
+    // }
 
 #ifdef ENABLE_EXT_PASSTHRU_LOGGING
     {
