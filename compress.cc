@@ -134,12 +134,12 @@ H5VL_pass_through_ext_transfer_compress(compression_ctx *ctx, const void *data, 
     /* Always hand libpressio host memory; GPU compressors migrate it to the
      * device themselves via the domain manager. */
     input  = pressio_data_new_nonowning_domain(in_dtype, (void *)data, in_ndims, in_dims, "malloc");
-    // output = pressio_data_new_empty(pressio_byte_dtype, 0, NULL);
+    output = pressio_data_new_empty(pressio_byte_dtype, 0, NULL);
 
-    size_t max_comp_size = nbytes + 4096;
-    size_t out_dims[1] = { max_comp_size };
+    // size_t max_comp_size = nbytes + 4096;
+    // size_t out_dims[1] = { max_comp_size };
 
-    output = pressio_data_new_owning(pressio_byte_dtype, 1, out_dims);
+    // output = pressio_data_new_owning(pressio_byte_dtype, 1, out_dims);
 
     if (!output) {
         fprintf(stderr, "FATAL: Failed to allocate output buffer of size %zu\n", max_comp_size);

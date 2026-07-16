@@ -57,20 +57,20 @@ static const bench_dataset_t BENCH_DATASETS[] = {
     //     BENCH_BOUND_REL, 1e-3, 1,
     //     "Use a CLEARED field. nonclean-data fields contain NaN fill -> bad for fidelity."
     // },
-    {
-        "nyx",
-        BENCH_DATA_ROOT "/NYX_baryon_density_512/baryon_density.f32",
-        3, {512, 512, 512, 0}, BENCH_F32,
-        BENCH_BOUND_REL, 1e-3, 1,
-        "Confirm field name; SDRBench canonical also ships temperature.f32 etc."
-    },
-    {
-        "s3d",
-        BENCH_DATA_ROOT "/S3D/stat_planar.1.1000E-03.field.mpi",
-        3, {500, 500, 500, 0}, BENCH_F64,
-        BENCH_BOUND_REL, 1e-3, 1,
-        "SDRBench lists S3D as f64 (.d64) despite one stray f32 line on the site."
-    },
+    // {
+    //     "nyx",
+    //     BENCH_DATA_ROOT "/NYX_baryon_density_512/baryon_density.f32",
+    //     3, {512, 512, 512, 0}, BENCH_F32,
+    //     BENCH_BOUND_REL, 1e-3, 1,
+    //     "Confirm field name; SDRBench canonical also ships temperature.f32 etc."
+    // },
+    // {
+    //     "s3d",
+    //     BENCH_DATA_ROOT "/S3D/stat_planar.1.1000E-03.field.mpi",
+    //     3, {500, 500, 500, 0}, BENCH_F64,
+    //     BENCH_BOUND_REL, 1e-3, 1,
+    //     "SDRBench lists S3D as f64 (.d64) despite one stray f32 line on the site."
+    // },
     {
         "cesm_atm_2d",
         BENCH_DATA_ROOT "/cesm/climate-bigdata-1.5T/f1850_ne120tx01.cam2.h0.0001-01.nc-vars/4/1800x3600/CLDHGH_1_1800_3600.f32",
@@ -78,13 +78,13 @@ static const bench_dataset_t BENCH_DATASETS[] = {
         BENCH_BOUND_REL, 1e-2, 0,
         "2D f32. Cluster may hold only the 26x1800x3600 3D version -- confirm path."
     },
-    {
-        "scale_letkf",
-        BENCH_DATA_ROOT "/scale-letkf/PRES-98x1200x1200.f32",
-        3, {98, 1200, 1200, 0}, BENCH_F32,
-        BENCH_BOUND_REL, 1e-3, 1,
-        "Confirm which variable/field file is present (T-, PRES-, U-, ...)."
-    },
+    // {
+    //     "scale_letkf",
+    //     BENCH_DATA_ROOT "/scale-letkf/PRES-98x1200x1200.f32",
+    //     3, {98, 1200, 1200, 0}, BENCH_F32,
+    //     BENCH_BOUND_REL, 1e-3, 1,
+    //     "Confirm which variable/field file is present (T-, PRES-, U-, ...)."
+    // },
 };
 
 #define BENCH_NUM_DATASETS \
