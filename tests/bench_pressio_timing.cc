@@ -1,20 +1,3 @@
-/* ============================================================================
- * bench_pressio_timing.cc  --  APPROACH 1 of 3: libpressio DIRECT (no HDF5)
- * ----------------------------------------------------------------------------
- * The lower-bound comparator: same codec config as the VOL and the filter, but
- * zero HDF5/VOL machinery. Compress in memory, fwrite the payload; read it back,
- * decompress. This harness sees ALL three phases cleanly:
- *     write: compress + io          read: io + decompress
- * CPU timing via std::chrono::steady_clock; GPU (cuszp) via CUDA events on the
- * codec's stream. TOTAL is wall time (steady_clock); for GPU codecs TOTAL will
- * not exactly equal compress+io because the compress phase is device time.
- *
- * Build (CPU only):
- *   g++  -O2 -std=c++17 bench_pressio_timing.cc -lpressio -o bench_pressio_timing
- * Build (GPU-event timing for cuszp):
- *   nvcc -O2 -std=c++17 -x cu -DBENCH_TIMING_WITH_CUDA bench_pressio_timing.cc \
- *        -lpressio -lcudart -o bench_pressio_timing
- * ==========================================================================*/
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
@@ -25,10 +8,6 @@
 #include <cuda_runtime.h>
 #endif
 
-/* Some libpressio builds do NOT declare the C JSON options builder in the
- * public header -> implicit-int return truncates the 64-bit pointer -> segfault.
- * Declare it explicitly. Confirm name/signature for your build with:
- *     grep -rn "options.*json\|from_json" $LP_VIEW/include                     */
 extern "C" struct pressio_options *
 pressio_options_new_json(struct pressio *library, const char *json);
 

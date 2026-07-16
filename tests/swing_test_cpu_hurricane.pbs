@@ -78,7 +78,7 @@ ls build/tests/ || { echo "No tests/ in build"; exit 1; }
 
 export LD_LIBRARY_PATH=${GCC_LIB}:${LP_VIEW}/lib64:${LP_VIEW}/lib
 
-# Which datasets to sweep (matches the run below). Comment out for "all readable".
+# Which datasets to sweep
 # export BENCH_ONLY="miranda,hurricane,s3d"
 
 echo ""
@@ -88,9 +88,9 @@ env HDF5_VOL_CONNECTOR="pass_through_ext under_vol=0;under_info={}" \
     BENCH_CSV="$WORK/connector_phases.csv" \
     ./build/tests/bench_vol_timing "$WORK/bench_out.h5" "$WORK/results_vol.csv"
 
-echo ""
-echo "=== [2/3] Pressio-only compressor timing ==="
-./build/tests/bench_pressio_timing "$WORK/payload.bin" "$WORK/results_pressio.csv"
+# echo ""
+# echo "=== [2/3] Pressio-only compressor timing ==="
+# ./build/tests/bench_pressio_timing "$WORK/payload.bin" "$WORK/results_pressio.csv"
 
 echo ""
 echo "=== [3/3] Filter (deflate) timing ==="
@@ -104,9 +104,9 @@ echo ""
 echo "=== results_vol.csv (harness total + ratio + RMSE) ==="
 column -t -s, "$WORK/results_vol.csv"
 echo ""
-echo "=== results_pressio.csv ==="
-column -t -s, "$WORK/results_pressio.csv"
-echo ""
+# echo "=== results_pressio.csv ==="
+# column -t -s, "$WORK/results_pressio.csv"
+# echo ""
 echo "=== results_filter.csv ==="
 column -t -s, "$WORK/results_filter.csv"
 

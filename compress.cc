@@ -107,7 +107,7 @@ H5VL_pass_through_ext_transfer_compress(compression_ctx *ctx, const void *data, 
             return -1;
         }
 
-        /* libpressio sizes the clone/copy from the declared shape, NOT from
+        /* libpressio sizes the clone/copy from the declared shape, not from
          * nbytes. If the recorded dims imply a different size than the buffer
          * HDF5 actually handed us, the copy runs off the end and segfaults.
          * Catch it here as a clean error instead. */
