@@ -1,12 +1,3 @@
-/* ============================================================================
- * bench_config.h  --  datasets + compressors in one place
- * ----------------------------------------------------------------------------
- * Merge of the former bench_datasets.h and bench_compressors.h. Edit the two
- * tables below to change what the harnesses sweep. Optional per-backend helpers
- * are gated by:
- *     #define BENCH_CONFIG_ENABLE_HDF5      before include -> HDF5 type helpers
- *     #define BENCH_CONFIG_ENABLE_PRESSIO   before include -> libpressio helpers
- * ==========================================================================*/
 #ifndef BENCH_CONFIG_H
 #define BENCH_CONFIG_H
 
@@ -23,9 +14,6 @@
 extern "C" {
 #endif
 
-/* ==========================================================================
- * DATASETS
- * ========================================================================== */
 #ifndef BENCH_DATA_ROOT
 #define BENCH_DATA_ROOT "/lcrc/project/ECP-EZ/public/compression"
 #endif
@@ -85,7 +73,7 @@ static const bench_dataset_t BENCH_DATASETS[] = {
     },
     {
         "cesm_atm_2d",
-        BENCH_DATA_ROOT "cesm/climate-bigdata-1.5T/f1850_ne120tx01.cam2.h0.0001-01.nc-vars/4/1800x3600/CLDHGH_1_1800_3600.f32",
+        BENCH_DATA_ROOT "/cesm/climate-bigdata-1.5T/f1850_ne120tx01.cam2.h0.0001-01.nc-vars/4/1800x3600/CLDHGH_1_1800_3600.f32",
         2, {1800, 3600, 0, 0}, BENCH_F32,
         BENCH_BOUND_REL, 1e-2, 0,
         "2D f32. Cluster may hold only the 26x1800x3600 3D version -- confirm path."
@@ -169,9 +157,6 @@ static inline void bench_dataset_pressio_dims(const bench_dataset_t *d, size_t o
 }
 #endif /* BENCH_CONFIG_ENABLE_PRESSIO */
 
-/* ==========================================================================
- * COMPRESSORS
- * ========================================================================== */
 typedef enum {
     BENCH_CPU_CODEC = 0,
     BENCH_GPU_CODEC = 1
@@ -226,8 +211,7 @@ static inline const bench_compressor_t *bench_compressor_by_name(const char *nam
 static inline const char *bench_compressor_opts(const bench_compressor_t *c) {
     return (c->opts_json && c->opts_json[0]) ? c->opts_json : "{}";
 }
-/* Same, into a buffer; if no literal opts_json, fall back to a generic bound
- * generated from the DATASET (used by the pressio/filter harnesses). */
+
 static inline int bench_compressor_opts_json(const bench_compressor_t *c,
                                              const bench_dataset_t *d,
                                              char *buf, size_t n) {
@@ -237,8 +221,7 @@ static inline int bench_compressor_opts_json(const bench_compressor_t *c,
                                                           : "pressio:rel";
     return snprintf(buf, n, "{\"%s\": %g}", mode, d->bound);
 }
-/* JSON describing codec + options, to embed in the connector's under_info so
- * the VOL path uses the SAME configuration as the other two harnesses. */
+
 static inline int bench_compressor_vol_info_json(const bench_compressor_t *c,
                                                  const bench_dataset_t *d,
                                                  char *buf, size_t n) {
