@@ -1,0 +1,408 @@
+Job started on Thu Jul 16 10:09:42 CDT 2026
+Running on: gpu6
+PWD: /home/kdougherty/hdf5_projs/vol-external-passthrough
+mpicc:   /gpfs/fs1/home/software/swing/HPCX/hpcx-v2.26-gcc-doca_ofed-ubuntu22.04-cuda13-x86_64/ompi4/bin/mpicc
+nvcc:    /gpfs/fs1/soft/swing/software/spack-built/linux-ubuntu22.04-x86_64/gcc-11.4.0/cuda-12.6.0-qb3dlng/bin/nvcc
+gcc:     gcc (Ubuntu 11.4.0-1ubuntu1~22.04.2) 11.4.0
+GCC_LIB: /usr/lib/gcc/x86_64-linux-gnu/11
+gcc (Ubuntu 11.4.0-1ubuntu1~22.04.2) 11.4.0
+Copyright (C) 2021 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+LibPressio cmake dir: /home/kdougherty/libpressio_cuda/.spack-env/view/lib/cmake/LibPressio
+
+=== Building (USE_CUDA=ON -> CUDA-event timing in the connector) ===
+-- The C compiler identification is GNU 11.4.0
+-- The CXX compiler identification is GNU 11.4.0
+-- The CUDA compiler identification is NVIDIA 12.9.86
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /gpfs/fs1/home/software/swing/HPCX/hpcx-v2.26-gcc-doca_ofed-ubuntu22.04-cuda13-x86_64/ompi4/bin/mpicc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /gpfs/fs1/home/software/swing/HPCX/hpcx-v2.26-gcc-doca_ofed-ubuntu22.04-cuda13-x86_64/ompi4/bin/mpicxx - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Detecting CUDA compiler ABI info
+-- Detecting CUDA compiler ABI info - done
+-- Check for working CUDA compiler: /home/kdougherty/libpressio_cuda/.spack-env/view/bin/nvcc - skipped
+-- Detecting CUDA compile features
+-- Detecting CUDA compile features - done
+-- Found HDF5: hdf5-shared (found version "1.14.6")  
+-- Found OpenMP_C: -fopenmp (found version "4.5") 
+-- Found OpenMP_CXX: -fopenmp (found version "4.5") 
+-- Found OpenMP: TRUE (found version "4.5")  
+-- Found BZip2: /home/kdougherty/libpressio_cuda/.spack-env/view/lib/libbz2.so (found version "1.0.8") 
+-- Looking for BZ2_bzCompressInit
+-- Looking for BZ2_bzCompressInit - found
+-- Found ZFP: /home/kdougherty/libpressio_cuda/.spack-env/view/lib/cmake/zfp/zfp-config.cmake (found version "0.5.5") 
+-- Found OpenMP_C: -fopenmp (found version "4.5") 
+-- Found OpenMP_CXX: -fopenmp (found version "4.5") 
+-- Found PkgConfig: /home/kdougherty/libpressio_cuda/.spack-env/view/bin/pkg-config (found version "2.5.1") 
+-- Found GSL: /home/kdougherty/libpressio_cuda/.spack-env/view/include (found version "2.8") 
+-- Checking for one of the modules 'libzstd'
+-- Checking for one of the modules 'blosc'
+-- Found CUDAToolkit: /home/kdougherty/libpressio_cuda/.spack-env/view/include (found version "12.9.86") 
+-- Looking for pthread.h
+-- Looking for pthread.h - found
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE  
+-- Found HDF5: hdf5-shared (found version "1.14.6") found components: C 
+-- Found MPI_C: /gpfs/fs1/home/software/swing/HPCX/hpcx-v2.26-gcc-doca_ofed-ubuntu22.04-cuda13-x86_64/ompi4/bin/mpicc (found version "3.1") 
+-- Found MPI_CXX: /gpfs/fs1/home/software/swing/HPCX/hpcx-v2.26-gcc-doca_ofed-ubuntu22.04-cuda13-x86_64/ompi4/bin/mpicxx (found version "3.1") 
+-- Found MPI: TRUE (found version "3.1")  
+-- Found MPI: TRUE (found version "3.1") found components: CXX 
+-- Checking for one of the modules 'lua;luajit'
+-- Found nlohmann_json: /home/kdougherty/libpressio_cuda/.spack-env/view/share/cmake/nlohmann_json/nlohmann_jsonConfig.cmake (found version "3.12.0") 
+-- Found Python3: /home/kdougherty/libpressio_cuda/.spack-env/view/bin/python3 (found version "3.14.5") found components: Interpreter Development NumPy Development.Module Development.Embed 
+-- Found SWIG: /home/kdougherty/libpressio_cuda/.spack-env/view/bin/swig4.0 (found version "4.1.1")  
+-- Found MPI: TRUE (found version "3.1")  
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/kdougherty/hdf5_projs/vol-external-passthrough/build
+[  5%] Building C object CMakeFiles/hdf5_vol_passthrough.dir/H5VLpassthru_ext.c.o
+[ 10%] Building CXX object CMakeFiles/hdf5_vol_passthrough.dir/compress.cc.o
+[ 15%] Linking CXX shared library libhdf5_vol_passthrough.so
+[ 15%] Built target hdf5_vol_passthrough
+[ 21%] Building C object tests/CMakeFiles/test_cpu_write.dir/test_cpu_write.c.o
+[ 26%] Building C object tests/CMakeFiles/test_time_hurricane.dir/test_time_hurricane.c.o
+[ 31%] Building C object tests/CMakeFiles/test_time_miranda.dir/test_time_miranda.c.o
+[ 36%] Building C object tests/CMakeFiles/test_ci.dir/test_ci.c.o
+[ 42%] Linking C executable test_cpu_write
+[ 47%] Linking C executable test_time_hurricane
+[ 52%] Linking C executable test_ci
+[ 57%] Linking C executable test_time_miranda
+[ 57%] Built target test_cpu_write
+[ 57%] Built target test_time_hurricane
+[ 63%] Building C object tests/CMakeFiles/test_error_miranda.dir/test_error_miranda.c.o
+[ 63%] Built target test_ci
+[ 68%] Building CXX object tests/CMakeFiles/bench_vol_timing.dir/bench_vol_timing.cc.o
+[ 68%] Built target test_time_miranda
+[ 73%] Building CXX object tests/CMakeFiles/bench_pressio_timing.dir/bench_pressio_timing.cc.o
+[ 78%] Building CXX object tests/CMakeFiles/bench_filter_timing.dir/bench_filter_timing.cc.o
+[ 84%] Linking C executable test_error_miranda
+[ 84%] Built target test_error_miranda
+[ 89%] Linking CXX executable bench_vol_timing
+[ 94%] Linking CXX executable bench_pressio_timing
+[100%] Linking CXX executable bench_filter_timing
+[100%] Built target bench_vol_timing
+[100%] Built target bench_filter_timing
+[100%] Built target bench_pressio_timing
+--- build/ ---
+CMakeCache.txt
+CMakeFiles
+Makefile
+cmake_install.cmake
+libhdf5_vol_passthrough.so
+tests
+--- build/tests/ ---
+CMakeFiles
+Makefile
+bench_filter_timing
+bench_pressio_timing
+bench_vol_timing
+cmake_install.cmake
+test_ci
+test_cpu_write
+test_error_miranda
+test_time_hurricane
+test_time_miranda
+
+=== [1/3] VOL timing:  ===
+name           dtype  rank dims                   MiB        exists
+miranda        double 3    256x384x384            288.0      yes
+nyx            float  3    512x512x512            512.0      yes
+s3d            double 3    500x500x500            953.7      yes
+cesm_atm_2d    float  2    1800x3600              24.7       yes
+scale_letkf    float  3    98x1200x1200           538.3      yes
+5/5 dataset paths readable
+DEBUG: Right before compress. Compressor=0x5568ce013620, Output Capacity=301993984 bytes
+Info: 0x5568ce0034c0
+
+=== miranda (288.0 MiB, double) ===
+  miranda_noop                 W=  731.95 ms  R=  394.73 ms  ratio=  1.00x  RMSE=0.000e+00
+DEBUG: Right before compress. Compressor=0x5568ce013620, Output Capacity=301993984 bytes
+DECOMP domain id = cudamalloc
+  miranda_cuszp                W=  865.73 ms  R=  373.33 ms  ratio= 20.57x  RMSE=2.720e-04
+DEBUG: Right before compress. Compressor=0x5568ce15a5a0, Output Capacity=301993984 bytes
+DECOMP domain id = malloc
+  miranda_sz3_1e3              W= 1078.96 ms  R=  786.48 ms  ratio= 41.14x  RMSE=2.792e-04
+DEBUG: Right before compress. Compressor=0x5568ce00aee0, Output Capacity=301993984 bytes
+DECOMP domain id = malloc
+  miranda_sz3_1e6              W= 1415.37 ms  R=  994.74 ms  ratio=  8.73x  RMSE=2.709e-07
+DEBUG: Right before compress. Compressor=0x5568ce15a5a0, Output Capacity=301993984 bytes
+DECOMP domain id = malloc
+  miranda_bzip2                W=22691.14 ms  R=11584.82 ms  ratio=  2.34x  RMSE=0.000e+00
+DEBUG: Right before compress. Compressor=0x5568cfed8b70, Output Capacity=536875008 bytes
+
+=== nyx (512.0 MiB, float) ===
+  nyx_noop                     W= 1198.16 ms  R=  692.85 ms  ratio=  1.00x  RMSE=0.000e+00
+DEBUG: Right before compress. Compressor=0x5568cf19f550, Output Capacity=536875008 bytes
+DECOMP domain id = cudamalloc
+  nyx_cuszp                    W=  624.60 ms  R=  769.86 ms  ratio=  3.76x  RMSE=5.774e-04
+DEBUG: Right before compress. Compressor=0x5568cf1ecda0, Output Capacity=536875008 bytes
+DECOMP domain id = malloc
+  nyx_sz3_1e3                  W= 4745.54 ms  R= 3645.67 ms  ratio=  6.17x  RMSE=5.626e-04
+DEBUG: Right before compress. Compressor=0x5568cf1fd180, Output Capacity=536875008 bytes
+DECOMP domain id = malloc
+  nyx_sz3_1e6                  W= 7507.45 ms  R= 9428.37 ms  ratio=  2.00x  RMSE=5.394e-07
+DEBUG: Right before compress. Compressor=0x5568cf0e7600, Output Capacity=536875008 bytes
+DECOMP domain id = malloc
+  nyx_bzip2                    W=53737.03 ms  R=30018.32 ms  ratio=  1.10x  RMSE=0.000e+00
+DEBUG: Right before compress. Compressor=0x5568cf1ed820, Output Capacity=1000004096 bytes
+
+=== s3d (953.7 MiB, double) ===
+  s3d_noop                     W= 2140.02 ms  R= 1278.73 ms  ratio=  1.00x  RMSE=0.000e+00
+DEBUG: Right before compress. Compressor=0x5568cf058310, Output Capacity=1000004096 bytes
+DECOMP domain id = cudamalloc
+  s3d_cuszp                    W=  720.32 ms  R= 1232.82 ms  ratio= 45.41x  RMSE=4.899e-04
+DEBUG: Right before compress. Compressor=0x5568cf406330, Output Capacity=1000004096 bytes
+DECOMP domain id = malloc
+  s3d_sz3_1e3                  W= 3047.17 ms  R= 1828.68 ms  ratio=953.67x  RMSE=1.247e-04
+DEBUG: Right before compress. Compressor=0x5568cf40fcc0, Output Capacity=1000004096 bytes
+DECOMP domain id = malloc
+  s3d_sz3_1e6                  W= 3317.77 ms  R= 1917.10 ms  ratio=238.42x  RMSE=2.617e-07
+DEBUG: Right before compress. Compressor=0x5568cf3fe140, Output Capacity=1000004096 bytes
+DECOMP domain id = malloc
+  s3d_bzip2                    W=101813.24 ms  R=56069.15 ms  ratio=  1.13x  RMSE=0.000e+00
+DEBUG: Right before compress. Compressor=0x5568ce053d20, Output Capacity=25924096 bytes
+
+=== cesm_atm_2d (24.7 MiB, float) ===
+  cesm_atm_2d_noop             W=   62.79 ms  R=   37.95 ms  ratio=  0.99x  RMSE=0.000e+00
+DEBUG: Right before compress. Compressor=0x5568cf4627c0, Output Capacity=25924096 bytes
+DECOMP domain id = cudamalloc
+  cesm_atm_2d_cuszp            W=   27.01 ms  R=   39.76 ms  ratio=  8.24x  RMSE=4.373e-03
+DEBUG: Right before compress. Compressor=0x5568cf469de0, Output Capacity=25924096 bytes
+DECOMP domain id = malloc
+  cesm_atm_2d_sz3_1e3          W=  171.79 ms  R=  111.53 ms  ratio=  8.24x  RMSE=5.304e-04
+DEBUG: Right before compress. Compressor=0x5568cefc47b0, Output Capacity=25924096 bytes
+DECOMP domain id = malloc
+  cesm_atm_2d_sz3_1e6          W=  359.59 ms  R=  333.22 ms  ratio=  2.06x  RMSE=5.204e-07
+DEBUG: Right before compress. Compressor=0x5568cf475ae0, Output Capacity=25924096 bytes
+DECOMP domain id = malloc
+  cesm_atm_2d_bzip2            W= 2517.00 ms  R= 1542.39 ms  ratio=  1.12x  RMSE=0.000e+00
+DEBUG: Right before compress. Compressor=0x5568cf425f20, Output Capacity=564484096 bytes
+
+=== scale_letkf (538.3 MiB, float) ===
+  scale_letkf_noop             W= 1212.96 ms  R=  764.29 ms  ratio=  1.00x  RMSE=0.000e+00
+DEBUG: Right before compress. Compressor=0x5568cf46a9b0, Output Capacity=564484096 bytes
+DECOMP domain id = cudamalloc
+  scale_letkf_cuszp            W=  828.73 ms  R= 1913.52 ms  ratio=  2.05x  RMSE=1.960e-03
+DEBUG: Right before compress. Compressor=0x5568cfe62aa0, Output Capacity=564484096 bytes
+DECOMP domain id = malloc
+  scale_letkf_sz3_1e3          W=11140.67 ms  R= 8609.13 ms  ratio=  1.79x  RMSE=3.269e-04
+DEBUG: Right before compress. Compressor=0x5568cff14be0, Output Capacity=564484096 bytes
+DECOMP domain id = malloc
+  scale_letkf_sz3_1e6          W=12204.11 ms  R= 1534.70 ms  ratio=  1.35x  RMSE=0.000e+00
+DEBUG: Right before compress. Compressor=0x5568cfe6dca0, Output Capacity=564484096 bytes
+DECOMP domain id = malloc
+  scale_letkf_bzip2            W=51996.76 ms  R=24458.30 ms  ratio=  1.69x  RMSE=0.000e+00
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results_vol.csv
+
+=== [3/3] Filter (deflate) timing ===
+name           dtype  rank dims                   MiB        exists
+miranda        double 3    256x384x384            288.0      yes
+nyx            float  3    512x512x512            512.0      yes
+s3d            double 3    500x500x500            953.7      yes
+cesm_atm_2d    float  2    1800x3600              24.7       yes
+scale_letkf    float  3    98x1200x1200           538.3      yes
+5/5 dataset paths readable
+miranda/deflate                file=137.5 MiB (raw 288.0 MiB)
+nyx/deflate                    file=456.4 MiB (raw 512.0 MiB)
+s3d/deflate                    file=851.9 MiB (raw 953.7 MiB)
+cesm_atm_2d/deflate            file=21.7 MiB (raw 24.7 MiB)
+scale_letkf/deflate            file=405.6 MiB (raw 538.3 MiB)
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results_filter.csv
+
+=== connector_phases.csv (VOL total/compress/io) ===
+dataset              compressor  op     total_ms     compress_ms  io_ms      overhead_ms  overhead_pct
+miranda_noop         noop        write  764.3014     338.6397     215.1095   210.5522     27.55
+miranda_noop         noop        read   374.1344     156.0578     172.4145   45.6621      12.20
+miranda_cuszp        cuszp       write  1001.0810    31.9537      5.1839     963.9435     96.29
+miranda_cuszp        cuszp       read   451.0507     4.2016       10.5910    436.2581     96.72
+miranda_sz3_1e3      sz3         write  1080.5513    895.3158     2.2074     183.0280     16.94
+miranda_sz3_1e3      sz3         read   790.1230     697.2648     1.6888     91.1695      11.54
+miranda_sz3_1e6      sz3         write  1415.3022    1206.2265    10.0826    198.9930     14.06
+miranda_sz3_1e6      sz3         read   987.2616     935.3068     29.0977    22.8570      2.32
+miranda_bzip2        bzip2       write  22504.7266   22271.9624   38.8359    193.9283     0.86
+miranda_bzip2        bzip2       read   11507.2597   11331.4430   74.6236    101.1931     0.88
+nyx_noop             noop        write  1131.4863    599.6415     156.5177   375.3272     33.17
+nyx_noop             noop        read   663.7862     277.1154     307.3302   79.3406      11.95
+nyx_cuszp            cuszp       write  589.5665     51.3286      42.1268    496.1111     84.15
+nyx_cuszp            cuszp       read   770.7277     19.5968      81.1182    670.0128     86.93
+nyx_sz3_1e3          sz3         write  4625.5955    4268.9483    25.6223    331.0249     7.16
+nyx_sz3_1e3          sz3         read   3558.8700    3468.3809    49.4527    41.0364      1.15
+nyx_sz3_1e6          sz3         write  7327.7985    6904.4364    77.6575    345.7047     4.72
+nyx_sz3_1e6          sz3         read   9400.6857    9068.1478    152.2746   180.2634     1.92
+nyx_bzip2            bzip2       write  53192.4013   52682.0265   145.7233   364.6515     0.69
+nyx_bzip2            bzip2       read   30249.5903   29782.2868   270.0086   197.2949     0.65
+scale_letkf_noop     noop        write  1158.5891    614.1821     164.6970   379.7100     32.77
+scale_letkf_noop     noop        read   678.9003     285.8452     310.7385   82.3166      12.12
+scale_letkf_cuszp    cuszp       write  789.4728     53.6584      78.2146    657.5997     83.30
+scale_letkf_cuszp    cuszp       read   874.3097     30.1344      150.3289   693.8464     79.36
+scale_letkf_sz3_1e3  sz3         write  11072.4195   10624.1635   91.5985    356.6575     3.22
+scale_letkf_sz3_1e3  sz3         read   7883.0047    7580.1812    178.6209   124.2026     1.58
+scale_letkf_sz3_1e6  sz3         write  12208.4060   11712.2644   121.3664   374.7752     3.07
+scale_letkf_sz3_1e6  sz3         read   1506.3306    1197.4748    237.6690   71.1867      4.73
+scale_letkf_bzip2    bzip2       write  51593.0310   51128.2116   97.5217    367.2976     0.71
+scale_letkf_bzip2    bzip2       read   24008.3409   23630.1961   189.6496   188.4951     0.79
+miranda_noop         noop        write  739.5887     337.5673     193.3096   208.7118     28.22
+miranda_noop         noop        read   389.4082     156.4030     187.7562   45.2490      11.62
+miranda_cuszp        cuszp       write  712.0399     37.0985      6.4962     668.4452     93.88
+miranda_cuszp        cuszp       read   382.8533     4.2161       9.4525     369.1848     96.43
+miranda_sz3_1e3      sz3         write  1081.5437    896.6251     2.6356     182.2830     16.85
+miranda_sz3_1e3      sz3         read   777.1003     692.6304     2.1516     82.3184      10.59
+miranda_sz3_1e6      sz3         write  1413.2815    1212.5441    12.6230    188.1143     13.31
+miranda_sz3_1e6      sz3         read   989.8268     943.0489     22.7289    24.0491      2.43
+miranda_bzip2        bzip2       write  22616.5336   22374.4461   44.6480    197.4396     0.87
+miranda_bzip2        bzip2       read   11541.4876   11358.3655   81.9364    101.1857     0.88
+nyx_noop             noop        write  1159.6101    600.3849     191.3541   367.8711     31.72
+nyx_noop             noop        read   688.1558     277.0519     331.0342   80.0696      11.64
+nyx_cuszp            cuszp       write  601.1770     52.4273      48.6099    500.1399     83.19
+nyx_cuszp            cuszp       read   771.6611     23.0776      88.6124    659.9711     85.53
+nyx_sz3_1e3          sz3         write  4887.4297    4526.2147    31.1497    330.0653     6.75
+nyx_sz3_1e3          sz3         read   3650.3261    3555.8015    54.1986    40.3260      1.10
+nyx_sz3_1e6          sz3         write  7609.1041    7170.6515    92.9022    345.5504     4.54
+nyx_sz3_1e6          sz3         read   9281.2708    8993.4344    168.1581   119.6783     1.29
+nyx_bzip2            bzip2       write  53148.7042   52617.2645   166.7182   364.7214     0.69
+nyx_bzip2            bzip2       read   29856.3699   29351.8725   304.0007   200.4967     0.67
+s3d_noop             noop        write  2135.4201    1117.4094    334.3861   683.6246     32.01
+s3d_noop             noop        read   1303.3533    515.5642     640.3733   147.4159     11.31
+s3d_cuszp            cuszp       write  712.5793     87.5953      8.4828     616.5011     86.52
+s3d_cuszp            cuszp       read   1251.2852    6.1557       5.6785     1239.4510    99.05
+s3d_sz3_1e3          sz3         write  3084.8978    2486.4721    0.1079     598.3178     19.40
+s3d_sz3_1e3          sz3         read   1815.9034    1753.9357    0.2916     61.6761      3.40
+s3d_sz3_1e6          sz3         write  3274.8854    2673.0566    1.6919     600.1369     18.33
+s3d_sz3_1e6          sz3         read   1901.9423    1838.5349    1.3005     62.1069      3.27
+s3d_bzip2            bzip2       write  101712.1769  100734.4120  303.6130   674.1519     0.66
+s3d_bzip2            bzip2       read   53914.0493   53221.7392   556.1942   136.1159     0.25
+scale_letkf_noop     noop        write  1209.7046    629.4528     193.7526   386.4993     31.95
+scale_letkf_noop     noop        read   723.3221     290.7796     350.3269   82.2155      11.37
+scale_letkf_cuszp    cuszp       write  826.2412     53.5268      96.1490    676.5654     81.88
+scale_letkf_cuszp    cuszp       read   909.2906     30.6010      171.4510   707.2386     77.78
+scale_letkf_sz3_1e3  sz3         write  11056.9516   10582.1682   108.2039   366.5795     3.32
+scale_letkf_sz3_1e3  sz3         read   7876.9878    7556.6312    195.7276   124.6291     1.58
+scale_letkf_sz3_1e6  sz3         write  12140.7376   11625.1936   141.1971   374.3469     3.08
+scale_letkf_sz3_1e6  sz3         read   1533.4922    1201.9245    259.7738   71.7939      4.68
+miranda_noop         noop        write  730.6319     340.4359     178.9123   211.2837     28.92
+miranda_noop         noop        read   394.6163     158.0238     190.1558   46.4367      11.77
+miranda_cuszp        cuszp       write  865.6764     32.5077      6.2793     826.8894     95.52
+miranda_cuszp        cuszp       read   373.2150     4.6474       9.6407     358.9269     96.17
+miranda_sz3_1e3      sz3         write  1077.6660    897.6027     2.7837     177.2795     16.45
+miranda_sz3_1e3      sz3         read   786.3462     693.1303     2.1750     91.0409      11.58
+miranda_sz3_1e6      sz3         write  1415.3140    1216.6981    12.7661    185.8499     13.13
+miranda_sz3_1e6      sz3         read   994.6171     944.6686     26.6204    23.3281      2.35
+miranda_bzip2        bzip2       write  22691.0564   22450.2000   44.5332    196.3231     0.87
+miranda_bzip2        bzip2       read   11584.6925   11401.2614   81.6270    101.8040     0.88
+nyx_noop             noop        write  1197.9664    598.3047     181.5697   418.0920     34.90
+nyx_noop             noop        read   692.7241     276.7853     336.0116   79.9272      11.54
+nyx_cuszp            cuszp       write  624.5404     58.7660      70.3729    495.4014     79.32
+nyx_cuszp            cuszp       read   769.7015     20.6364      87.8382    661.2269     85.91
+nyx_sz3_1e3          sz3         write  4745.4816    4384.6453    29.7918    331.0445     6.98
+nyx_sz3_1e3          sz3         read   3645.5458    3550.7051    53.9335    40.9072      1.12
+nyx_sz3_1e6          sz3         write  7507.2922    7066.8238    91.9012    348.5672     4.64
+nyx_sz3_1e6          sz3         read   9428.2331    9203.2033    168.2027   56.8271      0.60
+nyx_bzip2            bzip2       write  53736.9285   53201.3839   167.8560   367.6887     0.68
+nyx_bzip2            bzip2       read   30018.1697   29496.5952   310.5958   210.9787     0.70
+s3d_noop             noop        write  2139.7401    1113.3496    342.0663   684.3242     31.98
+s3d_noop             noop        read   1278.6030    514.4691     618.0351   146.0988     11.43
+s3d_cuszp            cuszp       write  720.2690     90.1782      8.1674     621.9234     86.35
+s3d_cuszp            cuszp       read   1232.7028    6.1685       5.7270     1220.8073    99.04
+s3d_sz3_1e3          sz3         write  3047.0594    2445.3416    0.1282     601.5896     19.74
+s3d_sz3_1e3          sz3         read   1828.5482    1764.6949    0.2989     63.5544      3.48
+s3d_sz3_1e6          sz3         write  3317.7131    2709.6740    1.6618     606.3774     18.28
+s3d_sz3_1e6          sz3         read   1916.9730    1852.7826    1.3017     62.8887      3.28
+s3d_bzip2            bzip2       write  101812.9897  100831.2683  302.9798   678.7416     0.67
+s3d_bzip2            bzip2       read   56068.9960   53617.7008   2313.8778  137.4174     0.25
+cesm_atm_2d_noop     noop        write  62.7382      32.1186      10.0247    20.5950      32.83
+cesm_atm_2d_noop     noop        read   37.8468      14.7514      21.3370    1.7583       4.65
+cesm_atm_2d_cuszp    cuszp       write  26.9603      9.9344       1.2234     15.8025      58.61
+cesm_atm_2d_cuszp    cuszp       read   39.6495      1.9445       19.0737    18.6313      46.99
+cesm_atm_2d_sz3_1e3  sz3         write  171.7468     168.9527     0.8947     1.8995       1.11
+cesm_atm_2d_sz3_1e3  sz3         read   111.4282     92.9984      16.5056    1.9242       1.73
+cesm_atm_2d_sz3_1e6  sz3         write  359.5378     349.0825     4.4553     6.0000       1.67
+cesm_atm_2d_sz3_1e6  sz3         read   333.1132     307.8619     23.3201    1.9312       0.58
+cesm_atm_2d_bzip2    bzip2       write  2516.9461    2506.4649    8.5834     1.8978       0.08
+cesm_atm_2d_bzip2    bzip2       read   1542.2917    1374.5052    165.9045   1.8820       0.12
+scale_letkf_noop     noop        write  1212.7989    628.7170     195.8683   388.2136     32.01
+scale_letkf_noop     noop        read   764.1723     290.9168     390.3422   82.9132      10.85
+scale_letkf_cuszp    cuszp       write  828.6453     54.7003      94.3786    679.5665     82.01
+scale_letkf_cuszp    cuszp       read   1913.3941    31.0462      1168.4015  713.9464     37.31
+scale_letkf_sz3_1e3  sz3         write  11140.4780   10668.9327   106.6967   364.8486     3.27
+scale_letkf_sz3_1e3  sz3         read   8609.0034    7534.3587    1010.6379  64.0067      0.74
+scale_letkf_sz3_1e6  sz3         write  12203.9942   11684.8906   144.9121   374.1916     3.07
+scale_letkf_sz3_1e6  sz3         read   1534.5824    1203.7467    259.0163   71.8194      4.68
+scale_letkf_bzip2    bzip2       write  51996.6691   51515.5346   114.3620   366.7724     0.71
+scale_letkf_bzip2    bzip2       read   24458.1761   24078.2841   204.4462   175.4459     0.72
+
+=== results_vol.csv (harness total + ratio + RMSE) ===
+dataset      compressor  path  op     phase  ms           ratio     rmse
+miranda      noop        vol   write  total  731.9518     0.9965    
+miranda      noop        vol   read   total  394.7297               0.000000e+00
+miranda      cuszp       vol   write  total  865.7289     20.5714   
+miranda      cuszp       vol   read   total  373.3347               2.719601e-04
+miranda      sz3_1e3     vol   write  total  1078.9597    41.1429   
+miranda      sz3_1e3     vol   read   total  786.4768               2.792276e-04
+miranda      sz3_1e6     vol   write  total  1415.3718    8.7273    
+miranda      sz3_1e6     vol   read   total  994.7406               2.708514e-07
+miranda      bzip2       vol   write  total  22691.1378   2.3415    
+miranda      bzip2       vol   read   total  11584.8226             0.000000e+00
+nyx          noop        vol   write  total  1198.1619    0.9981    
+nyx          noop        vol   read   total  692.8526               0.000000e+00
+nyx          cuszp       vol   write  total  624.5980     3.7647    
+nyx          cuszp       vol   read   total  769.8606               5.773606e-04
+nyx          sz3_1e3     vol   write  total  4745.5358    6.1687    
+nyx          sz3_1e3     vol   read   total  3645.6677              5.625753e-04
+nyx          sz3_1e6     vol   write  total  7507.4489    2.0000    
+nyx          sz3_1e6     vol   read   total  9428.3663              5.394001e-07
+nyx          bzip2       vol   write  total  53737.0291   1.0964    
+nyx          bzip2       vol   read   total  30018.3163             0.000000e+00
+s3d          noop        vol   write  total  2140.0176    0.9997    
+s3d          noop        vol   read   total  1278.7296              0.000000e+00
+s3d          cuszp       vol   write  total  720.3190     45.4131   
+s3d          cuszp       vol   read   total  1232.8227              4.898672e-04
+s3d          sz3_1e3     vol   write  total  3047.1689    953.6743  
+s3d          sz3_1e3     vol   read   total  1828.6750              1.246576e-04
+s3d          sz3_1e6     vol   write  total  3317.7666    238.4186  
+s3d          sz3_1e6     vol   read   total  1917.1000              2.617416e-07
+s3d          bzip2       vol   write  total  101813.2427  1.1299    
+s3d          bzip2       vol   read   total  56069.1452             0.000000e+00
+cesm_atm_2d  noop        vol   write  total  62.7876      0.9888    
+cesm_atm_2d  noop        vol   read   total  37.9482                0.000000e+00
+cesm_atm_2d  cuszp       vol   write  total  27.0130      8.2397    
+cesm_atm_2d  cuszp       vol   read   total  39.7575                4.372897e-03
+cesm_atm_2d  sz3_1e3     vol   write  total  171.7925     8.2397    
+cesm_atm_2d  sz3_1e3     vol   read   total  111.5347               5.303975e-04
+cesm_atm_2d  sz3_1e6     vol   write  total  359.5893     2.0599    
+cesm_atm_2d  sz3_1e6     vol   read   total  333.2212               5.204343e-07
+cesm_atm_2d  bzip2       vol   write  total  2517.0034    1.1236    
+cesm_atm_2d  bzip2       vol   read   total  1542.3950              0.000000e+00
+scale_letkf  noop        vol   write  total  1212.9621    0.9988    
+scale_letkf  noop        vol   read   total  764.2907               0.000000e+00
+scale_letkf  cuszp       vol   write  total  828.7280     2.0547    
+scale_letkf  cuszp       vol   read   total  1913.5201              1.960338e-03
+scale_letkf  sz3_1e3     vol   write  total  11140.6698   1.7885    
+scale_letkf  sz3_1e3     vol   read   total  8609.1299              3.268708e-04
+scale_letkf  sz3_1e6     vol   write  total  12204.1142   1.3458    
+scale_letkf  sz3_1e6     vol   read   total  1534.7024              0.000000e+00
+scale_letkf  bzip2       vol   write  total  51996.7650   1.6929    
+scale_letkf  bzip2       vol   read   total  24458.3010             0.000000e+00
+
+=== results_filter.csv ===
+dataset      compressor  path    op     phase  ms          ratio   rmse
+miranda      deflate     filter  write  total  7080.8797   2.0948  
+miranda      deflate     filter  read   total  1038.0285           
+nyx          deflate     filter  write  total  16491.6669  1.1219  
+nyx          deflate     filter  read   total  2633.7496           
+s3d          deflate     filter  write  total  30309.5679  1.1194  
+s3d          deflate     filter  read   total  4856.7198           
+cesm_atm_2d  deflate     filter  write  total  821.8687    1.1401  
+cesm_atm_2d  deflate     filter  read   total  153.9282            
+scale_letkf  deflate     filter  write  total  16583.1290  1.3273  
+scale_letkf  deflate     filter  read   total  2732.0238           
+
+Job finished on Thu Jul 16 10:19:00 CDT 2026

@@ -1,7 +1,7 @@
 #!/bin/bash
 #PBS -N vol_test_swing
 #PBS -l select=1:ncpus=4:ngpus=1:mpiprocs=1:mem=8gb
-#PBS -l walltime=00:07:00
+#PBS -l walltime=00:15:00
 #PBS -j oe
 #PBS -A SDR
 #PBS -q gpu
