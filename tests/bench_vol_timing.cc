@@ -133,6 +133,10 @@ int main(int argc, char **argv) {
     const char *only     = std::getenv("BENCH_ONLY");   /* dataset filter    */
     const char *only_cmp = std::getenv("BENCH_COMP");   /* compressor filter */
 
+    struct pressio* lib = pressio_instance();
+    struct pressio_compressor* c = pressio_get_compressor(lib, "cuszp");
+    std::printf("%s\n", pressio_options_to_string(pressio_compressor_get_options(c)));
+
     register_vol_properties();
     bench_datasets_validate();
 
