@@ -329,10 +329,9 @@ static const bench_compressor_t BENCH_COMPRESSORS[] = {
       "Connector default (no compressor). Bit-exact baseline; isolates overhead." },
 
     { "cuszp", "cuszp",
-      "{\"pressio:abs\": 1e-3, \"cuszp:mode_str\": \"outlier\"}",
-      BENCH_GPU_CODEC, 0, "cuszp:cuda_stream",
-      "GPU error-bounded lossy (A100). abs=1e-3 suits Miranda; for f32 sets "
-      "consider \"pressio:rel\": 1e-3 so one config is comparable across datasets." },
+    "{\"cuszp:error_bound_mode_str\":\"abs\",\"cuszp:error_bound\":1e-3,\"cuszp:mode_str\":\"outlier\"}",
+    BENCH_GPU_CODEC, 0, "cuszp:cuda_stream",
+    "Native abs bound (matches sz3 config). mode_str=outlier is the ENCODING mode." },
 
     { "sz3_1e3", "sz3",
       "{\"sz3:error_bound_mode_str\":\"abs\",\"sz3:abs_error_bound\":1e-3}",
