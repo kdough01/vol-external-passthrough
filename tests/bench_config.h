@@ -71,7 +71,7 @@ static const bench_dataset_t BENCH_DATASETS[] = {
     {
         "einspline37",
         BENCH_DATA_ROOT "/QMCPACK-bigdata/einspline.tile_37-1-242-23-8.spin_0.tw_0.l0u6144.g112x66x66.dat",
-        1, {N, 0, 0, 0}, BENCH_F32,          /* N = filesize/4 from stat above */
+        1, {13560851520 / 4, 0, 0, 0}, BENCH_F32,          /* N = filesize/4 from stat above */
         BENCH_BOUND_REL, 1e-3, 1,
         "Raw headerless float32 dump; 1D flat for the codec. spin/tw may be complex.",
         BENCH_SRC_RAW, NULL                  /* raw -> uses fread, no HDF5 needed */
