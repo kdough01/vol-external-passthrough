@@ -85,7 +85,7 @@ echo ""
 echo "=== [0/3] Dump cuszp option keys ==="
 env PATH="$CLEAN_PATH" LD_LIBRARY_PATH="$GCC_LIB" \
     "$SYSTEM_MPICXX" -std=c++17 "$WORK/dump_cuszp_opts.cc" \
-    -I"$LP_VIEW/include" -L"$LP_VIEW/lib64" -L"$LP_VIEW/lib" -lpressio \
+    -I"$LP_VIEW/include" -L"$LP_VIEW/lib64" -L"$LP_VIEW/lib" -llibpressio \
     -o "$WORK/dump_cuszp_opts" \
   && "$WORK/dump_cuszp_opts" | tr ',' '\n' | grep -i cuszp
 
