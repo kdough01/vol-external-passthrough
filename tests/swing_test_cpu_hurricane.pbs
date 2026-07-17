@@ -83,14 +83,7 @@ export LD_LIBRARY_PATH=${GCC_LIB}:${LP_VIEW}/lib64:${LP_VIEW}/lib
 
 echo ""
 echo "=== [0/3] Dump cuszp option keys ==="
-LP_SO=$(find "$LP_VIEW" \( -name 'liblibpressio.so' -o -name 'libpressio.so' \) | head -1)
-echo "libpressio: $LP_SO"
-env PATH="$CLEAN_PATH" LD_LIBRARY_PATH="$GCC_LIB" \
-    "$SYSTEM_MPICXX" -std=c++17 "$WORK/dump_cuszp_opts.cc" \
-    -I"$LP_VIEW/include" "$LP_SO" \
-    -Wl,--allow-shlib-undefined \
-    -o "$WORK/dump_cuszp_opts" \
-  && "$WORK/dump_cuszp_opts" | tr ',' '\n' | grep -i cuszp
+./build/tests/dump_cuszp_opts | tr ',' '\n' | grep -i cuszp
 
 
 echo ""

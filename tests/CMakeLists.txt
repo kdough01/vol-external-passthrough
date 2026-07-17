@@ -28,6 +28,9 @@ target_link_libraries(bench_vol_timing PRIVATE m)
 target_link_libraries(bench_pressio_timing PRIVATE m)
 target_link_libraries(bench_filter_timing PRIVATE m)
 
+add_executable(dump_cuszp_opts dump_cuszp_opts.cc)
+target_link_libraries(dump_cuszp_opts PRIVATE LibPressio::libpressio)
+
 if(USE_CUDA)
   target_compile_definitions(bench_pressio_timing PRIVATE BENCH_TIMING_WITH_CUDA)
   target_include_directories(bench_pressio_timing PRIVATE ${CUDAToolkit_INCLUDE_DIRS})
