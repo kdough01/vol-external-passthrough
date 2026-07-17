@@ -78,13 +78,15 @@ ls build/tests/ || { echo "No tests/ in build"; exit 1; }
 
 export LD_LIBRARY_PATH=${GCC_LIB}:${LP_VIEW}/lib64:${LP_VIEW}/lib
 
+export HDF5_USE_FILE_LOCKING=FALSE
+rm -f "$WORK/bench_out.h5"        # clear any stale/half-written file
+
 # Which datasets to sweep
 # export BENCH_ONLY="miranda,hurricane,s3d"
 
 echo ""
 echo "=== [0/3] Dump cuszp option keys ==="
 ./build/tests/dump_cuszp_opts | tr ',' '\n' | grep -i cuszp
-
 
 echo ""
 echo "=== [1/3] VOL timing: $BENCH_ONLY ==="
