@@ -1,4 +1,4 @@
-#include <libpressio.h>
+#include <libpressio/libpressio.h>
 #include <cstdio>
 #include <cstdlib>
 
