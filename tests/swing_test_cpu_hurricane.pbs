@@ -82,6 +82,15 @@ export LD_LIBRARY_PATH=${GCC_LIB}:${LP_VIEW}/lib64:${LP_VIEW}/lib
 # export BENCH_ONLY="miranda,hurricane,s3d"
 
 echo ""
+echo "=== [0/3] Dump cuszp option keys ==="
+env PATH="$CLEAN_PATH" LD_LIBRARY_PATH="$GCC_LIB" \
+    "$SYSTEM_MPICXX" -std=c++17 "$WORK/dump_cuszp_opts.cc" \
+    -I"$LP_VIEW/include" -L"$LP_VIEW/lib64" -L"$LP_VIEW/lib" -lpressio \
+    -o "$WORK/dump_cuszp_opts" \
+  && "$WORK/dump_cuszp_opts" | tr ',' '\n' | grep -i cuszp
+
+
+echo ""
 echo "=== [1/3] VOL timing: $BENCH_ONLY ==="
 env HDF5_VOL_CONNECTOR="pass_through_ext under_vol=0;under_info={}" \
     HDF5_PLUGIN_PATH="$(pwd)/build" \
