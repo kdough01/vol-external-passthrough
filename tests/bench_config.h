@@ -71,10 +71,10 @@ static const bench_dataset_t BENCH_DATASETS[] = {
     {
         "einspline37",
         BENCH_DATA_ROOT "/QMCPACK-bigdata/einspline.tile_37-1-242-23-8.spin_0.tw_0.l0u6144.g112x66x66.dat",
-        1, {13560851520 / 4, 0, 0, 0}, BENCH_F32,          /* N = filesize/4 from stat above */
-        BENCH_BOUND_REL, 1e-3, 1,
+        1, {13560851520 / 4, 0, 0, 0}, BENCH_F32,          
+        BENCH_BOUND_ABS, 1e-3, 1,    /* <-- Changed from REL to ABS */
         "Raw headerless float32 dump; 1D flat for the codec. spin/tw may be complex.",
-        BENCH_SRC_RAW, NULL                  /* raw -> uses fread, no HDF5 needed */
+        BENCH_SRC_RAW, NULL                  
     },
 
     // {
@@ -329,9 +329,9 @@ static const bench_compressor_t BENCH_COMPRESSORS[] = {
       "Connector default (no compressor). Bit-exact baseline; isolates overhead." },
 
     { "cuszp", "cuszp",
-    "{\"pressio:rel\": 1e-6, \"cuszp:mode_str\": \"outlier\"}",
-    BENCH_GPU_CODEC, 0, "cuszp:cuda_stream",
-    "cuszp@2.0.1 is RELATIVE-bound only (no abs mode option). Compare vs sz3 rel." },
+        "{\"pressio:abs\": 1e-3, \"cuszp:mode_str\": \"outlier\"}",
+        BENCH_GPU_CODEC, 0, "cuszp:cuda_stream",
+        "cuSZp configured for 1e-3 absolute error bound." },
 
     { "sz3_1e3", "sz3",
       "{\"sz3:error_bound_mode_str\":\"abs\",\"sz3:abs_error_bound\":1e-3}",
