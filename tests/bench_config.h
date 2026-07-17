@@ -7,6 +7,7 @@
 
 #include <stddef.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
@@ -21,8 +22,8 @@ extern "C" {
 #define BENCH_MAX_RANK 4
 
 typedef enum {
-    BENCH_F32 = 0,   /* IEEE single precision, little-endian (.f32)      */
-    BENCH_F64 = 1    /* IEEE double precision, little-endian (.f64/.d64) */
+    BENCH_F32 = 0,   /* little-endian (.f32)      */
+    BENCH_F64 = 1    /* little-endian (.f64/.d64) */
 } bench_dtype_t;
 
 typedef enum {
@@ -30,26 +31,53 @@ typedef enum {
     BENCH_BOUND_REL = 1    /* value-range relative error bound */
 } bench_bound_mode_t;
 
+typedef enum {
+    BENCH_SRC_RAW  = 0,
+    BENCH_SRC_HDF5 = 1
+} bench_src_t;
+
 typedef struct {
     const char        *name;        /* short id used in output filenames/logs */
-    const char        *path;        /* raw binary field on disk (one field)   */
-    int                rank;        /* number of dimensions                   */
+    const char        *path;        /* raw field, or the .h5/.nc4 container    */
+    int                rank;        /* number of dimensions (RAW: required)    */
     size_t             dims[BENCH_MAX_RANK]; /* row-major (HDF5 order)         */
     bench_dtype_t      dtype;
     bench_bound_mode_t bound_mode;  /* default error control for lossy runs   */
     double             bound;       /* default error bound value              */
     int                gpu_suitable;/* 1 = large/contiguous enough for GPU codec */
     const char        *note;        /* provenance / caveats                   */
+    bench_src_t        src;         /* BENCH_SRC_RAW (default/0) or _HDF5      */
+    const char        *h5dset;      /* HDF5 src: dataset path inside file,     */
 } bench_dataset_t;
 
 static const bench_dataset_t BENCH_DATASETS[] = {
+    // {
+    //     "miranda",
+    //     BENCH_DATA_ROOT "/Miranda/SDRBENCH-Miranda-256x384x384/density.d64",
+    //     3, {256, 384, 384, 0}, BENCH_F64,
+    //     BENCH_BOUND_REL, 1e-3, 1,
+    //     "Clean d64; cuszp returns RMSE~2.7e-4 here. SDRBench names it density.d64."
+    // },
+
     {
-        "miranda",
-        BENCH_DATA_ROOT "/Miranda/SDRBENCH-Miranda-256x384x384/density.d64",
-        3, {256, 384, 384, 0}, BENCH_F64,
+        "ocean_temp",
+        BENCH_DATA_ROOT "/oceanbox/Tobbeholmane_0001.nc",
+        0, {0, 0, 0, 0}, BENCH_F32,
         BENCH_BOUND_REL, 1e-3, 1,
-        "Clean d64; cuszp returns RMSE~2.7e-4 here. SDRBench names it density.d64."
+        "NetCDF-4 (HDF5-backed). Confirm netCDF-4 via `ncdump -k`. Shape/type "
+        "read at load. NetCDF scale_factor/add_offset packing is NOT applied.",
+        BENCH_SRC_HDF5, "/temp"
     },
+    // {
+    //     "einspline37",
+    //     BENCH_DATA_ROOT "/QMCPACK-bigdata/einspline.tile_37-1-242-23-8.spin_0.tw_0.l0u6144.g112x66x66.h5",
+    //     0, {0, 0, 0, 0}, BENCH_F32,
+    //     BENCH_BOUND_REL, 1e-3, 1,
+    //     "QMCPACK einspline coeffs; shape/type auto-read. spin/tw may be complex "
+    //     "(interleaved re/im) -> compressed as flat float, mind RMSE interpretation.",
+    //     BENCH_SRC_HDF5, "/spline_0"          /* <-- confirm exact name via h5ls -r */
+    // },
+
     // {
     //     "hurricane",
     //     BENCH_DATA_ROOT "/Hurricane-ISABEL/nonclean-data/Pf48.bin.f32",
@@ -71,13 +99,13 @@ static const bench_dataset_t BENCH_DATASETS[] = {
     //     BENCH_BOUND_REL, 1e-3, 1,
     //     "SDRBench lists S3D as f64 (.d64) despite one stray f32 line on the site."
     // },
-    {
-        "cesm_atm_2d",
-        BENCH_DATA_ROOT "/cesm/climate-bigdata-1.5T/f1850_ne120tx01.cam2.h0.0001-01.nc-vars/4/1800x3600/CLDHGH_1_1800_3600.f32",
-        2, {1800, 3600, 0, 0}, BENCH_F32,
-        BENCH_BOUND_REL, 1e-2, 0,
-        "2D f32. Cluster may hold only the 26x1800x3600 3D version -- confirm path."
-    },
+    // {
+    //     "cesm_atm_2d",
+    //     BENCH_DATA_ROOT "/cesm/climate-bigdata-1.5T/f1850_ne120tx01.cam2.h0.0001-01.nc-vars/4/1800x3600/CLDHGH_1_1800_3600.f32",
+    //     2, {1800, 3600, 0, 0}, BENCH_F32,
+    //     BENCH_BOUND_REL, 1e-2, 0,
+    //     "2D f32. Cluster may hold only the 26x1800x3600 3D version -- confirm path."
+    // },
     // {
     //     "scale_letkf",
     //     BENCH_DATA_ROOT "/scale-letkf/PRES-98x1200x1200.f32",
@@ -107,6 +135,9 @@ static inline size_t bench_num_bytes(const bench_dataset_t *d) {
 static inline const char *bench_bound_mode_name(bench_bound_mode_t m) {
     return (m == BENCH_BOUND_ABS) ? "abs" : "rel";
 }
+static inline const char *bench_src_name(bench_src_t s) {
+    return (s == BENCH_SRC_HDF5) ? "hdf5" : "raw";
+}
 static inline const bench_dataset_t *bench_dataset_by_name(const char *name) {
     for (int i = 0; i < BENCH_NUM_DATASETS; ++i)
         if (name && BENCH_DATASETS[i].name &&
@@ -116,23 +147,145 @@ static inline const bench_dataset_t *bench_dataset_by_name(const char *name) {
 }
 static inline int bench_datasets_validate(void) {
     int found = 0;
-    fprintf(stderr, "%-14s %-6s %-4s %-22s %-10s %s\n",
-            "name", "dtype", "rank", "dims", "MiB", "exists");
+    fprintf(stderr, "%-14s %-6s %-4s %-6s %-22s %-10s %s\n",
+            "name", "dtype", "rank", "src", "dims", "MiB", "exists");
     for (int i = 0; i < BENCH_NUM_DATASETS; ++i) {
         const bench_dataset_t *d = &BENCH_DATASETS[i];
         char dims[64]; size_t off = 0;
-        for (int k = 0; k < d->rank; ++k)
-            off += (size_t)snprintf(dims + off, sizeof(dims) - off,
-                                    k ? "x%zu" : "%zu", d->dims[k]);
+        if (d->src == BENCH_SRC_HDF5 && d->rank == 0) {
+            snprintf(dims, sizeof(dims), "(from file)");
+        } else {
+            for (int k = 0; k < d->rank; ++k)
+                off += (size_t)snprintf(dims + off, sizeof(dims) - off,
+                                        k ? "x%zu" : "%zu", d->dims[k]);
+        }
         int ok = (access(d->path, R_OK) == 0);
         found += ok;
-        fprintf(stderr, "%-14s %-6s %-4d %-22s %-10.1f %s\n",
-                d->name, bench_dtype_name(d->dtype), d->rank, dims,
-                bench_num_bytes(d) / (1024.0 * 1024.0),
+        fprintf(stderr, "%-14s %-6s %-4d %-6s %-22s %-10.1f %s\n",
+                d->name, bench_dtype_name(d->dtype), d->rank,
+                bench_src_name(d->src), dims,
+                (d->src == BENCH_SRC_HDF5) ? 0.0
+                    : bench_num_bytes(d) / (1024.0 * 1024.0),
                 ok ? "yes" : "NO  <-- fix path");
     }
     fprintf(stderr, "%d/%d dataset paths readable\n", found, BENCH_NUM_DATASETS);
     return found;
+}
+
+static inline void *bench_load_raw(const bench_dataset_t *d, size_t *out_bytes) {
+    size_t want = bench_num_bytes(d);
+    FILE *fp = fopen(d->path, "rb");
+    if (!fp) {
+        fprintf(stderr, "bench_load_raw: cannot open %s\n", d->path);
+        return NULL;
+    }
+    void *buf = malloc(want);
+    if (!buf) {
+        fprintf(stderr, "bench_load_raw: OOM (%zu bytes) for %s\n", want, d->name);
+        fclose(fp);
+        return NULL;
+    }
+    size_t got = fread(buf, 1, want, fp);
+    fclose(fp);
+    if (got != want) {
+        fprintf(stderr, "bench_load_raw: short read %s (%zu/%zu bytes)\n",
+                d->path, got, want);
+        free(buf);
+        return NULL;
+    }
+    if (out_bytes) *out_bytes = want;
+    return buf;
+}
+
+#ifdef BENCH_CONFIG_ENABLE_HDF5
+static inline void *bench_load_h5(const bench_dataset_t *in,
+                                  bench_dataset_t *resolved,
+                                  size_t *out_bytes) {
+    if (!in->h5dset || !in->h5dset[0]) {
+        fprintf(stderr, "bench_load_h5: '%s' has BENCH_SRC_HDF5 but h5dset is unset.\n",
+                in->name);
+        return NULL;
+    }
+    hid_t fid = H5Fopen(in->path, H5F_ACC_RDONLY, H5P_DEFAULT);
+    if (fid < 0) {
+        fprintf(stderr, "bench_load_h5: H5Fopen failed: %s "
+                "(not HDF5? NetCDF-3/classic is unreadable here)\n", in->path);
+        return NULL;
+    }
+    hid_t did = H5Dopen2(fid, in->h5dset, H5P_DEFAULT);
+    if (did < 0) {
+        fprintf(stderr, "bench_load_h5: dataset '%s' not found in %s "
+                "(check `h5ls -r`)\n", in->h5dset, in->path);
+        H5Fclose(fid);
+        return NULL;
+    }
+
+    hid_t sid  = H5Dget_space(did);
+    int   rank = H5Sget_simple_extent_ndims(sid);
+    if (rank < 1 || rank > BENCH_MAX_RANK) {
+        fprintf(stderr, "bench_load_h5: rank %d unsupported (1..%d) for %s\n",
+                rank, BENCH_MAX_RANK, in->h5dset);
+        H5Sclose(sid); H5Dclose(did); H5Fclose(fid);
+        return NULL;
+    }
+    hsize_t hdims[BENCH_MAX_RANK];
+    H5Sget_simple_extent_dims(sid, hdims, NULL);
+
+    hid_t  ftype  = H5Dget_type(did);
+    int    tclass = (int)H5Tget_class(ftype);
+    size_t tsize  = H5Tget_size(ftype);
+    bench_dtype_t dt;
+    if (tclass == (int)H5T_FLOAT && tsize == 4)      dt = BENCH_F32;
+    else if (tclass == (int)H5T_FLOAT && tsize == 8) dt = BENCH_F64;
+    else {
+        fprintf(stderr, "bench_load_h5: unsupported type (class=%d size=%zu) for %s; "
+                "only float32/float64 handled.\n", tclass, tsize, in->h5dset);
+        H5Tclose(ftype); H5Sclose(sid); H5Dclose(did); H5Fclose(fid);
+        return NULL;
+    }
+
+    *resolved       = *in;
+    resolved->rank  = rank;
+    resolved->dtype = dt;
+    resolved->src   = BENCH_SRC_HDF5;
+    for (int i = 0; i < rank; ++i)            resolved->dims[i] = (size_t)hdims[i];
+    for (int i = rank; i < BENCH_MAX_RANK; ++i) resolved->dims[i] = 0;
+
+    size_t nbytes = bench_num_bytes(resolved);
+    void  *buf    = malloc(nbytes);
+    if (!buf) {
+        fprintf(stderr, "bench_load_h5: OOM (%zu bytes) for %s\n", nbytes, in->name);
+        H5Tclose(ftype); H5Sclose(sid); H5Dclose(did); H5Fclose(fid);
+        return NULL;
+    }
+    hid_t  mtype = (dt == BENCH_F64) ? H5T_NATIVE_DOUBLE : H5T_NATIVE_FLOAT;
+    herr_t rc    = H5Dread(did, mtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
+
+    H5Tclose(ftype); H5Sclose(sid); H5Dclose(did); H5Fclose(fid);
+    if (rc < 0) {
+        fprintf(stderr, "bench_load_h5: H5Dread failed for %s\n", in->h5dset);
+        free(buf);
+        return NULL;
+    }
+    if (out_bytes) *out_bytes = nbytes;
+    return buf;
+}
+#endif /* BENCH_CONFIG_ENABLE_HDF5 */
+
+static inline void *bench_load_field(const bench_dataset_t *in,
+                                     bench_dataset_t *resolved,
+                                     size_t *out_bytes) {
+    if (in->src == BENCH_SRC_HDF5) {
+#ifdef BENCH_CONFIG_ENABLE_HDF5
+        return bench_load_h5(in, resolved, out_bytes);
+#else
+        fprintf(stderr, "bench_load_field: '%s' is an HDF5 source but this TU was "
+                "built without -DBENCH_CONFIG_ENABLE_HDF5.\n", in->name);
+        return NULL;
+#endif
+    }
+    *resolved = *in;                 /* raw: descriptor is already complete */
+    return bench_load_raw(in, out_bytes);
 }
 
 #ifdef BENCH_CONFIG_ENABLE_HDF5
@@ -186,13 +339,13 @@ static const bench_compressor_t BENCH_COMPRESSORS[] = {
       "{\"sz3:error_bound_mode_str\":\"abs\",\"sz3:abs_error_bound\":1e-3}",
       BENCH_CPU_CODEC, 0, NULL, "CPU error-bounded lossy, abs 1e-3." },
 
-    { "sz3_1e6", "sz3",
-      "{\"sz3:error_bound_mode_str\":\"abs\",\"sz3:abs_error_bound\":1e-6}",
-      BENCH_CPU_CODEC, 0, NULL, "CPU error-bounded lossy, abs 1e-6 (tighter)." },
+    // { "sz3_1e6", "sz3",
+    //   "{\"sz3:error_bound_mode_str\":\"abs\",\"sz3:abs_error_bound\":1e-6}",
+    //   BENCH_CPU_CODEC, 0, NULL, "CPU error-bounded lossy, abs 1e-6 (tighter)." },
 
-    { "bzip2", "bzip2",
-      "{\"bzip2:block_size\":9}",
-      BENCH_CPU_CODEC, 1, NULL, "CPU lossless, general purpose. CPU comparator." },
+    // { "bzip2", "bzip2",
+    //   "{\"bzip2:block_size\":9}",
+    //   BENCH_CPU_CODEC, 1, NULL, "CPU lossless, general purpose. CPU comparator." },
 };
 
 #define BENCH_NUM_COMPRESSORS \
