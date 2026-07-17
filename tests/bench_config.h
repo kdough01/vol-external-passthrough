@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <float.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -329,9 +330,9 @@ static const bench_compressor_t BENCH_COMPRESSORS[] = {
       "Connector default (no compressor). Bit-exact baseline; isolates overhead." },
 
     { "cuszp", "cuszp",
-        "{\"pressio:abs\": 1e-3, \"cuszp:mode_str\": \"outlier\"}",
-        BENCH_GPU_CODEC, 0, "cuszp:cuda_stream",
-        "cuSZp configured for 1e-3 absolute error bound." },
+      NULL,
+      BENCH_GPU_CODEC, 0, "cuszp:cuda_stream",
+      "cuSZp: dynamically mapping ABS 1e-3 to REL based on data range." },
 
     { "sz3_1e3", "sz3",
       "{\"sz3:error_bound_mode_str\":\"abs\",\"sz3:abs_error_bound\":1e-3}",
@@ -365,11 +366,45 @@ static inline const char *bench_compressor_opts(const bench_compressor_t *c) {
 
 static inline int bench_compressor_opts_json(const bench_compressor_t *c,
                                              const bench_dataset_t *d,
+                                             const void *raw_data, size_t num_elements,
                                              char *buf, size_t n) {
-    if (c->opts_json && c->opts_json[0]) return snprintf(buf, n, "%s", c->opts_json);
-    if (c->lossless) return snprintf(buf, n, "{}");
-    const char *mode = (d->bound_mode == BENCH_BOUND_ABS) ? "pressio:abs"
-                                                          : "pressio:rel";
+    if (c->opts_json && c->opts_json[0]) {
+        return snprintf(buf, n, "%s", c->opts_json);
+    }
+    if (c->lossless) {
+        return snprintf(buf, n, "{}");
+    }
+
+    /* cuSZp workaround: translate ABS to REL dynamically */
+    if (strcmp(c->name, "cuszp") == 0 && d->bound_mode == BENCH_BOUND_ABS) {
+        double d_min = DBL_MAX;
+        double d_max = -DBL_MAX;
+        
+        /* Scan the array to find the true value range */
+        if (d->dtype == BENCH_F32) {
+            const float *f_data = (const float *)raw_data;
+            for (size_t i = 0; i < num_elements; ++i) {
+                if (f_data[i] < d_min) d_min = f_data[i];
+                if (f_data[i] > d_max) d_max = f_data[i];
+            }
+        } else {
+            const double *d_data = (const double *)raw_data;
+            for (size_t i = 0; i < num_elements; ++i) {
+                if (d_data[i] < d_min) d_min = d_data[i];
+                if (d_data[i] > d_max) d_max = d_data[i];
+            }
+        }
+        
+        double range = d_max - d_min;
+        double required_rel = d->bound / range;
+        
+        return snprintf(buf, n, 
+            "{\"pressio:rel\": %.10e, \"cuszp:mode_str\": \"outlier\"}", 
+            required_rel);
+    }
+
+    /* Standard fallback for well-behaved codecs */
+    const char *mode = (d->bound_mode == BENCH_BOUND_ABS) ? "pressio:abs" : "pressio:rel";
     return snprintf(buf, n, "{\"%s\": %g}", mode, d->bound);
 }
 
