@@ -57,7 +57,9 @@ static const bench_dataset_t BENCH_DATASETS[] = {
         "miranda",
         BENCH_DATA_ROOT "/Miranda/SDRBENCH-Miranda-256x384x384/density.d64",
         3, {256, 384, 384, 0}, BENCH_F64,
-        BENCH_BOUND_REL, 1e-3, 1,
+        BENCH_BOUND_REL, 1e-3,
+        0.0,   /* assumed_range: unused for REL-mode datasets */
+        1,
         "Clean d64; cuszp returns RMSE~2.7e-4 here. SDRBench names it density.d64."
     },
 
