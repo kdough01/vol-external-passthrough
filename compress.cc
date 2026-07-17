@@ -48,6 +48,12 @@ vol_make_host_resident(struct pressio_data *data)
     }
 }
 
+static const char *
+vol_ptr_domain(const void *p)
+{
+    return H5VL_pass_through_ext_buf_is_device(p) ? "cudamalloc" : "malloc";
+}
+
 extern "C" {
 
 size_t
@@ -78,6 +84,23 @@ H5VL_pass_through_ext_compressor_available(const char *compressor_id)
             strncmp(start, compressor_id, idlen) == 0)
             return 1;
     }
+    return 0;
+}
+
+/* Returns 1 if p is device- or managed-memory, 0 for host. Safe on any
+ * pointer; clears CUDA's "not registered" error that host pointers produce. */
+int
+H5VL_pass_through_ext_buf_is_device(const void *p)
+{
+#ifdef USE_CUDA
+    cudaPointerAttributes attr;
+    if (p && cudaPointerGetAttributes(&attr, p) == cudaSuccess &&
+        (attr.type == cudaMemoryTypeDevice || attr.type == cudaMemoryTypeManaged))
+        return 1;
+    cudaGetLastError();
+#else
+    (void)p;
+#endif
     return 0;
 }
 
@@ -500,7 +523,8 @@ H5VL_pass_through_ext_transfer_compress_chunk(compression_ctx *ctx,
 
     /* Host memory in; GPU compressors migrate via the domain manager. */
     input = pressio_data_new_nonowning_domain(in_dtype, (void *)data,
-                                              1, chunk_dims, "malloc");
+                                              1, chunk_dims,
+                                              vol_ptr_domain(data));
 
     out_dims[0] = nbytes + 4096;
     output = pressio_data_new_owning(pressio_byte_dtype, 1, out_dims);

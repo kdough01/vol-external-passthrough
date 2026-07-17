@@ -204,6 +204,7 @@ herr_t H5VL_pass_through_ext_transfer_decompress(compression_ctx *ctx, const voi
 herr_t H5VL_pass_through_ext_transfer_compress_chunk(compression_ctx *ctx, const void *buf, size_t nbytes, void **out_cbuf, uint64_t *out_csize);
 herr_t H5VL_pass_through_ext_transfer_decompress_chunk(compression_ctx *ctx, const void *cbuf, size_t csize, void *out, size_t out_bytes);
 int    H5VL_pass_through_ext_compressor_available(const char *compressor_id);
+int H5VL_pass_through_ext_buf_is_device(const void *p);
 
 /* Destroy Functions */
 void config_params_destroy(config_params *p);
@@ -2259,37 +2260,68 @@ H5VL_pass_through_ext_dataset_write(
             ret_val = -1; continue;
         }
 
-        /* ---- Stage into a full-size buffer; compress only once complete ---- */
-        if (!ctx->stage_buf) {
-            ctx->stage_buf = malloc(total_bytes);
-            if (!ctx->stage_buf) {
+        /* ====================================================================
+         * Pick the compression source.
+         *  - Whole-dataset write in one call: compress DIRECTLY from the
+         *    caller's buffer. No staging memcpy, and it works for both host
+         *    and device-resident (cudaMalloc'd) buffers — compress_chunk
+         *    detects the pointer's domain and skips the H2D migration for
+         *    device memory.
+         *  - Strip write (h5repack): stage on the host exactly as before.
+         *    Device-resident buffers are not supported for strips.
+         * ==================================================================== */
+        const void *comp_src = NULL;
+        const int is_whole_write = (off_bytes == 0 && len_bytes == total_bytes);
+
+        if (is_whole_write) {
+            if (ctx->stage_buf) {          /* discard stale partial staging */
+                free(ctx->stage_buf);
+                ctx->stage_buf    = NULL;
+                ctx->stage_filled = 0;
+                ctx->stage_total  = 0;
+            }
+            comp_src = buf[u];
+        } else {
+            if (H5VL_pass_through_ext_buf_is_device(buf[u])) {
                 H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
                         vol_err_class, maj_compression, min_compress_failed,
-                        "out of memory staging %zu bytes for dataset %zu",
-                        total_bytes, u);
+                        "dataset %zu: device-resident buffers are only supported "
+                        "for whole-dataset writes, not partial strips", u);
                 ret_val = -1; continue;
             }
-            ctx->stage_total  = total_bytes;
-            ctx->stage_filled = 0;
-        }
 
-        memcpy((char *)ctx->stage_buf + off_bytes, buf[u], len_bytes);
-        ctx->stage_filled += len_bytes;
+            if (!ctx->stage_buf) {
+                ctx->stage_buf = malloc(total_bytes);
+                if (!ctx->stage_buf) {
+                    H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                            vol_err_class, maj_compression, min_compress_failed,
+                            "out of memory staging %zu bytes for dataset %zu",
+                            total_bytes, u);
+                    ret_val = -1; continue;
+                }
+                ctx->stage_total  = total_bytes;
+                ctx->stage_filled = 0;
+            }
+
+            memcpy((char *)ctx->stage_buf + off_bytes, buf[u], len_bytes);
+            ctx->stage_filled += len_bytes;
 
 #ifdef ENABLE_EXT_PASSTHRU_LOGGING
-        printf("------- DATASET Write strip: off=%zu len=%zu filled=%zu/%zu\n",
-               off_bytes, len_bytes, ctx->stage_filled, ctx->stage_total);
+            printf("------- DATASET Write strip: off=%zu len=%zu filled=%zu/%zu\n",
+                   off_bytes, len_bytes, ctx->stage_filled, ctx->stage_total);
 #endif
 
-        if (ctx->stage_filled < ctx->stage_total) {
-            vol_timing_emit(dset_name, ctx->compressor_id, "write",
-                            bench_now_ms() - _d0, 0.0, 0.0);
-            continue;
+            if (ctx->stage_filled < ctx->stage_total) {
+                vol_timing_emit(dset_name, ctx->compressor_id, "write",
+                                bench_now_ms() - _d0, 0.0, 0.0);
+                continue;
+            }
+            comp_src = ctx->stage_buf;
         }
 
         /* ====================================================================
-         * Full dataset assembled: compress in chunks, then write the
-         * container: [magic][nchunks][chunk_bytes][csize table][payloads].
+         * Full dataset available at comp_src: compress in CHUNKS, then write
+         * the v2 container: [magic][nchunks][chunk_bytes][csize table][payloads].
          * ==================================================================== */
         const size_t chunk_bytes = vol_comp_chunk_bytes(dsize);
         const size_t nchunks = (total_bytes + chunk_bytes - 1) / chunk_bytes;
@@ -2309,18 +2341,21 @@ H5VL_pass_through_ext_dataset_write(
             ret_val = -1; continue;
         }
 
+        ctx->compress_ms = 0.0;   /* chunk helpers ACCUMULATE device ms here */
         double _c0 = bench_now_ms();
         for (size_t k = 0; k < nchunks && cret >= 0; k++) {
             size_t coff = k * chunk_bytes;
             size_t clen = (total_bytes - coff < chunk_bytes)
                               ? (total_bytes - coff) : chunk_bytes;
             cret = H5VL_pass_through_ext_transfer_compress_chunk(
-                       ctx, (const char *)ctx->stage_buf + coff, clen,
+                       ctx, (const char *)comp_src + coff, clen,
                        &chunk_bufs[k], &csizes[k]);
         }
-        compress_ms = bench_now_ms() - _c0;
+        compress_ms = (ctx->compress_ms > 0.0) ? ctx->compress_ms
+                                               : (bench_now_ms() - _c0);
 
-        /* Staging buffer no longer needed regardless of outcome */
+        /* Staging buffer no longer needed regardless of outcome
+         * (NULL on the whole-write bypass path — free(NULL) is a no-op) */
         free(ctx->stage_buf);
         ctx->stage_buf    = NULL;
         ctx->stage_filled = 0;
