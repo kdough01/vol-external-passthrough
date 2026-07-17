@@ -53,13 +53,13 @@ typedef struct {
 } bench_dataset_t;
 
 static const bench_dataset_t BENCH_DATASETS[] = {
-    // {
-    //     "miranda",
-    //     BENCH_DATA_ROOT "/Miranda/SDRBENCH-Miranda-256x384x384/density.d64",
-    //     3, {256, 384, 384, 0}, BENCH_F64,
-    //     BENCH_BOUND_REL, 1e-3, 1,
-    //     "Clean d64; cuszp returns RMSE~2.7e-4 here. SDRBench names it density.d64."
-    // },
+    {
+        "miranda",
+        BENCH_DATA_ROOT "/Miranda/SDRBENCH-Miranda-256x384x384/density.d64",
+        3, {256, 384, 384, 0}, BENCH_F64,
+        BENCH_BOUND_REL, 1e-3, 1,
+        "Clean d64; cuszp returns RMSE~2.7e-4 here. SDRBench names it density.d64."
+    },
 
     // {
     //     "ocean_temp",
