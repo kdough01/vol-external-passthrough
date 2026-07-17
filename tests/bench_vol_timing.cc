@@ -149,19 +149,26 @@ int main(int argc, char **argv) {
         if (access(d->path, R_OK) != 0) {
             std::fprintf(stderr, "skip %s (path)\n", d->name); continue;
         }
+
+        /* Unified load: RAW does an fread; HDF5/NetCDF-4 reads the named dataset
+         * and fills `rz` with the true rank/dims/dtype from the file. Use `rz`
+         * (NOT d) everywhere downstream -- that is what carries the real shape. */
+        bench_dataset_t rz;
         size_t raw = 0;
-        void *hbuf = load_field(d, &raw);
-        if (!hbuf) continue;
+        void *hbuf = bench_load_field(d, &rz, &raw);
+        if (!hbuf) { std::fprintf(stderr, "load failed %s\n", d->name); continue; }
+
         void *rbuf = std::malloc(raw);
         if (!rbuf) { std::free(hbuf); continue; }
 
-        std::printf("\n=== %s (%.1f MiB, %s) ===\n", d->name,
-                    raw / (1024.0 * 1024.0), bench_dtype_name(d->dtype));
+        std::printf("\n=== %s (%.1f MiB, %s, %s) ===\n", rz.name,
+                    raw / (1024.0 * 1024.0), bench_dtype_name(rz.dtype),
+                    bench_src_name(rz.src));
 
         for (int ci = 0; ci < BENCH_NUM_COMPRESSORS; ++ci) {
             const bench_compressor_t *c = &BENCH_COMPRESSORS[ci];
             if (!name_selected(only_cmp, c->name)) continue;
-            run_pair(file, d, c, hbuf, rbuf, raw, csv);
+            run_pair(file, &rz, c, hbuf, rbuf, raw, csv);   /* pass resolved rz */
         }
         std::free(rbuf); std::free(hbuf);
     }
