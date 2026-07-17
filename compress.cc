@@ -21,6 +21,8 @@ extern "C" {
 #endif
 
 /* Helpers */
+int H5VL_pass_through_ext_buf_is_device(const void *p);
+
 static int
 vol_is_byte_stream(const char *id)
 {
