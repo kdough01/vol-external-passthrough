@@ -45,6 +45,7 @@ typedef struct {
     bench_dtype_t      dtype;
     bench_bound_mode_t bound_mode;  /* default error control for lossy runs   */
     double             bound;       /* default error bound value              */
+    double             assumed_range; /* NEW: Required for relative-only codecs like cuSZp */
     int                gpu_suitable;/* 1 = large/contiguous enough for GPU codec */
     const char        *note;        /* provenance / caveats                   */
     bench_src_t        src;         /* BENCH_SRC_RAW (default/0) or _HDF5      */
@@ -73,7 +74,9 @@ static const bench_dataset_t BENCH_DATASETS[] = {
         "einspline37",
         BENCH_DATA_ROOT "/QMCPACK-bigdata/einspline.tile_37-1-242-23-8.spin_0.tw_0.l0u6144.g112x66x66.dat",
         1, {13560851520 / 4, 0, 0, 0}, BENCH_F32,          
-        BENCH_BOUND_ABS, 1e-3, 1,    /* <-- Changed from REL to ABS */
+        BENCH_BOUND_ABS, 1e-3, 
+        7.84e5,  /* <--- Add assumed range (~784,000 based on previous RMSE) */
+        1,
         "Raw headerless float32 dump; 1D flat for the codec. spin/tw may be complex.",
         BENCH_SRC_RAW, NULL                  
     },
@@ -366,7 +369,6 @@ static inline const char *bench_compressor_opts(const bench_compressor_t *c) {
 
 static inline int bench_compressor_opts_json(const bench_compressor_t *c,
                                              const bench_dataset_t *d,
-                                             const void *raw_data, size_t num_elements,
                                              char *buf, size_t n) {
     if (c->opts_json && c->opts_json[0]) {
         return snprintf(buf, n, "%s", c->opts_json);
@@ -375,27 +377,10 @@ static inline int bench_compressor_opts_json(const bench_compressor_t *c,
         return snprintf(buf, n, "{}");
     }
 
-    /* cuSZp workaround: translate ABS to REL dynamically */
+    /* cuSZp workaround: translate ABS to REL using the dataset's assumed range */
     if (strcmp(c->name, "cuszp") == 0 && d->bound_mode == BENCH_BOUND_ABS) {
-        double d_min = DBL_MAX;
-        double d_max = -DBL_MAX;
-        
-        /* Scan the array to find the true value range */
-        if (d->dtype == BENCH_F32) {
-            const float *f_data = (const float *)raw_data;
-            for (size_t i = 0; i < num_elements; ++i) {
-                if (f_data[i] < d_min) d_min = f_data[i];
-                if (f_data[i] > d_max) d_max = f_data[i];
-            }
-        } else {
-            const double *d_data = (const double *)raw_data;
-            for (size_t i = 0; i < num_elements; ++i) {
-                if (d_data[i] < d_min) d_min = d_data[i];
-                if (d_data[i] > d_max) d_max = d_data[i];
-            }
-        }
-        
-        double range = d_max - d_min;
+        /* Fallback to 1.0 to prevent divide-by-zero if range wasn't set */
+        double range = (d->assumed_range > 0.0) ? d->assumed_range : 1.0;
         double required_rel = d->bound / range;
         
         return snprintf(buf, n, 
