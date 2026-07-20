@@ -86,7 +86,10 @@ static void run_pair(hid_t file, const bench_dataset_t *d,
     std::snprintf(dsname, sizeof(dsname), "%s_%s", d->name, c->name);
 
     /* ---- WRITE (compressor chosen here via dcpl properties) ---- */
-    hid_t dcpl = make_dcpl(c->pressio_id, c->opts_json);   /* NULL,NULL => default */
+    char opts[256];
+    bench_compressor_opts_json(c, d, opts, sizeof(opts));       /* honors d->bound_mode/bound */
+    const char *oj = (std::strcmp(opts, "{}") == 0) ? NULL : opts;
+    hid_t dcpl = make_dcpl(c->pressio_id, oj);
     hid_t dset = H5Dcreate2(file, dsname, ntype, space, H5P_DEFAULT, dcpl, H5P_DEFAULT);
     if (dset < 0) {
         std::fprintf(stderr, "H5Dcreate2 failed %s\n", dsname);
