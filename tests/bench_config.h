@@ -67,7 +67,9 @@ static const bench_dataset_t BENCH_DATASETS[] = {
         "ocean_temp",
         BENCH_DATA_ROOT "/oceanbox/Tobbeholmane_0001.nc",
         0, {0, 0, 0, 0}, BENCH_F32,
-        BENCH_BOUND_REL, 1e-3, 1,
+        BENCH_BOUND_REL, 1e-3,
+        0.0,   /* assumed_range: unused for REL-mode datasets */
+        1,     /* gpu_suitable */
         "NetCDF-4 (HDF5-backed). Confirm netCDF-4 via `ncdump -k`. Shape/type "
         "read at load. NetCDF scale_factor/add_offset packing is NOT applied.",
         BENCH_SRC_HDF5, "/temp"
