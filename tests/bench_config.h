@@ -87,17 +87,17 @@ static const bench_dataset_t BENCH_DATASETS[] = {
 
     /* NYX */
     { "nyx_baryon",   BENCH_DATA_ROOT "/NYX-Zarija/z42_n512_l10.h5", 0,{0,0,0,0},BENCH_F32,
-      BENCH_BOUND_ABS,1e-3, 0.0,1, "NYX 512^3", BENCH_SRC_HDF5, "/native_fields/baryon_density" },
+      BENCH_BOUND_REL,1e-3, 0.0,1, "NYX 512^3", BENCH_SRC_HDF5, "/native_fields/baryon_density" },
     { "nyx_dm",       BENCH_DATA_ROOT "/NYX-Zarija/z42_n512_l10.h5", 0,{0,0,0,0},BENCH_F32,
-      BENCH_BOUND_ABS,1e-3, 0.0,1, "NYX 512^3", BENCH_SRC_HDF5, "/native_fields/dark_matter_density" },
+      BENCH_BOUND_REL,1e-3, 0.0,1, "NYX 512^3", BENCH_SRC_HDF5, "/native_fields/dark_matter_density" },
     { "nyx_temp",     BENCH_DATA_ROOT "/NYX-Zarija/z42_n512_l10.h5", 0,{0,0,0,0},BENCH_F32,
-      BENCH_BOUND_ABS,1e-3, 0.0,1, "NYX 512^3", BENCH_SRC_HDF5, "/native_fields/temperature" },
+      BENCH_BOUND_REL,1e-3, 0.0,1, "NYX 512^3", BENCH_SRC_HDF5, "/native_fields/temperature" },
     { "nyx_vx",       BENCH_DATA_ROOT "/NYX-Zarija/z42_n512_l10.h5", 0,{0,0,0,0},BENCH_F32,
-      BENCH_BOUND_ABS,1e-3, 0.0,1, "NYX 512^3", BENCH_SRC_HDF5, "/native_fields/velocity_x" },
+      BENCH_BOUND_REL,1e-3, 0.0,1, "NYX 512^3", BENCH_SRC_HDF5, "/native_fields/velocity_x" },
     { "nyx_vy",       BENCH_DATA_ROOT "/NYX-Zarija/z42_n512_l10.h5", 0,{0,0,0,0},BENCH_F32,
-      BENCH_BOUND_ABS,1e-3, 0.0,1, "NYX 512^3", BENCH_SRC_HDF5, "/native_fields/velocity_y" },
+      BENCH_BOUND_REL,1e-3, 0.0,1, "NYX 512^3", BENCH_SRC_HDF5, "/native_fields/velocity_y" },
     { "nyx_vz",       BENCH_DATA_ROOT "/NYX-Zarija/z42_n512_l10.h5", 0,{0,0,0,0},BENCH_F32,
-      BENCH_BOUND_ABS,1e-3, 0.0,1, "NYX 512^3", BENCH_SRC_HDF5, "/native_fields/velocity_z" },
+      BENCH_BOUND_REL,1e-3, 0.0,1, "NYX 512^3", BENCH_SRC_HDF5, "/native_fields/velocity_z" },
 
     // {
     //     "hurricane",
@@ -361,6 +361,17 @@ static const bench_compressor_t BENCH_COMPRESSORS[] = {
     { "sz3_1e3", "sz3",
       "{\"sz3:error_bound_mode_str\":\"abs\",\"sz3:abs_error_bound\":1e-3}",
       BENCH_CPU_CODEC, 0, NULL, "CPU error-bounded lossy, abs 1e-3." },
+
+    { "sz3_1e3", "sz3",
+      "{\"sz3:error_bound_mode_str\":\"res\",\"sz3:rel\":1e-3}",
+      BENCH_CPU_CODEC, 0, NULL, "CPU error-bounded lossy, abs 1e-3." },
+
+    { "sz3_1e3", "sz3",
+        "{\"sz3:error_bound_mode_str\":\"rel\",\"sz3:rel_error_bound\":1e-3}",
+        BENCH_CPU_CODEC, 0, NULL, "CPU value-range relative 1e-3." },
+
+    { "sz3_1e3", "sz3", "{\"pressio:rel\":1e-3}",
+        BENCH_CPU_CODEC, 0, NULL, "CPU value-range relative 1e-3." },
 
     // { "sz3_1e6", "sz3",
     //   "{\"sz3:error_bound_mode_str\":\"abs\",\"sz3:abs_error_bound\":1e-6}",
