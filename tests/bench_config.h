@@ -358,18 +358,6 @@ static const bench_compressor_t BENCH_COMPRESSORS[] = {
       BENCH_GPU_CODEC, 0, "cuszp:cuda_stream",
       "cuSZp: dynamically mapping ABS 1e-3 to REL based on data range." },
 
-    { "sz3_1e3", "sz3",
-      "{\"sz3:error_bound_mode_str\":\"abs\",\"sz3:abs_error_bound\":1e-3}",
-      BENCH_CPU_CODEC, 0, NULL, "CPU error-bounded lossy, abs 1e-3." },
-
-    { "sz3_1e3", "sz3",
-      "{\"sz3:error_bound_mode_str\":\"res\",\"sz3:rel\":1e-3}",
-      BENCH_CPU_CODEC, 0, NULL, "CPU error-bounded lossy, abs 1e-3." },
-
-    { "sz3_1e3", "sz3",
-        "{\"sz3:error_bound_mode_str\":\"rel\",\"sz3:rel_error_bound\":1e-3}",
-        BENCH_CPU_CODEC, 0, NULL, "CPU value-range relative 1e-3." },
-
     { "sz3_1e3", "sz3", "{\"pressio:rel\":1e-3}",
         BENCH_CPU_CODEC, 0, NULL, "CPU value-range relative 1e-3." },
 
@@ -410,14 +398,12 @@ static inline int bench_compressor_opts_json(const bench_compressor_t *c,
     }
 
     /* cuSZp workaround: translate ABS to REL using the dataset's assumed range */
-    if (strcmp(c->name, "cuszp") == 0 && d->bound_mode == BENCH_BOUND_ABS) {
-        /* Fallback to 1.0 to prevent divide-by-zero if range wasn't set */
-        double range = (d->assumed_range > 0.0) ? d->assumed_range : 1.0;
-        double required_rel = d->bound / range;
-        
-        return snprintf(buf, n, 
-            "{\"pressio:rel\": %.10e, \"cuszp:mode_str\": \"outlier\"}", 
-            required_rel);
+    if (strcmp(c->name, "cuszp") == 0) {
+        double rel = (d->bound_mode == BENCH_BOUND_ABS)
+            ? d->bound / ((d->assumed_range > 0.0) ? d->assumed_range : 1.0)
+            : d->bound;
+        return snprintf(buf, n,
+            "{\"pressio:rel\": %.10e, \"cuszp:mode_str\": \"outlier\"}", rel);
     }
 
     /* Standard fallback for well-behaved codecs */
