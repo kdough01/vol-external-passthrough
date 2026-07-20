@@ -235,6 +235,12 @@ int main(int argc, char **argv) {
         if (dbg) std::fprintf(stderr, "[dbg main] loaded %s: rank=%d dtype=%s raw=%zu B\n",
                               rz.name, rz.rank, bench_dtype_name(rz.dtype), raw);
 
+        if (rz.xform != BENCH_XFORM_NONE) {   /* NEW: log/asinh preprocessing */
+            if (dbg) std::fprintf(stderr, "[dbg main] applying %s transform to %s\n",
+                                  bench_xform_name(rz.xform), rz.name);
+            bench_apply_xform(hbuf, bench_num_elements(&rz), rz.dtype, rz.xform);
+        }
+
         {   /* one-time range scan: feeds assumed_range tuning + bound diagnostics */
             size_t ne = bench_num_elements(&rz);
             double mn = DBL_MAX, mx = -DBL_MAX, sum = 0.0;

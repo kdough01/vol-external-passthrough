@@ -11,6 +11,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <float.h>
+#include <math.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -37,6 +38,12 @@ typedef enum {
     BENCH_SRC_HDF5 = 1
 } bench_src_t;
 
+typedef enum {
+    BENCH_XFORM_NONE  = 0,
+    BENCH_XFORM_LOG1P = 1,   /* y = log1p(x); non-negative fields only        */
+    BENCH_XFORM_ASINH = 2    /* y = asinh(x); signed-safe "log" (velocity)    */
+} bench_xform_t;
+
 typedef struct {
     const char        *name;        /* short id used in output filenames/logs */
     const char        *path;        /* raw field, or the .h5/.nc4 container    */
@@ -50,6 +57,7 @@ typedef struct {
     const char        *note;        /* provenance / caveats                   */
     bench_src_t        src;         /* BENCH_SRC_RAW (default/0) or _HDF5      */
     const char        *h5dset;      /* HDF5 src: dataset path inside file,     */
+    bench_xform_t      xform;
 } bench_dataset_t;
 
 static const bench_dataset_t BENCH_DATASETS[] = {
@@ -98,6 +106,17 @@ static const bench_dataset_t BENCH_DATASETS[] = {
       BENCH_BOUND_REL,1e-3, 0.0,1, "NYX 512^3", BENCH_SRC_HDF5, "/native_fields/velocity_y" },
     { "nyx_vz",       BENCH_DATA_ROOT "/NYX-Zarija/z42_n512_l10.h5", 0,{0,0,0,0},BENCH_F32,
       BENCH_BOUND_REL,1e-3, 0.0,1, "NYX 512^3", BENCH_SRC_HDF5, "/native_fields/velocity_z" },
+
+    /* NYX Log */
+    { "nyx_baryon_log", BENCH_DATA_ROOT "/NYX-Zarija/z42_n512_l10.h5", 0,{0,0,0,0},BENCH_F32,
+      BENCH_BOUND_REL,1e-3, 0.0,1, "NYX 512^3 log1p(baryon)", BENCH_SRC_HDF5,
+      "/native_fields/baryon_density", BENCH_XFORM_LOG1P },
+    { "nyx_dm_log",     BENCH_DATA_ROOT "/NYX-Zarija/z42_n512_l10.h5", 0,{0,0,0,0},BENCH_F32,
+      BENCH_BOUND_REL,1e-3, 0.0,1, "NYX 512^3 log1p(dm)", BENCH_SRC_HDF5,
+      "/native_fields/dark_matter_density", BENCH_XFORM_LOG1P },
+    { "nyx_vx_asinh",   BENCH_DATA_ROOT "/NYX-Zarija/z42_n512_l10.h5", 0,{0,0,0,0},BENCH_F32,
+      BENCH_BOUND_REL,1e-3, 0.0,1, "NYX 512^3 asinh(vx)", BENCH_SRC_HDF5,
+      "/native_fields/velocity_x", BENCH_XFORM_ASINH },
 
     // {
     //     "hurricane",
@@ -191,6 +210,27 @@ static inline int bench_datasets_validate(void) {
     }
     fprintf(stderr, "%d/%d dataset paths readable\n", found, BENCH_NUM_DATASETS);
     return found;
+}
+
+static inline const char *bench_xform_name(bench_xform_t x) {
+    switch (x) {
+        case BENCH_XFORM_LOG1P: return "log1p";
+        case BENCH_XFORM_ASINH: return "asinh";
+        default:                return "none";
+    }
+}
+static inline void bench_apply_xform(void *buf, size_t nelem,
+                                     bench_dtype_t dt, bench_xform_t xf) {
+    if (xf == BENCH_XFORM_NONE) return;
+    for (size_t i = 0; i < nelem; ++i) {
+        if (dt == BENCH_F64) {
+            double v = ((double *)buf)[i];
+            ((double *)buf)[i] = (xf == BENCH_XFORM_LOG1P) ? log1p(v) : asinh(v);
+        } else {
+            float v = ((float *)buf)[i];
+            ((float *)buf)[i] = (xf == BENCH_XFORM_LOG1P) ? log1pf(v) : asinhf(v);
+        }
+    }
 }
 
 static inline void *bench_load_raw(const bench_dataset_t *d, size_t *out_bytes) {
