@@ -391,27 +391,58 @@ static inline const char *bench_compressor_opts(const bench_compressor_t *c) {
 static inline int bench_compressor_opts_json(const bench_compressor_t *c,
                                              const bench_dataset_t *d,
                                              char *buf, size_t n) {
+    int   ret;
+    int   dbg = (getenv("BENCH_DEBUG") != NULL);
+
+    /* 1) An explicit literal opts_json on the compressor entry wins outright. */
     if (c->opts_json && c->opts_json[0]) {
-        return snprintf(buf, n, "%s", c->opts_json);
+        ret = snprintf(buf, n, "%s", c->opts_json);
+        if (dbg) fprintf(stderr, "[dbg opts] %-8s %-12s LITERAL   -> %s\n",
+                         c->name, d->name, buf);
+        return ret;
     }
+
+    /* 2) Lossless codecs take no bound. */
     if (c->lossless) {
-        return snprintf(buf, n, "{}");
+        ret = snprintf(buf, n, "{}");
+        if (dbg) fprintf(stderr, "[dbg opts] %-8s %-12s LOSSLESS  -> %s\n",
+                         c->name, d->name, buf);
+        return ret;
     }
 
-    /* cuSZp workaround: translate ABS to REL using the dataset's assumed range */
-    if (strcmp(c->name, "cuszp") == 0 && d->bound_mode == BENCH_BOUND_ABS) {
-        /* Fallback to 1.0 to prevent divide-by-zero if range wasn't set */
-        double range = (d->assumed_range > 0.0) ? d->assumed_range : 1.0;
-        double required_rel = d->bound / range;
-        
-        return snprintf(buf, n, 
-            "{\"pressio:rel\": %.10e, \"cuszp:mode_str\": \"outlier\"}", 
-            required_rel);
+    /* 3) cuSZp is a value-range RELATIVE codec with no native absolute mode,
+     *    and it ABORTS (std::runtime_error "invalid argument") on wide-range /
+     *    signed fields unless cuszp:mode_str=outlier is set. Handle BOTH bound
+     *    modes here and always emit outlier:
+     *      - ABS datasets: emulate absolute via abs/assumed_range -> rel.
+     *      - REL datasets: pass the relative bound straight through.          */
+    if (strcmp(c->name, "cuszp") == 0) {
+        double rel;
+        if (d->bound_mode == BENCH_BOUND_ABS) {
+            double range = (d->assumed_range > 0.0) ? d->assumed_range : 1.0;
+            rel = d->bound / range;              /* abs -> value-range relative */
+            if (dbg) fprintf(stderr,
+                "[dbg opts] cuszp    %-12s ABS bound=%g assumed_range=%g -> rel=%.6e (outlier)\n",
+                d->name, d->bound, range, rel);
+        } else {
+            rel = d->bound;                      /* already relative */
+            if (dbg) fprintf(stderr,
+                "[dbg opts] cuszp    %-12s REL bound=%.6e (outlier)\n", d->name, rel);
+        }
+        ret = snprintf(buf, n,
+            "{\"pressio:rel\": %.10e, \"cuszp:mode_str\": \"outlier\"}", rel);
+        return ret;
     }
 
-    /* Standard fallback for well-behaved codecs */
-    const char *mode = (d->bound_mode == BENCH_BOUND_ABS) ? "pressio:abs" : "pressio:rel";
-    return snprintf(buf, n, "{\"%s\": %g}", mode, d->bound);
+    /* 4) Standard error-bounded codecs: map straight onto pressio:abs / :rel. */
+    {
+        const char *mode = (d->bound_mode == BENCH_BOUND_ABS) ? "pressio:abs"
+                                                              : "pressio:rel";
+        ret = snprintf(buf, n, "{\"%s\": %g}", mode, d->bound);
+        if (dbg) fprintf(stderr, "[dbg opts] %-8s %-12s %s=%g -> %s\n",
+                         c->name, d->name, mode, d->bound, buf);
+        return ret;
+    }
 }
 
 static inline int bench_compressor_vol_info_json(const bench_compressor_t *c,

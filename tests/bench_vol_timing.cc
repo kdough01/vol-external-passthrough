@@ -18,6 +18,8 @@
 #include <cstring>
 #include <cmath>
 #include <cfloat>
+#include <stdexcept>
+#include <exception>
 
 #define BENCH_CONFIG_ENABLE_HDF5
 #include "bench_config.h"
@@ -76,6 +78,8 @@ static int name_selected(const char *sel, const char *name) {
 static void run_pair(hid_t file, const bench_dataset_t *d,
                      const bench_compressor_t *c, const void *hbuf,
                      void *rbuf, size_t raw_bytes, FILE *csv) {
+    const bool dbg = std::getenv("BENCH_DEBUG") != NULL;
+  try {
     size_t  nelem = bench_num_elements(d);
     hid_t   ntype = bench_dataset_h5native(d);
     hsize_t dims[BENCH_MAX_RANK];
@@ -85,16 +89,29 @@ static void run_pair(hid_t file, const bench_dataset_t *d,
     char dsname[192];
     std::snprintf(dsname, sizeof(dsname), "%s_%s", d->name, c->name);
 
-    /* ---- WRITE (compressor chosen here via dcpl properties) ---- */
+    if (dbg) std::fprintf(stderr,
+        "[dbg run_pair] BEGIN %-24s rank=%d nelem=%zu raw=%zu B\n",
+        dsname, d->rank, nelem, raw_bytes);
+
+    /* ---- Build compressor options (honors d->bound_mode / d->bound) ---- */
     char opts[256];
-    bench_compressor_opts_json(c, d, opts, sizeof(opts));       /* honors d->bound_mode/bound */
+    bench_compressor_opts_json(c, d, opts, sizeof(opts));
     const char *oj = (std::strcmp(opts, "{}") == 0) ? NULL : opts;
+    if (dbg) std::fprintf(stderr,
+        "[dbg run_pair] %-24s pressio_id=%s opts=%s\n",
+        dsname, c->pressio_id ? c->pressio_id : "(null)", oj ? oj : "(default)");
+
+    /* ---- WRITE (compressor selected via dcpl properties) ---- */
     hid_t dcpl = make_dcpl(c->pressio_id, oj);
+    if (dbg) std::fprintf(stderr, "[dbg run_pair] %-24s make_dcpl -> %lld\n",
+                          dsname, (long long)dcpl);
+
     hid_t dset = H5Dcreate2(file, dsname, ntype, space, H5P_DEFAULT, dcpl, H5P_DEFAULT);
     if (dset < 0) {
-        std::fprintf(stderr, "H5Dcreate2 failed %s\n", dsname);
+        std::fprintf(stderr, "[ERR] H5Dcreate2 failed %s\n", dsname);
         H5Pclose(dcpl); H5Sclose(space); return;
     }
+    if (dbg) std::fprintf(stderr, "[dbg run_pair] %-24s H5Dcreate2 ok, writing...\n", dsname);
 
     BenchCpuTimer wt; wt.start();
     herr_t wret = H5Dwrite(dset, ntype, H5S_ALL, H5S_ALL, H5P_DEFAULT, hbuf);
@@ -103,31 +120,71 @@ static void run_pair(hid_t file, const bench_dataset_t *d,
     hsize_t storage = H5Dget_storage_size(dset);          /* on-disk size for ratio */
     H5Dclose(dset); H5Pclose(dcpl);
     if (wret < 0) {
-        std::fprintf(stderr, "H5Dwrite failed %s\n", dsname);
+        std::fprintf(stderr, "[ERR] H5Dwrite failed %s\n", dsname);
         H5Sclose(space); return;
     }
     double wratio = storage ? (double)raw_bytes / (double)storage : 0.0;
-    bench_csv_row(csv, d->name, c->name, "vol", "write", "total",
-                  wms, wratio, -1.0);
+    if (dbg) std::fprintf(stderr,
+        "[dbg run_pair] %-24s WRITE wms=%.2f storage=%llu ratio=%.3fx\n",
+        dsname, wms, (unsigned long long)storage, wratio);
+    bench_csv_row(csv, d->name, c->name, "vol", "write", "total", wms, wratio, -1.0);
 
     /* ---- READ + fidelity ---- */
     std::memset(rbuf, 0, raw_bytes);
     dset = H5Dopen2(file, dsname, H5P_DEFAULT);
+    if (dset < 0) {
+        std::fprintf(stderr, "[ERR] H5Dopen2 failed %s\n", dsname);
+        H5Sclose(space); return;
+    }
+    if (dbg) std::fprintf(stderr, "[dbg run_pair] %-24s reading back...\n", dsname);
 
     BenchCpuTimer rt; rt.start();
     herr_t rret = H5Dread(dset, ntype, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf);
     double rms = rt.stop_ms();
 
     H5Dclose(dset); H5Sclose(space);
-    if (rret < 0) { std::fprintf(stderr, "H5Dread failed %s\n", dsname); return; }
+    if (rret < 0) { std::fprintf(stderr, "[ERR] H5Dread failed %s\n", dsname); return; }
 
     bench_stats st = bench_compute_stats(hbuf, rbuf, nelem, d->dtype);
-    bench_csv_row(csv, d->name, c->name, "vol", "read", "total",
-                  rms, -1.0, st.rmse);
+
+    /* Diagnostic: compare achieved error vs. the nominal bound. This is the
+     * check that exposes cuszp NOT honoring the requested bound on wide-range
+     * fields (achieved_rel >> nominal). */
+    if (dbg) {
+        double range       = st.max - st.min;
+        double achieved_rel = (range > 0.0) ? st.rmse / range : 0.0;
+        std::fprintf(stderr,
+            "[dbg run_pair] %-24s READ rms=%.2f RMSE=%.6e data_range=%.6e "
+            "achieved_rel=%.3e (nominal=%.3e mode=%s)\n",
+            dsname, rms, st.rmse, range, achieved_rel,
+            d->bound, bench_bound_mode_name(d->bound_mode));
+        if (d->bound_mode == BENCH_BOUND_REL && achieved_rel > 2.0 * d->bound)
+            std::fprintf(stderr,
+                "[dbg WARN] %-24s achieved_rel %.3e EXCEEDS nominal %.3e "
+                "-> codec is not respecting the bound\n",
+                dsname, achieved_rel, d->bound);
+    }
+
+    bench_csv_row(csv, d->name, c->name, "vol", "read", "total", rms, -1.0, st.rmse);
 
     std::printf("  %-28s W=%8.2f ms  R=%8.2f ms  ratio=%6.2fx  RMSE=%.3e\n",
                 dsname, wms, rms, wratio, st.rmse);
     std::fflush(stdout);
+
+    if (dbg) std::fprintf(stderr, "[dbg run_pair] END   %-24s\n", dsname);
+
+  } catch (const std::exception &e) {
+      /* A throwing codec (e.g. cuszp on a field it can't handle) lands here
+       * instead of terminating the process. Note: a few HDF5 handles may leak
+       * for this one failed dataset -- acceptable for a benchmark run. */
+      std::fprintf(stderr, "[ERR] run_pair %s/%s threw: %s  (skipped; sweep continues)\n",
+                   d->name, c->name, e.what());
+      std::fflush(stderr);
+  } catch (...) {
+      std::fprintf(stderr, "[ERR] run_pair %s/%s threw unknown exception (skipped)\n",
+                   d->name, c->name);
+      std::fflush(stderr);
+  }
 }
 
 int main(int argc, char **argv) {
@@ -135,8 +192,15 @@ int main(int argc, char **argv) {
     const char *csvpath  = (argc > 2) ? argv[2] : "results_vol.csv";
     const char *only     = std::getenv("BENCH_ONLY");   /* dataset filter    */
     const char *only_cmp = std::getenv("BENCH_COMP");   /* compressor filter */
+    const bool  dbg      = std::getenv("BENCH_DEBUG") != NULL;
+
+    std::fprintf(stderr, "[dbg main] h5=%s csv=%s only=%s comp=%s debug=%d\n",
+                 h5path, csvpath, only ? only : "(all)",
+                 only_cmp ? only_cmp : "(all)", (int)dbg);
 
     register_vol_properties();
+    if (dbg) std::fprintf(stderr, "[dbg main] register_vol_properties done\n");
+
     bench_datasets_validate();
 
     FILE *csv = std::fopen(csvpath, "w");
@@ -144,35 +208,49 @@ int main(int argc, char **argv) {
     bench_csv_header(csv);
 
     hid_t file = H5Fcreate(h5path, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-    if (file < 0) { std::fprintf(stderr, "H5Fcreate failed\n"); std::fclose(csv); return 1; }
+    if (file < 0) { std::fprintf(stderr, "[ERR] H5Fcreate failed\n"); std::fclose(csv); return 1; }
+    if (dbg) std::fprintf(stderr, "[dbg main] output file created (fid=%lld)\n", (long long)file);
+
+    int n_ok = 0, n_skip = 0;
 
     for (int di = 0; di < BENCH_NUM_DATASETS; ++di) {
         const bench_dataset_t *d = &BENCH_DATASETS[di];
-        if (!name_selected(only, d->name)) continue;
+        if (!name_selected(only, d->name)) {
+            if (dbg) std::fprintf(stderr, "[dbg main] filter-skip %s\n", d->name);
+            continue;
+        }
         if (access(d->path, R_OK) != 0) {
-            std::fprintf(stderr, "skip %s (path)\n", d->name); continue;
+            std::fprintf(stderr, "[dbg main] skip %s (unreadable path: %s)\n", d->name, d->path);
+            n_skip++; continue;
         }
 
+        /* Unified load: RAW does an fread; HDF5 reads the named dataset and
+         * fills `rz` with the true rank/dims/dtype. Use `rz` downstream. */
         bench_dataset_t rz;
         size_t raw = 0;
+        if (dbg) std::fprintf(stderr, "[dbg main] loading %s (%s)...\n", d->name,
+                              d->src == BENCH_SRC_HDF5 ? d->h5dset : d->path);
         void *hbuf = bench_load_field(d, &rz, &raw);
-        if (!hbuf) { std::fprintf(stderr, "load failed %s\n", d->name); continue; }
+        if (!hbuf) { std::fprintf(stderr, "[ERR] load failed %s\n", d->name); n_skip++; continue; }
+        if (dbg) std::fprintf(stderr, "[dbg main] loaded %s: rank=%d dtype=%s raw=%zu B\n",
+                              rz.name, rz.rank, bench_dtype_name(rz.dtype), raw);
 
-        {
+        {   /* one-time range scan: feeds assumed_range tuning + bound diagnostics */
             size_t ne = bench_num_elements(&rz);
-            double mn = DBL_MAX, mx = -DBL_MAX;
+            double mn = DBL_MAX, mx = -DBL_MAX, sum = 0.0;
             for (size_t i = 0; i < ne; ++i) {
                 double v = (rz.dtype == BENCH_F64) ? ((const double*)hbuf)[i]
                                                    : (double)((const float*)hbuf)[i];
                 if (v < mn) mn = v;
                 if (v > mx) mx = v;
+                sum += v;
             }
-            std::fprintf(stderr, "RANGE %-12s min=%.6e max=%.6e range=%.6e\n",
-                         rz.name, mn, mx, mx - mn);
+            std::fprintf(stderr, "RANGE %-12s min=%.6e max=%.6e range=%.6e mean=%.6e\n",
+                         rz.name, mn, mx, mx - mn, sum / (double)ne);
         }
 
         void *rbuf = std::malloc(raw);
-        if (!rbuf) { std::free(hbuf); continue; }
+        if (!rbuf) { std::fprintf(stderr, "[ERR] OOM rbuf %s\n", rz.name); std::free(hbuf); continue; }
 
         std::printf("\n=== %s (%.1f MiB, %s, %s) ===\n", rz.name,
                     raw / (1024.0 * 1024.0), bench_dtype_name(rz.dtype),
@@ -184,10 +262,12 @@ int main(int argc, char **argv) {
             run_pair(file, &rz, c, hbuf, rbuf, raw, csv);   /* pass resolved rz */
         }
         std::free(rbuf); std::free(hbuf);
+        n_ok++;
     }
 
     H5Fclose(file);
     std::fclose(csv);
-    std::fprintf(stderr, "wrote %s\n", csvpath);
+    std::fprintf(stderr, "[dbg main] wrote %s  (%d datasets processed, %d skipped)\n",
+                 csvpath, n_ok, n_skip);
     return 0;
 }
