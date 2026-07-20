@@ -213,7 +213,10 @@ static inline void *bench_load_h5(const bench_dataset_t *in,
                 in->name);
         return NULL;
     }
-    hid_t fid = H5Fopen(in->path, H5F_ACC_RDONLY, H5P_DEFAULT);
+    hid_t fapl = H5Pcreate(H5P_FILE_ACCESS);
+    H5Pset_vol(fapl, H5VL_NATIVE, NULL);   /* read the pre-existing file natively; bypass passthrough */
+    hid_t fid = H5Fopen(in->path, H5F_ACC_RDONLY, fapl);
+    H5Pclose(fapl);
     if (fid < 0) {
         fprintf(stderr, "bench_load_h5: H5Fopen failed: %s "
                 "(not HDF5? NetCDF-3/classic is unreadable here)\n", in->path);
