@@ -63,25 +63,25 @@ static const bench_dataset_t BENCH_DATASETS[] = {
         "Clean d64; cuszp returns RMSE~2.7e-4 here. SDRBench names it density.d64."
     },
 
-    // {
-    //     "ocean_temp",
-    //     BENCH_DATA_ROOT "/oceanbox/Tobbeholmane_0001.nc",
-    //     0, {0, 0, 0, 0}, BENCH_F32,
-    //     BENCH_BOUND_REL, 1e-3, 1,
-    //     "NetCDF-4 (HDF5-backed). Confirm netCDF-4 via `ncdump -k`. Shape/type "
-    //     "read at load. NetCDF scale_factor/add_offset packing is NOT applied.",
-    //     BENCH_SRC_HDF5, "/temp"
-    // },
     {
-        "einspline37",
-        BENCH_DATA_ROOT "/QMCPACK-bigdata/einspline.tile_37-1-242-23-8.spin_0.tw_0.l0u6144.g112x66x66.dat",
-        1, {13560851520 / 4, 0, 0, 0}, BENCH_F32,          
-        BENCH_BOUND_ABS, 1e-3, 
-        7.84e5,  /* <--- Add assumed range (~784,000 based on previous RMSE) */
-        1,
-        "Raw headerless float32 dump; 1D flat for the codec. spin/tw may be complex.",
-        BENCH_SRC_RAW, NULL                  
+        "ocean_temp",
+        BENCH_DATA_ROOT "/oceanbox/Tobbeholmane_0001.nc",
+        0, {0, 0, 0, 0}, BENCH_F32,
+        BENCH_BOUND_REL, 1e-3, 1,
+        "NetCDF-4 (HDF5-backed). Confirm netCDF-4 via `ncdump -k`. Shape/type "
+        "read at load. NetCDF scale_factor/add_offset packing is NOT applied.",
+        BENCH_SRC_HDF5, "/temp"
     },
+    // {
+    //     "einspline37",
+    //     BENCH_DATA_ROOT "/QMCPACK-bigdata/einspline.tile_37-1-242-23-8.spin_0.tw_0.l0u6144.g112x66x66.dat",
+    //     1, {13560851520 / 4, 0, 0, 0}, BENCH_F32,          
+    //     BENCH_BOUND_ABS, 1e-3, 
+    //     7.84e5,  /* <--- Add assumed range (~784,000 based on previous RMSE) */
+    //     1,
+    //     "Raw headerless float32 dump; 1D flat for the codec. spin/tw may be complex.",
+    //     BENCH_SRC_RAW, NULL                  
+    // },
 
     // {
     //     "hurricane",
