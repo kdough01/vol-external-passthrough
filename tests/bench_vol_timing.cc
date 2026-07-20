@@ -153,13 +153,23 @@ int main(int argc, char **argv) {
             std::fprintf(stderr, "skip %s (path)\n", d->name); continue;
         }
 
-        /* Unified load: RAW does an fread; HDF5/NetCDF-4 reads the named dataset
-         * and fills `rz` with the true rank/dims/dtype from the file. Use `rz`
-         * (NOT d) everywhere downstream -- that is what carries the real shape. */
         bench_dataset_t rz;
         size_t raw = 0;
         void *hbuf = bench_load_field(d, &rz, &raw);
         if (!hbuf) { std::fprintf(stderr, "load failed %s\n", d->name); continue; }
+
+        {
+            size_t ne = bench_num_elements(&rz);
+            double mn = DBL_MAX, mx = -DBL_MAX;
+            for (size_t i = 0; i < ne; ++i) {
+                double v = (rz.dtype == BENCH_F64) ? ((const double*)hbuf)[i]
+                                                   : (double)((const float*)hbuf)[i];
+                if (v < mn) mn = v;
+                if (v > mx) mx = v;
+            }
+            std::fprintf(stderr, "RANGE %-12s min=%.6e max=%.6e range=%.6e\n",
+                         rz.name, mn, mx, mx - mn);
+        }
 
         void *rbuf = std::malloc(raw);
         if (!rbuf) { std::free(hbuf); continue; }
