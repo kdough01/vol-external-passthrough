@@ -82,16 +82,16 @@ static const bench_dataset_t BENCH_DATASETS[] = {
         "read at load. NetCDF scale_factor/add_offset packing is NOT applied.",
         BENCH_SRC_HDF5, "/temp"
     },
-    // {
-    //     "einspline37",
-    //     BENCH_DATA_ROOT "/QMCPACK-bigdata/einspline.tile_37-1-242-23-8.spin_0.tw_0.l0u6144.g112x66x66.dat",
-    //     1, {13560851520 / 4, 0, 0, 0}, BENCH_F32,          
-    //     BENCH_BOUND_ABS, 1e-3, 
-    //     7.84e5,  /* <--- Add assumed range (~784,000 based on previous RMSE) */
-    //     1,
-    //     "Raw headerless float32 dump; 1D flat for the codec. spin/tw may be complex.",
-    //     BENCH_SRC_RAW, NULL                  
-    // },
+    {
+        "einspline37",
+        BENCH_DATA_ROOT "/QMCPACK-bigdata/einspline.tile_37-1-242-23-8.spin_0.tw_0.l0u6144.g112x66x66.dat",
+        1, {13560851520 / 4, 0, 0, 0}, BENCH_F32,          
+        BENCH_BOUND_ABS, 1e-3, 
+        7.84e5,  /* <--- Add assumed range (~784,000 based on previous RMSE) */
+        1,
+        "Raw headerless float32 dump; 1D flat for the codec. spin/tw may be complex.",
+        BENCH_SRC_RAW, NULL                  
+    },
 
     /* NYX */
     { "nyx_baryon",   BENCH_DATA_ROOT "/NYX-Zarija/z42_n512_l10.h5", 0,{0,0,0,0},BENCH_F32,
