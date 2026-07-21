@@ -107,8 +107,8 @@ run_vol_group () {
 
 run_vol_group miranda "miranda"
 run_vol_group ocean   "ocean_temp"
-run_vol_group nyx     "nyx_baryon,nyx_dm"
-run_vol_group nyx_log "nyx_temp_log,nyx_vx_asinh,nyx_vy_asinh,nyx_vz_asinh"
+run_vol_group qmc     "einspline37"
+run_vol_group nyx "nyx_baryon,nyx_dm,nyx_temp_log,nyx_vx_asinh,nyx_vy_asinh,nyx_vz_asinh"
 
 # echo ""
 # echo "=== [2/3] Pressio-only compressor timing ==="
