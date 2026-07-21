@@ -60,7 +60,12 @@ vol_ptr_domain(const void *p)
     return H5VL_pass_through_ext_buf_is_device(p) ? "cudamalloc" : "malloc";
 }
 
-namespace {
+/* Defined inside libpressio's own namespaces so the plugin API names
+ * (libpressio_compressor_plugin, pressio_compressor, compressor_plugins,
+ * set_meta/get_meta, pressio_register) resolve exactly as they do in
+ * libpressio's in-tree plugins (cf. chunking.cc). */
+namespace libpressio { namespace compressors { namespace vol_host_output_ns {
+
 struct vol_host_output_plugin final : public libpressio_compressor_plugin {
     pressio_compressor child    = compressor_plugins().build("noop");
     std::string        child_id = "noop";
@@ -125,8 +130,9 @@ struct vol_host_output_plugin final : public libpressio_compressor_plugin {
 
 pressio_register vol_host_output_registration(
     compressor_plugins(), "vol_host_output",
-    [] { return std::make_unique<vol_host_output_plugin>(); });
-} /* anonymous namespace */
+    [] { return std::make_shared<vol_host_output_plugin>(); });
+
+} } } /* namespace libpressio::compressors::vol_host_output_ns */
 
 extern "C" {
 
