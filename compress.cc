@@ -809,27 +809,36 @@ vol_make_chunking_compressor(compression_ctx *ctx, size_t dsize,
 {
     struct pressio *lib = pressio_instance();
     if (!lib) return NULL;
-
+ 
     struct pressio_compressor *chunk = pressio_get_compressor(lib, "chunking");
     if (!chunk) {
         pressio_release(lib);
         return NULL;   /* chunking not available in this build */
     }
-
-    /* Inner options (includes any userptr stream) -> reuse as the base. */
+ 
+    {
+        struct pressio_options *nest = pressio_options_new();
+        pressio_options_set_string(nest, "chunking:compressor", "many_independent");
+        pressio_options_set_string(nest, "many_independent:compressor",
+                                   ctx->compressor_id);
+        (void)pressio_compressor_set_options(chunk, nest);
+        pressio_options_free(nest);
+    }
+ 
+    /* --- Stage 2: the leaf exists now. Push its real options (from the
+     * dataset's configured compressor: cuszp:* incl. the error bound and the
+     * stream userptr) plus the chunk geometry. --- */
     struct pressio_options *opts = pressio_compressor_get_options(ctx->compressor);
-
-    pressio_options_set_string(opts, "chunking:compressor", "many_independent");
-    pressio_options_set_string(opts, "many_independent:compressor",
-                               ctx->compressor_id);
-
+ 
     size_t chunk_elems = vol_native_chunk_elems(ctx, dsize);
-
+ 
+    /* CRITICAL: never let a chunk exceed the dataset -- an oversized chunk
+     * makes chunking read past the input (segfault) in the single-chunk case. */
     if (total_elems > 0 && chunk_elems > total_elems)
         chunk_elems = total_elems;
     if (chunk_elems == 0)
         chunk_elems = 1;
-
+ 
     size_t one = 1;
     size_t csz_bytes = 0;
     struct pressio_data *csz =
@@ -837,16 +846,16 @@ vol_make_chunking_compressor(compression_ctx *ctx, size_t dsize,
     ((uint64_t *)pressio_data_ptr(csz, &csz_bytes))[0] = (uint64_t)chunk_elems;
     pressio_options_set_data(opts, "chunking:size", csz);
     pressio_data_free(csz);
-
+ 
     int serr = pressio_compressor_set_options(chunk, opts);
     pressio_options_free(opts);
-
+ 
     if (serr) {
         pressio_compressor_release(chunk);
         pressio_release(lib);
         return NULL;
     }
-
+ 
 #ifdef USE_CUDA
     if (ctx->stream) {
         struct pressio_options *sopt = pressio_options_new();
@@ -858,9 +867,22 @@ vol_make_chunking_compressor(compression_ctx *ctx, size_t dsize,
     }
 #endif
 
+    if (getenv("HDF5_VOL_DUMP_PIPELINE")) {
+        struct pressio_options *src   = pressio_compressor_get_options(ctx->compressor);
+        struct pressio_options *built = pressio_compressor_get_options(chunk);
+        char *s1 = pressio_options_to_string(src);
+        char *s2 = pressio_options_to_string(built);
+        fprintf(stderr, "[VOL SRC OPTS '%s']\n%s\n[VOL BUILT PIPELINE]\n%s\n",
+                ctx->compressor_id, s1 ? s1 : "(null)", s2 ? s2 : "(null)");
+        free(s1); free(s2);
+        pressio_options_free(src);
+        pressio_options_free(built);
+    }
+ 
     *out_lib = lib;
     return chunk;
 }
+
 
 /*-------------------------------------------------------------------------
  * Whole-dataset compress via libpressio-native chunking.
