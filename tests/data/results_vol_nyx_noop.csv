@@ -1,0 +1,15 @@
+dataset,compressor,path,op,phase,ms,ratio,rmse
+nyx_baryon,noop,vol,write,total,1387.1852,0.9981,
+nyx_baryon,noop,vol,read,total,811.8709,,0.000000e+00
+nyx_dm,noop,vol,write,total,933.1193,0.9981,
+nyx_dm,noop,vol,read,total,765.4029,,0.000000e+00
+nyx_temp_log,noop,vol,write,total,831.0593,0.9981,
+nyx_temp_log,noop,vol,read,total,676.4384,,0.000000e+00
+nyx_vx_asinh,noop,vol,write,total,828.3671,0.9981,
+nyx_vx_asinh,noop,vol,read,total,746.3289,,0.000000e+00
+nyx_vy_asinh,noop,vol,write,total,857.1863,0.9981,
+nyx_vy_asinh,noop,vol,read,total,675.5505,,0.000000e+00
+nyx_vz_asinh,noop,vol,write,total,829.0134,0.9981,
+nyx_vz_asinh,noop,vol,read,total,692.6724,,0.000000e+00
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_nyx_noop.h5,ALL,vol,write,file,5669.7984,0.9981,
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_nyx_noop.h5,ALL,vol,read,file,4368.2639,,
