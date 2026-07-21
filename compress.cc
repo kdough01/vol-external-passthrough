@@ -808,7 +808,7 @@ vol_native_chunk_elems(compression_ctx *ctx, size_t dsize)
 
 static struct pressio_compressor *
 vol_make_chunking_compressor(compression_ctx *ctx, size_t dsize,
-                             struct pressio **out_lib)
+                             size_t total_elems, struct pressio **out_lib)
 {
     struct pressio *lib = pressio_instance();
     if (!lib) return NULL;
@@ -829,10 +829,20 @@ vol_make_chunking_compressor(compression_ctx *ctx, size_t dsize,
      * extent per dimension. We compress over a flat 1-D view, so it is a
      * single value = elements per chunk. */
     size_t chunk_elems = vol_native_chunk_elems(ctx, dsize);
+
+    /* CRITICAL: never let a chunk exceed the dataset. libpressio's chunking
+     * will read chunk_elems from the input even when the data is smaller,
+     * which is an out-of-bounds read (segfault) in the single-chunk case. */
+    if (total_elems > 0 && chunk_elems > total_elems)
+        chunk_elems = total_elems;
+    if (chunk_elems == 0)
+        chunk_elems = 1;
+
     size_t one = 1;
+    size_t csz_bytes = 0;
     struct pressio_data *csz =
         pressio_data_new_owning(pressio_uint64_dtype, 1, &one);
-    ((uint64_t *)pressio_data_ptr(csz, NULL))[0] = (uint64_t)chunk_elems;
+    ((uint64_t *)pressio_data_ptr(csz, &csz_bytes))[0] = (uint64_t)chunk_elems;
     pressio_options_set_data(opts, "chunking:size", csz);
     pressio_data_free(csz);
 
@@ -867,6 +877,8 @@ vol_make_chunking_compressor(compression_ctx *ctx, size_t dsize,
 
 /*-------------------------------------------------------------------------
  * Whole-dataset compress via libpressio-native chunking.
+ * data/nbytes = the ENTIRE logical dataset (host- or device-resident).
+ * Produces a single self-describing blob in *out_cbuf / *out_csize.
  *-----------------------------------------------------------------------*/
 herr_t
 H5VL_pass_through_ext_compress_native(compression_ctx *ctx,
@@ -908,7 +920,7 @@ H5VL_pass_through_ext_compress_native(compression_ctx *ctx,
         in_dims[0] = nbytes / dsize;
     }
 
-    chunk = vol_make_chunking_compressor(ctx, dsize, &lib);
+    chunk = vol_make_chunking_compressor(ctx, dsize, in_dims[0], &lib);
     if (!chunk) {
         H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
                 vol_err_class, maj_compression, min_compress_failed,
@@ -1043,6 +1055,8 @@ done:
 
 /*-------------------------------------------------------------------------
  * Whole-dataset decompress via libpressio-native chunking.
+ * cbuf/csize = the ENTIRE compressed blob produced by _compress_native.
+ * out/out_bytes = the full decompressed destination.
  *-----------------------------------------------------------------------*/
 herr_t
 H5VL_pass_through_ext_decompress_native(compression_ctx *ctx,
@@ -1084,7 +1098,7 @@ H5VL_pass_through_ext_decompress_native(compression_ctx *ctx,
 
     /* Chunk size MUST match compress. vol_make_chunking_compressor derives it
      * from the same ctx/dsize, so the two agree by construction. */
-    chunk = vol_make_chunking_compressor(ctx, dsize, &lib);
+    chunk = vol_make_chunking_compressor(ctx, dsize, out_dims[0], &lib);
     if (!chunk) {
         H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
                 vol_err_class, maj_compression, min_decompress_failed,
