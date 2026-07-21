@@ -779,7 +779,6 @@ done:
     return ret_val;
 }
 
-/* Native compressor chunking */
 static size_t
 vol_native_chunk_elems(compression_ctx *ctx, size_t dsize)
 {
@@ -809,36 +808,48 @@ vol_make_chunking_compressor(compression_ctx *ctx, size_t dsize,
 {
     struct pressio *lib = pressio_instance();
     if (!lib) return NULL;
- 
+
     struct pressio_compressor *chunk = pressio_get_compressor(lib, "chunking");
     if (!chunk) {
         pressio_release(lib);
         return NULL;   /* chunking not available in this build */
     }
- 
+
     {
         struct pressio_options *nest = pressio_options_new();
-        pressio_options_set_string(nest, "chunking:compressor", "many_independent");
-        pressio_options_set_string(nest, "many_independent:compressor",
+        pressio_options_set_string(nest, "chunking:compressor",
+                                   "many_independent_threaded");
+        pressio_options_set_string(nest, "many_independent_threaded:compressor",
                                    ctx->compressor_id);
         (void)pressio_compressor_set_options(chunk, nest);
         pressio_options_free(nest);
+
+        struct pressio_options *chk = pressio_compressor_get_options(chunk);
+        char *cs = pressio_options_to_string(chk);
+        int ok = (cs && strstr(cs, "many_independent_threaded") != NULL);
+        free(cs);
+        pressio_options_free(chk);
+        if (!ok) {
+            H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                    vol_err_class, maj_compression, min_compress_failed,
+                    "chunking child failed to switch to many_independent_threaded "
+                    "for '%s' (adapter unavailable in this libpressio build) -- "
+                    "refusing to store uncompressed data", ctx->compressor_id);
+            pressio_compressor_release(chunk);
+            pressio_release(lib);
+            return NULL;
+        }
     }
- 
-    /* --- Stage 2: the leaf exists now. Push its real options (from the
-     * dataset's configured compressor: cuszp:* incl. the error bound and the
-     * stream userptr) plus the chunk geometry. --- */
+
     struct pressio_options *opts = pressio_compressor_get_options(ctx->compressor);
- 
+
     size_t chunk_elems = vol_native_chunk_elems(ctx, dsize);
- 
-    /* CRITICAL: never let a chunk exceed the dataset -- an oversized chunk
-     * makes chunking read past the input (segfault) in the single-chunk case. */
+
     if (total_elems > 0 && chunk_elems > total_elems)
         chunk_elems = total_elems;
     if (chunk_elems == 0)
         chunk_elems = 1;
- 
+
     size_t one = 1;
     size_t csz_bytes = 0;
     struct pressio_data *csz =
@@ -846,16 +857,16 @@ vol_make_chunking_compressor(compression_ctx *ctx, size_t dsize,
     ((uint64_t *)pressio_data_ptr(csz, &csz_bytes))[0] = (uint64_t)chunk_elems;
     pressio_options_set_data(opts, "chunking:size", csz);
     pressio_data_free(csz);
- 
+
     int serr = pressio_compressor_set_options(chunk, opts);
     pressio_options_free(opts);
- 
+
     if (serr) {
         pressio_compressor_release(chunk);
         pressio_release(lib);
         return NULL;
     }
- 
+
 #ifdef USE_CUDA
     if (ctx->stream) {
         struct pressio_options *sopt = pressio_options_new();
@@ -878,17 +889,11 @@ vol_make_chunking_compressor(compression_ctx *ctx, size_t dsize,
         pressio_options_free(src);
         pressio_options_free(built);
     }
- 
+
     *out_lib = lib;
     return chunk;
 }
 
-
-/*-------------------------------------------------------------------------
- * Whole-dataset compress via libpressio-native chunking.
- * data/nbytes = the ENTIRE logical dataset (host- or device-resident).
- * Produces a single self-describing blob in *out_cbuf / *out_csize.
- *-----------------------------------------------------------------------*/
 herr_t
 H5VL_pass_through_ext_compress_native(compression_ctx *ctx,
                                       const void *data, size_t nbytes,
@@ -1062,11 +1067,6 @@ done:
     return ret_val;
 }
 
-/*-------------------------------------------------------------------------
- * Whole-dataset decompress via libpressio-native chunking.
- * cbuf/csize = the ENTIRE compressed blob produced by _compress_native.
- * out/out_bytes = the full decompressed destination.
- *-----------------------------------------------------------------------*/
 herr_t
 H5VL_pass_through_ext_decompress_native(compression_ctx *ctx,
                                         const void *cbuf, size_t csize,
