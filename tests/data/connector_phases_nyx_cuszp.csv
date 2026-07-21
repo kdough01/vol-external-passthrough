@@ -1,0 +1,13 @@
+dataset,compressor,op,total_ms,compress_ms,io_ms,overhead_ms,overhead_pct
+nyx_baryon_cuszp,cuszp,write,1136.4919,55.0614,184.7572,896.6733,78.90
+nyx_baryon_cuszp,cuszp,read,1058.2252,694.3469,169.6122,194.2662,18.36
+nyx_dm_cuszp,cuszp,write,465.0008,51.6075,83.9304,329.4628,70.85
+nyx_dm_cuszp,cuszp,read,1062.2354,697.2366,169.1755,195.8233,18.44
+nyx_temp_log_cuszp,cuszp,write,376.8259,50.9451,66.2590,259.6219,68.90
+nyx_temp_log_cuszp,cuszp,read,875.1448,684.3893,133.0214,57.7341,6.60
+nyx_vx_asinh_cuszp,cuszp,write,330.3071,52.8376,58.3750,219.0946,66.33
+nyx_vx_asinh_cuszp,cuszp,read,866.3753,684.5656,133.7995,48.0102,5.54
+nyx_vy_asinh_cuszp,cuszp,write,371.4823,51.9463,63.6378,255.8983,68.89
+nyx_vy_asinh_cuszp,cuszp,read,882.8091,693.9891,131.8319,56.9881,6.46
+nyx_vz_asinh_cuszp,cuszp,write,425.6651,55.3844,77.4542,292.8264,68.79
+nyx_vz_asinh_cuszp,cuszp,read,893.5116,685.1305,148.8525,59.5286,6.66

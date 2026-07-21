@@ -1,0 +1,15 @@
+dataset,compressor,path,op,phase,ms,ratio,rmse
+nyx_baryon,cuszp,vol,write,total,1137.0630,2.6947,
+nyx_baryon,cuszp,vol,read,total,1058.3747,,5.775256e-05
+nyx_dm,cuszp,vol,write,total,465.1037,2.1787,
+nyx_dm,cuszp,vol,read,total,1062.3734,,5.694991e-05
+nyx_temp_log,cuszp,vol,write,total,376.9108,2.7978,
+nyx_temp_log,cuszp,vol,read,total,875.2715,,5.773672e-05
+nyx_vx_asinh,cuszp,vol,write,total,330.3917,3.1220,
+nyx_vx_asinh,cuszp,vol,read,total,866.5067,,5.773930e-05
+nyx_vy_asinh,cuszp,vol,write,total,371.5570,2.8444,
+nyx_vy_asinh,cuszp,vol,read,total,882.9668,,5.773330e-05
+nyx_vz_asinh,cuszp,vol,write,total,425.7443,2.3814,
+nyx_vz_asinh,cuszp,vol,read,total,893.6596,,5.773818e-05
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_nyx_cuszp.h5,ALL,vol,write,file,3177.7134,2.6324,
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_nyx_cuszp.h5,ALL,vol,read,file,5639.1527,,
