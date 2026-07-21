@@ -1,0 +1,13 @@
+dataset,compressor,op,total_ms,compress_ms,io_ms,overhead_ms,overhead_pct
+nyx_baryon_bzip2,bzip2,write,53699.1778,53435.3403,195.6183,68.2192,0.13
+nyx_baryon_bzip2,bzip2,read,30121.3312,29615.7437,351.1905,154.3970,0.51
+nyx_dm_bzip2,bzip2,write,52309.4298,52082.8343,179.5161,47.0794,0.09
+nyx_dm_bzip2,bzip2,read,29023.2798,28431.7016,382.8519,208.7262,0.72
+nyx_temp_log_bzip2,bzip2,write,49363.8638,49194.5563,132.4765,36.8310,0.07
+nyx_temp_log_bzip2,bzip2,read,24569.4629,24197.5045,302.9744,68.9839,0.28
+nyx_vx_asinh_bzip2,bzip2,write,48644.7794,48459.8545,147.1261,37.7988,0.08
+nyx_vx_asinh_bzip2,bzip2,read,25763.9521,25365.4713,266.0868,132.3940,0.51
+nyx_vy_asinh_bzip2,bzip2,write,48725.1624,48524.0114,161.4880,39.6630,0.08
+nyx_vy_asinh_bzip2,bzip2,read,26610.2077,26121.3919,288.6194,200.1964,0.75
+nyx_vz_asinh_bzip2,bzip2,write,48708.7025,48506.2455,161.9344,40.5226,0.08
+nyx_vz_asinh_bzip2,bzip2,read,27035.8098,26586.8339,310.6567,138.3192,0.51

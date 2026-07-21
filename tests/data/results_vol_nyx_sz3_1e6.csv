@@ -1,0 +1,15 @@
+dataset,compressor,path,op,phase,ms,ratio,rmse
+nyx_baryon,sz3_1e6,vol,write,total,8293.2317,1.7124,
+nyx_baryon,sz3_1e6,vol,read,total,9891.6996,,5.067961e-07
+nyx_dm,sz3_1e6,vol,write,total,11549.0270,1.1797,
+nyx_dm,sz3_1e6,vol,read,total,5052.2573,,2.424464e-07
+nyx_temp_log,sz3_1e6,vol,write,total,8586.1318,1.8286,
+nyx_temp_log,sz3_1e6,vol,read,total,9436.6555,,6.450550e-07
+nyx_vx_asinh,sz3_1e6,vol,write,total,9197.6353,2.0078,
+nyx_vx_asinh,sz3_1e6,vol,read,total,8956.9766,,5.654334e-07
+nyx_vy_asinh,sz3_1e6,vol,write,total,8044.8505,1.8824,
+nyx_vy_asinh,sz3_1e6,vol,read,total,9055.0344,,6.066248e-07
+nyx_vz_asinh,sz3_1e6,vol,write,total,7538.8843,1.6898,
+nyx_vz_asinh,sz3_1e6,vol,read,total,9050.8994,,5.997798e-07
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_nyx_sz3_1e6.h5,ALL,vol,write,file,53478.5476,1.6668,
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_nyx_sz3_1e6.h5,ALL,vol,read,file,51443.5228,,

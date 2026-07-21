@@ -1,0 +1,362 @@
+Job started on Tue Jul 21 13:49:54 CDT 2026
+Running on: gpu2
+PWD: /home/kdougherty/hdf5_projs/vol-external-passthrough
+mpicc:   /gpfs/fs1/home/software/swing/HPCX/hpcx-v2.26-gcc-doca_ofed-ubuntu22.04-cuda13-x86_64/ompi4/bin/mpicc
+nvcc:    /gpfs/fs1/soft/swing/software/spack-built/linux-ubuntu22.04-x86_64/gcc-11.4.0/cuda-12.6.0-qb3dlng/bin/nvcc
+gcc:     gcc (Ubuntu 11.4.0-1ubuntu1~22.04.2) 11.4.0
+GCC_LIB: /usr/lib/gcc/x86_64-linux-gnu/11
+gcc (Ubuntu 11.4.0-1ubuntu1~22.04.2) 11.4.0
+Copyright (C) 2021 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+LibPressio cmake dir: /home/kdougherty/libpressio_cuda/.spack-env/view/lib/cmake/LibPressio
+
+=== Building (USE_CUDA=ON -> CUDA-event timing in the connector) ===
+-- The C compiler identification is GNU 11.4.0
+-- The CXX compiler identification is GNU 11.4.0
+-- The CUDA compiler identification is NVIDIA 12.9.86
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /gpfs/fs1/home/software/swing/HPCX/hpcx-v2.26-gcc-doca_ofed-ubuntu22.04-cuda13-x86_64/ompi4/bin/mpicc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /gpfs/fs1/home/software/swing/HPCX/hpcx-v2.26-gcc-doca_ofed-ubuntu22.04-cuda13-x86_64/ompi4/bin/mpicxx - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Detecting CUDA compiler ABI info
+-- Detecting CUDA compiler ABI info - done
+-- Check for working CUDA compiler: /home/kdougherty/libpressio_cuda/.spack-env/view/bin/nvcc - skipped
+-- Detecting CUDA compile features
+-- Detecting CUDA compile features - done
+-- Found HDF5: hdf5-shared (found version "1.14.6")  
+-- Found OpenMP_C: -fopenmp (found version "4.5") 
+-- Found OpenMP_CXX: -fopenmp (found version "4.5") 
+-- Found OpenMP: TRUE (found version "4.5")  
+-- Found BZip2: /home/kdougherty/libpressio_cuda/.spack-env/view/lib/libbz2.so (found version "1.0.8") 
+-- Looking for BZ2_bzCompressInit
+-- Looking for BZ2_bzCompressInit - found
+-- Found ZFP: /home/kdougherty/libpressio_cuda/.spack-env/view/lib/cmake/zfp/zfp-config.cmake (found version "0.5.5") 
+-- Found OpenMP_C: -fopenmp (found version "4.5") 
+-- Found OpenMP_CXX: -fopenmp (found version "4.5") 
+-- Found PkgConfig: /home/kdougherty/libpressio_cuda/.spack-env/view/bin/pkg-config (found version "2.5.1") 
+-- Found GSL: /home/kdougherty/libpressio_cuda/.spack-env/view/include (found version "2.8") 
+-- Checking for one of the modules 'libzstd'
+-- Checking for one of the modules 'blosc'
+-- Found CUDAToolkit: /home/kdougherty/libpressio_cuda/.spack-env/view/include (found version "12.9.86") 
+-- Looking for pthread.h
+-- Looking for pthread.h - found
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE  
+-- Found HDF5: hdf5-shared (found version "1.14.6") found components: C 
+-- Found MPI_C: /gpfs/fs1/home/software/swing/HPCX/hpcx-v2.26-gcc-doca_ofed-ubuntu22.04-cuda13-x86_64/ompi4/bin/mpicc (found version "3.1") 
+-- Found MPI_CXX: /gpfs/fs1/home/software/swing/HPCX/hpcx-v2.26-gcc-doca_ofed-ubuntu22.04-cuda13-x86_64/ompi4/bin/mpicxx (found version "3.1") 
+-- Found MPI: TRUE (found version "3.1")  
+-- Found MPI: TRUE (found version "3.1") found components: CXX 
+-- Checking for one of the modules 'lua;luajit'
+-- Found nlohmann_json: /home/kdougherty/libpressio_cuda/.spack-env/view/share/cmake/nlohmann_json/nlohmann_jsonConfig.cmake (found version "3.12.0") 
+-- Found Python3: /home/kdougherty/libpressio_cuda/.spack-env/view/bin/python3 (found version "3.14.5") found components: Interpreter Development NumPy Development.Module Development.Embed 
+-- Found SWIG: /home/kdougherty/libpressio_cuda/.spack-env/view/bin/swig4.0 (found version "4.1.1")  
+-- Found MPI: TRUE (found version "3.1")  
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/kdougherty/hdf5_projs/vol-external-passthrough/build
+[  4%] Building CXX object tests/CMakeFiles/dump_cuszp_opts.dir/dump_cuszp_opts.cc.o
+[  9%] Building C object CMakeFiles/hdf5_vol_passthrough.dir/H5VLpassthru_ext.c.o
+[ 14%] Building CXX object CMakeFiles/hdf5_vol_passthrough.dir/compress.cc.o
+[ 19%] Linking CXX executable dump_cuszp_opts
+[ 19%] Built target dump_cuszp_opts
+[ 23%] Linking CXX shared library libhdf5_vol_passthrough.so
+[ 23%] Built target hdf5_vol_passthrough
+[ 38%] Building C object tests/CMakeFiles/test_cpu_write.dir/test_cpu_write.c.o
+[ 38%] Building C object tests/CMakeFiles/test_time_hurricane.dir/test_time_hurricane.c.o
+[ 38%] Building C object tests/CMakeFiles/test_time_miranda.dir/test_time_miranda.c.o
+[ 42%] Building C object tests/CMakeFiles/test_ci.dir/test_ci.c.o
+[ 47%] Linking C executable test_cpu_write
+[ 52%] Linking C executable test_time_hurricane
+[ 57%] Linking C executable test_ci
+[ 61%] Linking C executable test_time_miranda
+[ 61%] Built target test_cpu_write
+[ 61%] Built target test_time_hurricane
+[ 66%] Building C object tests/CMakeFiles/test_error_miranda.dir/test_error_miranda.c.o
+[ 71%] Building CXX object tests/CMakeFiles/bench_vol_timing.dir/bench_vol_timing.cc.o
+[ 71%] Built target test_ci
+[ 71%] Built target test_time_miranda
+[ 76%] Building CXX object tests/CMakeFiles/bench_pressio_timing.dir/bench_pressio_timing.cc.o
+[ 80%] Building CXX object tests/CMakeFiles/bench_filter_timing.dir/bench_filter_timing.cc.o
+[ 85%] Linking C executable test_error_miranda
+[ 85%] Built target test_error_miranda
+[ 90%] Linking CXX executable bench_vol_timing
+[ 95%] Linking CXX executable bench_filter_timing
+[100%] Linking CXX executable bench_pressio_timing
+[100%] Built target bench_filter_timing
+[100%] Built target bench_vol_timing
+[100%] Built target bench_pressio_timing
+--- build/ ---
+CMakeCache.txt
+CMakeFiles
+Makefile
+cmake_install.cmake
+libhdf5_vol_passthrough.so
+tests
+--- build/tests/ ---
+CMakeFiles
+Makefile
+bench_filter_timing
+bench_pressio_timing
+bench_vol_timing
+cmake_install.cmake
+dump_cuszp_opts
+test_ci
+test_cpu_write
+test_error_miranda
+test_time_hurricane
+test_time_miranda
+
+=== [0/3] Dump cuszp option keys ===
+cuszp:metric <char*> = "noop"
+cuszp:mode <int32> = 0
+cuszp:mode_str <char*> = "plain"
+
+=== [1/3] VOL timing [nyx_bzip2] : nyx_baryon,nyx_dm,nyx_temp_log,nyx_vx_asinh,nyx_vy_asinh,nyx_vz_asinh ===
+[dbg main] h5=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_nyx_bzip2.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results_vol_nyx_bzip2.csv only=nyx_baryon,nyx_dm,nyx_temp_log,nyx_vx_asinh,nyx_vy_asinh,nyx_vz_asinh comp=bzip2 debug=0
+name           dtype  rank src    dims                   MiB        exists
+miranda        double 3    raw    256x384x384            288.0      yes
+ocean_temp     float  0    hdf5   (from file)            0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        yes
+nyx_dm         float  0    hdf5   (from file)            0.0        yes
+nyx_temp_log   float  0    hdf5   (from file)            0.0        yes
+nyx_vx_asinh   float  0    hdf5   (from file)            0.0        yes
+nyx_vy_asinh   float  0    hdf5   (from file)            0.0        yes
+nyx_vz_asinh   float  0    hdf5   (from file)            0.0        yes
+9/9 dataset paths readable
+RANGE nyx_baryon     min=5.799697e-02 max=1.158623e+05 range=1.158622e+05 xform=none
+Info: 0x562071aee4c0
+
+=== nyx_baryon (512.0 MiB, float, hdf5) ===
+  nyx_baryon_bzip2             W=53699.82 ms  R=30121.47 ms  ratio=  1.10x  RMSE=0.000e+00
+RANGE nyx_dm         min=0.000000e+00 max=1.377893e+04 range=1.377893e+04 xform=none
+
+=== nyx_dm (512.0 MiB, float, hdf5) ===
+  nyx_dm_bzip2                 W=52309.65 ms  R=29023.41 ms  ratio=  1.09x  RMSE=0.000e+00
+RANGE nyx_temp_log   min=7.732797e+00 max=1.538049e+01 range=7.647694e+00 xform=log1p
+
+=== nyx_temp_log (512.0 MiB, float, hdf5, transformed) ===
+  nyx_temp_log_bzip2           W=49364.05 ms  R=24569.64 ms  ratio=  1.46x  RMSE=0.000e+00 (log-space)
+RANGE nyx_vx_asinh   min=-1.842898e+01 max=1.797022e+01 range=3.639921e+01 xform=asinh
+
+=== nyx_vx_asinh (512.0 MiB, float, hdf5, transformed) ===
+  nyx_vx_asinh_bzip2           W=48644.97 ms  R=25764.09 ms  ratio=  1.41x  RMSE=0.000e+00 (log-space)
+RANGE nyx_vy_asinh   min=-1.829132e+01 max=1.854300e+01 range=3.683432e+01 xform=asinh
+
+=== nyx_vy_asinh (512.0 MiB, float, hdf5, transformed) ===
+  nyx_vy_asinh_bzip2           W=48725.36 ms  R=26610.35 ms  ratio=  1.33x  RMSE=0.000e+00 (log-space)
+RANGE nyx_vz_asinh   min=-1.817063e+01 max=1.801680e+01 range=3.618743e+01 xform=asinh
+
+=== nyx_vz_asinh (512.0 MiB, float, hdf5, transformed) ===
+  nyx_vz_asinh_bzip2           W=48708.90 ms  R=27035.94 ms  ratio=  1.31x  RMSE=0.000e+00 (log-space)
+[dbg main] done: 6 datasets, 0 skipped
+
+=== FILE /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_nyx_bzip2.h5: 6 dataset-writes | create=1.59  write=301452.75  close/flush=581.67 => write_total=302036.01 ms | read_total=163124.89 ms | ratio=1.27x ===
+
+=== [3/3] Filter (deflate) timing ===
+name           dtype  rank src    dims                   MiB        exists
+miranda        double 3    raw    256x384x384            288.0      yes
+ocean_temp     float  0    hdf5   (from file)            0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        yes
+nyx_dm         float  0    hdf5   (from file)            0.0        yes
+nyx_temp_log   float  0    hdf5   (from file)            0.0        yes
+nyx_vx_asinh   float  0    hdf5   (from file)            0.0        yes
+nyx_vy_asinh   float  0    hdf5   (from file)            0.0        yes
+nyx_vz_asinh   float  0    hdf5   (from file)            0.0        yes
+9/9 dataset paths readable
+miranda/deflate                file=137.5 MiB (raw 288.0 MiB)
+HDF5-DIAG: Error detected in HDF5 (1.14.6):
+  #000: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Pdcpl.c line 1923 in H5Pset_chunk(): chunk dimensionality must be positive
+    major: Invalid arguments to routine
+    minor: Out of range
+ocean_temp/deflate             file=0.0 MiB (raw 0.0 MiB)
+HDF5-DIAG: Error detected in HDF5 (1.14.6):
+  #000: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5D.c line 186 in H5Dcreate2(): unable to synchronously create dataset
+    major: Dataset
+    minor: Unable to create file
+  #001: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5D.c line 135 in H5D__create_api_common(): unable to create dataset
+    major: Dataset
+    minor: Unable to create file
+  #002: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5VLcallback.c line 1865 in H5VL_dataset_create(): dataset create failed
+    major: Virtual Object Layer
+    minor: Unable to create file
+  #003: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5VLcallback.c line 1830 in H5VL__dataset_create(): dataset create failed
+    major: Virtual Object Layer
+    minor: Unable to create file
+  #004: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5VLnative_dataset.c line 282 in H5VL__native_dataset_create(): unable to create dataset
+    major: Dataset
+    minor: Unable to initialize object
+  #005: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Dint.c line 351 in H5D__create_named(): unable to create and link to dataset
+    major: Dataset
+    minor: Unable to initialize object
+  #006: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Lint.c line 492 in H5L_link_object(): unable to create new link to object
+    major: Links
+    minor: Unable to initialize object
+  #007: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Lint.c line 732 in H5L__create_real(): can't insert link
+    major: Links
+    minor: Unable to insert object
+  #008: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Gtraverse.c line 824 in H5G_traverse(): internal path traversal failed
+    major: Symbol table
+    minor: Object not found
+  #009: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Gtraverse.c line 596 in H5G__traverse_real(): traversal operator failed
+    major: Symbol table
+    minor: Callback failed
+  #010: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Lint.c line 537 in H5L__link_cb(): unable to create object
+    major: Links
+    minor: Unable to initialize object
+  #011: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Oint.c line 2346 in H5O_obj_create(): unable to open object
+    major: Object header
+    minor: Can't open object
+  #012: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Doh.c line 273 in H5O__dset_create(): unable to create dataset
+    major: Dataset
+    minor: Unable to initialize object
+  #013: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Dint.c line 1304 in H5D__create(): unable to construct layout information
+    major: Dataset
+    minor: Unable to initialize object
+  #014: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Dchunk.c line 835 in H5D__chunk_construct(): unable to set chunk sizes
+    major: Dataset
+    minor: Bad value
+  #015: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Dchunk.c line 798 in H5D__chunk_set_sizes(): chunk size must be < 4GB
+    major: Dataset
+    minor: Unable to initialize object
+HDF5-DIAG: Error detected in HDF5 (1.14.6):
+  #000: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5D.c line 1347 in H5Dwrite(): can't synchronously write data
+    major: Dataset
+    minor: Write failed
+  #001: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5D.c line 1263 in H5D__write_api_common(): dset_id is not a dataset ID
+    major: Invalid arguments to routine
+    minor: Inappropriate type
+HDF5-DIAG: Error detected in HDF5 (1.14.6):
+  #000: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5D.c line 468 in H5Dclose(): not a dataset ID
+    major: Invalid arguments to routine
+    minor: Inappropriate type
+einspline37/deflate            file=0.0 MiB (raw 12932.6 MiB)
+HDF5-DIAG: Error detected in HDF5 (1.14.6):
+  #000: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5D.c line 398 in H5Dopen2(): unable to synchronously open dataset
+    major: Dataset
+    minor: Can't open object
+  #001: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5D.c line 360 in H5D__open_api_common(): unable to open dataset
+    major: Dataset
+    minor: Can't open object
+  #002: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5VLcallback.c line 1967 in H5VL_dataset_open(): dataset open failed
+    major: Virtual Object Layer
+    minor: Can't open object
+  #003: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5VLcallback.c line 1934 in H5VL__dataset_open(): dataset open failed
+    major: Virtual Object Layer
+    minor: Can't open object
+  #004: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5VLnative_dataset.c line 332 in H5VL__native_dataset_open(): unable to open dataset
+    major: Dataset
+    minor: Can't open object
+  #005: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Dint.c line 1426 in H5D__open_name(): not found
+    major: Dataset
+    minor: Object not found
+  #006: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Gloc.c line 424 in H5G_loc_find(): can't find object
+    major: Symbol table
+    minor: Object not found
+  #007: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Gtraverse.c line 824 in H5G_traverse(): internal path traversal failed
+    major: Symbol table
+    minor: Object not found
+  #008: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Gtraverse.c line 596 in H5G__traverse_real(): traversal operator failed
+    major: Symbol table
+    minor: Callback failed
+  #009: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Gloc.c line 381 in H5G__loc_find_cb(): object 'einspline37' doesn't exist
+    major: Symbol table
+    minor: Object not found
+HDF5-DIAG: Error detected in HDF5 (1.14.6):
+  #000: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5D.c line 1044 in H5Dread(): can't synchronously read data
+    major: Dataset
+    minor: Read failed
+  #001: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5D.c line 961 in H5D__read_api_common(): dset_id is not a dataset ID
+    major: Invalid arguments to routine
+    minor: Inappropriate type
+  #002: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5VLint.c line 1786 in H5VL_vol_object_verify(): identifier is not of specified type
+    major: Invalid arguments to routine
+    minor: Inappropriate type
+HDF5-DIAG: Error detected in HDF5 (1.14.6):
+  #000: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5D.c line 468 in H5Dclose(): not a dataset ID
+    major: Invalid arguments to routine
+    minor: Inappropriate type
+HDF5-DIAG: Error detected in HDF5 (1.14.6):
+  #000: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Pdcpl.c line 1923 in H5Pset_chunk(): chunk dimensionality must be positive
+    major: Invalid arguments to routine
+    minor: Out of range
+nyx_baryon/deflate             file=0.0 MiB (raw 0.0 MiB)
+HDF5-DIAG: Error detected in HDF5 (1.14.6):
+  #000: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Pdcpl.c line 1923 in H5Pset_chunk(): chunk dimensionality must be positive
+    major: Invalid arguments to routine
+    minor: Out of range
+nyx_dm/deflate                 file=0.0 MiB (raw 0.0 MiB)
+HDF5-DIAG: Error detected in HDF5 (1.14.6):
+  #000: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Pdcpl.c line 1923 in H5Pset_chunk(): chunk dimensionality must be positive
+    major: Invalid arguments to routine
+    minor: Out of range
+nyx_temp_log/deflate           file=0.0 MiB (raw 0.0 MiB)
+HDF5-DIAG: Error detected in HDF5 (1.14.6):
+  #000: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Pdcpl.c line 1923 in H5Pset_chunk(): chunk dimensionality must be positive
+    major: Invalid arguments to routine
+    minor: Out of range
+nyx_vx_asinh/deflate           file=0.0 MiB (raw 0.0 MiB)
+HDF5-DIAG: Error detected in HDF5 (1.14.6):
+  #000: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Pdcpl.c line 1923 in H5Pset_chunk(): chunk dimensionality must be positive
+    major: Invalid arguments to routine
+    minor: Out of range
+nyx_vy_asinh/deflate           file=0.0 MiB (raw 0.0 MiB)
+HDF5-DIAG: Error detected in HDF5 (1.14.6):
+  #000: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Pdcpl.c line 1923 in H5Pset_chunk(): chunk dimensionality must be positive
+    major: Invalid arguments to routine
+    minor: Out of range
+nyx_vz_asinh/deflate           file=0.0 MiB (raw 0.0 MiB)
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results_filter.csv
+
+=== [miranda] connector_phases (VOL total/compress/io) ===
+
+=== [miranda] results_vol (harness total + ratio + RMSE) ===
+
+=== [ocean] connector_phases (VOL total/compress/io) ===
+
+=== [ocean] results_vol (harness total + ratio + RMSE) ===
+
+=== [nyx] connector_phases (VOL total/compress/io) ===
+
+=== [nyx] results_vol (harness total + ratio + RMSE) ===
+
+=== [nyx_log] connector_phases (VOL total/compress/io) ===
+
+=== [nyx_log] results_vol (harness total + ratio + RMSE) ===
+
+=== FILE-LEVEL summary (phase=file, per group × codec) ===
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_nyx_bzip2.h5,ALL,vol,read,file,163124.8898,,
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_nyx_bzip2.h5,ALL,vol,write,file,302036.0057,1.2668,
+=== results_filter.csv ===
+dataset       compressor  path    op     phase  ms         ratio         rmse
+miranda       deflate     filter  write  total  7409.0473  2.0948        
+miranda       deflate     filter  read   total  1124.6149                
+ocean_temp    deflate     filter  write  total  0.0167     0.0010        
+ocean_temp    deflate     filter  read   total  0.0088                   
+einspline37   deflate     filter  write  total  0.0569     6621509.5312  
+einspline37   deflate     filter  read   total  0.1514                   
+nyx_baryon    deflate     filter  write  total  0.0105     0.0010        
+nyx_baryon    deflate     filter  read   total  0.0084                   
+nyx_dm        deflate     filter  write  total  0.0043     0.0010        
+nyx_dm        deflate     filter  read   total  0.0073                   
+nyx_temp_log  deflate     filter  write  total  0.0043     0.0010        
+nyx_temp_log  deflate     filter  read   total  0.0075                   
+nyx_vx_asinh  deflate     filter  write  total  0.0043     0.0010        
+nyx_vx_asinh  deflate     filter  read   total  0.0076                   
+nyx_vy_asinh  deflate     filter  write  total  0.0043     0.0010        
+nyx_vy_asinh  deflate     filter  read   total  0.0074                   
+nyx_vz_asinh  deflate     filter  write  total  0.0043     0.0010        
+nyx_vz_asinh  deflate     filter  read   total  0.0145                   
+
+Job finished on Tue Jul 21 13:58:39 CDT 2026

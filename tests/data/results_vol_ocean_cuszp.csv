@@ -1,5 +1,5 @@
 dataset,compressor,path,op,phase,ms,ratio,rmse
-ocean_temp,cuszp,vol,write,total,900.7957,2.6770,
-ocean_temp,cuszp,vol,read,total,212.3044,,5.774486e-05
-/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_ocean_cuszp.h5,ALL,vol,write,file,902.6926,2.6770,
-/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_ocean_cuszp.h5,ALL,vol,read,file,212.3044,,
+ocean_temp,cuszp,vol,write,total,715.9471,2.6770,
+ocean_temp,cuszp,vol,read,total,204.7077,,5.774486e-05
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_ocean_cuszp.h5,ALL,vol,write,file,717.7361,2.6770,
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_ocean_cuszp.h5,ALL,vol,read,file,204.7077,,

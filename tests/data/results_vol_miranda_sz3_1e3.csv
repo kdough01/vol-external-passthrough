@@ -1,5 +1,5 @@
 dataset,compressor,path,op,phase,ms,ratio,rmse
-miranda,sz3_1e3,vol,write,total,1460.5708,57.6000,
-miranda,sz3_1e3,vol,read,total,812.7813,,2.785627e-04
-/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_miranda_sz3_1e3.h5,ALL,vol,write,file,1463.0371,57.6000,
-/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_miranda_sz3_1e3.h5,ALL,vol,read,file,812.7813,,
+miranda,sz3_1e3,vol,write,total,1370.3471,57.6000,
+miranda,sz3_1e3,vol,read,total,833.7354,,2.785627e-04
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_miranda_sz3_1e3.h5,ALL,vol,write,file,1371.8627,57.6000,
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_miranda_sz3_1e3.h5,ALL,vol,read,file,833.7354,,

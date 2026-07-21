@@ -1,5 +1,5 @@
-Job started on Tue Jul 21 12:12:00 CDT 2026
-Running on: gpu6
+Job started on Tue Jul 21 12:43:55 CDT 2026
+Running on: gpu2
 PWD: /home/kdougherty/hdf5_projs/vol-external-passthrough
 mpicc:   /gpfs/fs1/home/software/swing/HPCX/hpcx-v2.26-gcc-doca_ofed-ubuntu22.04-cuda13-x86_64/ompi4/bin/mpicc
 nvcc:    /gpfs/fs1/soft/swing/software/spack-built/linux-ubuntu22.04-x86_64/gcc-11.4.0/cuda-12.6.0-qb3dlng/bin/nvcc
@@ -64,33 +64,33 @@ LibPressio cmake dir: /home/kdougherty/libpressio_cuda/.spack-env/view/lib/cmake
 -- Configuring done
 -- Generating done
 -- Build files have been written to: /home/kdougherty/hdf5_projs/vol-external-passthrough/build
+[  4%] Building CXX object tests/CMakeFiles/dump_cuszp_opts.dir/dump_cuszp_opts.cc.o
+[ 14%] Building C object CMakeFiles/hdf5_vol_passthrough.dir/H5VLpassthru_ext.c.o
 [ 14%] Building CXX object CMakeFiles/hdf5_vol_passthrough.dir/compress.cc.o
-[  9%] Building C object CMakeFiles/hdf5_vol_passthrough.dir/H5VLpassthru_ext.c.o
-[ 14%] Building CXX object tests/CMakeFiles/dump_cuszp_opts.dir/dump_cuszp_opts.cc.o
 [ 19%] Linking CXX executable dump_cuszp_opts
 [ 19%] Built target dump_cuszp_opts
 [ 23%] Linking CXX shared library libhdf5_vol_passthrough.so
 [ 23%] Built target hdf5_vol_passthrough
-[ 28%] Building C object tests/CMakeFiles/test_cpu_write.dir/test_cpu_write.c.o
+[ 28%] Building C object tests/CMakeFiles/test_time_hurricane.dir/test_time_hurricane.c.o
+[ 38%] Building C object tests/CMakeFiles/test_cpu_write.dir/test_cpu_write.c.o
 [ 38%] Building C object tests/CMakeFiles/test_time_miranda.dir/test_time_miranda.c.o
-[ 42%] Building C object tests/CMakeFiles/test_time_hurricane.dir/test_time_hurricane.c.o
 [ 42%] Building C object tests/CMakeFiles/test_ci.dir/test_ci.c.o
 [ 47%] Linking C executable test_cpu_write
 [ 52%] Linking C executable test_time_hurricane
 [ 57%] Linking C executable test_ci
 [ 61%] Linking C executable test_time_miranda
 [ 61%] Built target test_cpu_write
+[ 61%] Built target test_time_hurricane
 [ 66%] Building C object tests/CMakeFiles/test_error_miranda.dir/test_error_miranda.c.o
-[ 66%] Built target test_time_hurricane
-[ 66%] Built target test_ci
-[ 66%] Built target test_time_miranda
 [ 71%] Building CXX object tests/CMakeFiles/bench_vol_timing.dir/bench_vol_timing.cc.o
+[ 71%] Built target test_ci
+[ 71%] Built target test_time_miranda
 [ 76%] Building CXX object tests/CMakeFiles/bench_pressio_timing.dir/bench_pressio_timing.cc.o
 [ 80%] Building CXX object tests/CMakeFiles/bench_filter_timing.dir/bench_filter_timing.cc.o
 [ 85%] Linking C executable test_error_miranda
 [ 85%] Built target test_error_miranda
-[ 90%] Linking CXX executable bench_pressio_timing
-[ 95%] Linking CXX executable bench_vol_timing
+[ 90%] Linking CXX executable bench_vol_timing
+[ 95%] Linking CXX executable bench_pressio_timing
 [100%] Linking CXX executable bench_filter_timing
 [100%] Built target bench_vol_timing
 [100%] Built target bench_filter_timing
@@ -135,13 +135,13 @@ nyx_vy_asinh   float  0    hdf5   (from file)            0.0        yes
 nyx_vz_asinh   float  0    hdf5   (from file)            0.0        yes
 9/9 dataset paths readable
 RANGE miranda        min=9.999878e-01 max=3.000046e+00 range=2.000058e+00 xform=none
-Info: 0x55a79ea4c4c0
+Info: 0x5653bc4db4c0
 
 === miranda (288.0 MiB, double, raw) ===
-  miranda_noop                 W=  953.35 ms  R=  505.51 ms  ratio=  1.00x  RMSE=0.000e+00
+  miranda_noop                 W= 1014.22 ms  R=  480.75 ms  ratio=  1.00x  RMSE=0.000e+00
 [dbg main] done: 1 datasets, 0 skipped
 
-=== FILE /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_miranda_noop.h5: 1 dataset-writes | create=1.19  write=953.35  close/flush=0.53 => write_total=955.07 ms | read_total=505.51 ms | ratio=1.00x ===
+=== FILE /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_miranda_noop.h5: 1 dataset-writes | create=1.34  write=1014.22  close/flush=1.95 => write_total=1017.51 ms | read_total=480.75 ms | ratio=1.00x ===
 
 === [1/3] VOL timing [ocean_noop] : ocean_temp ===
 [dbg main] h5=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_ocean_noop.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results_vol_ocean_noop.csv only=ocean_temp comp=noop debug=0
@@ -157,13 +157,13 @@ nyx_vy_asinh   float  0    hdf5   (from file)            0.0        yes
 nyx_vz_asinh   float  0    hdf5   (from file)            0.0        yes
 9/9 dataset paths readable
 RANGE ocean_temp     min=4.445019e+00 max=1.072704e+01 range=6.282023e+00 xform=none
-Info: 0x55edaba474c0
+Info: 0x5575807e84c0
 
 === ocean_temp (123.1 MiB, float, hdf5) ===
-  ocean_temp_noop              W=  631.80 ms  R=  183.07 ms  ratio=  0.99x  RMSE=0.000e+00
+  ocean_temp_noop              W=  672.61 ms  R=  181.47 ms  ratio=  0.99x  RMSE=0.000e+00
 [dbg main] done: 1 datasets, 0 skipped
 
-=== FILE /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_ocean_noop.h5: 1 dataset-writes | create=1.15  write=631.80  close/flush=1.20 => write_total=634.15 ms | read_total=183.07 ms | ratio=0.99x ===
+=== FILE /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_ocean_noop.h5: 1 dataset-writes | create=1.01  write=672.61  close/flush=1.23 => write_total=674.85 ms | read_total=181.47 ms | ratio=0.99x ===
 
 === [1/3] VOL timing [qmc_noop] : einspline37 ===
 [dbg main] h5=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_qmc_noop.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results_vol_qmc_noop.csv only=einspline37 comp=noop debug=0
@@ -179,13 +179,13 @@ nyx_vy_asinh   float  0    hdf5   (from file)            0.0        yes
 nyx_vz_asinh   float  0    hdf5   (from file)            0.0        yes
 9/9 dataset paths readable
 RANGE einspline37    min=-2.125822e+01 max=2.036857e+01 range=4.162679e+01 xform=none
-Info: 0x55f61e3684c0
+Info: 0x558416e404c0
 
 === einspline37 (12932.6 MiB, float, raw) ===
-  einspline37_noop             W=27811.33 ms  R=21693.59 ms  ratio=  1.00x  RMSE=0.000e+00
+  einspline37_noop             W=24173.09 ms  R=20835.86 ms  ratio=  1.00x  RMSE=0.000e+00
 [dbg main] done: 1 datasets, 0 skipped
 
-=== FILE /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_qmc_noop.h5: 1 dataset-writes | create=1.54  write=27811.33  close/flush=507.22 => write_total=28320.09 ms | read_total=21693.59 ms | ratio=1.00x ===
+=== FILE /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_qmc_noop.h5: 1 dataset-writes | create=0.82  write=24173.09  close/flush=1077.21 => write_total=25251.12 ms | read_total=20835.86 ms | ratio=1.00x ===
 
 === [1/3] VOL timing [nyx_noop] : nyx_baryon,nyx_dm,nyx_temp_log,nyx_vx_asinh,nyx_vy_asinh,nyx_vz_asinh ===
 [dbg main] h5=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_nyx_noop.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results_vol_nyx_noop.csv only=nyx_baryon,nyx_dm,nyx_temp_log,nyx_vx_asinh,nyx_vy_asinh,nyx_vz_asinh comp=noop debug=0
@@ -201,33 +201,33 @@ nyx_vy_asinh   float  0    hdf5   (from file)            0.0        yes
 nyx_vz_asinh   float  0    hdf5   (from file)            0.0        yes
 9/9 dataset paths readable
 RANGE nyx_baryon     min=5.799697e-02 max=1.158623e+05 range=1.158622e+05 xform=none
-Info: 0x5635e448e4c0
+Info: 0x56295f7824c0
 
 === nyx_baryon (512.0 MiB, float, hdf5) ===
-  nyx_baryon_noop              W= 1530.08 ms  R= 1020.56 ms  ratio=  1.00x  RMSE=0.000e+00
+  nyx_baryon_noop              W= 1437.25 ms  R=  809.12 ms  ratio=  1.00x  RMSE=0.000e+00
 RANGE nyx_dm         min=0.000000e+00 max=1.377893e+04 range=1.377893e+04 xform=none
 
 === nyx_dm (512.0 MiB, float, hdf5) ===
-  nyx_dm_noop                  W=  912.37 ms  R=  871.22 ms  ratio=  1.00x  RMSE=0.000e+00
+  nyx_dm_noop                  W=  897.58 ms  R=  887.97 ms  ratio=  1.00x  RMSE=0.000e+00
 RANGE nyx_temp_log   min=7.732797e+00 max=1.538049e+01 range=7.647694e+00 xform=log1p
 
 === nyx_temp_log (512.0 MiB, float, hdf5, transformed) ===
-  nyx_temp_log_noop            W=  909.53 ms  R=  781.54 ms  ratio=  1.00x  RMSE=0.000e+00 (log-space)
+  nyx_temp_log_noop            W=  850.80 ms  R=  686.40 ms  ratio=  1.00x  RMSE=0.000e+00 (log-space)
 RANGE nyx_vx_asinh   min=-1.842898e+01 max=1.797022e+01 range=3.639921e+01 xform=asinh
 
 === nyx_vx_asinh (512.0 MiB, float, hdf5, transformed) ===
-  nyx_vx_asinh_noop            W=  886.86 ms  R=  858.23 ms  ratio=  1.00x  RMSE=0.000e+00 (log-space)
+  nyx_vx_asinh_noop            W=  825.22 ms  R=  813.18 ms  ratio=  1.00x  RMSE=0.000e+00 (log-space)
 RANGE nyx_vy_asinh   min=-1.829132e+01 max=1.854300e+01 range=3.683432e+01 xform=asinh
 
 === nyx_vy_asinh (512.0 MiB, float, hdf5, transformed) ===
-  nyx_vy_asinh_noop            W=  878.94 ms  R=  781.12 ms  ratio=  1.00x  RMSE=0.000e+00 (log-space)
+  nyx_vy_asinh_noop            W=  870.52 ms  R=  796.81 ms  ratio=  1.00x  RMSE=0.000e+00 (log-space)
 RANGE nyx_vz_asinh   min=-1.817063e+01 max=1.801680e+01 range=3.618743e+01 xform=asinh
 
 === nyx_vz_asinh (512.0 MiB, float, hdf5, transformed) ===
-  nyx_vz_asinh_noop            W=  879.55 ms  R=  882.99 ms  ratio=  1.00x  RMSE=0.000e+00 (log-space)
+  nyx_vz_asinh_noop            W=  843.78 ms  R=  790.92 ms  ratio=  1.00x  RMSE=0.000e+00 (log-space)
 [dbg main] done: 6 datasets, 0 skipped
 
-=== FILE /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_nyx_noop.h5: 6 dataset-writes | create=1.42  write=5997.33  close/flush=188.16 => write_total=6186.90 ms | read_total=5195.66 ms | ratio=1.00x ===
+=== FILE /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_nyx_noop.h5: 6 dataset-writes | create=0.82  write=5725.15  close/flush=33.01 => write_total=5758.97 ms | read_total=4784.40 ms | ratio=1.00x ===
 
 === [1/3] VOL timing [miranda_cuszp] : miranda ===
 [dbg main] h5=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_miranda_cuszp.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results_vol_miranda_cuszp.csv only=miranda comp=cuszp debug=0
@@ -243,13 +243,13 @@ nyx_vy_asinh   float  0    hdf5   (from file)            0.0        yes
 nyx_vz_asinh   float  0    hdf5   (from file)            0.0        yes
 9/9 dataset paths readable
 RANGE miranda        min=9.999878e-01 max=3.000046e+00 range=2.000058e+00 xform=none
-Info: 0x5617fa4384c0
+Info: 0x55f82ddbd4c0
 
 === miranda (288.0 MiB, double, raw) ===
-  miranda_cuszp                W=  745.89 ms  R=  411.88 ms  ratio= 16.00x  RMSE=2.853e-05
+  miranda_cuszp                W=  777.08 ms  R=  392.30 ms  ratio= 16.00x  RMSE=2.853e-05
 [dbg main] done: 1 datasets, 0 skipped
 
-=== FILE /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_miranda_cuszp.h5: 1 dataset-writes | create=1.78  write=745.89  close/flush=0.49 => write_total=748.16 ms | read_total=411.88 ms | ratio=16.00x ===
+=== FILE /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_miranda_cuszp.h5: 1 dataset-writes | create=0.96  write=777.08  close/flush=0.42 => write_total=778.46 ms | read_total=392.30 ms | ratio=16.00x ===
 
 === [1/3] VOL timing [ocean_cuszp] : ocean_temp ===
 [dbg main] h5=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_ocean_cuszp.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results_vol_ocean_cuszp.csv only=ocean_temp comp=cuszp debug=0
@@ -265,13 +265,13 @@ nyx_vy_asinh   float  0    hdf5   (from file)            0.0        yes
 nyx_vz_asinh   float  0    hdf5   (from file)            0.0        yes
 9/9 dataset paths readable
 RANGE ocean_temp     min=4.445019e+00 max=1.072704e+01 range=6.282023e+00 xform=none
-Info: 0x5626b68264c0
+Info: 0x55ff353724c0
 
 === ocean_temp (123.1 MiB, float, hdf5) ===
-  ocean_temp_cuszp             W=  900.80 ms  R=  212.30 ms  ratio=  2.68x  RMSE=5.774e-05
+  ocean_temp_cuszp             W=  715.95 ms  R=  204.71 ms  ratio=  2.68x  RMSE=5.774e-05
 [dbg main] done: 1 datasets, 0 skipped
 
-=== FILE /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_ocean_cuszp.h5: 1 dataset-writes | create=1.25  write=900.80  close/flush=0.65 => write_total=902.69 ms | read_total=212.30 ms | ratio=2.68x ===
+=== FILE /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_ocean_cuszp.h5: 1 dataset-writes | create=0.97  write=715.95  close/flush=0.82 => write_total=717.74 ms | read_total=204.71 ms | ratio=2.68x ===
 
 === [1/3] VOL timing [qmc_cuszp] : einspline37 ===
 [dbg main] h5=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_qmc_cuszp.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results_vol_qmc_cuszp.csv only=einspline37 comp=cuszp debug=0
@@ -287,13 +287,13 @@ nyx_vy_asinh   float  0    hdf5   (from file)            0.0        yes
 nyx_vz_asinh   float  0    hdf5   (from file)            0.0        yes
 9/9 dataset paths readable
 RANGE einspline37    min=-2.125822e+01 max=2.036857e+01 range=4.162679e+01 xform=none
-Info: 0x55ac3daa14c0
+Info: 0x56470e9d64c0
 
 === einspline37 (12932.6 MiB, float, raw) ===
-  einspline37_cuszp            W=11844.92 ms  R=26007.23 ms  ratio=  2.51x  RMSE=5.771e-05
+  einspline37_cuszp            W=12269.45 ms  R=21901.15 ms  ratio=  2.51x  RMSE=5.771e-05
 [dbg main] done: 1 datasets, 0 skipped
 
-=== FILE /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_qmc_cuszp.h5: 1 dataset-writes | create=1.16  write=11844.92  close/flush=208.19 => write_total=12054.28 ms | read_total=26007.23 ms | ratio=2.51x ===
+=== FILE /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_qmc_cuszp.h5: 1 dataset-writes | create=0.94  write=12269.45  close/flush=223.85 => write_total=12494.25 ms | read_total=21901.15 ms | ratio=2.51x ===
 
 === [1/3] VOL timing [nyx_cuszp] : nyx_baryon,nyx_dm,nyx_temp_log,nyx_vx_asinh,nyx_vy_asinh,nyx_vz_asinh ===
 [dbg main] h5=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_nyx_cuszp.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results_vol_nyx_cuszp.csv only=nyx_baryon,nyx_dm,nyx_temp_log,nyx_vx_asinh,nyx_vy_asinh,nyx_vz_asinh comp=cuszp debug=0
@@ -309,33 +309,33 @@ nyx_vy_asinh   float  0    hdf5   (from file)            0.0        yes
 nyx_vz_asinh   float  0    hdf5   (from file)            0.0        yes
 9/9 dataset paths readable
 RANGE nyx_baryon     min=5.799697e-02 max=1.158623e+05 range=1.158622e+05 xform=none
-Info: 0x55f9b57cd4c0
+Info: 0x55f1454e24c0
 
 === nyx_baryon (512.0 MiB, float, hdf5) ===
-  nyx_baryon_cuszp             W= 1137.06 ms  R= 1058.37 ms  ratio=  2.69x  RMSE=5.775e-05
+  nyx_baryon_cuszp             W= 1167.32 ms  R=  955.87 ms  ratio=  2.69x  RMSE=5.775e-05
 RANGE nyx_dm         min=0.000000e+00 max=1.377893e+04 range=1.377893e+04 xform=none
 
 === nyx_dm (512.0 MiB, float, hdf5) ===
-  nyx_dm_cuszp                 W=  465.10 ms  R= 1062.37 ms  ratio=  2.18x  RMSE=5.695e-05
+  nyx_dm_cuszp                 W=  440.75 ms  R=  927.03 ms  ratio=  2.18x  RMSE=5.695e-05
 RANGE nyx_temp_log   min=7.732797e+00 max=1.538049e+01 range=7.647694e+00 xform=log1p
 
 === nyx_temp_log (512.0 MiB, float, hdf5, transformed) ===
-  nyx_temp_log_cuszp           W=  376.91 ms  R=  875.27 ms  ratio=  2.80x  RMSE=5.774e-05 (log-space)
+  nyx_temp_log_cuszp           W=  350.16 ms  R=  882.52 ms  ratio=  2.80x  RMSE=5.774e-05 (log-space)
 RANGE nyx_vx_asinh   min=-1.842898e+01 max=1.797022e+01 range=3.639921e+01 xform=asinh
 
 === nyx_vx_asinh (512.0 MiB, float, hdf5, transformed) ===
-  nyx_vx_asinh_cuszp           W=  330.39 ms  R=  866.51 ms  ratio=  3.12x  RMSE=5.774e-05 (log-space)
+  nyx_vx_asinh_cuszp           W=  323.25 ms  R=  804.03 ms  ratio=  3.12x  RMSE=5.774e-05 (log-space)
 RANGE nyx_vy_asinh   min=-1.829132e+01 max=1.854300e+01 range=3.683432e+01 xform=asinh
 
 === nyx_vy_asinh (512.0 MiB, float, hdf5, transformed) ===
-  nyx_vy_asinh_cuszp           W=  371.56 ms  R=  882.97 ms  ratio=  2.84x  RMSE=5.773e-05 (log-space)
+  nyx_vy_asinh_cuszp           W=  348.74 ms  R=  843.03 ms  ratio=  2.84x  RMSE=5.773e-05 (log-space)
 RANGE nyx_vz_asinh   min=-1.817063e+01 max=1.801680e+01 range=3.618743e+01 xform=asinh
 
 === nyx_vz_asinh (512.0 MiB, float, hdf5, transformed) ===
-  nyx_vz_asinh_cuszp           W=  425.74 ms  R=  893.66 ms  ratio=  2.38x  RMSE=5.774e-05 (log-space)
+  nyx_vz_asinh_cuszp           W=  409.34 ms  R=  884.89 ms  ratio=  2.38x  RMSE=5.774e-05 (log-space)
 [dbg main] done: 6 datasets, 0 skipped
 
-=== FILE /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_nyx_cuszp.h5: 6 dataset-writes | create=1.13  write=3106.77  close/flush=69.81 => write_total=3177.71 ms | read_total=5639.15 ms | ratio=2.63x ===
+=== FILE /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_nyx_cuszp.h5: 6 dataset-writes | create=0.98  write=3039.55  close/flush=87.96 => write_total=3128.49 ms | read_total=5297.37 ms | ratio=2.63x ===
 
 === [1/3] VOL timing [miranda_sz3_1e3] : miranda ===
 [dbg main] h5=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_miranda_sz3_1e3.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results_vol_miranda_sz3_1e3.csv only=miranda comp=sz3_1e3 debug=0
@@ -351,13 +351,13 @@ nyx_vy_asinh   float  0    hdf5   (from file)            0.0        yes
 nyx_vz_asinh   float  0    hdf5   (from file)            0.0        yes
 9/9 dataset paths readable
 RANGE miranda        min=9.999878e-01 max=3.000046e+00 range=2.000058e+00 xform=none
-Info: 0x5572285e24c0
+Info: 0x55bc8e5bd4c0
 
 === miranda (288.0 MiB, double, raw) ===
-  miranda_sz3_1e3              W= 1460.57 ms  R=  812.78 ms  ratio= 57.60x  RMSE=2.786e-04
+  miranda_sz3_1e3              W= 1370.35 ms  R=  833.74 ms  ratio= 57.60x  RMSE=2.786e-04
 [dbg main] done: 1 datasets, 0 skipped
 
-=== FILE /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_miranda_sz3_1e3.h5: 1 dataset-writes | create=1.49  write=1460.57  close/flush=0.98 => write_total=1463.04 ms | read_total=812.78 ms | ratio=57.60x ===
+=== FILE /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_miranda_sz3_1e3.h5: 1 dataset-writes | create=1.02  write=1370.35  close/flush=0.50 => write_total=1371.86 ms | read_total=833.74 ms | ratio=57.60x ===
 
 === [1/3] VOL timing [ocean_sz3_1e3] : ocean_temp ===
 [dbg main] h5=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_ocean_sz3_1e3.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results_vol_ocean_sz3_1e3.csv only=ocean_temp comp=sz3_1e3 debug=0
@@ -373,13 +373,13 @@ nyx_vy_asinh   float  0    hdf5   (from file)            0.0        yes
 nyx_vz_asinh   float  0    hdf5   (from file)            0.0        yes
 9/9 dataset paths readable
 RANGE ocean_temp     min=4.445019e+00 max=1.072704e+01 range=6.282023e+00 xform=none
-Info: 0x563e831b64c0
+Info: 0x56352bd414c0
 
 === ocean_temp (123.1 MiB, float, hdf5) ===
-  ocean_temp_sz3_1e3           W= 1603.55 ms  R= 1112.10 ms  ratio=  4.74x  RMSE=5.765e-04
+  ocean_temp_sz3_1e3           W= 1565.41 ms  R= 1038.38 ms  ratio=  4.74x  RMSE=5.765e-04
 [dbg main] done: 1 datasets, 0 skipped
 
-=== FILE /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_ocean_sz3_1e3.h5: 1 dataset-writes | create=1.07  write=1603.55  close/flush=1.13 => write_total=1605.75 ms | read_total=1112.10 ms | ratio=4.74x ===
+=== FILE /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_ocean_sz3_1e3.h5: 1 dataset-writes | create=1.39  write=1565.41  close/flush=1.50 => write_total=1568.31 ms | read_total=1038.38 ms | ratio=4.74x ===
 
 === [1/3] VOL timing [qmc_sz3_1e3] : einspline37 ===
 [dbg main] h5=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_qmc_sz3_1e3.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results_vol_qmc_sz3_1e3.csv only=einspline37 comp=sz3_1e3 debug=0
@@ -395,13 +395,13 @@ nyx_vy_asinh   float  0    hdf5   (from file)            0.0        yes
 nyx_vz_asinh   float  0    hdf5   (from file)            0.0        yes
 9/9 dataset paths readable
 RANGE einspline37    min=-2.125822e+01 max=2.036857e+01 range=4.162679e+01 xform=none
-Info: 0x5619525ff4c0
+Info: 0x562cd6a984c0
 
 === einspline37 (12932.6 MiB, float, raw) ===
-  einspline37_sz3_1e3          W=125909.69 ms  R=147353.58 ms  ratio=  3.38x  RMSE=5.742e-04
+  einspline37_sz3_1e3          W=113103.38 ms  R=134281.70 ms  ratio=  3.38x  RMSE=5.742e-04
 [dbg main] done: 1 datasets, 0 skipped
 
-=== FILE /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_qmc_sz3_1e3.h5: 1 dataset-writes | create=1.19  write=125909.69  close/flush=256.74 => write_total=126167.62 ms | read_total=147353.58 ms | ratio=3.38x ===
+=== FILE /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_qmc_sz3_1e3.h5: 1 dataset-writes | create=1.03  write=113103.38  close/flush=312.67 => write_total=113417.08 ms | read_total=134281.70 ms | ratio=3.38x ===
 
 === [1/3] VOL timing [nyx_sz3_1e3] : nyx_baryon,nyx_dm,nyx_temp_log,nyx_vx_asinh,nyx_vy_asinh,nyx_vz_asinh ===
 [dbg main] h5=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_nyx_sz3_1e3.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results_vol_nyx_sz3_1e3.csv only=nyx_baryon,nyx_dm,nyx_temp_log,nyx_vx_asinh,nyx_vy_asinh,nyx_vz_asinh comp=sz3_1e3 debug=0
@@ -417,33 +417,33 @@ nyx_vy_asinh   float  0    hdf5   (from file)            0.0        yes
 nyx_vz_asinh   float  0    hdf5   (from file)            0.0        yes
 9/9 dataset paths readable
 RANGE nyx_baryon     min=5.799697e-02 max=1.158623e+05 range=1.158622e+05 xform=none
-Info: 0x563fbf6fa4c0
+Info: 0x55f7c4e6b4c0
 
 === nyx_baryon (512.0 MiB, float, hdf5) ===
-  nyx_baryon_sz3_1e3           W= 5423.62 ms  R= 5086.99 ms  ratio=  4.65x  RMSE=5.771e-04
+  nyx_baryon_sz3_1e3           W= 4976.68 ms  R= 4684.92 ms  ratio=  4.65x  RMSE=5.771e-04
 RANGE nyx_dm         min=0.000000e+00 max=1.377893e+04 range=1.377893e+04 xform=none
 
 === nyx_dm (512.0 MiB, float, hdf5) ===
-  nyx_dm_sz3_1e3               W= 4810.49 ms  R= 6401.47 ms  ratio=  3.18x  RMSE=5.766e-04
+  nyx_dm_sz3_1e3               W= 4387.73 ms  R= 5986.93 ms  ratio=  3.18x  RMSE=5.766e-04
 RANGE nyx_temp_log   min=7.732797e+00 max=1.538049e+01 range=7.647694e+00 xform=log1p
 
 === nyx_temp_log (512.0 MiB, float, hdf5, transformed) ===
-  nyx_temp_log_sz3_1e3         W= 4485.09 ms  R= 4477.49 ms  ratio=  5.02x  RMSE=5.772e-04 (log-space)
+  nyx_temp_log_sz3_1e3         W= 4261.17 ms  R= 4006.78 ms  ratio=  5.02x  RMSE=5.772e-04 (log-space)
 RANGE nyx_vx_asinh   min=-1.842898e+01 max=1.797022e+01 range=3.639921e+01 xform=asinh
 
 === nyx_vx_asinh (512.0 MiB, float, hdf5, transformed) ===
-  nyx_vx_asinh_sz3_1e3         W= 5607.66 ms  R= 4716.39 ms  ratio=  6.48x  RMSE=5.759e-04 (log-space)
+  nyx_vx_asinh_sz3_1e3         W= 5214.76 ms  R= 4475.72 ms  ratio=  6.48x  RMSE=5.759e-04 (log-space)
 RANGE nyx_vy_asinh   min=-1.829132e+01 max=1.854300e+01 range=3.683432e+01 xform=asinh
 
 === nyx_vy_asinh (512.0 MiB, float, hdf5, transformed) ===
-  nyx_vy_asinh_sz3_1e3         W= 5461.18 ms  R= 4913.04 ms  ratio=  5.51x  RMSE=5.750e-04 (log-space)
+  nyx_vy_asinh_sz3_1e3         W= 5224.68 ms  R= 4550.06 ms  ratio=  5.51x  RMSE=5.750e-04 (log-space)
 RANGE nyx_vz_asinh   min=-1.817063e+01 max=1.801680e+01 range=3.618743e+01 xform=asinh
 
 === nyx_vz_asinh (512.0 MiB, float, hdf5, transformed) ===
-  nyx_vz_asinh_sz3_1e3         W= 5508.75 ms  R= 5501.71 ms  ratio=  4.57x  RMSE=5.773e-04 (log-space)
+  nyx_vz_asinh_sz3_1e3         W= 5228.36 ms  R= 5169.39 ms  ratio=  4.57x  RMSE=5.773e-04 (log-space)
 [dbg main] done: 6 datasets, 0 skipped
 
-=== FILE /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_nyx_sz3_1e3.h5: 6 dataset-writes | create=1.26  write=31296.79  close/flush=63.99 => write_total=31362.04 ms | read_total=31097.09 ms | ratio=4.68x ===
+=== FILE /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_nyx_sz3_1e3.h5: 6 dataset-writes | create=0.98  write=29293.38  close/flush=16.84 => write_total=29311.21 ms | read_total=28873.80 ms | ratio=4.68x ===
 
 === [1/3] VOL timing [miranda_sz3_1e6] : miranda ===
 [dbg main] h5=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_miranda_sz3_1e6.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results_vol_miranda_sz3_1e6.csv only=miranda comp=sz3_1e6 debug=0
@@ -459,13 +459,13 @@ nyx_vy_asinh   float  0    hdf5   (from file)            0.0        yes
 nyx_vz_asinh   float  0    hdf5   (from file)            0.0        yes
 9/9 dataset paths readable
 RANGE miranda        min=9.999878e-01 max=3.000046e+00 range=2.000058e+00 xform=none
-Info: 0x55c96d8ab4c0
+Info: 0x560897abd4c0
 
 === miranda (288.0 MiB, double, raw) ===
-  miranda_sz3_1e6              W= 1982.94 ms  R= 1264.88 ms  ratio= 13.09x  RMSE=2.972e-07
+  miranda_sz3_1e6              W= 1742.06 ms  R= 1144.39 ms  ratio= 13.09x  RMSE=2.972e-07
 [dbg main] done: 1 datasets, 0 skipped
 
-=== FILE /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_miranda_sz3_1e6.h5: 1 dataset-writes | create=1.36  write=1982.94  close/flush=1.31 => write_total=1985.62 ms | read_total=1264.88 ms | ratio=13.09x ===
+=== FILE /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_miranda_sz3_1e6.h5: 1 dataset-writes | create=1.06  write=1742.06  close/flush=0.93 => write_total=1744.05 ms | read_total=1144.39 ms | ratio=13.09x ===
 
 === [1/3] VOL timing [ocean_sz3_1e6] : ocean_temp ===
 [dbg main] h5=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_ocean_sz3_1e6.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results_vol_ocean_sz3_1e6.csv only=ocean_temp comp=sz3_1e6 debug=0
@@ -481,13 +481,13 @@ nyx_vy_asinh   float  0    hdf5   (from file)            0.0        yes
 nyx_vz_asinh   float  0    hdf5   (from file)            0.0        yes
 9/9 dataset paths readable
 RANGE ocean_temp     min=4.445019e+00 max=1.072704e+01 range=6.282023e+00 xform=none
-Info: 0x56014281b4c0
+Info: 0x562ac6fc34c0
 
 === ocean_temp (123.1 MiB, float, hdf5) ===
-  ocean_temp_sz3_1e6           W= 3634.22 ms  R= 2287.73 ms  ratio=  1.62x  RMSE=4.650e-07
+  ocean_temp_sz3_1e6           W= 3195.14 ms  R= 2169.94 ms  ratio=  1.62x  RMSE=4.650e-07
 [dbg main] done: 1 datasets, 0 skipped
 
-=== FILE /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_ocean_sz3_1e6.h5: 1 dataset-writes | create=1.38  write=3634.22  close/flush=3.51 => write_total=3639.10 ms | read_total=2287.73 ms | ratio=1.62x ===
+=== FILE /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_ocean_sz3_1e6.h5: 1 dataset-writes | create=0.98  write=3195.14  close/flush=2.22 => write_total=3198.33 ms | read_total=2169.94 ms | ratio=1.62x ===
 
 === [1/3] VOL timing [qmc_sz3_1e6] : einspline37 ===
 [dbg main] h5=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_qmc_sz3_1e6.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results_vol_qmc_sz3_1e6.csv only=einspline37 comp=sz3_1e6 debug=0
@@ -503,4 +503,147 @@ nyx_vy_asinh   float  0    hdf5   (from file)            0.0        yes
 nyx_vz_asinh   float  0    hdf5   (from file)            0.0        yes
 9/9 dataset paths readable
 RANGE einspline37    min=-2.125822e+01 max=2.036857e+01 range=4.162679e+01 xform=none
-=>> PBS: job killed: walltime 953 exceeded limit 900
+Info: 0x556442c2e4c0
+
+=== einspline37 (12932.6 MiB, float, raw) ===
+  einspline37_sz3_1e6          W=196146.91 ms  R=149100.77 ms  ratio=  1.27x  RMSE=2.848e-07
+[dbg main] done: 1 datasets, 0 skipped
+
+=== FILE /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_qmc_sz3_1e6.h5: 1 dataset-writes | create=0.90  write=196146.91  close/flush=441.46 => write_total=196589.27 ms | read_total=149100.77 ms | ratio=1.27x ===
+
+=== [1/3] VOL timing [nyx_sz3_1e6] : nyx_baryon,nyx_dm,nyx_temp_log,nyx_vx_asinh,nyx_vy_asinh,nyx_vz_asinh ===
+[dbg main] h5=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_nyx_sz3_1e6.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results_vol_nyx_sz3_1e6.csv only=nyx_baryon,nyx_dm,nyx_temp_log,nyx_vx_asinh,nyx_vy_asinh,nyx_vz_asinh comp=sz3_1e6 debug=0
+name           dtype  rank src    dims                   MiB        exists
+miranda        double 3    raw    256x384x384            288.0      yes
+ocean_temp     float  0    hdf5   (from file)            0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        yes
+nyx_dm         float  0    hdf5   (from file)            0.0        yes
+nyx_temp_log   float  0    hdf5   (from file)            0.0        yes
+nyx_vx_asinh   float  0    hdf5   (from file)            0.0        yes
+nyx_vy_asinh   float  0    hdf5   (from file)            0.0        yes
+nyx_vz_asinh   float  0    hdf5   (from file)            0.0        yes
+9/9 dataset paths readable
+RANGE nyx_baryon     min=5.799697e-02 max=1.158623e+05 range=1.158622e+05 xform=none
+Info: 0x55eaceb4a4c0
+
+=== nyx_baryon (512.0 MiB, float, hdf5) ===
+  nyx_baryon_sz3_1e6           W= 8293.23 ms  R= 9891.70 ms  ratio=  1.71x  RMSE=5.068e-07
+RANGE nyx_dm         min=0.000000e+00 max=1.377893e+04 range=1.377893e+04 xform=none
+
+=== nyx_dm (512.0 MiB, float, hdf5) ===
+  nyx_dm_sz3_1e6               W=11549.03 ms  R= 5052.26 ms  ratio=  1.18x  RMSE=2.424e-07
+RANGE nyx_temp_log   min=7.732797e+00 max=1.538049e+01 range=7.647694e+00 xform=log1p
+
+=== nyx_temp_log (512.0 MiB, float, hdf5, transformed) ===
+  nyx_temp_log_sz3_1e6         W= 8586.13 ms  R= 9436.66 ms  ratio=  1.83x  RMSE=6.451e-07 (log-space)
+RANGE nyx_vx_asinh   min=-1.842898e+01 max=1.797022e+01 range=3.639921e+01 xform=asinh
+
+=== nyx_vx_asinh (512.0 MiB, float, hdf5, transformed) ===
+  nyx_vx_asinh_sz3_1e6         W= 9197.64 ms  R= 8956.98 ms  ratio=  2.01x  RMSE=5.654e-07 (log-space)
+RANGE nyx_vy_asinh   min=-1.829132e+01 max=1.854300e+01 range=3.683432e+01 xform=asinh
+
+=== nyx_vy_asinh (512.0 MiB, float, hdf5, transformed) ===
+  nyx_vy_asinh_sz3_1e6         W= 8044.85 ms  R= 9055.03 ms  ratio=  1.88x  RMSE=6.066e-07 (log-space)
+RANGE nyx_vz_asinh   min=-1.817063e+01 max=1.801680e+01 range=3.618743e+01 xform=asinh
+
+=== nyx_vz_asinh (512.0 MiB, float, hdf5, transformed) ===
+  nyx_vz_asinh_sz3_1e6         W= 7538.88 ms  R= 9050.90 ms  ratio=  1.69x  RMSE=5.998e-07 (log-space)
+[dbg main] done: 6 datasets, 0 skipped
+
+=== FILE /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_nyx_sz3_1e6.h5: 6 dataset-writes | create=0.98  write=53209.76  close/flush=267.80 => write_total=53478.55 ms | read_total=51443.52 ms | ratio=1.67x ===
+
+=== [1/3] VOL timing [miranda_bzip2] : miranda ===
+[dbg main] h5=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_miranda_bzip2.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results_vol_miranda_bzip2.csv only=miranda comp=bzip2 debug=0
+name           dtype  rank src    dims                   MiB        exists
+miranda        double 3    raw    256x384x384            288.0      yes
+ocean_temp     float  0    hdf5   (from file)            0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        yes
+nyx_dm         float  0    hdf5   (from file)            0.0        yes
+nyx_temp_log   float  0    hdf5   (from file)            0.0        yes
+nyx_vx_asinh   float  0    hdf5   (from file)            0.0        yes
+nyx_vy_asinh   float  0    hdf5   (from file)            0.0        yes
+nyx_vz_asinh   float  0    hdf5   (from file)            0.0        yes
+9/9 dataset paths readable
+RANGE miranda        min=9.999878e-01 max=3.000046e+00 range=2.000058e+00 xform=none
+Info: 0x5611cc6db4c0
+
+=== miranda (288.0 MiB, double, raw) ===
+  miranda_bzip2                W=22926.85 ms  R=11391.70 ms  ratio=  2.34x  RMSE=0.000e+00
+[dbg main] done: 1 datasets, 0 skipped
+
+=== FILE /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_miranda_bzip2.h5: 1 dataset-writes | create=1.21  write=22926.85  close/flush=2.27 => write_total=22930.32 ms | read_total=11391.70 ms | ratio=2.34x ===
+
+=== [1/3] VOL timing [ocean_bzip2] : ocean_temp ===
+[dbg main] h5=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_ocean_bzip2.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results_vol_ocean_bzip2.csv only=ocean_temp comp=bzip2 debug=0
+name           dtype  rank src    dims                   MiB        exists
+miranda        double 3    raw    256x384x384            288.0      yes
+ocean_temp     float  0    hdf5   (from file)            0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        yes
+nyx_dm         float  0    hdf5   (from file)            0.0        yes
+nyx_temp_log   float  0    hdf5   (from file)            0.0        yes
+nyx_vx_asinh   float  0    hdf5   (from file)            0.0        yes
+nyx_vy_asinh   float  0    hdf5   (from file)            0.0        yes
+nyx_vz_asinh   float  0    hdf5   (from file)            0.0        yes
+9/9 dataset paths readable
+RANGE ocean_temp     min=4.445019e+00 max=1.072704e+01 range=6.282023e+00 xform=none
+Info: 0x56252d55f4c0
+
+=== ocean_temp (123.1 MiB, float, hdf5) ===
+  ocean_temp_bzip2             W=12498.84 ms  R= 5831.39 ms  ratio=  1.50x  RMSE=0.000e+00
+[dbg main] done: 1 datasets, 0 skipped
+
+=== FILE /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_ocean_bzip2.h5: 1 dataset-writes | create=0.95  write=12498.84  close/flush=3.12 => write_total=12502.91 ms | read_total=5831.39 ms | ratio=1.50x ===
+
+=== [1/3] VOL timing [qmc_bzip2] : einspline37 ===
+[dbg main] h5=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_qmc_bzip2.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results_vol_qmc_bzip2.csv only=einspline37 comp=bzip2 debug=0
+name           dtype  rank src    dims                   MiB        exists
+miranda        double 3    raw    256x384x384            288.0      yes
+ocean_temp     float  0    hdf5   (from file)            0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        yes
+nyx_dm         float  0    hdf5   (from file)            0.0        yes
+nyx_temp_log   float  0    hdf5   (from file)            0.0        yes
+nyx_vx_asinh   float  0    hdf5   (from file)            0.0        yes
+nyx_vy_asinh   float  0    hdf5   (from file)            0.0        yes
+nyx_vz_asinh   float  0    hdf5   (from file)            0.0        yes
+9/9 dataset paths readable
+RANGE einspline37    min=-2.125822e+01 max=2.036857e+01 range=4.162679e+01 xform=none
+Info: 0x5579e99da4c0
+
+=== einspline37 (12932.6 MiB, float, raw) ===
+  einspline37_bzip2            W=1333312.72 ms  R=773647.43 ms  ratio=  1.03x  RMSE=0.000e+00
+[dbg main] done: 1 datasets, 0 skipped
+
+=== FILE /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_qmc_bzip2.h5: 1 dataset-writes | create=1.36  write=1333312.72  close/flush=596.52 => write_total=1333910.59 ms | read_total=773647.43 ms | ratio=1.03x ===
+
+=== [1/3] VOL timing [nyx_bzip2] : nyx_baryon,nyx_dm,nyx_temp_log,nyx_vx_asinh,nyx_vy_asinh,nyx_vz_asinh ===
+[dbg main] h5=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_nyx_bzip2.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results_vol_nyx_bzip2.csv only=nyx_baryon,nyx_dm,nyx_temp_log,nyx_vx_asinh,nyx_vy_asinh,nyx_vz_asinh comp=bzip2 debug=0
+name           dtype  rank src    dims                   MiB        exists
+miranda        double 3    raw    256x384x384            288.0      yes
+ocean_temp     float  0    hdf5   (from file)            0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        yes
+nyx_dm         float  0    hdf5   (from file)            0.0        yes
+nyx_temp_log   float  0    hdf5   (from file)            0.0        yes
+nyx_vx_asinh   float  0    hdf5   (from file)            0.0        yes
+nyx_vy_asinh   float  0    hdf5   (from file)            0.0        yes
+nyx_vz_asinh   float  0    hdf5   (from file)            0.0        yes
+9/9 dataset paths readable
+RANGE nyx_baryon     min=5.799697e-02 max=1.158623e+05 range=1.158622e+05 xform=none
+Info: 0x55bb4ff534c0
+
+=== nyx_baryon (512.0 MiB, float, hdf5) ===
+  nyx_baryon_bzip2             W=53169.22 ms  R=29570.07 ms  ratio=  1.10x  RMSE=0.000e+00
+RANGE nyx_dm         min=0.000000e+00 max=1.377893e+04 range=1.377893e+04 xform=none
+
+=== nyx_dm (512.0 MiB, float, hdf5) ===
+  nyx_dm_bzip2                 W=52187.29 ms  R=29146.43 ms  ratio=  1.09x  RMSE=0.000e+00
+RANGE nyx_temp_log   min=7.732797e+00 max=1.538049e+01 range=7.647694e+00 xform=log1p
+
+=== nyx_temp_log (512.0 MiB, float, hdf5, transformed) ===
+  nyx_temp_log_bzip2           W=49156.97 ms  R=24025.00 ms  ratio=  1.46x  RMSE=0.000e+00 (log-space)
+RANGE nyx_vx_asinh   min=-1.842898e+01 max=1.797022e+01 range=3.639921e+01 xform=asinh
+=>> PBS: job killed: walltime 3691 exceeded limit 3600

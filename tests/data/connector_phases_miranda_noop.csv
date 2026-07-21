@@ -1,3 +1,3 @@
 dataset,compressor,op,total_ms,compress_ms,io_ms,overhead_ms,overhead_pct
-miranda_noop,noop,write,952.3621,781.6981,144.4020,26.2620,2.76
-miranda_noop,noop,read,505.3671,169.6380,217.6952,118.0339,23.36
+miranda_noop,noop,write,1013.7343,849.2969,135.4930,28.9444,2.86
+miranda_noop,noop,read,480.6353,158.2051,211.5204,110.9098,23.08
