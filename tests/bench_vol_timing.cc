@@ -153,29 +153,31 @@ static void run_pair(hid_t file, const bench_dataset_t *d,
     /* Two views of fidelity:
      *   st_tx  = error in the space the codec bounds (transformed) -> bound check
      *   st_lin = error inverse-transformed to physical units       -> reported   */
-    bench_stats st_tx  = bench_compute_stats(hbuf, rbuf, nelem, d->dtype, BENCH_XFORM_NONE);
-    bench_stats st_lin = (d->xform == BENCH_XFORM_NONE)
-                       ? st_tx
-                       : bench_compute_stats(hbuf, rbuf, nelem, d->dtype, d->xform);
+/* RMSE in the space the codec bounds (transformed for log/asinh rows).
+     * For untransformed rows st_tx is already physical -- nothing changes. */
+    bench_stats st_tx = bench_compute_stats(hbuf, rbuf, nelem, d->dtype, BENCH_XFORM_NONE);
 
     if (dbg) {
+        bench_stats st_lin = (d->xform == BENCH_XFORM_NONE)
+                           ? st_tx
+                           : bench_compute_stats(hbuf, rbuf, nelem, d->dtype, d->xform);
         double range_tx = st_tx.max - st_tx.min;
         double arel_tx  = (range_tx > 0.0) ? st_tx.rmse / range_tx : 0.0;
         std::fprintf(stderr,
-            "[dbg run_pair] %-24s rms=%.2f  RMSE_lin=%.6e  RMSE_codecspace=%.6e "
+            "[dbg run_pair] %-24s rms=%.2f  RMSE_codec=%.6e  RMSE_physical=%.6e "
             "achieved_rel=%.3e (nominal=%.3e)\n",
-            dsname, rms, st_lin.rmse, st_tx.rmse, arel_tx, d->bound);
+            dsname, rms, st_tx.rmse, st_lin.rmse, arel_tx, d->bound);
         if (d->bound_mode == BENCH_BOUND_REL && arel_tx > 2.0 * d->bound)
             std::fprintf(stderr, "[dbg WARN] %-24s codec not honoring bound "
-                         "(achieved_rel %.3e > nominal %.3e in codec space)\n",
+                         "(achieved_rel %.3e > nominal %.3e)\n",
                          dsname, arel_tx, d->bound);
     }
 
-    bench_csv_row(csv, d->name, c->name, "vol", "read", "total", rms, -1.0, st_lin.rmse);
+    bench_csv_row(csv, d->name, c->name, "vol", "read", "total", rms, -1.0, st_tx.rmse);
 
     std::printf("  %-28s W=%8.2f ms  R=%8.2f ms  ratio=%6.2fx  RMSE=%.3e%s\n",
-                dsname, wms, rms, wratio, st_lin.rmse,
-                (d->xform != BENCH_XFORM_NONE) ? " (physical)" : "");
+                dsname, wms, rms, wratio, st_tx.rmse,
+                (d->xform != BENCH_XFORM_NONE) ? " (log-space)" : "");
     std::fflush(stdout);
 
   } catch (const std::exception &e) {
