@@ -1,7 +1,0 @@
-dataset,compressor,op,total_ms,compress_ms,io_ms,overhead_ms,overhead_pct
-einspline37_noop,noop,write,22270.4655,16463.3719,4659.4241,1147.6695,5.15
-einspline37_noop,noop,read,19655.7086,7022.7631,8127.7052,4505.2403,22.92
-einspline37_cuszp,cuszp,write,13874.2838,4639.6259,2361.4637,6873.1942,49.54
-einspline37_cuszp,cuszp,read,23685.4647,16108.5810,3496.7988,4080.0849,17.23
-einspline37_sz3_1e3,sz3,write,115031.8881,112506.4546,2189.2893,336.1442,0.29
-einspline37_sz3_1e3,sz3,read,134049.3048,124044.4486,2299.5443,7705.3120,5.75

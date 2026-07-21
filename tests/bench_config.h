@@ -397,13 +397,13 @@ static const bench_compressor_t BENCH_COMPRESSORS[] = {
       "{\"sz3:error_bound_mode_str\":\"abs\",\"sz3:abs_error_bound\":1e-3}",
       BENCH_CPU_CODEC, 0, NULL, "CPU error-bounded lossy, abs 1e-3." },
 
-    // { "sz3_1e6", "sz3",
-    //   "{\"sz3:error_bound_mode_str\":\"abs\",\"sz3:abs_error_bound\":1e-6}",
-    //   BENCH_CPU_CODEC, 0, NULL, "CPU error-bounded lossy, abs 1e-6 (tighter)." },
+    { "sz3_1e6", "sz3",
+      "{\"sz3:error_bound_mode_str\":\"abs\",\"sz3:abs_error_bound\":1e-6}",
+      BENCH_CPU_CODEC, 0, NULL, "CPU error-bounded lossy, abs 1e-6 (tighter)." },
 
-    // { "bzip2", "bzip2",
-    //   "{\"bzip2:block_size\":9}",
-    //   BENCH_CPU_CODEC, 1, NULL, "CPU lossless, general purpose. CPU comparator." },
+    { "bzip2", "bzip2",
+      "{\"bzip2:block_size\":9}",
+      BENCH_CPU_CODEC, 1, NULL, "CPU lossless, general purpose. CPU comparator." },
 };
 
 #define BENCH_NUM_COMPRESSORS \

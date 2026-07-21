@@ -91,25 +91,28 @@ echo "=== [0/3] Dump cuszp option keys ==="
 PLUGIN_DIR="$(pwd)/build"
 
 run_vol_group () {
-    local tag="$1"; local sel="$2"
-    local h5="$WORK/bench_${tag}.h5"
-    local rcsv="$WORK/results_vol_${tag}.csv"
-    local pcsv="$WORK/connector_phases_${tag}.csv"
+    local tag="$1"; local sel="$2"; local comp="$3"
+    local label="${tag}_${comp}"
+    local h5="$WORK/bench_${label}.h5"
+    local rcsv="$WORK/results_vol_${label}.csv"
+    local pcsv="$WORK/connector_phases_${label}.csv"
     rm -f "$h5"
     echo ""
-    echo "=== [1/3] VOL timing [$tag] : $sel ==="
+    echo "=== [1/3] VOL timing [$label] : $sel ==="
     env HDF5_VOL_CONNECTOR="pass_through_ext under_vol=0;under_info={}" \
         HDF5_PLUGIN_PATH="$PLUGIN_DIR" \
         BENCH_ONLY="$sel" \
+        BENCH_COMP="$comp" \
         BENCH_CSV="$pcsv" \
         ./build/tests/bench_vol_timing "$h5" "$rcsv"
 }
 
-run_vol_group miranda "miranda"
-run_vol_group ocean   "ocean_temp"
-run_vol_group qmc     "einspline37"
-run_vol_group nyx "nyx_baryon,nyx_dm,nyx_temp_log,nyx_vx_asinh,nyx_vy_asinh,nyx_vz_asinh"
-
+for comp in noop cuszp sz3_1e3; do
+    run_vol_group miranda "miranda" "$comp"
+    run_vol_group ocean   "ocean_temp" "$comp"
+    run_vol_group qmc     "einspline37" "$comp"
+    run_vol_group nyx "nyx_baryon,nyx_dm,nyx_temp_log,nyx_vx_asinh,nyx_vy_asinh,nyx_vz_asinh" "$comp"
+done
 # echo ""
 # echo "=== [2/3] Pressio-only compressor timing ==="
 # ./build/tests/bench_pressio_timing "$WORK/payload.bin" "$WORK/results_pressio.csv"
@@ -129,8 +132,8 @@ for tag in miranda ocean nyx nyx_log; do
 done
 
 echo ""
-echo "=== FILE-LEVEL summary (phase=file rows across all groups) ==="
-grep -h ',file,' "$WORK"/results_vol_*.csv 2>/dev/null || echo "(no file rows -- check schema)"
+echo "=== FILE-LEVEL summary (phase=file, per group × codec) ==="
+grep -h ',file,' "$WORK"/results_vol_*.csv 2>/dev/null | sort || echo "(no file rows)"
 
 # echo "=== results_pressio.csv ==="
 # column -t -s, "$WORK/results_pressio.csv"
