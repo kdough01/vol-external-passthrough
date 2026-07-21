@@ -15,6 +15,10 @@ extern "C" {
 #include <libpressio_ext/cpp/domain.h>
 #include <libpressio_ext/cpp/domain_manager.h>
 #include "vol_timing_sink.h"
+#include <memory>
+#include <libpressio_ext/cpp/compressor.h>
+#include <libpressio_ext/cpp/options.h>
+#include <libpressio_ext/cpp/pressio.h>
 
 #ifdef USE_CUDA
 #include <cuda_runtime.h>
@@ -55,6 +59,74 @@ vol_ptr_domain(const void *p)
 {
     return H5VL_pass_through_ext_buf_is_device(p) ? "cudamalloc" : "malloc";
 }
+
+namespace {
+struct vol_host_output_plugin final : public libpressio_compressor_plugin {
+    pressio_compressor child    = compressor_plugins().build("noop");
+    std::string        child_id = "noop";
+
+    struct pressio_options get_options_impl() const override {
+        pressio_options opts;
+        set_meta(opts, "vol_host_output:compressor", child_id, child);
+        return opts;
+    }
+    int set_options_impl(pressio_options const& opts) override {
+        get_meta(opts, "vol_host_output:compressor", compressor_plugins(),
+                 child_id, child);
+        return 0;
+    }
+    struct pressio_options get_configuration_impl() const override {
+        pressio_options opts;
+        set_meta_configuration(opts, "vol_host_output:compressor",
+                               compressor_plugins(), child);
+        set(opts, "pressio:thread_safe", pressio_thread_safety_multiple);
+        set(opts, "pressio:stability", "external");
+        return opts;
+    }
+    struct pressio_options get_documentation_impl() const override {
+        pressio_options opts;
+        set_meta_docs(opts, "vol_host_output:compressor",
+                      "child codec whose outputs are forced host-resident", child);
+        set(opts, "pressio:description",
+            "forces the child compressor's output into the malloc domain");
+        return opts;
+    }
+    pressio_options get_metrics_results_impl() const override {
+        return child->get_metrics_results();
+    }
+    int compress_impl(const pressio_data* input, pressio_data* output) override {
+        int rc = child->compress(input, output);
+        if (rc) return set_error(child->error_code(), child->error_msg());
+        vol_make_host_resident(output);      /* device -> host, no-op on CPU */
+        return 0;
+    }
+    int decompress_impl(const pressio_data* input, pressio_data* output) override {
+        int rc = child->decompress(input, output);
+        if (rc) return set_error(child->error_code(), child->error_msg());
+        vol_make_host_resident(output);
+        return 0;
+    }
+    void set_name_impl(std::string const& new_name) override {
+        if (!new_name.empty()) child->set_name(new_name + "/" + child->prefix());
+        else                   child->set_name(new_name);
+    }
+    std::vector<std::string> children_impl() const final {
+        return { child->get_name() };
+    }
+    const char* prefix() const override  { return "vol_host_output"; }
+    const char* version() const override { return "0.0.1"; }
+    int major_version() const override { return 0; }
+    int minor_version() const override { return 0; }
+    int patch_version() const override { return 1; }
+    std::shared_ptr<libpressio_compressor_plugin> clone() override {
+        return std::make_shared<vol_host_output_plugin>(*this);
+    }
+};
+
+pressio_register vol_host_output_registration(
+    compressor_plugins(), "vol_host_output",
+    [] { return std::make_unique<vol_host_output_plugin>(); });
+} /* anonymous namespace */
 
 extern "C" {
 
@@ -820,20 +892,23 @@ vol_make_chunking_compressor(compression_ctx *ctx, size_t dsize,
         pressio_options_set_string(nest, "chunking:compressor",
                                    "many_independent_threaded");
         pressio_options_set_string(nest, "many_independent_threaded:compressor",
+                                   "vol_host_output");
+        pressio_options_set_string(nest, "vol_host_output:compressor",
                                    ctx->compressor_id);
         (void)pressio_compressor_set_options(chunk, nest);
         pressio_options_free(nest);
 
         struct pressio_options *chk = pressio_compressor_get_options(chunk);
         char *cs = pressio_options_to_string(chk);
-        int ok = (cs && strstr(cs, "many_independent_threaded") != NULL);
+        int ok = (cs && strstr(cs, "many_independent_threaded") != NULL
+                     && strstr(cs, "vol_host_output") != NULL);
         free(cs);
         pressio_options_free(chk);
         if (!ok) {
             H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
                     vol_err_class, maj_compression, min_compress_failed,
-                    "chunking child failed to switch to many_independent_threaded "
-                    "for '%s' (adapter unavailable in this libpressio build) -- "
+                    "chunking pipeline failed to assemble "
+                    "many_independent_threaded/vol_host_output for '%s' -- "
                     "refusing to store uncompressed data", ctx->compressor_id);
             pressio_compressor_release(chunk);
             pressio_release(lib);
@@ -955,12 +1030,13 @@ H5VL_pass_through_ext_compress_native(compression_ctx *ctx,
 
     /* Generous output: raw + per-chunk header slack. libpressio grows an
      * owning buffer if it needs more. */
-    {
-        size_t chunk_elems = vol_native_chunk_elems(ctx, dsize);
-        size_t nchunks = (in_dims[0] + chunk_elems - 1) / chunk_elems;
-        out_dims[0] = nbytes + nchunks * 64 + 8192;
-    }
-    output = pressio_data_new_owning(pressio_byte_dtype, 1, out_dims);
+    // {
+    //     size_t chunk_elems = vol_native_chunk_elems(ctx, dsize);
+    //     size_t nchunks = (in_dims[0] + chunk_elems - 1) / chunk_elems;
+    //     out_dims[0] = nbytes + nchunks * 64 + 8192;
+    // }
+    // output = pressio_data_new_owning(pressio_byte_dtype, 1, out_dims);
+    output = pressio_data_new_empty(pressio_byte_dtype, 0, NULL);
 
     if (!input || !output) {
         H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
