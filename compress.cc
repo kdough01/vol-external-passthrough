@@ -784,8 +784,25 @@ static size_t
 vol_native_chunk_elems(compression_ctx *ctx, size_t dsize)
 {
     (void)ctx;
-    size_t chunk_bytes = vol_comp_chunk_bytes(dsize);
-    size_t elems = (dsize ? chunk_bytes / dsize : chunk_bytes);
+
+    /* Self-contained copy of the chunk-size policy so compress.cc does not
+     * depend on vol_comp_chunk_bytes(), which is static in the passthru TU.
+     * Uses the same VOL_COMP_CHUNK_MB knob for consistent tuning. */
+    size_t mb = 1024;
+    const char *env = getenv("VOL_COMP_CHUNK_MB");
+    if (env && *env) {
+        char *end = NULL;
+        unsigned long long v = strtoull(env, &end, 10);
+        if (end != env && v > 0)
+            mb = (size_t)v;
+    }
+
+    if (dsize == 0) dsize = 1;
+    size_t bytes = mb << 20;
+    bytes -= bytes % dsize;
+    if (bytes < dsize) bytes = dsize;
+
+    size_t elems = bytes / dsize;
     return elems ? elems : 1;
 }
 
