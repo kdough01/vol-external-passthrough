@@ -101,6 +101,7 @@ run_vol_group () {
     echo "=== [1/3] VOL timing [$label] : $sel ==="
     env HDF5_VOL_CONNECTOR="pass_through_ext under_vol=0;under_info={}" \
         HDF5_PLUGIN_PATH="$PLUGIN_DIR" \
+        HDF5_VOL_DUMP_PIPELINE=1 \
         BENCH_ONLY="$sel" \
         BENCH_COMP="$comp" \
         BENCH_CSV="$pcsv" \
