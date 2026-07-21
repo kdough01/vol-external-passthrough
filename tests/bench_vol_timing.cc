@@ -29,13 +29,17 @@
 typedef struct { double min, max, mean, rmse; } bench_stats;
 
 static bench_stats bench_compute_stats(const void *orig, const void *dec,
-                                       size_t nelem, bench_dtype_t dt) {
+                                       size_t nelem, bench_dtype_t dt,
+                                       bench_xform_t xf) {
     double mn = DBL_MAX, mx = -DBL_MAX, sum = 0.0, se = 0.0;
     for (size_t i = 0; i < nelem; ++i) {
         double o = (dt == BENCH_F64) ? ((const double *)orig)[i]
                                      : (double)((const float *)orig)[i];
         double v = (dt == BENCH_F64) ? ((const double *)dec)[i]
                                      : (double)((const float *)dec)[i];
+        /* Invert preprocessing so error is in physical units. NONE = identity. */
+        if      (xf == BENCH_XFORM_LOG1P) { o = expm1(o); v = expm1(v); }
+        else if (xf == BENCH_XFORM_ASINH) { o = sinh(o);  v = sinh(v);  }
         if (o < mn) mn = o;
         if (o > mx) mx = o;
         sum += o;
@@ -75,9 +79,18 @@ static int name_selected(const char *sel, const char *name) {
     return 0;
 }
 
+typedef struct {
+    double             write_ms;   /* sum of per-dataset H5Dwrite wall time */
+    double             read_ms;    /* sum of per-dataset H5Dread  wall time */
+    size_t             raw_bytes;  /* sum of uncompressed input bytes       */
+    unsigned long long storage;    /* sum of on-disk storage bytes          */
+    int                n;          /* dataset writes counted                */
+} bench_file_acc;
+
 static void run_pair(hid_t file, const bench_dataset_t *d,
                      const bench_compressor_t *c, const void *hbuf,
-                     void *rbuf, size_t raw_bytes, FILE *csv) {
+                     void *rbuf, size_t raw_bytes, FILE *csv,
+                     bench_file_acc *acc) {
     const bool dbg = std::getenv("BENCH_DEBUG") != NULL;
   try {
     size_t  nelem = bench_num_elements(d);
@@ -89,54 +102,44 @@ static void run_pair(hid_t file, const bench_dataset_t *d,
     char dsname[192];
     std::snprintf(dsname, sizeof(dsname), "%s_%s", d->name, c->name);
 
-    if (dbg) std::fprintf(stderr,
-        "[dbg run_pair] BEGIN %-24s rank=%d nelem=%zu raw=%zu B\n",
-        dsname, d->rank, nelem, raw_bytes);
+    if (dbg) std::fprintf(stderr, "[dbg run_pair] BEGIN %-24s rank=%d nelem=%zu xform=%s\n",
+                          dsname, d->rank, nelem, bench_xform_name(d->xform));
 
-    /* ---- Build compressor options (honors d->bound_mode / d->bound) ---- */
     char opts[256];
     bench_compressor_opts_json(c, d, opts, sizeof(opts));
     const char *oj = (std::strcmp(opts, "{}") == 0) ? NULL : opts;
-    if (dbg) std::fprintf(stderr,
-        "[dbg run_pair] %-24s pressio_id=%s opts=%s\n",
-        dsname, c->pressio_id ? c->pressio_id : "(null)", oj ? oj : "(default)");
+    if (dbg) std::fprintf(stderr, "[dbg run_pair] %-24s pressio_id=%s opts=%s\n",
+                          dsname, c->pressio_id ? c->pressio_id : "(null)", oj ? oj : "(default)");
 
-    /* ---- WRITE (compressor selected via dcpl properties) ---- */
+    /* ---- WRITE ---- */
     hid_t dcpl = make_dcpl(c->pressio_id, oj);
-    if (dbg) std::fprintf(stderr, "[dbg run_pair] %-24s make_dcpl -> %lld\n",
-                          dsname, (long long)dcpl);
-
     hid_t dset = H5Dcreate2(file, dsname, ntype, space, H5P_DEFAULT, dcpl, H5P_DEFAULT);
     if (dset < 0) {
         std::fprintf(stderr, "[ERR] H5Dcreate2 failed %s\n", dsname);
         H5Pclose(dcpl); H5Sclose(space); return;
     }
-    if (dbg) std::fprintf(stderr, "[dbg run_pair] %-24s H5Dcreate2 ok, writing...\n", dsname);
 
     BenchCpuTimer wt; wt.start();
     herr_t wret = H5Dwrite(dset, ntype, H5S_ALL, H5S_ALL, H5P_DEFAULT, hbuf);
     double wms = wt.stop_ms();
 
-    hsize_t storage = H5Dget_storage_size(dset);          /* on-disk size for ratio */
+    hsize_t storage = H5Dget_storage_size(dset);
     H5Dclose(dset); H5Pclose(dcpl);
     if (wret < 0) {
         std::fprintf(stderr, "[ERR] H5Dwrite failed %s\n", dsname);
         H5Sclose(space); return;
     }
     double wratio = storage ? (double)raw_bytes / (double)storage : 0.0;
-    if (dbg) std::fprintf(stderr,
-        "[dbg run_pair] %-24s WRITE wms=%.2f storage=%llu ratio=%.3fx\n",
-        dsname, wms, (unsigned long long)storage, wratio);
     bench_csv_row(csv, d->name, c->name, "vol", "write", "total", wms, wratio, -1.0);
+
+    /* accumulate file-level totals (write side) */
+    if (acc) { acc->write_ms += wms; acc->raw_bytes += raw_bytes;
+               acc->storage += (unsigned long long)storage; }
 
     /* ---- READ + fidelity ---- */
     std::memset(rbuf, 0, raw_bytes);
     dset = H5Dopen2(file, dsname, H5P_DEFAULT);
-    if (dset < 0) {
-        std::fprintf(stderr, "[ERR] H5Dopen2 failed %s\n", dsname);
-        H5Sclose(space); return;
-    }
-    if (dbg) std::fprintf(stderr, "[dbg run_pair] %-24s reading back...\n", dsname);
+    if (dset < 0) { std::fprintf(stderr, "[ERR] H5Dopen2 failed %s\n", dsname); H5Sclose(space); return; }
 
     BenchCpuTimer rt; rt.start();
     herr_t rret = H5Dread(dset, ntype, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf);
@@ -145,39 +148,38 @@ static void run_pair(hid_t file, const bench_dataset_t *d,
     H5Dclose(dset); H5Sclose(space);
     if (rret < 0) { std::fprintf(stderr, "[ERR] H5Dread failed %s\n", dsname); return; }
 
-    bench_stats st = bench_compute_stats(hbuf, rbuf, nelem, d->dtype);
+    if (acc) { acc->read_ms += rms; acc->n += 1; }   /* count dataset once */
 
-    /* Diagnostic: compare achieved error vs. the nominal bound. This is the
-     * check that exposes cuszp NOT honoring the requested bound on wide-range
-     * fields (achieved_rel >> nominal). */
+    /* Two views of fidelity:
+     *   st_tx  = error in the space the codec bounds (transformed) -> bound check
+     *   st_lin = error inverse-transformed to physical units       -> reported   */
+    bench_stats st_tx  = bench_compute_stats(hbuf, rbuf, nelem, d->dtype, BENCH_XFORM_NONE);
+    bench_stats st_lin = (d->xform == BENCH_XFORM_NONE)
+                       ? st_tx
+                       : bench_compute_stats(hbuf, rbuf, nelem, d->dtype, d->xform);
+
     if (dbg) {
-        double range       = st.max - st.min;
-        double achieved_rel = (range > 0.0) ? st.rmse / range : 0.0;
+        double range_tx = st_tx.max - st_tx.min;
+        double arel_tx  = (range_tx > 0.0) ? st_tx.rmse / range_tx : 0.0;
         std::fprintf(stderr,
-            "[dbg run_pair] %-24s READ rms=%.2f RMSE=%.6e data_range=%.6e "
-            "achieved_rel=%.3e (nominal=%.3e mode=%s)\n",
-            dsname, rms, st.rmse, range, achieved_rel,
-            d->bound, bench_bound_mode_name(d->bound_mode));
-        if (d->bound_mode == BENCH_BOUND_REL && achieved_rel > 2.0 * d->bound)
-            std::fprintf(stderr,
-                "[dbg WARN] %-24s achieved_rel %.3e EXCEEDS nominal %.3e "
-                "-> codec is not respecting the bound\n",
-                dsname, achieved_rel, d->bound);
+            "[dbg run_pair] %-24s rms=%.2f  RMSE_lin=%.6e  RMSE_codecspace=%.6e "
+            "achieved_rel=%.3e (nominal=%.3e)\n",
+            dsname, rms, st_lin.rmse, st_tx.rmse, arel_tx, d->bound);
+        if (d->bound_mode == BENCH_BOUND_REL && arel_tx > 2.0 * d->bound)
+            std::fprintf(stderr, "[dbg WARN] %-24s codec not honoring bound "
+                         "(achieved_rel %.3e > nominal %.3e in codec space)\n",
+                         dsname, arel_tx, d->bound);
     }
 
-    bench_csv_row(csv, d->name, c->name, "vol", "read", "total", rms, -1.0, st.rmse);
+    bench_csv_row(csv, d->name, c->name, "vol", "read", "total", rms, -1.0, st_lin.rmse);
 
-    std::printf("  %-28s W=%8.2f ms  R=%8.2f ms  ratio=%6.2fx  RMSE=%.3e\n",
-                dsname, wms, rms, wratio, st.rmse);
+    std::printf("  %-28s W=%8.2f ms  R=%8.2f ms  ratio=%6.2fx  RMSE=%.3e%s\n",
+                dsname, wms, rms, wratio, st_lin.rmse,
+                (d->xform != BENCH_XFORM_NONE) ? " (physical)" : "");
     std::fflush(stdout);
 
-    if (dbg) std::fprintf(stderr, "[dbg run_pair] END   %-24s\n", dsname);
-
   } catch (const std::exception &e) {
-      /* A throwing codec (e.g. cuszp on a field it can't handle) lands here
-       * instead of terminating the process. Note: a few HDF5 handles may leak
-       * for this one failed dataset -- acceptable for a benchmark run. */
-      std::fprintf(stderr, "[ERR] run_pair %s/%s threw: %s  (skipped; sweep continues)\n",
+      std::fprintf(stderr, "[ERR] run_pair %s/%s threw: %s (skipped; sweep continues)\n",
                    d->name, c->name, e.what());
       std::fflush(stderr);
   } catch (...) {
@@ -190,90 +192,94 @@ static void run_pair(hid_t file, const bench_dataset_t *d,
 int main(int argc, char **argv) {
     const char *h5path   = (argc > 1) ? argv[1] : "bench_out.h5";
     const char *csvpath  = (argc > 2) ? argv[2] : "results_vol.csv";
-    const char *only     = std::getenv("BENCH_ONLY");   /* dataset filter    */
-    const char *only_cmp = std::getenv("BENCH_COMP");   /* compressor filter */
+    const char *only     = std::getenv("BENCH_ONLY");
+    const char *only_cmp = std::getenv("BENCH_COMP");
     const bool  dbg      = std::getenv("BENCH_DEBUG") != NULL;
 
     std::fprintf(stderr, "[dbg main] h5=%s csv=%s only=%s comp=%s debug=%d\n",
-                 h5path, csvpath, only ? only : "(all)",
-                 only_cmp ? only_cmp : "(all)", (int)dbg);
+                 h5path, csvpath, only ? only : "(all)", only_cmp ? only_cmp : "(all)", (int)dbg);
 
     register_vol_properties();
-    if (dbg) std::fprintf(stderr, "[dbg main] register_vol_properties done\n");
-
     bench_datasets_validate();
 
     FILE *csv = std::fopen(csvpath, "w");
     if (!csv) { std::perror("csv"); return 1; }
     bench_csv_header(csv);
 
+    /* ---- file-level: time creation ---- */
+    BenchCpuTimer fct; fct.start();
     hid_t file = H5Fcreate(h5path, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    double create_ms = fct.stop_ms();
     if (file < 0) { std::fprintf(stderr, "[ERR] H5Fcreate failed\n"); std::fclose(csv); return 1; }
-    if (dbg) std::fprintf(stderr, "[dbg main] output file created (fid=%lld)\n", (long long)file);
 
+    bench_file_acc acc = {0.0, 0.0, 0, 0ULL, 0};
     int n_ok = 0, n_skip = 0;
 
     for (int di = 0; di < BENCH_NUM_DATASETS; ++di) {
         const bench_dataset_t *d = &BENCH_DATASETS[di];
-        if (!name_selected(only, d->name)) {
-            if (dbg) std::fprintf(stderr, "[dbg main] filter-skip %s\n", d->name);
-            continue;
-        }
+        if (!name_selected(only, d->name)) continue;
         if (access(d->path, R_OK) != 0) {
-            std::fprintf(stderr, "[dbg main] skip %s (unreadable path: %s)\n", d->name, d->path);
+            std::fprintf(stderr, "[dbg main] skip %s (unreadable: %s)\n", d->name, d->path);
             n_skip++; continue;
         }
 
-        /* Unified load: RAW does an fread; HDF5 reads the named dataset and
-         * fills `rz` with the true rank/dims/dtype. Use `rz` downstream. */
         bench_dataset_t rz;
         size_t raw = 0;
-        if (dbg) std::fprintf(stderr, "[dbg main] loading %s (%s)...\n", d->name,
-                              d->src == BENCH_SRC_HDF5 ? d->h5dset : d->path);
         void *hbuf = bench_load_field(d, &rz, &raw);
         if (!hbuf) { std::fprintf(stderr, "[ERR] load failed %s\n", d->name); n_skip++; continue; }
-        if (dbg) std::fprintf(stderr, "[dbg main] loaded %s: rank=%d dtype=%s raw=%zu B\n",
-                              rz.name, rz.rank, bench_dtype_name(rz.dtype), raw);
 
-        if (rz.xform != BENCH_XFORM_NONE) {   /* NEW: log/asinh preprocessing */
-            if (dbg) std::fprintf(stderr, "[dbg main] applying %s transform to %s\n",
+        if (rz.xform != BENCH_XFORM_NONE) {   /* log/asinh preprocessing */
+            if (dbg) std::fprintf(stderr, "[dbg main] applying %s to %s\n",
                                   bench_xform_name(rz.xform), rz.name);
             bench_apply_xform(hbuf, bench_num_elements(&rz), rz.dtype, rz.xform);
         }
 
-        {   /* one-time range scan: feeds assumed_range tuning + bound diagnostics */
+        {   /* range scan (post-transform) */
             size_t ne = bench_num_elements(&rz);
-            double mn = DBL_MAX, mx = -DBL_MAX, sum = 0.0;
+            double mn = DBL_MAX, mx = -DBL_MAX;
             for (size_t i = 0; i < ne; ++i) {
                 double v = (rz.dtype == BENCH_F64) ? ((const double*)hbuf)[i]
                                                    : (double)((const float*)hbuf)[i];
                 if (v < mn) mn = v;
                 if (v > mx) mx = v;
-                sum += v;
             }
-            std::fprintf(stderr, "RANGE %-12s min=%.6e max=%.6e range=%.6e mean=%.6e\n",
-                         rz.name, mn, mx, mx - mn, sum / (double)ne);
+            std::fprintf(stderr, "RANGE %-14s min=%.6e max=%.6e range=%.6e xform=%s\n",
+                         rz.name, mn, mx, mx - mn, bench_xform_name(rz.xform));
         }
 
         void *rbuf = std::malloc(raw);
         if (!rbuf) { std::fprintf(stderr, "[ERR] OOM rbuf %s\n", rz.name); std::free(hbuf); continue; }
 
-        std::printf("\n=== %s (%.1f MiB, %s, %s) ===\n", rz.name,
-                    raw / (1024.0 * 1024.0), bench_dtype_name(rz.dtype),
-                    bench_src_name(rz.src));
+        std::printf("\n=== %s (%.1f MiB, %s, %s%s) ===\n", rz.name,
+                    raw / (1024.0 * 1024.0), bench_dtype_name(rz.dtype), bench_src_name(rz.src),
+                    rz.xform != BENCH_XFORM_NONE ? ", transformed" : "");
 
         for (int ci = 0; ci < BENCH_NUM_COMPRESSORS; ++ci) {
             const bench_compressor_t *c = &BENCH_COMPRESSORS[ci];
             if (!name_selected(only_cmp, c->name)) continue;
-            run_pair(file, &rz, c, hbuf, rbuf, raw, csv);   /* pass resolved rz */
+            run_pair(file, &rz, c, hbuf, rbuf, raw, csv, &acc);
         }
         std::free(rbuf); std::free(hbuf);
         n_ok++;
     }
 
+    /* ---- file-level: time close/flush, emit file rows ---- */
+    BenchCpuTimer fclt; fclt.start();
     H5Fclose(file);
+    double close_ms = fclt.stop_ms();
+
+    double file_wtotal = create_ms + acc.write_ms + close_ms;   /* full build incl. flush */
+    double file_rtotal = acc.read_ms;
+    double file_ratio  = acc.storage ? (double)acc.raw_bytes / (double)acc.storage : 0.0;
+
+    std::printf("\n=== FILE %s: %d dataset-writes | create=%.2f  write=%.2f  close/flush=%.2f "
+                "=> write_total=%.2f ms | read_total=%.2f ms | ratio=%.2fx ===\n",
+                h5path, acc.n, create_ms, acc.write_ms, close_ms,
+                file_wtotal, file_rtotal, file_ratio);
+    bench_csv_row(csv, h5path, "ALL", "vol", "write", "file", file_wtotal, file_ratio, -1.0);
+    bench_csv_row(csv, h5path, "ALL", "vol", "read",  "file", file_rtotal, -1.0,       -1.0);
+
     std::fclose(csv);
-    std::fprintf(stderr, "[dbg main] wrote %s  (%d datasets processed, %d skipped)\n",
-                 csvpath, n_ok, n_skip);
+    std::fprintf(stderr, "[dbg main] done: %d datasets, %d skipped\n", n_ok, n_skip);
     return 0;
 }
