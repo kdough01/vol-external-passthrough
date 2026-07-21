@@ -785,9 +785,6 @@ vol_native_chunk_elems(compression_ctx *ctx, size_t dsize)
 {
     (void)ctx;
 
-    /* Self-contained copy of the chunk-size policy so compress.cc does not
-     * depend on vol_comp_chunk_bytes(), which is static in the passthru TU.
-     * Uses the same VOL_COMP_CHUNK_MB knob for consistent tuning. */
     size_t mb = 1024;
     const char *env = getenv("VOL_COMP_CHUNK_MB");
     if (env && *env) {
@@ -822,17 +819,12 @@ vol_make_chunking_compressor(compression_ctx *ctx, size_t dsize,
     /* Inner options (includes any userptr stream) -> reuse as the base. */
     struct pressio_options *opts = pressio_compressor_get_options(ctx->compressor);
 
-    /* Which child to instantiate. */
-    pressio_options_set_string(opts, "chunking:compressor", ctx->compressor_id);
+    pressio_options_set_string(opts, "chunking:compressor", "many_independent");
+    pressio_options_set_string(opts, "many_independent:compressor",
+                               ctx->compressor_id);
 
-    /* chunking:size is a 1-D uint64 pressio_data whose VALUES are the chunk
-     * extent per dimension. We compress over a flat 1-D view, so it is a
-     * single value = elements per chunk. */
     size_t chunk_elems = vol_native_chunk_elems(ctx, dsize);
 
-    /* CRITICAL: never let a chunk exceed the dataset. libpressio's chunking
-     * will read chunk_elems from the input even when the data is smaller,
-     * which is an out-of-bounds read (segfault) in the single-chunk case. */
     if (total_elems > 0 && chunk_elems > total_elems)
         chunk_elems = total_elems;
     if (chunk_elems == 0)
@@ -855,11 +847,6 @@ vol_make_chunking_compressor(compression_ctx *ctx, size_t dsize,
         return NULL;
     }
 
-    /* Best-effort explicit stream re-apply, in case get_options() did not
-     * surface the userptr for your compressor. Unknown keys are ignored by
-     * libpressio, and the return is intentionally not checked. If your
-     * dataset_open uses a different key than "<id>:cuda_stream", change it
-     * here (or delete this block if the forward above already carries it). */
 #ifdef USE_CUDA
     if (ctx->stream) {
         struct pressio_options *sopt = pressio_options_new();
