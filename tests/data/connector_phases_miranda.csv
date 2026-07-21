@@ -1,0 +1,13 @@
+dataset,compressor,op,total_ms,compress_ms,io_ms,overhead_ms,overhead_pct
+miranda_noop,noop,write,885.5128,745.1007,113.1448,27.2674,3.08
+miranda_noop,noop,read,741.7285,215.9506,477.5915,48.1865,6.50
+miranda_cuszp,cuszp,write,349.6132,35.6565,6.2614,307.6953,88.01
+miranda_cuszp,cuszp,read,404.9155,364.4037,10.6702,29.8416,7.37
+miranda_sz3_1e3,sz3,write,1071.4820,1069.9810,1.4408,0.0602,0.01
+miranda_sz3_1e3,sz3,read,838.3722,755.5112,1.2672,81.5938,9.73
+miranda_noop,noop,write,895.9307,733.5772,135.5529,26.8006,2.99
+miranda_noop,noop,read,465.9816,227.6685,190.5247,47.7884,10.26
+miranda_cuszp,cuszp,write,292.0474,33.6401,6.5923,251.8150,86.22
+miranda_cuszp,cuszp,read,457.9144,362.3181,14.2844,81.3119,17.76
+miranda_sz3_1e3,sz3,write,1027.8978,1026.1341,1.7052,0.0584,0.01
+miranda_sz3_1e3,sz3,read,841.1738,813.6742,7.3626,20.1370,2.39

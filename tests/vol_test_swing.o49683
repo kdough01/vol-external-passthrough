@@ -1,0 +1,638 @@
+Job started on Tue Jul 21 11:26:22 CDT 2026
+Running on: gpu6
+PWD: /home/kdougherty/hdf5_projs/vol-external-passthrough
+mpicc:   /gpfs/fs1/home/software/swing/HPCX/hpcx-v2.26-gcc-doca_ofed-ubuntu22.04-cuda13-x86_64/ompi4/bin/mpicc
+nvcc:    /gpfs/fs1/soft/swing/software/spack-built/linux-ubuntu22.04-x86_64/gcc-11.4.0/cuda-12.6.0-qb3dlng/bin/nvcc
+gcc:     gcc (Ubuntu 11.4.0-1ubuntu1~22.04.2) 11.4.0
+GCC_LIB: /usr/lib/gcc/x86_64-linux-gnu/11
+gcc (Ubuntu 11.4.0-1ubuntu1~22.04.2) 11.4.0
+Copyright (C) 2021 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+LibPressio cmake dir: /home/kdougherty/libpressio_cuda/.spack-env/view/lib/cmake/LibPressio
+
+=== Building (USE_CUDA=ON -> CUDA-event timing in the connector) ===
+-- The C compiler identification is GNU 11.4.0
+-- The CXX compiler identification is GNU 11.4.0
+-- The CUDA compiler identification is NVIDIA 12.9.86
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /gpfs/fs1/home/software/swing/HPCX/hpcx-v2.26-gcc-doca_ofed-ubuntu22.04-cuda13-x86_64/ompi4/bin/mpicc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /gpfs/fs1/home/software/swing/HPCX/hpcx-v2.26-gcc-doca_ofed-ubuntu22.04-cuda13-x86_64/ompi4/bin/mpicxx - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Detecting CUDA compiler ABI info
+-- Detecting CUDA compiler ABI info - done
+-- Check for working CUDA compiler: /home/kdougherty/libpressio_cuda/.spack-env/view/bin/nvcc - skipped
+-- Detecting CUDA compile features
+-- Detecting CUDA compile features - done
+-- Found HDF5: hdf5-shared (found version "1.14.6")  
+-- Found OpenMP_C: -fopenmp (found version "4.5") 
+-- Found OpenMP_CXX: -fopenmp (found version "4.5") 
+-- Found OpenMP: TRUE (found version "4.5")  
+-- Found BZip2: /home/kdougherty/libpressio_cuda/.spack-env/view/lib/libbz2.so (found version "1.0.8") 
+-- Looking for BZ2_bzCompressInit
+-- Looking for BZ2_bzCompressInit - found
+-- Found ZFP: /home/kdougherty/libpressio_cuda/.spack-env/view/lib/cmake/zfp/zfp-config.cmake (found version "0.5.5") 
+-- Found OpenMP_C: -fopenmp (found version "4.5") 
+-- Found OpenMP_CXX: -fopenmp (found version "4.5") 
+-- Found PkgConfig: /home/kdougherty/libpressio_cuda/.spack-env/view/bin/pkg-config (found version "2.5.1") 
+-- Found GSL: /home/kdougherty/libpressio_cuda/.spack-env/view/include (found version "2.8") 
+-- Checking for one of the modules 'libzstd'
+-- Checking for one of the modules 'blosc'
+-- Found CUDAToolkit: /home/kdougherty/libpressio_cuda/.spack-env/view/include (found version "12.9.86") 
+-- Looking for pthread.h
+-- Looking for pthread.h - found
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE  
+-- Found HDF5: hdf5-shared (found version "1.14.6") found components: C 
+-- Found MPI_C: /gpfs/fs1/home/software/swing/HPCX/hpcx-v2.26-gcc-doca_ofed-ubuntu22.04-cuda13-x86_64/ompi4/bin/mpicc (found version "3.1") 
+-- Found MPI_CXX: /gpfs/fs1/home/software/swing/HPCX/hpcx-v2.26-gcc-doca_ofed-ubuntu22.04-cuda13-x86_64/ompi4/bin/mpicxx (found version "3.1") 
+-- Found MPI: TRUE (found version "3.1")  
+-- Found MPI: TRUE (found version "3.1") found components: CXX 
+-- Checking for one of the modules 'lua;luajit'
+-- Found nlohmann_json: /home/kdougherty/libpressio_cuda/.spack-env/view/share/cmake/nlohmann_json/nlohmann_jsonConfig.cmake (found version "3.12.0") 
+-- Found Python3: /home/kdougherty/libpressio_cuda/.spack-env/view/bin/python3 (found version "3.14.5") found components: Interpreter Development NumPy Development.Module Development.Embed 
+-- Found SWIG: /home/kdougherty/libpressio_cuda/.spack-env/view/bin/swig4.0 (found version "4.1.1")  
+-- Found MPI: TRUE (found version "3.1")  
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/kdougherty/hdf5_projs/vol-external-passthrough/build
+[  4%] Building CXX object tests/CMakeFiles/dump_cuszp_opts.dir/dump_cuszp_opts.cc.o
+[  9%] Building C object CMakeFiles/hdf5_vol_passthrough.dir/H5VLpassthru_ext.c.o
+[ 14%] Building CXX object CMakeFiles/hdf5_vol_passthrough.dir/compress.cc.o
+[ 19%] Linking CXX executable dump_cuszp_opts
+[ 19%] Built target dump_cuszp_opts
+[ 23%] Linking CXX shared library libhdf5_vol_passthrough.so
+[ 23%] Built target hdf5_vol_passthrough
+[ 28%] Building C object tests/CMakeFiles/test_cpu_write.dir/test_cpu_write.c.o
+[ 33%] Building C object tests/CMakeFiles/test_time_miranda.dir/test_time_miranda.c.o
+[ 42%] Building C object tests/CMakeFiles/test_ci.dir/test_ci.c.o
+[ 42%] Building C object tests/CMakeFiles/test_time_hurricane.dir/test_time_hurricane.c.o
+[ 47%] Linking C executable test_cpu_write
+[ 52%] Linking C executable test_time_hurricane
+[ 57%] Linking C executable test_ci
+[ 61%] Linking C executable test_time_miranda
+[ 61%] Built target test_cpu_write
+[ 66%] Building C object tests/CMakeFiles/test_error_miranda.dir/test_error_miranda.c.o
+[ 66%] Built target test_time_hurricane
+[ 66%] Built target test_ci
+[ 71%] Building CXX object tests/CMakeFiles/bench_vol_timing.dir/bench_vol_timing.cc.o
+[ 71%] Built target test_time_miranda
+[ 76%] Building CXX object tests/CMakeFiles/bench_pressio_timing.dir/bench_pressio_timing.cc.o
+[ 80%] Building CXX object tests/CMakeFiles/bench_filter_timing.dir/bench_filter_timing.cc.o
+[ 85%] Linking C executable test_error_miranda
+[ 85%] Built target test_error_miranda
+[ 90%] Linking CXX executable bench_vol_timing
+[ 95%] Linking CXX executable bench_pressio_timing
+[100%] Linking CXX executable bench_filter_timing
+[100%] Built target bench_vol_timing
+[100%] Built target bench_filter_timing
+[100%] Built target bench_pressio_timing
+--- build/ ---
+CMakeCache.txt
+CMakeFiles
+Makefile
+cmake_install.cmake
+libhdf5_vol_passthrough.so
+tests
+--- build/tests/ ---
+CMakeFiles
+Makefile
+bench_filter_timing
+bench_pressio_timing
+bench_vol_timing
+cmake_install.cmake
+dump_cuszp_opts
+test_ci
+test_cpu_write
+test_error_miranda
+test_time_hurricane
+test_time_miranda
+
+=== [0/3] Dump cuszp option keys ===
+cuszp:metric <char*> = "noop"
+cuszp:mode <int32> = 0
+cuszp:mode_str <char*> = "plain"
+
+=== [1/3] VOL timing [miranda] : miranda ===
+[dbg main] h5=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_miranda.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results_vol_miranda.csv only=miranda comp=(all) debug=0
+name           dtype  rank src    dims                   MiB        exists
+miranda        double 3    raw    256x384x384            288.0      yes
+ocean_temp     float  0    hdf5   (from file)            0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        yes
+nyx_dm         float  0    hdf5   (from file)            0.0        yes
+nyx_temp_log   float  0    hdf5   (from file)            0.0        yes
+nyx_vx_asinh   float  0    hdf5   (from file)            0.0        yes
+nyx_vy_asinh   float  0    hdf5   (from file)            0.0        yes
+nyx_vz_asinh   float  0    hdf5   (from file)            0.0        yes
+9/9 dataset paths readable
+RANGE miranda        min=9.999878e-01 max=3.000046e+00 range=2.000058e+00 xform=none
+Info: 0x5653ebb1c4c0
+
+=== miranda (288.0 MiB, double, raw) ===
+  miranda_noop                 W=  896.20 ms  R=  466.09 ms  ratio=  1.00x  RMSE=0.000e+00
+  miranda_cuszp                W=  292.09 ms  R=  458.03 ms  ratio= 16.00x  RMSE=2.853e-05
+  miranda_sz3_1e3              W= 1027.94 ms  R=  841.28 ms  ratio= 57.60x  RMSE=2.786e-04
+[dbg main] done: 1 datasets, 0 skipped
+
+=== FILE /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_miranda.h5: 3 dataset-writes | create=1.20  write=2216.24  close/flush=2.91 => write_total=2220.35 ms | read_total=1765.40 ms | ratio=2.77x ===
+
+=== [1/3] VOL timing [ocean] : ocean_temp ===
+[dbg main] h5=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_ocean.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results_vol_ocean.csv only=ocean_temp comp=(all) debug=0
+name           dtype  rank src    dims                   MiB        exists
+miranda        double 3    raw    256x384x384            288.0      yes
+ocean_temp     float  0    hdf5   (from file)            0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        yes
+nyx_dm         float  0    hdf5   (from file)            0.0        yes
+nyx_temp_log   float  0    hdf5   (from file)            0.0        yes
+nyx_vx_asinh   float  0    hdf5   (from file)            0.0        yes
+nyx_vy_asinh   float  0    hdf5   (from file)            0.0        yes
+nyx_vz_asinh   float  0    hdf5   (from file)            0.0        yes
+9/9 dataset paths readable
+RANGE ocean_temp     min=4.445019e+00 max=1.072704e+01 range=6.282023e+00 xform=none
+Info: 0x555c1cb004c0
+
+=== ocean_temp (123.1 MiB, float, hdf5) ===
+  ocean_temp_noop              W=  590.64 ms  R=  166.78 ms  ratio=  0.99x  RMSE=0.000e+00
+  ocean_temp_cuszp             W=  319.36 ms  R=  239.24 ms  ratio=  2.68x  RMSE=5.774e-05
+  ocean_temp_sz3_1e3           W=  985.56 ms  R=  995.34 ms  ratio=  4.74x  RMSE=5.765e-04
+[dbg main] done: 1 datasets, 0 skipped
+
+=== FILE /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_ocean.h5: 3 dataset-writes | create=1.13  write=1895.56  close/flush=5.01 => write_total=1901.70 ms | read_total=1401.36 ms | ratio=1.88x ===
+
+=== [1/3] VOL timing [qmc] : einspline37 ===
+[dbg main] h5=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_qmc.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results_vol_qmc.csv only=einspline37 comp=(all) debug=0
+name           dtype  rank src    dims                   MiB        exists
+miranda        double 3    raw    256x384x384            288.0      yes
+ocean_temp     float  0    hdf5   (from file)            0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        yes
+nyx_dm         float  0    hdf5   (from file)            0.0        yes
+nyx_temp_log   float  0    hdf5   (from file)            0.0        yes
+nyx_vx_asinh   float  0    hdf5   (from file)            0.0        yes
+nyx_vy_asinh   float  0    hdf5   (from file)            0.0        yes
+nyx_vz_asinh   float  0    hdf5   (from file)            0.0        yes
+9/9 dataset paths readable
+RANGE einspline37    min=-2.125822e+01 max=2.036857e+01 range=4.162679e+01 xform=none
+Info: 0x560839d364c0
+
+=== einspline37 (12932.6 MiB, float, raw) ===
+  einspline37_noop             W=22271.09 ms  R=19656.61 ms  ratio=  1.00x  RMSE=0.000e+00
+  einspline37_cuszp            W=13874.36 ms  R=23685.58 ms  ratio=  2.51x  RMSE=5.771e-05
+  einspline37_sz3_1e3          W=115031.96 ms  R=134049.43 ms  ratio=  3.38x  RMSE=5.742e-04
+[dbg main] done: 1 datasets, 0 skipped
+
+=== FILE /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_qmc.h5: 3 dataset-writes | create=1.05  write=151177.41  close/flush=941.99 => write_total=152120.45 ms | read_total=177391.61 ms | ratio=1.77x ===
+
+=== [1/3] VOL timing [nyx] : nyx_baryon,nyx_dm,nyx_temp_log,nyx_vx_asinh,nyx_vy_asinh,nyx_vz_asinh ===
+[dbg main] h5=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_nyx.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results_vol_nyx.csv only=nyx_baryon,nyx_dm,nyx_temp_log,nyx_vx_asinh,nyx_vy_asinh,nyx_vz_asinh comp=(all) debug=0
+name           dtype  rank src    dims                   MiB        exists
+miranda        double 3    raw    256x384x384            288.0      yes
+ocean_temp     float  0    hdf5   (from file)            0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        yes
+nyx_dm         float  0    hdf5   (from file)            0.0        yes
+nyx_temp_log   float  0    hdf5   (from file)            0.0        yes
+nyx_vx_asinh   float  0    hdf5   (from file)            0.0        yes
+nyx_vy_asinh   float  0    hdf5   (from file)            0.0        yes
+nyx_vz_asinh   float  0    hdf5   (from file)            0.0        yes
+9/9 dataset paths readable
+RANGE nyx_baryon     min=5.799697e-02 max=1.158623e+05 range=1.158622e+05 xform=none
+Info: 0x555dc54e94c0
+
+=== nyx_baryon (512.0 MiB, float, hdf5) ===
+  nyx_baryon_noop              W= 1573.57 ms  R=  966.22 ms  ratio=  1.00x  RMSE=0.000e+00
+  nyx_baryon_cuszp             W=  657.16 ms  R=  847.04 ms  ratio=  2.69x  RMSE=5.775e-05
+  nyx_baryon_sz3_1e3           W= 4382.00 ms  R= 4675.53 ms  ratio=  4.65x  RMSE=5.771e-04
+RANGE nyx_dm         min=0.000000e+00 max=1.377893e+04 range=1.377893e+04 xform=none
+
+=== nyx_dm (512.0 MiB, float, hdf5) ===
+  nyx_dm_noop                  W=  821.86 ms  R=  689.80 ms  ratio=  1.00x  RMSE=0.000e+00
+  nyx_dm_cuszp                 W=  429.79 ms  R=  834.21 ms  ratio=  2.18x  RMSE=5.695e-05
+  nyx_dm_sz3_1e3               W= 4190.25 ms  R= 5846.74 ms  ratio=  3.18x  RMSE=5.766e-04
+RANGE nyx_temp_log   min=7.732797e+00 max=1.538049e+01 range=7.647694e+00 xform=log1p
+
+=== nyx_temp_log (512.0 MiB, float, hdf5, transformed) ===
+  nyx_temp_log_noop            W=  817.47 ms  R=  721.99 ms  ratio=  1.00x  RMSE=0.000e+00 (log-space)
+  nyx_temp_log_cuszp           W=  400.61 ms  R=  827.37 ms  ratio=  2.80x  RMSE=5.774e-05 (log-space)
+  nyx_temp_log_sz3_1e3         W= 4094.85 ms  R= 4000.55 ms  ratio=  5.02x  RMSE=5.772e-04 (log-space)
+RANGE nyx_vx_asinh   min=-1.842898e+01 max=1.797022e+01 range=3.639921e+01 xform=asinh
+
+=== nyx_vx_asinh (512.0 MiB, float, hdf5, transformed) ===
+  nyx_vx_asinh_noop            W=  901.67 ms  R=  680.95 ms  ratio=  1.00x  RMSE=0.000e+00 (log-space)
+  nyx_vx_asinh_cuszp           W=  335.61 ms  R=  796.15 ms  ratio=  3.12x  RMSE=5.774e-05 (log-space)
+  nyx_vx_asinh_sz3_1e3         W= 5044.48 ms  R= 4340.96 ms  ratio=  6.48x  RMSE=5.759e-04 (log-space)
+RANGE nyx_vy_asinh   min=-1.829132e+01 max=1.854300e+01 range=3.683432e+01 xform=asinh
+
+=== nyx_vy_asinh (512.0 MiB, float, hdf5, transformed) ===
+  nyx_vy_asinh_noop            W=  889.66 ms  R=  725.82 ms  ratio=  1.00x  RMSE=0.000e+00 (log-space)
+  nyx_vy_asinh_cuszp           W=  375.79 ms  R=  813.29 ms  ratio=  2.84x  RMSE=5.773e-05 (log-space)
+  nyx_vy_asinh_sz3_1e3         W= 5141.34 ms  R= 4519.10 ms  ratio=  5.51x  RMSE=5.750e-04 (log-space)
+RANGE nyx_vz_asinh   min=-1.817063e+01 max=1.801680e+01 range=3.618743e+01 xform=asinh
+
+=== nyx_vz_asinh (512.0 MiB, float, hdf5, transformed) ===
+  nyx_vz_asinh_noop            W=  922.17 ms  R=  744.79 ms  ratio=  1.00x  RMSE=0.000e+00 (log-space)
+  nyx_vz_asinh_cuszp           W=  444.75 ms  R=  855.87 ms  ratio=  2.38x  RMSE=5.774e-05 (log-space)
+  nyx_vz_asinh_sz3_1e3         W= 5290.74 ms  R= 5206.32 ms  ratio=  4.57x  RMSE=5.773e-04 (log-space)
+[dbg main] done: 6 datasets, 0 skipped
+
+=== FILE /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_nyx.h5: 18 dataset-writes | create=1.15  write=36713.77  close/flush=1158.32 => write_total=37873.24 ms | read_total=38092.72 ms | ratio=1.88x ===
+
+=== [3/3] Filter (deflate) timing ===
+name           dtype  rank src    dims                   MiB        exists
+miranda        double 3    raw    256x384x384            288.0      yes
+ocean_temp     float  0    hdf5   (from file)            0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        yes
+nyx_dm         float  0    hdf5   (from file)            0.0        yes
+nyx_temp_log   float  0    hdf5   (from file)            0.0        yes
+nyx_vx_asinh   float  0    hdf5   (from file)            0.0        yes
+nyx_vy_asinh   float  0    hdf5   (from file)            0.0        yes
+nyx_vz_asinh   float  0    hdf5   (from file)            0.0        yes
+9/9 dataset paths readable
+miranda/deflate                file=137.5 MiB (raw 288.0 MiB)
+HDF5-DIAG: Error detected in HDF5 (1.14.6):
+  #000: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Pdcpl.c line 1923 in H5Pset_chunk(): chunk dimensionality must be positive
+    major: Invalid arguments to routine
+    minor: Out of range
+ocean_temp/deflate             file=0.0 MiB (raw 0.0 MiB)
+HDF5-DIAG: Error detected in HDF5 (1.14.6):
+  #000: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5D.c line 186 in H5Dcreate2(): unable to synchronously create dataset
+    major: Dataset
+    minor: Unable to create file
+  #001: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5D.c line 135 in H5D__create_api_common(): unable to create dataset
+    major: Dataset
+    minor: Unable to create file
+  #002: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5VLcallback.c line 1865 in H5VL_dataset_create(): dataset create failed
+    major: Virtual Object Layer
+    minor: Unable to create file
+  #003: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5VLcallback.c line 1830 in H5VL__dataset_create(): dataset create failed
+    major: Virtual Object Layer
+    minor: Unable to create file
+  #004: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5VLnative_dataset.c line 282 in H5VL__native_dataset_create(): unable to create dataset
+    major: Dataset
+    minor: Unable to initialize object
+  #005: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Dint.c line 351 in H5D__create_named(): unable to create and link to dataset
+    major: Dataset
+    minor: Unable to initialize object
+  #006: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Lint.c line 492 in H5L_link_object(): unable to create new link to object
+    major: Links
+    minor: Unable to initialize object
+  #007: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Lint.c line 732 in H5L__create_real(): can't insert link
+    major: Links
+    minor: Unable to insert object
+  #008: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Gtraverse.c line 824 in H5G_traverse(): internal path traversal failed
+    major: Symbol table
+    minor: Object not found
+  #009: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Gtraverse.c line 596 in H5G__traverse_real(): traversal operator failed
+    major: Symbol table
+    minor: Callback failed
+  #010: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Lint.c line 537 in H5L__link_cb(): unable to create object
+    major: Links
+    minor: Unable to initialize object
+  #011: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Oint.c line 2346 in H5O_obj_create(): unable to open object
+    major: Object header
+    minor: Can't open object
+  #012: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Doh.c line 273 in H5O__dset_create(): unable to create dataset
+    major: Dataset
+    minor: Unable to initialize object
+  #013: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Dint.c line 1304 in H5D__create(): unable to construct layout information
+    major: Dataset
+    minor: Unable to initialize object
+  #014: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Dchunk.c line 835 in H5D__chunk_construct(): unable to set chunk sizes
+    major: Dataset
+    minor: Bad value
+  #015: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Dchunk.c line 798 in H5D__chunk_set_sizes(): chunk size must be < 4GB
+    major: Dataset
+    minor: Unable to initialize object
+HDF5-DIAG: Error detected in HDF5 (1.14.6):
+  #000: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5D.c line 1347 in H5Dwrite(): can't synchronously write data
+    major: Dataset
+    minor: Write failed
+  #001: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5D.c line 1263 in H5D__write_api_common(): dset_id is not a dataset ID
+    major: Invalid arguments to routine
+    minor: Inappropriate type
+HDF5-DIAG: Error detected in HDF5 (1.14.6):
+  #000: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5D.c line 468 in H5Dclose(): not a dataset ID
+    major: Invalid arguments to routine
+    minor: Inappropriate type
+einspline37/deflate            file=0.0 MiB (raw 12932.6 MiB)
+HDF5-DIAG: Error detected in HDF5 (1.14.6):
+  #000: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5D.c line 398 in H5Dopen2(): unable to synchronously open dataset
+    major: Dataset
+    minor: Can't open object
+  #001: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5D.c line 360 in H5D__open_api_common(): unable to open dataset
+    major: Dataset
+    minor: Can't open object
+  #002: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5VLcallback.c line 1967 in H5VL_dataset_open(): dataset open failed
+    major: Virtual Object Layer
+    minor: Can't open object
+  #003: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5VLcallback.c line 1934 in H5VL__dataset_open(): dataset open failed
+    major: Virtual Object Layer
+    minor: Can't open object
+  #004: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5VLnative_dataset.c line 332 in H5VL__native_dataset_open(): unable to open dataset
+    major: Dataset
+    minor: Can't open object
+  #005: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Dint.c line 1426 in H5D__open_name(): not found
+    major: Dataset
+    minor: Object not found
+  #006: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Gloc.c line 424 in H5G_loc_find(): can't find object
+    major: Symbol table
+    minor: Object not found
+  #007: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Gtraverse.c line 824 in H5G_traverse(): internal path traversal failed
+    major: Symbol table
+    minor: Object not found
+  #008: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Gtraverse.c line 596 in H5G__traverse_real(): traversal operator failed
+    major: Symbol table
+    minor: Callback failed
+  #009: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Gloc.c line 381 in H5G__loc_find_cb(): object 'einspline37' doesn't exist
+    major: Symbol table
+    minor: Object not found
+HDF5-DIAG: Error detected in HDF5 (1.14.6):
+  #000: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5D.c line 1044 in H5Dread(): can't synchronously read data
+    major: Dataset
+    minor: Read failed
+  #001: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5D.c line 961 in H5D__read_api_common(): dset_id is not a dataset ID
+    major: Invalid arguments to routine
+    minor: Inappropriate type
+  #002: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5VLint.c line 1786 in H5VL_vol_object_verify(): identifier is not of specified type
+    major: Invalid arguments to routine
+    minor: Inappropriate type
+HDF5-DIAG: Error detected in HDF5 (1.14.6):
+  #000: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5D.c line 468 in H5Dclose(): not a dataset ID
+    major: Invalid arguments to routine
+    minor: Inappropriate type
+HDF5-DIAG: Error detected in HDF5 (1.14.6):
+  #000: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Pdcpl.c line 1923 in H5Pset_chunk(): chunk dimensionality must be positive
+    major: Invalid arguments to routine
+    minor: Out of range
+nyx_baryon/deflate             file=0.0 MiB (raw 0.0 MiB)
+HDF5-DIAG: Error detected in HDF5 (1.14.6):
+  #000: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Pdcpl.c line 1923 in H5Pset_chunk(): chunk dimensionality must be positive
+    major: Invalid arguments to routine
+    minor: Out of range
+nyx_dm/deflate                 file=0.0 MiB (raw 0.0 MiB)
+HDF5-DIAG: Error detected in HDF5 (1.14.6):
+  #000: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Pdcpl.c line 1923 in H5Pset_chunk(): chunk dimensionality must be positive
+    major: Invalid arguments to routine
+    minor: Out of range
+nyx_temp_log/deflate           file=0.0 MiB (raw 0.0 MiB)
+HDF5-DIAG: Error detected in HDF5 (1.14.6):
+  #000: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Pdcpl.c line 1923 in H5Pset_chunk(): chunk dimensionality must be positive
+    major: Invalid arguments to routine
+    minor: Out of range
+nyx_vx_asinh/deflate           file=0.0 MiB (raw 0.0 MiB)
+HDF5-DIAG: Error detected in HDF5 (1.14.6):
+  #000: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Pdcpl.c line 1923 in H5Pset_chunk(): chunk dimensionality must be positive
+    major: Invalid arguments to routine
+    minor: Out of range
+nyx_vy_asinh/deflate           file=0.0 MiB (raw 0.0 MiB)
+HDF5-DIAG: Error detected in HDF5 (1.14.6):
+  #000: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Pdcpl.c line 1923 in H5Pset_chunk(): chunk dimensionality must be positive
+    major: Invalid arguments to routine
+    minor: Out of range
+nyx_vz_asinh/deflate           file=0.0 MiB (raw 0.0 MiB)
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results_filter.csv
+
+=== [miranda] connector_phases (VOL total/compress/io) ===
+dataset          compressor  op     total_ms   compress_ms  io_ms     overhead_ms  overhead_pct
+miranda_noop     noop        write  885.5128   745.1007     113.1448  27.2674      3.08
+miranda_noop     noop        read   741.7285   215.9506     477.5915  48.1865      6.50
+miranda_cuszp    cuszp       write  349.6132   35.6565      6.2614    307.6953     88.01
+miranda_cuszp    cuszp       read   404.9155   364.4037     10.6702   29.8416      7.37
+miranda_sz3_1e3  sz3         write  1071.4820  1069.9810    1.4408    0.0602       0.01
+miranda_sz3_1e3  sz3         read   838.3722   755.5112     1.2672    81.5938      9.73
+miranda_noop     noop        write  895.9307   733.5772     135.5529  26.8006      2.99
+miranda_noop     noop        read   465.9816   227.6685     190.5247  47.7884      10.26
+miranda_cuszp    cuszp       write  292.0474   33.6401      6.5923    251.8150     86.22
+miranda_cuszp    cuszp       read   457.9144   362.3181     14.2844   81.3119      17.76
+miranda_sz3_1e3  sz3         write  1027.8978  1026.1341    1.7052    0.0584       0.01
+miranda_sz3_1e3  sz3         read   841.1738   813.6742     7.3626    20.1370      2.39
+
+=== [miranda] results_vol (harness total + ratio + RMSE) ===
+dataset                                                                      compressor  path  op     phase  ms         ratio    rmse
+miranda                                                                      noop        vol   write  total  896.2030   0.9965   
+miranda                                                                      noop        vol   read   total  466.0894            0.000000e+00
+miranda                                                                      cuszp       vol   write  total  292.0944   16.0000  
+miranda                                                                      cuszp       vol   read   total  458.0303            2.852723e-05
+miranda                                                                      sz3_1e3     vol   write  total  1027.9398  57.6000  
+miranda                                                                      sz3_1e3     vol   read   total  841.2810            2.785627e-04
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_miranda.h5  ALL         vol   write  file   2220.3463  2.7692   
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_miranda.h5  ALL         vol   read   file   1765.4008           
+
+=== [ocean] connector_phases (VOL total/compress/io) ===
+dataset             compressor  op     total_ms  compress_ms  io_ms    overhead_ms  overhead_pct
+ocean_temp_noop     noop        write  577.4330  489.4685     75.5291  12.4353      2.15
+ocean_temp_noop     noop        read   164.5594  66.1557      76.9407  21.4630      13.04
+ocean_temp_cuszp    cuszp       write  353.4152  17.4718      15.7289  320.2145     90.61
+ocean_temp_cuszp    cuszp       read   231.4482  189.8500     27.8241  13.7741      5.95
+ocean_temp_sz3_1e3  sz3         write  977.7909  966.0792     8.7824   2.9293       0.30
+ocean_temp_sz3_1e3  sz3         read   988.0776  963.5732     15.6004  8.9040       0.90
+ocean_temp_noop     noop        write  590.4528  505.5132     72.4058  12.5338      2.12
+ocean_temp_noop     noop        read   166.6784  67.6617      77.8040  21.2127      12.73
+ocean_temp_cuszp    cuszp       write  319.3148  21.1759      15.3119  282.8269     88.57
+ocean_temp_cuszp    cuszp       read   239.1301  193.0467     32.3621  13.7213      5.74
+ocean_temp_sz3_1e3  sz3         write  985.5143  973.7536     8.8306   2.9301       0.30
+ocean_temp_sz3_1e3  sz3         read   995.1998  970.2804     16.0361  8.8833       0.89
+
+=== [ocean] results_vol (harness total + ratio + RMSE) ===
+dataset                                                                    compressor  path  op     phase  ms         ratio   rmse
+ocean_temp                                                                 noop        vol   write  total  590.6372   0.9931  
+ocean_temp                                                                 noop        vol   read   total  166.7783           0.000000e+00
+ocean_temp                                                                 cuszp       vol   write  total  319.3631   2.6770  
+ocean_temp                                                                 cuszp       vol   read   total  239.2359           5.774486e-05
+ocean_temp                                                                 sz3_1e3     vol   write  total  985.5640   4.7362  
+ocean_temp                                                                 sz3_1e3     vol   read   total  995.3435           5.765402e-04
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_ocean.h5  ALL         vol   write  file   1901.7005  1.8848  
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_ocean.h5  ALL         vol   read   file   1401.3577          
+
+=== [nyx] connector_phases (VOL total/compress/io) ===
+dataset               compressor  op     total_ms   compress_ms  io_ms     overhead_ms  overhead_pct
+nyx_baryon_noop       noop        write  1267.1580  1023.9060    196.4673  46.7848      3.69
+nyx_baryon_noop       noop        read   862.9872   354.6339     365.5421  142.8112     16.55
+nyx_baryon_cuszp      cuszp       write  607.8851   124.3001     62.5958   420.9891     69.25
+nyx_baryon_cuszp      cuszp       read   803.4251   624.3313     128.6954  50.3984      6.27
+nyx_baryon_sz3_1e3    sz3         write  4419.0867  4373.5782    35.2164   10.2921      0.23
+nyx_baryon_sz3_1e3    sz3         read   4642.1590  4377.5923    93.1490   171.4177     3.69
+nyx_dm_noop           noop        write  882.8612   673.3281     162.6862  46.8469      5.31
+nyx_dm_noop           noop        read   725.7614   278.2537     367.7731  79.7346      10.99
+nyx_dm_cuszp          cuszp       write  479.2872   59.0136      75.3897   344.8838     71.96
+nyx_dm_cuszp          cuszp       read   922.2182   657.3000     144.5632  120.3551     13.05
+nyx_dm_sz3_1e3        sz3         write  4270.9112  4204.0004    51.9707   14.9400      0.35
+nyx_dm_sz3_1e3        sz3         read   5930.8693  5758.5155    122.7675  49.5863      0.84
+nyx_baryon_noop       noop        write  1573.2198  1012.6860    513.7320  46.8017      2.97
+nyx_baryon_noop       noop        read   966.1142   379.2585     443.4852  143.3705     14.84
+nyx_baryon_cuszp      cuszp       write  657.0941   123.3994     61.6215   472.0733     71.84
+nyx_baryon_cuszp      cuszp       read   846.9029   652.0074     144.3735  50.5220      5.97
+nyx_baryon_sz3_1e3    sz3         write  4381.9485  4337.1531    34.4719   10.3235      0.24
+nyx_baryon_sz3_1e3    sz3         read   4675.4035  4441.2323    65.4743   168.6969     3.61
+nyx_dm_noop           noop        write  821.7348   613.9035     161.0711  46.7602      5.69
+nyx_dm_noop           noop        read   689.6944   270.2892     339.1617  80.2436      11.63
+nyx_dm_cuszp          cuszp       write  429.7176   55.5866      76.4847   297.6463     69.27
+nyx_dm_cuszp          cuszp       read   834.1039   636.0432     139.8063  58.2545      6.98
+nyx_dm_sz3_1e3        sz3         write  4190.1786  4122.9347    52.2792   14.9647      0.36
+nyx_dm_sz3_1e3        sz3         read   5846.6340  5697.7672    98.4165   50.4504      0.86
+nyx_temp_log_noop     noop        write  817.3275   597.6763     173.1760  46.4753      5.69
+nyx_temp_log_noop     noop        read   721.8830   272.0113     337.9487  111.9230     15.50
+nyx_temp_log_cuszp    cuszp       write  400.5478   58.2890      110.5721  231.6867     57.84
+nyx_temp_log_cuszp    cuszp       read   827.2572   643.8684     131.2206  52.1681      6.31
+nyx_temp_log_sz3_1e3  sz3         write  4094.7957  4034.0074    51.2961   9.4921       0.23
+nyx_temp_log_sz3_1e3  sz3         read   4000.4434  3829.4674    64.4558   106.5202     2.66
+nyx_vx_asinh_noop     noop        write  901.5427   612.1042     242.9149  46.5236      5.16
+nyx_vx_asinh_noop     noop        read   680.8484   270.6510     329.2705  80.9269      11.89
+nyx_vx_asinh_cuszp    cuszp       write  335.5477   55.9594      72.1515   207.4368     61.82
+nyx_vx_asinh_cuszp    cuszp       read   796.0302   644.4088     101.3999  50.2215      6.31
+nyx_vx_asinh_sz3_1e3  sz3         write  5044.4259  4998.0006    39.0693   7.3560       0.15
+nyx_vx_asinh_sz3_1e3  sz3         read   4340.8315  4246.4224    52.3403   42.0688      0.97
+nyx_vy_asinh_noop     noop        write  889.5329   612.0204     230.4418  47.0707      5.29
+nyx_vy_asinh_noop     noop        read   725.7253   278.6034     366.5026  80.6193      11.11
+nyx_vy_asinh_cuszp    cuszp       write  375.7333   55.7685      84.0328   235.9320     62.79
+nyx_vy_asinh_cuszp    cuszp       read   813.1942   649.4371     111.4348  52.3224      6.43
+nyx_vy_asinh_sz3_1e3  sz3         write  5141.2844  5087.8758    44.5550   8.8536       0.17
+nyx_vy_asinh_sz3_1e3  sz3         read   4518.9893  4352.9612    58.2194   107.8087     2.39
+nyx_vz_asinh_noop     noop        write  922.0405   612.0265     263.2485  46.7655      5.07
+nyx_vz_asinh_noop     noop        read   744.6625   283.4626     380.7512  80.4487      10.80
+nyx_vz_asinh_cuszp    cuszp       write  444.6812   59.8270      104.4095  280.4447     63.07
+nyx_vz_asinh_cuszp    cuszp       read   855.7558   652.6662     148.4556  54.6340      6.38
+nyx_vz_asinh_sz3_1e3  sz3         write  5290.6839  5228.7895    51.4577   10.4367      0.20
+nyx_vz_asinh_sz3_1e3  sz3         read   5206.2011  5025.8223    69.5750   110.8038     2.13
+
+=== [nyx] results_vol (harness total + ratio + RMSE) ===
+dataset                                                                  compressor  path  op     phase  ms          ratio   rmse
+nyx_baryon                                                               noop        vol   write  total  1573.5734   0.9981  
+nyx_baryon                                                               noop        vol   read   total  966.2188            0.000000e+00
+nyx_baryon                                                               cuszp       vol   write  total  657.1568    2.6947  
+nyx_baryon                                                               cuszp       vol   read   total  847.0421            5.775256e-05
+nyx_baryon                                                               sz3_1e3     vol   write  total  4381.9993   4.6545  
+nyx_baryon                                                               sz3_1e3     vol   read   total  4675.5303           5.770836e-04
+nyx_dm                                                                   noop        vol   write  total  821.8579    0.9981  
+nyx_dm                                                                   noop        vol   read   total  689.8021            0.000000e+00
+nyx_dm                                                                   cuszp       vol   write  total  429.7892    2.1787  
+nyx_dm                                                                   cuszp       vol   read   total  834.2139            5.694991e-05
+nyx_dm                                                                   sz3_1e3     vol   write  total  4190.2487   3.1801  
+nyx_dm                                                                   sz3_1e3     vol   read   total  5846.7401           5.765664e-04
+nyx_temp_log                                                             noop        vol   write  total  817.4660    0.9981  
+nyx_temp_log                                                             noop        vol   read   total  721.9924            0.000000e+00
+nyx_temp_log                                                             cuszp       vol   write  total  400.6104    2.7978  
+nyx_temp_log                                                             cuszp       vol   read   total  827.3686            5.773672e-05
+nyx_temp_log                                                             sz3_1e3     vol   write  total  4094.8505   5.0196  
+nyx_temp_log                                                             sz3_1e3     vol   read   total  4000.5525           5.772388e-04
+nyx_vx_asinh                                                             noop        vol   write  total  901.6702    0.9981  
+nyx_vx_asinh                                                             noop        vol   read   total  680.9506            0.000000e+00
+nyx_vx_asinh                                                             cuszp       vol   write  total  335.6104    3.1220  
+nyx_vx_asinh                                                             cuszp       vol   read   total  796.1533            5.773930e-05
+nyx_vx_asinh                                                             sz3_1e3     vol   write  total  5044.4790   6.4810  
+nyx_vx_asinh                                                             sz3_1e3     vol   read   total  4340.9629           5.759220e-04
+nyx_vy_asinh                                                             noop        vol   write  total  889.6629    0.9981  
+nyx_vy_asinh                                                             noop        vol   read   total  725.8203            0.000000e+00
+nyx_vy_asinh                                                             cuszp       vol   write  total  375.7931    2.8444  
+nyx_vy_asinh                                                             cuszp       vol   read   total  813.2945            5.773330e-05
+nyx_vy_asinh                                                             sz3_1e3     vol   write  total  5141.3358   5.5054  
+nyx_vy_asinh                                                             sz3_1e3     vol   read   total  4519.0977           5.749662e-04
+nyx_vz_asinh                                                             noop        vol   write  total  922.1741    0.9981  
+nyx_vz_asinh                                                             noop        vol   read   total  744.7916            0.000000e+00
+nyx_vz_asinh                                                             cuszp       vol   write  total  444.7545    2.3814  
+nyx_vz_asinh                                                             cuszp       vol   read   total  855.8705            5.773818e-05
+nyx_vz_asinh                                                             sz3_1e3     vol   write  total  5290.7384   4.5714  
+nyx_vz_asinh                                                             sz3_1e3     vol   read   total  5206.3169           5.772946e-04
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_nyx.h5  ALL         vol   write  file   37873.2379  1.8800  
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_nyx.h5  ALL         vol   read   file   38092.7191          
+
+=== [nyx_log] connector_phases (VOL total/compress/io) ===
+dataset               compressor  op     total_ms   compress_ms  io_ms     overhead_ms  overhead_pct
+nyx_temp_log_noop     noop        write  1165.1574  935.6102     183.1776  46.3696      3.98
+nyx_temp_log_noop     noop        read   852.1587   281.7462     361.2097  209.2028     24.55
+nyx_temp_log_cuszp    cuszp       write  725.5892   187.3122     60.8613   477.4157     65.80
+nyx_temp_log_cuszp    cuszp       read   890.9986   649.2882     127.6012  114.1092     12.81
+nyx_temp_log_sz3_1e3  sz3         write  4528.6476  4486.3645    32.7686   9.5145       0.21
+nyx_temp_log_sz3_1e3  sz3         read   4112.4667  4004.7431    63.9198   43.8038      1.07
+nyx_vx_asinh_noop     noop        write  879.9104   607.8756     225.6124  46.4224      5.28
+nyx_vx_asinh_noop     noop        read   832.8300   350.2893     402.6308  79.9099      9.59
+nyx_vx_asinh_cuszp    cuszp       write  324.5192   58.1161      52.7730   213.6301     65.83
+nyx_vx_asinh_cuszp    cuszp       read   828.7520   649.2879     129.7959  49.6682      5.99
+nyx_vx_asinh_sz3_1e3  sz3         write  5087.9832  5055.7194    24.8568   7.4070       0.15
+nyx_vx_asinh_sz3_1e3  sz3         read   4430.1376  4243.3049    83.4572   103.3755     2.33
+nyx_vy_asinh_noop     noop        write  825.1550   613.4840     165.1067  46.5643      5.64
+nyx_vy_asinh_noop     noop        read   759.7893   282.6097     333.7870  143.3926     18.87
+nyx_vy_asinh_cuszp    cuszp       write  430.1565   138.5302     57.0955   234.5308     54.52
+nyx_vy_asinh_cuszp    cuszp       read   830.2290   651.5026     127.9056  50.8208      6.12
+nyx_vy_asinh_sz3_1e3  sz3         write  5095.0415  5056.7594    29.5879   8.6941       0.17
+nyx_vy_asinh_sz3_1e3  sz3         read   4394.4938  4297.4510    54.2127   42.8301      0.97
+nyx_vz_asinh_noop     noop        write  801.3381   594.6879     160.0928  46.5574      5.81
+nyx_vz_asinh_noop     noop        read   749.5478   270.0250     337.6743  141.8485     18.92
+nyx_vz_asinh_cuszp    cuszp       write  467.7991   124.9250     69.3572   273.5169     58.47
+nyx_vz_asinh_cuszp    cuszp       read   870.2466   635.1429     181.9744  53.1293      6.11
+nyx_vz_asinh_sz3_1e3  sz3         write  5230.6436  5184.7330    35.3842   10.5264      0.20
+nyx_vz_asinh_sz3_1e3  sz3         read   5079.0698  4969.4733    65.2127   44.3838      0.87
+
+=== [nyx_log] results_vol (harness total + ratio + RMSE) ===
+dataset                                                                      compressor  path  op     phase  ms          ratio   rmse
+nyx_temp_log                                                                 noop        vol   write  total  1165.7399   0.9981  
+nyx_temp_log                                                                 noop        vol   read   total  852.2598            0.000000e+00
+nyx_temp_log                                                                 cuszp       vol   write  total  725.6484    2.7978  
+nyx_temp_log                                                                 cuszp       vol   read   total  891.1112            1.030239e+00
+nyx_temp_log                                                                 sz3_1e3     vol   write  total  4528.7102   5.0196  
+nyx_temp_log                                                                 sz3_1e3     vol   read   total  4112.5697           1.027745e+01
+nyx_vx_asinh                                                                 noop        vol   write  total  880.0232    0.9981  
+nyx_vx_asinh                                                                 noop        vol   read   total  832.9304            0.000000e+00
+nyx_vx_asinh                                                                 cuszp       vol   write  total  324.5744    3.1220  
+nyx_vx_asinh                                                                 cuszp       vol   read   total  828.8565            3.723025e+02
+nyx_vx_asinh                                                                 sz3_1e3     vol   write  total  5088.0330   6.4810  
+nyx_vx_asinh                                                                 sz3_1e3     vol   read   total  4430.2348           3.723086e+03
+nyx_vy_asinh                                                                 noop        vol   write  total  825.2714    0.9981  
+nyx_vy_asinh                                                                 noop        vol   read   total  759.8873            0.000000e+00
+nyx_vy_asinh                                                                 cuszp       vol   write  total  430.2242    2.8444  
+nyx_vy_asinh                                                                 cuszp       vol   read   total  830.3364            2.765965e+02
+nyx_vy_asinh                                                                 sz3_1e3     vol   write  total  5095.0969   5.5054  
+nyx_vy_asinh                                                                 sz3_1e3     vol   read   total  4394.6001           2.766077e+03
+nyx_vz_asinh                                                                 noop        vol   write  total  801.4663    0.9981  
+nyx_vz_asinh                                                                 noop        vol   read   total  749.6533            0.000000e+00
+nyx_vz_asinh                                                                 cuszp       vol   write  total  467.8709    2.3814  
+nyx_vz_asinh                                                                 cuszp       vol   read   total  870.3619            1.915125e+02
+nyx_vz_asinh                                                                 sz3_1e3     vol   write  total  5230.7024   4.5714  
+nyx_vz_asinh                                                                 sz3_1e3     vol   read   total  5079.1795           1.915103e+03
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_nyx_log.h5  ALL         vol   write  file   25953.8235  1.9321  
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_nyx_log.h5  ALL         vol   read   file   24631.9811          
+
+=== FILE-LEVEL summary (phase=file rows across all groups) ===
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_miranda.h5,ALL,vol,write,file,2220.3463,2.7692,
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_miranda.h5,ALL,vol,read,file,1765.4008,,
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_nyx.h5,ALL,vol,write,file,37873.2379,1.8800,
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_nyx.h5,ALL,vol,read,file,38092.7191,,
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_nyx_log.h5,ALL,vol,write,file,25953.8235,1.9321,
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_nyx_log.h5,ALL,vol,read,file,24631.9811,,
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_ocean.h5,ALL,vol,write,file,1901.7005,1.8848,
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_ocean.h5,ALL,vol,read,file,1401.3577,,
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_qmc.h5,ALL,vol,write,file,152120.4478,1.7703,
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_qmc.h5,ALL,vol,read,file,177391.6123,,
+=== results_filter.csv ===
+dataset       compressor  path    op     phase  ms         ratio         rmse
+miranda       deflate     filter  write  total  7117.7005  2.0948        
+miranda       deflate     filter  read   total  1012.2090                
+ocean_temp    deflate     filter  write  total  0.0165     0.0010        
+ocean_temp    deflate     filter  read   total  0.0085                   
+einspline37   deflate     filter  write  total  0.5833     6621509.5312  
+einspline37   deflate     filter  read   total  0.0713                   
+nyx_baryon    deflate     filter  write  total  0.0106     0.0010        
+nyx_baryon    deflate     filter  read   total  0.0085                   
+nyx_dm        deflate     filter  write  total  0.0042     0.0010        
+nyx_dm        deflate     filter  read   total  0.0076                   
+nyx_temp_log  deflate     filter  write  total  0.0042     0.0010        
+nyx_temp_log  deflate     filter  read   total  0.0074                   
+nyx_vx_asinh  deflate     filter  write  total  0.0042     0.0010        
+nyx_vx_asinh  deflate     filter  read   total  0.0074                   
+nyx_vy_asinh  deflate     filter  write  total  0.0043     0.0010        
+nyx_vy_asinh  deflate     filter  read   total  0.0072                   
+nyx_vz_asinh  deflate     filter  write  total  0.0042     0.0010        
+nyx_vz_asinh  deflate     filter  read   total  0.0073                   
+
+Job finished on Tue Jul 21 11:35:51 CDT 2026
