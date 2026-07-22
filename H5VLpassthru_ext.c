@@ -206,8 +206,10 @@ herr_t H5VL_pass_through_ext_transfer_decompress_chunk(compression_ctx *ctx, con
 herr_t H5VL_pass_through_ext_compress_native(compression_ctx *ctx, const void *data, size_t nbytes, void **out_cbuf, uint64_t *out_csize);
 herr_t H5VL_pass_through_ext_decompress_native(compression_ctx *ctx, const void *cbuf, size_t csize, void *out, size_t out_bytes);
 
-int    H5VL_pass_through_ext_compressor_available(const char *compressor_id);
+int H5VL_pass_through_ext_compressor_available(const char *compressor_id);
 int H5VL_pass_through_ext_buf_is_device(const void *p);
+
+size_t vol_comp_chunk_bytes(size_t dsize);
 
 /* Destroy Functions */
 void config_params_destroy(config_params *p);
@@ -659,35 +661,6 @@ vol_scatter_cb(const void **data_out, size_t *len_out, void *op_data)
 #ifndef VOL_NATIVE_MAGIC
 #define VOL_NATIVE_MAGIC ((uint64_t)0x564F4C4E41544956ULL)
 #endif
- 
-/* Chunk size policy: env VOL_COMP_CHUNK_MB (MiB), default 1024 (1 GiB),
- * rounded down to a whole number of elements. */
-static size_t
-vol_comp_chunk_bytes(size_t dsize)
-{
-    size_t mb = 1024;
-    const char *env = getenv("VOL_COMP_CHUNK_MB");
-    if (env && *env) {
-        char *end = NULL;
-        unsigned long long v = strtoull(env, &end, 10);
-        if (end != env && v > 0)
-            mb = (size_t)v;
-    }
-    size_t bytes = mb << 20;
-    bytes -= bytes % dsize;
-    if (bytes < dsize)
-        bytes = dsize;
-    return bytes;
-}
-
-/* Toggle: native chunking on unless explicitly disabled with "0". */
-static int
-vol_use_native_chunking(void)
-{
-    const char *e = getenv("HDF5_VOL_NATIVE_CHUNKING");
-    if (!e) return 1;                       /* default ON */
-    return !(e[0] == '0' && e[1] == '\0');
-}
 
 
 /*-------------------------------------------------------------------------
@@ -2034,6 +2007,8 @@ H5VL_pass_through_ext_dataset_read(
             int                  is_v2     = 0;
             int                  is_native = 0;
 
+            // Why is this split? -- Answer - you can choose to set chunk sizes yourself (generally not recommended)
+            // or just use the compressor chunks (recommended). We can now show the difference
             if (magic == VOL_CHUNK_MAGIC) {
                 if (cont_bytes < VOL_CHUNK_HDR_WORDS * sizeof(uint64_t)) {
                     H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
@@ -2076,11 +2051,12 @@ H5VL_pass_through_ext_dataset_read(
                 single_csize = cbuf + sizeof(uint64_t);
                 is_native    = 1;
             } else {
-                /* Legacy v1: [uint64 csize][payload] */
-                nchunks      = 1;
-                chunk_bytes  = total_bytes;
-                payload_off  = sizeof(uint64_t);
-                single_csize = cbuf;
+                H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                        vol_err_class, maj_compression, min_decompress_failed,
+                        "unrecognized container magic 0x%016llx for dataset %zu "
+                        "(file written by an incompatible VOL version?)",
+                        (unsigned long long)magic, u);
+                free(cbuf); ret_val = -1; continue;
             }
 
             /* --- Decompress chunk by chunk into a VOL-owned buffer --- */
@@ -2299,11 +2275,11 @@ H5VL_pass_through_ext_dataset_write(
             ret_val = -1; continue;
         }
 
-        /* ====================================================================
-         * Pick the compression source (unchanged): whole-write compresses
+        /*
+         * Pick the compression source: whole-write compresses
          * directly from the caller buffer (host or device); strip writes
          * stage on the host first.
-         * ==================================================================== */
+        */
         const void *comp_src = NULL;
         const int is_whole_write = (off_bytes == 0 && len_bytes == total_bytes);
 
@@ -2353,11 +2329,12 @@ H5VL_pass_through_ext_dataset_write(
             comp_src = ctx->stage_buf;
         }
 
-        /* ====================================================================
+        /*
          * NATIVE path: one compress into a single self-describing blob, then
          * write [VOL_NATIVE_MAGIC][csize][payload].
-         * ==================================================================== */
-        if (vol_use_native_chunking()) {
+        */
+        const size_t chunk_bytes = vol_chunk_bytes;
+        if (vol_chunk_bytes == 0) {
             void    *blob = NULL;
             uint64_t clen = 0;
             herr_t   cret;
@@ -2464,11 +2441,10 @@ H5VL_pass_through_ext_dataset_write(
             continue;   /* done with this dataset */
         }
 
-        /* ====================================================================
-         * MANUAL v2 path (fallback, HDF5_VOL_NATIVE_CHUNKING=0): compress in
-         * CHUNKS, then write [magic][nchunks][chunk_bytes][csize table][payloads].
-         * (Verbatim from your original implementation.)
-         * ==================================================================== */
+        /*
+         * Fallback, HDF5_VOL_NATIVE_CHUNKING=0: compress in
+         * chunks, then write [magic][nchunks][chunk_bytes][csize table][payloads].
+        */
         const size_t chunk_bytes = vol_comp_chunk_bytes(dsize);
         const size_t nchunks = (total_bytes + chunk_bytes - 1) / chunk_bytes;
 
