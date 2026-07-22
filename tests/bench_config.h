@@ -452,20 +452,25 @@ static inline int bench_compressor_opts_json(const bench_compressor_t *c,
      *      - ABS datasets: emulate absolute via abs/assumed_range -> rel.
      *      - REL datasets: pass the relative bound straight through.          */
     if (strcmp(c->name, "cuszp") == 0) {
-        double rel;
+        /* cuSZp is natively ABSOLUTE; its libpressio plugin's only bound knob is
+        * pressio:abs, passed straight to the kernel. outlier mode survives
+        * wide-range/signed fields. */
         if (d->bound_mode == BENCH_BOUND_ABS) {
-            double range = (d->assumed_range > 0.0) ? d->assumed_range : 1.0;
-            rel = d->bound / range;              /* abs -> value-range relative */
+            ret = snprintf(buf, n,
+                "{\"pressio:abs\": %.10e, \"cuszp:mode_str\": \"outlier\"}", d->bound);
             if (dbg) fprintf(stderr,
-                "[dbg opts] cuszp    %-12s ABS bound=%g assumed_range=%g -> rel=%.6e (outlier)\n",
-                d->name, d->bound, range, rel);
+                "[dbg opts] cuszp    %-12s ABS bound=%.10e (outlier)\n", d->name, d->bound);
         } else {
-            rel = d->bound;                      /* already relative */
+            /* REL dataset: convert to a fixed abs using the range so cuSZp sees a
+            * value you control. Prefer a range measured at load over assumed_range. */
+            double range = (d->assumed_range > 0.0) ? d->assumed_range : 1.0;
+            double abs   = d->bound * range;
+            ret = snprintf(buf, n,
+                "{\"pressio:abs\": %.10e, \"cuszp:mode_str\": \"outlier\"}", abs);
             if (dbg) fprintf(stderr,
-                "[dbg opts] cuszp    %-12s REL bound=%.6e (outlier)\n", d->name, rel);
+                "[dbg opts] cuszp    %-12s REL bound=%.6e range=%g -> abs=%.10e (outlier)\n",
+                d->name, d->bound, range, abs);
         }
-        ret = snprintf(buf, n,
-            "{\"pressio:rel\": %.10e, \"cuszp:mode_str\": \"outlier\"}", rel);
         return ret;
     }
 
