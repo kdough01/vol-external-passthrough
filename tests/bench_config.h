@@ -388,10 +388,13 @@ static const bench_compressor_t BENCH_COMPRESSORS[] = {
     { "noop", "noop", NULL, BENCH_CPU_CODEC, 1, NULL,
       "Connector default (no compressor). Bit-exact baseline; isolates overhead." },
 
-    { "cuszp", "cuszp",
-      NULL,
-      BENCH_GPU_CODEC, 0, "cuszp:cuda_stream",
-      "cuSZp: dynamically mapping ABS 1e-3 to REL based on data range." },
+    { "cuszp_1e3", "cuszp",
+    "{\"pressio:abs\":1e-3,\"cuszp:mode_str\":\"outlier\"}",
+    BENCH_GPU_CODEC, 0, "cuszp:cuda_stream", "GPU abs 1e-3, outlier mode." },
+
+    { "cuszp_1e6", "cuszp",
+    "{\"pressio:abs\":1e-6,\"cuszp:mode_str\":\"outlier\"}",
+    BENCH_GPU_CODEC, 0, "cuszp:cuda_stream", "GPU abs 1e-6, outlier mode." },
 
     { "sz3_1e3", "sz3",
       "{\"sz3:error_bound_mode_str\":\"abs\",\"sz3:abs_error_bound\":1e-3}",

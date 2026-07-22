@@ -108,7 +108,7 @@ run_vol_group () {
         ./build/tests/bench_vol_timing "$h5" "$rcsv"
 }
 
-for comp in cuszp; do
+for comp in cuszp_1e3 cuszp_1e6; do
     # run_vol_group miranda "miranda" "$comp"
     #run_vol_group ocean   "ocean_temp" "$comp"
     run_vol_group qmc     "einspline37" "$comp"
