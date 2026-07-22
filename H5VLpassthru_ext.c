@@ -2333,7 +2333,7 @@ H5VL_pass_through_ext_dataset_write(
          * NATIVE path: one compress into a single self-describing blob, then
          * write [VOL_NATIVE_MAGIC][csize][payload].
         */
-        const size_t chunk_bytes = vol_chunk_bytes;
+        const size_t vol_chunk_bytes = vol_comp_chunk_bytes(dsize);   /* 0 = native */
         if (vol_chunk_bytes == 0) {
             void    *blob = NULL;
             uint64_t clen = 0;
@@ -2445,7 +2445,7 @@ H5VL_pass_through_ext_dataset_write(
          * Fallback, HDF5_VOL_NATIVE_CHUNKING=0: compress in
          * chunks, then write [magic][nchunks][chunk_bytes][csize table][payloads].
         */
-        const size_t chunk_bytes = vol_comp_chunk_bytes(dsize);
+        const size_t chunk_bytes = vol_chunk_bytes;
         const size_t nchunks = (total_bytes + chunk_bytes - 1) / chunk_bytes;
 
         void    **chunk_bufs = (void **)calloc(nchunks, sizeof(void *));
