@@ -110,7 +110,7 @@ run_vol_group () {
 }
 
 for comp in noop cuszp sz3_1e3; do
-    for chunk_mb in "" 512; do
+    for chunk_mb in "" 4000 5000; do
         run_vol_group miranda "miranda"     "$comp" "$chunk_mb"
         run_vol_group qmc     "einspline37" "$comp" "$chunk_mb"
     done
