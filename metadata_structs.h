@@ -28,6 +28,10 @@ typedef struct compression_ctx {
     double compress_ms;      /* device codec time (ms) from CUDA events; 0 => use caller wall clock */
     void  *stream;
     char dataset_name[256];
+    int                        chunking_mode;       /* VOL_CHUNKING_* from opts_json */
+    uint64_t                   chunk_mb;            /* "vol:chunk_mb", 0 = default   */
+    struct pressio_compressor *chunk_wrapper;       /* cached 'chunking' meta        */
+    uint64_t                   chunk_wrapper_elems; /* chunk size wrapper was built with */
 } compression_ctx;
 
 #ifdef __cplusplus

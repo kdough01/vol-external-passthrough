@@ -90,18 +90,28 @@ echo "=== [0/3] Dump cuszp option keys ==="
 
 PLUGIN_DIR="$(pwd)/build"
 
+# ---------------------------------------------------------------------------
+# run_vol_group TAG SEL COMP MODE CHUNK_MB
+#   MODE:     "" = native (no chunking, default)
+#             "vol"     = VOL-level chunking      (VOL_COMP_CHUNKING=vol)
+#             "pressio" = libpressio chunking meta (VOL_COMP_CHUNKING=pressio)
+#   CHUNK_MB: chunk size for vol/pressio modes; "" = VOL default (1024)
+# The env vars override any vol:* keys in opts_json, so the *_pjson JSON-path
+# runs below must be launched with MODE="" and CHUNK_MB="".
+# ---------------------------------------------------------------------------
 run_vol_group () {
-    local tag="$1"; local sel="$2"; local comp="$3"; local chunk_mb="$4"  # "" = native
-    local label="${tag}_${comp}${chunk_mb:+_chunk${chunk_mb}mb}"
+    local tag="$1"; local sel="$2"; local comp="$3"; local mode="$4"; local chunk_mb="$5"
+    local label="${tag}_${comp}_${mode:-native}${chunk_mb:+_${chunk_mb}mb}"
     local h5="$WORK/bench_${label}.h5"
     local rcsv="$WORK/results_vol_${label}.csv"
     local pcsv="$WORK/connector_phases_${label}.csv"
     rm -f "$h5"
     echo ""
-    echo "=== [1/3] VOL timing [$label] : $sel (chunking: ${chunk_mb:-native}) ==="
+    echo "=== [1/3] VOL timing [$label] : $sel (chunking: ${mode:-native}${chunk_mb:+, ${chunk_mb} MB}) ==="
     env HDF5_VOL_CONNECTOR="pass_through_ext under_vol=0;under_info={}" \
         HDF5_PLUGIN_PATH="$PLUGIN_DIR" \
         HDF5_VOL_DUMP_PIPELINE=1 \
+        ${mode:+VOL_COMP_CHUNKING="$mode"} \
         ${chunk_mb:+VOL_COMP_CHUNK_MB="$chunk_mb"} \
         BENCH_ONLY="$sel" \
         BENCH_COMP="$comp" \
@@ -109,12 +119,46 @@ run_vol_group () {
         ./build/tests/bench_vol_timing "$h5" "$rcsv"
 }
 
+# Chunk sizes are per-dataset so both actually chunk:
+#   miranda     = 288 MiB  -> 64/128 MB gives 5/3 chunks (64 exercises a ragged tail)
+#   einspline37 = ~12.6 GiB -> 4000/5000 MB gives 4/3 chunks (old sweep values)
+CHUNKS_MIRANDA="64 128"
+CHUNKS_QMC="4000 5000"
+
 for comp in noop cuszp sz3_1e3; do
-    for chunk_mb in "" 4000 5000; do
-        run_vol_group miranda "miranda"     "$comp" "$chunk_mb"
-        run_vol_group qmc     "einspline37" "$comp" "$chunk_mb"
+    # native baseline (no chunking of any kind — the default path)
+    run_vol_group miranda "miranda"     "$comp" "" ""
+    run_vol_group qmc     "einspline37" "$comp" "" ""
+
+    for mode in vol pressio; do
+        # the VOL rejects noop under pressio chunking by design — skip, don't fail
+        if [ "$comp" = "noop" ] && [ "$mode" = "pressio" ]; then
+            echo ""
+            echo "=== skip: noop x pressio (rejected by the VOL by design) ==="
+            continue
+        fi
+        for mb in $CHUNKS_MIRANDA; do
+            run_vol_group miranda "miranda" "$comp" "$mode" "$mb"
+        done
+        for mb in $CHUNKS_QMC; do
+            run_vol_group qmc "einspline37" "$comp" "$mode" "$mb"
+        done
     done
 done
+
+# ---------------------------------------------------------------------------
+# JSON-path validation: chunking selected via opts_json ("vol:chunking_mode",
+# "vol:chunk_mb") with NO env override. This exercises the full persistence
+# chain: DCPL JSON -> parse at ctx create -> _VOL_OPTIONS_JSON snapshot ->
+# replay+parse at dataset_open. Entries defined in bench_config.h.
+# ---------------------------------------------------------------------------
+echo ""
+echo "=== JSON-path chunking selection (no VOL_COMP_* env set) ==="
+for comp in sz3_1e3_vjson sz3_1e3_pjson; do
+    run_vol_group miranda "miranda"     "$comp" "" ""
+    run_vol_group qmc     "einspline37" "$comp" "" ""
+done
+
 # echo ""
 # echo "=== [2/3] Pressio-only compressor timing ==="
 # ./build/tests/bench_pressio_timing "$WORK/payload.bin" "$WORK/results_pressio.csv"
@@ -124,13 +168,18 @@ echo "=== [3/3] Filter (deflate) timing ==="
 ./build/tests/bench_filter_timing --deflate \
     --h5 "$WORK/bench_filter.h5" --out "$WORK/results_filter.csv"
 
-for tag in miranda ocean nyx nyx_log; do
+# Summaries: iterate whatever labels actually ran (labels now encode mode+size)
+for pcsv in "$WORK"/connector_phases_*.csv; do
+    [ -f "$pcsv" ] || continue
+    label=$(basename "$pcsv" .csv); label=${label#connector_phases_}
     echo ""
-    echo "=== [$tag] connector_phases (VOL total/compress/io) ==="
-    [ -f "$WORK/connector_phases_${tag}.csv" ] && column -t -s, "$WORK/connector_phases_${tag}.csv"
-    echo ""
-    echo "=== [$tag] results_vol (harness total + ratio + RMSE) ==="
-    [ -f "$WORK/results_vol_${tag}.csv" ] && column -t -s, "$WORK/results_vol_${tag}.csv"
+    echo "=== [$label] connector_phases (VOL total/compress/io) ==="
+    column -t -s, "$pcsv"
+    if [ -f "$WORK/results_vol_${label}.csv" ]; then
+        echo ""
+        echo "=== [$label] results_vol (harness total + ratio + RMSE) ==="
+        column -t -s, "$WORK/results_vol_${label}.csv"
+    fi
 done
 
 echo ""

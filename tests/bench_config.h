@@ -66,7 +66,7 @@ static const bench_dataset_t BENCH_DATASETS[] = {
         BENCH_DATA_ROOT "/Miranda/SDRBENCH-Miranda-256x384x384/density.d64",
         3, {256, 384, 384, 0}, BENCH_F64,
         BENCH_BOUND_REL, 1e-3,
-        0.0,   /* assumed_range: unused for REL-mode datasets */
+        0.0,   /* assumed_range: not used for REL-mode datasets */
         1,
         "Clean d64; cuszp returns RMSE~2.7e-4 here. SDRBench names it density.d64."
     },
@@ -76,18 +76,20 @@ static const bench_dataset_t BENCH_DATASETS[] = {
         BENCH_DATA_ROOT "/oceanbox/Tobbeholmane_0001.nc",
         0, {0, 0, 0, 0}, BENCH_F32,
         BENCH_BOUND_REL, 1e-3,
-        0.0,   /* assumed_range: unused for REL-mode datasets */
+        0.0,   /* assumed_range: not used for REL-mode datasets */
         1,     /* gpu_suitable */
         "NetCDF-4 (HDF5-backed). Confirm netCDF-4 via `ncdump -k`. Shape/type "
         "read at load. NetCDF scale_factor/add_offset packing is NOT applied.",
         BENCH_SRC_HDF5, "/temp"
     },
+
+    // this will fail unless we set chunking
     {
         "einspline37",
         BENCH_DATA_ROOT "/QMCPACK-bigdata/einspline.tile_37-1-242-23-8.spin_0.tw_0.l0u6144.g112x66x66.dat",
         1, {13560851520 / 4, 0, 0, 0}, BENCH_F32,          
         BENCH_BOUND_ABS, 1e-3, 
-        7.84e5,  /* <--- Add assumed range (~784,000 based on previous RMSE) */
+        7.84e5,
         1,
         "Raw headerless float32 dump; 1D flat for the codec. spin/tw may be complex.",
         BENCH_SRC_RAW, NULL                  
@@ -96,22 +98,24 @@ static const bench_dataset_t BENCH_DATASETS[] = {
     /* NYX */
     { "nyx_baryon",   BENCH_DATA_ROOT "/NYX-Zarija/z42_n512_l10.h5", 0,{0,0,0,0},BENCH_F32,
       BENCH_BOUND_REL,1e-3, 0.0,1, "NYX 512^3", BENCH_SRC_HDF5, "/native_fields/baryon_density" },
-    { "nyx_dm",       BENCH_DATA_ROOT "/NYX-Zarija/z42_n512_l10.h5", 0,{0,0,0,0},BENCH_F32,
-      BENCH_BOUND_REL,1e-3, 0.0,1, "NYX 512^3", BENCH_SRC_HDF5, "/native_fields/dark_matter_density" },
 
-    /* NYX log - these give absurd RMSE without taking the log */
-    { "nyx_temp_log",  BENCH_DATA_ROOT "/NYX-Zarija/z42_n512_l10.h5", 0,{0,0,0,0},BENCH_F32,
-      BENCH_BOUND_REL,1e-3, 0.0,1, "NYX 512^3 log1p(temperature)", BENCH_SRC_HDF5,
-      "/native_fields/temperature", BENCH_XFORM_LOG1P },
-    { "nyx_vx_asinh",  BENCH_DATA_ROOT "/NYX-Zarija/z42_n512_l10.h5", 0,{0,0,0,0},BENCH_F32,
-      BENCH_BOUND_REL,1e-3, 0.0,1, "NYX 512^3 asinh(velocity_x)", BENCH_SRC_HDF5,
-      "/native_fields/velocity_x", BENCH_XFORM_ASINH },
-    { "nyx_vy_asinh",  BENCH_DATA_ROOT "/NYX-Zarija/z42_n512_l10.h5", 0,{0,0,0,0},BENCH_F32,
-      BENCH_BOUND_REL,1e-3, 0.0,1, "NYX 512^3 asinh(velocity_y)", BENCH_SRC_HDF5,
-      "/native_fields/velocity_y", BENCH_XFORM_ASINH },
-    { "nyx_vz_asinh",  BENCH_DATA_ROOT "/NYX-Zarija/z42_n512_l10.h5", 0,{0,0,0,0},BENCH_F32,
-      BENCH_BOUND_REL,1e-3, 0.0,1, "NYX 512^3 asinh(velocity_z)", BENCH_SRC_HDF5,
-      "/native_fields/velocity_z", BENCH_XFORM_ASINH },
+    // It is typical to only show the baryon dataset
+    // { "nyx_dm",       BENCH_DATA_ROOT "/NYX-Zarija/z42_n512_l10.h5", 0,{0,0,0,0},BENCH_F32,
+    //   BENCH_BOUND_REL,1e-3, 0.0,1, "NYX 512^3", BENCH_SRC_HDF5, "/native_fields/dark_matter_density" },
+
+    // /* NYX log - these give absurd RMSE without taking the log */
+    // { "nyx_temp_log",  BENCH_DATA_ROOT "/NYX-Zarija/z42_n512_l10.h5", 0,{0,0,0,0},BENCH_F32,
+    //   BENCH_BOUND_REL,1e-3, 0.0,1, "NYX 512^3 log1p(temperature)", BENCH_SRC_HDF5,
+    //   "/native_fields/temperature", BENCH_XFORM_LOG1P },
+    // { "nyx_vx_asinh",  BENCH_DATA_ROOT "/NYX-Zarija/z42_n512_l10.h5", 0,{0,0,0,0},BENCH_F32,
+    //   BENCH_BOUND_REL,1e-3, 0.0,1, "NYX 512^3 asinh(velocity_x)", BENCH_SRC_HDF5,
+    //   "/native_fields/velocity_x", BENCH_XFORM_ASINH },
+    // { "nyx_vy_asinh",  BENCH_DATA_ROOT "/NYX-Zarija/z42_n512_l10.h5", 0,{0,0,0,0},BENCH_F32,
+    //   BENCH_BOUND_REL,1e-3, 0.0,1, "NYX 512^3 asinh(velocity_y)", BENCH_SRC_HDF5,
+    //   "/native_fields/velocity_y", BENCH_XFORM_ASINH },
+    // { "nyx_vz_asinh",  BENCH_DATA_ROOT "/NYX-Zarija/z42_n512_l10.h5", 0,{0,0,0,0},BENCH_F32,
+    //   BENCH_BOUND_REL,1e-3, 0.0,1, "NYX 512^3 asinh(velocity_z)", BENCH_SRC_HDF5,
+    //   "/native_fields/velocity_z", BENCH_XFORM_ASINH },
 
     // {
     //     "hurricane",
@@ -384,6 +388,18 @@ typedef struct {
     const char        *note;
 } bench_compressor_t;
 
+/* ========================================================================
+ * Drop-in replacement for the BENCH_COMPRESSORS array in bench_config.h.
+ * Nothing else in the header changes.
+ *
+ * Two new entries at the bottom select chunking through opts_json
+ * ("vol:chunking_mode" / "vol:chunk_mb") instead of env. They validate the
+ * persistence chain (DCPL JSON -> parse at ctx create -> _VOL_OPTIONS_JSON
+ * snapshot -> replay at open) — run them WITHOUT VOL_COMP_CHUNKING /
+ * VOL_COMP_CHUNK_MB set, since env overrides JSON. 64 MB on miranda
+ * (288 MiB) also exercises a ragged final chunk in both modes.
+ * ======================================================================== */
+
 static const bench_compressor_t BENCH_COMPRESSORS[] = {
     { "noop", "noop", NULL, BENCH_CPU_CODEC, 1, NULL,
       "Connector default (no compressor). Bit-exact baseline; isolates overhead." },
@@ -407,6 +423,20 @@ static const bench_compressor_t BENCH_COMPRESSORS[] = {
     { "bzip2", "bzip2",
       "{\"bzip2:block_size\":9}",
       BENCH_CPU_CODEC, 1, NULL, "CPU lossless, general purpose. CPU comparator." },
+
+    /* --- JSON-path chunking selection (do NOT set VOL_COMP_* env for these) --- */
+
+    { "sz3_1e3_vjson", "sz3",
+      "{\"sz3:error_bound_mode_str\":\"abs\",\"sz3:abs_error_bound\":1e-3,"
+       "\"vol:chunking_mode\":\"vol\",\"vol:chunk_mb\":64}",
+      BENCH_CPU_CODEC, 0, NULL,
+      "VOL-level chunking selected via opts_json (validates attr persistence)." },
+
+    { "sz3_1e3_pjson", "sz3",
+      "{\"sz3:error_bound_mode_str\":\"abs\",\"sz3:abs_error_bound\":1e-3,"
+       "\"vol:chunking_mode\":\"pressio\",\"vol:chunk_mb\":64}",
+      BENCH_CPU_CODEC, 0, NULL,
+      "libpressio 'chunking' meta selected via opts_json (validates attr persistence)." },
 };
 
 #define BENCH_NUM_COMPRESSORS \
