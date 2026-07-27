@@ -125,7 +125,7 @@ run_vol_group () {
 CHUNKS_MIRANDA="64 128"
 CHUNKS_QMC="4000 5000"
 
-for comp in noop cuszp sz3_1e3; do
+for comp in noop cuszp_1e3 cuszp_1e6 sz3_1e3 sz3_1e6; do
     # native baseline (no chunking of any kind — the default path)
     run_vol_group miranda "miranda"     "$comp" "" ""
     run_vol_group qmc     "einspline37" "$comp" "" ""
