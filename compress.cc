@@ -68,66 +68,76 @@ vol_get_chunk_wrapper(compression_ctx *ctx, uint64_t chunk_elems)
         ctx->chunk_wrapper_elems = 0;
     }
 
-    if (!H5VL_pass_through_ext_compressor_available("chunking") ||
-        !H5VL_pass_through_ext_compressor_available("many_independent")) {
-        H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
-                vol_err_class, maj_compression, min_compressor_unavail,
-                "libpressio 'chunking'+'many_independent' meta-compressors are "
-                "not available in this build; use chunking_mode 'none' or 'vol'");
-        return NULL;
-    }
-
     struct pressio *lib = pressio_instance();
     struct pressio_compressor *w = lib ? pressio_get_compressor(lib, "chunking") : NULL;
     if (lib) pressio_release(lib);
     if (!w) {
         H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
                 vol_err_class, maj_compression, min_compressor_unavail,
-                "failed to instantiate libpressio 'chunking' meta-compressor");
+                "libpressio 'chunking' meta-compressor is not available in "
+                "this build; use chunking_mode 'none' or 'vol' instead");
         return NULL;
     }
 
-    /* Same recipe as the old vol_make_chunking_compressor: start from the
-     * child codec's full option set (carries tolerances, userptr stream,
-     * etc.), then splice in the chunking -> many_independent -> codec chain
-     * and the chunk size, applied in a single set_options call. */
+    /* Assemble chunking -> many_independent_threaded -> vol_host_output ->
+     * codec, then verify by round-tripping the options: meta/custom plugins
+     * don't reliably appear in pressio_supported_compressors(). */
+    {
+        struct pressio_options *nest = pressio_options_new();
+        pressio_options_set_string(nest, "chunking:compressor",
+                                   "many_independent_threaded");
+        pressio_options_set_string(nest, "many_independent_threaded:compressor",
+                                   "vol_host_output");
+        pressio_options_set_string(nest, "vol_host_output:compressor",
+                                   ctx->compressor_id);
+        (void)pressio_compressor_set_options(w, nest);
+        pressio_options_free(nest);
+
+        struct pressio_options *chk = pressio_compressor_get_options(w);
+        char *cs = pressio_options_to_string(chk);
+        int ok = (cs && strstr(cs, "many_independent_threaded") != NULL
+                     && strstr(cs, "vol_host_output") != NULL);
+        free(cs);
+        pressio_options_free(chk);
+        if (!ok) {
+            H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                    vol_err_class, maj_compression, min_compress_failed,
+                    "chunking pipeline failed to assemble "
+                    "many_independent_threaded/vol_host_output for '%s' -- "
+                    "refusing to store uncompressed data", ctx->compressor_id);
+            pressio_compressor_release(w);
+            return NULL;
+        }
+    }
+
+    /* Child codec options as the base, plus the chunk size. */
     {
         struct pressio_options *opts =
             pressio_compressor_get_options(ctx->compressor);
-        if (!opts)
-            opts = pressio_options_new();
 
-        pressio_options_set_string(opts, "chunking:compressor",
-                                   "many_independent");
-        pressio_options_set_string(opts, "many_independent:compressor",
-                                   ctx->compressor_id);
-
-        {
-            size_t one = 1;
-            size_t csz_bytes = 0;
-            struct pressio_data *csz =
-                pressio_data_new_owning(pressio_uint64_dtype, 1, &one);
-            ((uint64_t *)pressio_data_ptr(csz, &csz_bytes))[0] = chunk_elems;
-            pressio_options_set_data(opts, "chunking:size", csz);
-            pressio_data_free(csz);
-        }
+        size_t one = 1;
+        size_t csz_bytes = 0;
+        struct pressio_data *csz =
+            pressio_data_new_owning(pressio_uint64_dtype, 1, &one);
+        ((uint64_t *)pressio_data_ptr(csz, &csz_bytes))[0] = chunk_elems;
+        pressio_options_set_data(opts, "chunking:size", csz);
+        pressio_data_free(csz);
 
         const char *nt = getenv("VOL_COMP_PRESSIO_NTHREADS");
         if (nt && *nt) {
             unsigned long v = strtoul(nt, NULL, 10);
             if (v > 0)
-                pressio_options_set_uinteger(opts, "chunking:nthreads",
-                                             (unsigned)v);
+                pressio_options_set_uinteger(opts,
+                    "many_independent_threaded:nthreads", (unsigned)v);
         }
 
-        int err = pressio_compressor_set_options(w, opts);
+        int serr = pressio_compressor_set_options(w, opts);
         pressio_options_free(opts);
-        if (err) {
+        if (serr) {
             H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
                     vol_err_class, maj_compression, min_compressor_unavail,
-                    "failed to configure chunking/many_independent wrapper for "
-                    "'%s' (chunk_elems=%llu): %s",
-                    ctx->compressor_id, (unsigned long long)chunk_elems,
+                    "failed to set chunking:size=%llu on wrapper: %s",
+                    (unsigned long long)chunk_elems,
                     pressio_compressor_error_msg(w));
             pressio_compressor_release(w);
             return NULL;
@@ -135,8 +145,6 @@ vol_get_chunk_wrapper(compression_ctx *ctx, uint64_t chunk_elems)
     }
 
 #ifdef USE_CUDA
-    /* Re-apply the CUDA stream through the wrapper (the child opts replayed
-     * above should already cover this; cheap belt-and-braces). */
     if (ctx->stream) {
         struct pressio_options *s = pressio_options_new();
         char skey[128];
@@ -147,32 +155,19 @@ vol_get_chunk_wrapper(compression_ctx *ctx, uint64_t chunk_elems)
     }
 #endif
 
+    if (getenv("HDF5_VOL_DUMP_PIPELINE")) {
+        struct pressio_options *built = pressio_compressor_get_options(w);
+        char *s2 = pressio_options_to_string(built);
+        fprintf(stderr, "[VOL BUILT PIPELINE '%s']\n%s\n",
+                ctx->compressor_id, s2 ? s2 : "(null)");
+        free(s2);
+        pressio_options_free(built);
+    }
+
     ctx->chunk_wrapper       = w;
     ctx->chunk_wrapper_elems = chunk_elems;
     return w;
 }
-
-static const char *
-vol_ptr_domain(const void *p)
-{
-    return H5VL_pass_through_ext_buf_is_device(p) ? "cudamalloc" : "malloc";
-}
-
-#ifdef USE_CUDA
-/* Hand the codec our CUDA stream (previously done inside the chunking
- * pipeline builder; now applied directly to ctx->compressor). Idempotent. */
-static void
-vol_set_cuda_stream(compression_ctx *ctx)
-{
-    if (!ctx->stream) return;
-    struct pressio_options *sopt = pressio_options_new();
-    char skey[128];
-    snprintf(skey, sizeof(skey), "%s:cuda_stream", ctx->compressor_id);
-    pressio_options_set_userptr(sopt, skey, ctx->stream);
-    (void)pressio_compressor_set_options(ctx->compressor, sopt);
-    pressio_options_free(sopt);
-}
-#endif
 
 extern "C" {
 
