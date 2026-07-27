@@ -169,6 +169,27 @@ vol_get_chunk_wrapper(compression_ctx *ctx, uint64_t chunk_elems)
     return w;
 }
 
+static const char *
+vol_ptr_domain(const void *p)
+{
+    return H5VL_pass_through_ext_buf_is_device(p) ? "cudamalloc" : "malloc";
+}
+
+#ifdef USE_CUDA
+/* Hand the codec our CUDA stream. Idempotent. */
+static void
+vol_set_cuda_stream(compression_ctx *ctx)
+{
+    if (!ctx->stream) return;
+    struct pressio_options *sopt = pressio_options_new();
+    char skey[128];
+    snprintf(skey, sizeof(skey), "%s:cuda_stream", ctx->compressor_id);
+    pressio_options_set_userptr(sopt, skey, ctx->stream);
+    (void)pressio_compressor_set_options(ctx->compressor, sopt);
+    pressio_options_free(sopt);
+}
+#endif
+
 extern "C" {
 
 size_t
