@@ -1333,8 +1333,11 @@ vol_compress_pressio_impl(compression_ctx *ctx,
                                               vol_ptr_domain(data));
 
     /* Headroom for per-chunk overhead plus the wrapper's own framing. */
-    out_dims[0] = nbytes + 4096 + nch * 64;
-    output = pressio_data_new_owning(pressio_byte_dtype, 1, out_dims);
+    /* Empty output: the chunking pipeline allocates and sizes the result
+     * itself. A preallocated buffer is kept at full capacity (ratio 1.0x)
+     * and its layout doesn't round-trip. This matches the old working code,
+     * which had the preallocation commented out for exactly this reason. */
+    output = pressio_data_new_empty(pressio_byte_dtype, 0, NULL);
 
     if (!input || !output) {
         H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
