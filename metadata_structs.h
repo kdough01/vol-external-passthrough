@@ -6,6 +6,12 @@
 #include "hdf5.h"
 #include <libpressio/libpressio.h>
 
+typedef enum vol_chunking_mode {
+    VOL_CHUNKING_NONE = 0,
+    VOL_CHUNKING_VOL,
+    VOL_CHUNKING_PRESSIO
+} vol_chunking_mode_t;
+
 /* Must come first — used by datatype_ctx */
 typedef struct compression_ctx {
     char *compressor_id;
