@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <utility>
+#include <exception>
 #include <strings.h>
 
 extern "C" {
@@ -16,6 +17,11 @@ extern "C" {
 #include <libpressio_ext/cpp/domain.h>
 #include <libpressio_ext/cpp/domain_manager.h>
 #include "vol_timing_sink.h"
+
+#include <memory>
+#include <libpressio_ext/cpp/compressor.h>
+#include <libpressio_ext/cpp/options.h>
+#include <libpressio_ext/cpp/pressio.h>
 
 #ifdef USE_CUDA
 #include <cuda_runtime.h>
@@ -175,6 +181,78 @@ vol_ptr_domain(const void *p)
     return H5VL_pass_through_ext_buf_is_device(p) ? "cudamalloc" : "malloc";
 }
 
+/* Defined inside libpressio's own namespaces so the plugin API names
+ * resolve exactly as they do in libpressio's in-tree plugins. */
+namespace libpressio { namespace compressors { namespace vol_host_output_ns {
+
+struct vol_host_output_plugin final : public libpressio_compressor_plugin {
+    pressio_compressor child    = compressor_plugins().build("noop");
+    std::string        child_id = "noop";
+
+    struct pressio_options get_options_impl() const override {
+        pressio_options opts;
+        set_meta(opts, "vol_host_output:compressor", child_id, child);
+        return opts;
+    }
+    int set_options_impl(pressio_options const& opts) override {
+        get_meta(opts, "vol_host_output:compressor", compressor_plugins(),
+                 child_id, child);
+        return 0;
+    }
+    struct pressio_options get_configuration_impl() const override {
+        pressio_options opts;
+        set_meta_configuration(opts, "vol_host_output:compressor",
+                               compressor_plugins(), child);
+        set(opts, "pressio:thread_safe", pressio_thread_safety_multiple);
+        set(opts, "pressio:stability", "external");
+        return opts;
+    }
+    struct pressio_options get_documentation_impl() const override {
+        pressio_options opts;
+        set_meta_docs(opts, "vol_host_output:compressor",
+                      "child codec whose outputs are forced host-resident", child);
+        set(opts, "pressio:description",
+            "forces the child compressor's output into the malloc domain");
+        return opts;
+    }
+    pressio_options get_metrics_results_impl() const override {
+        return child->get_metrics_results();
+    }
+    int compress_impl(const pressio_data* input, pressio_data* output) override {
+        int rc = child->compress(input, output);
+        if (rc) return set_error(child->error_code(), child->error_msg());
+        vol_make_host_resident(output);      /* device -> host, no-op on CPU */
+        return 0;
+    }
+    int decompress_impl(const pressio_data* input, pressio_data* output) override {
+        int rc = child->decompress(input, output);
+        if (rc) return set_error(child->error_code(), child->error_msg());
+        vol_make_host_resident(output);
+        return 0;
+    }
+    void set_name_impl(std::string const& new_name) override {
+        if (!new_name.empty()) child->set_name(new_name + "/" + child->prefix());
+        else                   child->set_name(new_name);
+    }
+    std::vector<std::string> children_impl() const final {
+        return { child->get_name() };
+    }
+    const char* prefix() const override  { return "vol_host_output"; }
+    const char* version() const override { return "0.0.1"; }
+    int major_version() const override { return 0; }
+    int minor_version() const override { return 0; }
+    int patch_version() const override { return 1; }
+    std::shared_ptr<libpressio_compressor_plugin> clone() override {
+        return std::make_shared<vol_host_output_plugin>(*this);
+    }
+};
+
+pressio_register vol_host_output_registration(
+    compressor_plugins(), "vol_host_output",
+    [] { return std::make_shared<vol_host_output_plugin>(); });
+
+} } } /* namespace */
+
 #ifdef USE_CUDA
 /* Hand the codec our CUDA stream. Idempotent. */
 static void
@@ -189,6 +267,17 @@ vol_set_cuda_stream(compression_ctx *ctx)
     pressio_options_free(sopt);
 }
 #endif
+
+/* ========================================================================
+ * EXCEPTION BOUNDARY
+ *
+ * libpressio's C++ internals (domain manager, CUDA domains, some plugins)
+ * can throw. These entry points are called from HDF5's C stack, and a C++
+ * exception unwinding through C frames is undefined behavior (it's what
+ * produced the "infinite loop closing library" crash). Each public entry
+ * point below is a thin wrapper that catches everything and converts it to
+ * an H5Epush + -1. The *_impl functions hold the real logic.
+ * ======================================================================== */
 
 extern "C" {
 
@@ -298,10 +387,10 @@ H5VL_pass_through_ext_buf_is_device(const void *p)
  * whatever chunking happens is the codec's own internal blocking.
  * ======================================================================== */
 
-herr_t
-H5VL_pass_through_ext_compress_native(compression_ctx *ctx,
-                                      const void *data, size_t nbytes,
-                                      void **out_cbuf, uint64_t *out_csize)
+static herr_t
+vol_compress_native_impl(compression_ctx *ctx,
+                         const void *data, size_t nbytes,
+                         void **out_cbuf, uint64_t *out_csize)
 {
     herr_t ret_val = 0;
     struct pressio_data *input  = NULL;
@@ -474,9 +563,31 @@ done:
 }
 
 herr_t
-H5VL_pass_through_ext_decompress_native(compression_ctx *ctx,
-                                        const void *cbuf, size_t csize,
-                                        void *out, size_t out_bytes)
+H5VL_pass_through_ext_compress_native(compression_ctx *ctx,
+                                      const void *data, size_t nbytes,
+                                      void **out_cbuf, uint64_t *out_csize)
+{
+    try {
+        return vol_compress_native_impl(ctx, data, nbytes, out_cbuf, out_csize);
+    } catch (const std::exception &e) {
+        H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                vol_err_class, maj_compression, min_compress_failed,
+                "native compress for '%s' threw: %s",
+                ctx ? ctx->compressor_id : "?", e.what());
+        return -1;
+    } catch (...) {
+        H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                vol_err_class, maj_compression, min_compress_failed,
+                "native compress for '%s' threw a non-standard exception",
+                ctx ? ctx->compressor_id : "?");
+        return -1;
+    }
+}
+
+static herr_t
+vol_decompress_native_impl(compression_ctx *ctx,
+                           const void *cbuf, size_t csize,
+                           void *out, size_t out_bytes)
 {
     herr_t ret_val = 0;
     struct pressio_data *input  = NULL;
@@ -642,16 +753,38 @@ done:
     return ret_val;
 }
 
+herr_t
+H5VL_pass_through_ext_decompress_native(compression_ctx *ctx,
+                                        const void *cbuf, size_t csize,
+                                        void *out, size_t out_bytes)
+{
+    try {
+        return vol_decompress_native_impl(ctx, cbuf, csize, out, out_bytes);
+    } catch (const std::exception &e) {
+        H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                vol_err_class, maj_compression, min_decompress_failed,
+                "native decompress for '%s' threw: %s",
+                ctx ? ctx->compressor_id : "?", e.what());
+        return -1;
+    } catch (...) {
+        H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                vol_err_class, maj_compression, min_decompress_failed,
+                "native decompress for '%s' threw a non-standard exception",
+                ctx ? ctx->compressor_id : "?");
+        return -1;
+    }
+}
+
 /* ========================================================================
  * VOL-LEVEL CHUNKED PATH (opt-in via VOL_COMP_CHUNK_MB): the write loop
  * slices the buffer and calls these once per chunk. Each chunk is an
  * independent compressed blob recorded in the v2 container header.
  * ======================================================================== */
 
-herr_t
-H5VL_pass_through_ext_transfer_compress_chunk(compression_ctx *ctx,
-                                              const void *data, size_t nbytes,
-                                              void **out_cbuf, uint64_t *out_csize)
+static herr_t
+vol_transfer_compress_chunk_impl(compression_ctx *ctx,
+                                 const void *data, size_t nbytes,
+                                 void **out_cbuf, uint64_t *out_csize)
 {
     herr_t ret_val = 0;
     struct pressio_data *input  = NULL;
@@ -804,9 +937,32 @@ done:
 }
 
 herr_t
-H5VL_pass_through_ext_transfer_decompress_chunk(compression_ctx *ctx,
-                                                const void *cbuf, size_t csize,
-                                                void *out, size_t out_bytes)
+H5VL_pass_through_ext_transfer_compress_chunk(compression_ctx *ctx,
+                                              const void *data, size_t nbytes,
+                                              void **out_cbuf, uint64_t *out_csize)
+{
+    try {
+        return vol_transfer_compress_chunk_impl(ctx, data, nbytes,
+                                                out_cbuf, out_csize);
+    } catch (const std::exception &e) {
+        H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                vol_err_class, maj_compression, min_compress_failed,
+                "chunk compress for '%s' threw: %s",
+                ctx ? ctx->compressor_id : "?", e.what());
+        return -1;
+    } catch (...) {
+        H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                vol_err_class, maj_compression, min_compress_failed,
+                "chunk compress for '%s' threw a non-standard exception",
+                ctx ? ctx->compressor_id : "?");
+        return -1;
+    }
+}
+
+static herr_t
+vol_transfer_decompress_chunk_impl(compression_ctx *ctx,
+                                   const void *cbuf, size_t csize,
+                                   void *out, size_t out_bytes)
 {
     herr_t ret_val = 0;
     struct pressio_data *input  = NULL;
@@ -948,10 +1104,34 @@ done:
     return ret_val;
 }
 
+herr_t
+H5VL_pass_through_ext_transfer_decompress_chunk(compression_ctx *ctx,
+                                                const void *cbuf, size_t csize,
+                                                void *out, size_t out_bytes)
+{
+    try {
+        return vol_transfer_decompress_chunk_impl(ctx, cbuf, csize,
+                                                  out, out_bytes);
+    } catch (const std::exception &e) {
+        H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                vol_err_class, maj_compression, min_decompress_failed,
+                "chunk decompress for '%s' threw: %s",
+                ctx ? ctx->compressor_id : "?", e.what());
+        return -1;
+    } catch (...) {
+        H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                vol_err_class, maj_compression, min_decompress_failed,
+                "chunk decompress for '%s' threw a non-standard exception",
+                ctx ? ctx->compressor_id : "?");
+        return -1;
+    }
+}
+
 /* ========================================================================
  * LEGACY WHOLE-BUFFER HELPERS (transfer_compress / transfer_decompress).
  * Kept for callers outside the dataset read/write path. transfer_compress
  * is now just compress_native plus the ctx->compressed_buf bookkeeping.
+ * These call the already-wrapped entry points, so no try/catch needed.
  * ======================================================================== */
 
 herr_t
@@ -1074,12 +1254,12 @@ H5VL_pass_through_ext_parse_chunking_opts(compression_ctx *ctx,
     }
 }
 
-herr_t
-H5VL_pass_through_ext_compress_pressio(compression_ctx *ctx,
-                                       const void *data, size_t nbytes,
-                                       size_t chunk_bytes_req,
-                                       void **out_cbuf, uint64_t *out_csize,
-                                       uint64_t *out_chunk_elems)
+static herr_t
+vol_compress_pressio_impl(compression_ctx *ctx,
+                          const void *data, size_t nbytes,
+                          size_t chunk_bytes_req,
+                          void **out_cbuf, uint64_t *out_csize,
+                          uint64_t *out_chunk_elems)
 {
     herr_t ret_val = 0;
     struct pressio_data *input  = NULL;
@@ -1266,10 +1446,35 @@ done:
 }
 
 herr_t
-H5VL_pass_through_ext_decompress_pressio(compression_ctx *ctx,
-                                         const void *cbuf, size_t csize,
-                                         uint64_t chunk_elems,
-                                         void *out, size_t out_bytes)
+H5VL_pass_through_ext_compress_pressio(compression_ctx *ctx,
+                                       const void *data, size_t nbytes,
+                                       size_t chunk_bytes_req,
+                                       void **out_cbuf, uint64_t *out_csize,
+                                       uint64_t *out_chunk_elems)
+{
+    try {
+        return vol_compress_pressio_impl(ctx, data, nbytes, chunk_bytes_req,
+                                         out_cbuf, out_csize, out_chunk_elems);
+    } catch (const std::exception &e) {
+        H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                vol_err_class, maj_compression, min_compress_failed,
+                "pressio-chunked compress for '%s' threw: %s",
+                ctx ? ctx->compressor_id : "?", e.what());
+        return -1;
+    } catch (...) {
+        H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                vol_err_class, maj_compression, min_compress_failed,
+                "pressio-chunked compress for '%s' threw a non-standard exception",
+                ctx ? ctx->compressor_id : "?");
+        return -1;
+    }
+}
+
+static herr_t
+vol_decompress_pressio_impl(compression_ctx *ctx,
+                            const void *cbuf, size_t csize,
+                            uint64_t chunk_elems,
+                            void *out, size_t out_bytes)
 {
     herr_t ret_val = 0;
     struct pressio_data *input  = NULL;
@@ -1437,6 +1642,30 @@ done:
     if (input)  pressio_data_free(input);
     if (output) pressio_data_free(output);
     return ret_val;
+}
+
+herr_t
+H5VL_pass_through_ext_decompress_pressio(compression_ctx *ctx,
+                                         const void *cbuf, size_t csize,
+                                         uint64_t chunk_elems,
+                                         void *out, size_t out_bytes)
+{
+    try {
+        return vol_decompress_pressio_impl(ctx, cbuf, csize, chunk_elems,
+                                           out, out_bytes);
+    } catch (const std::exception &e) {
+        H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                vol_err_class, maj_compression, min_decompress_failed,
+                "pressio-chunked decompress for '%s' threw: %s",
+                ctx ? ctx->compressor_id : "?", e.what());
+        return -1;
+    } catch (...) {
+        H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                vol_err_class, maj_compression, min_decompress_failed,
+                "pressio-chunked decompress for '%s' threw a non-standard exception",
+                ctx ? ctx->compressor_id : "?");
+        return -1;
+    }
 }
 
 } /* extern C */
