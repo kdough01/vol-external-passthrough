@@ -478,7 +478,12 @@ void compression_ctx_destroy(compression_ctx *comp_ctx) {
     if (comp_ctx->compressor_opts) pressio_options_free(comp_ctx->compressor_opts);
     if (comp_ctx->compressor) pressio_compressor_release(comp_ctx->compressor);
     if (comp_ctx->library) pressio_release(comp_ctx->library);
-    if (comp_ctx->chunk_wrapper) pressio_compressor_release(comp_ctx->chunk_wrapper);
+
+    if (comp_ctx->chunk_wrapper) {
+        pressio_compressor_release(comp_ctx->chunk_wrapper);
+        comp_ctx->chunk_wrapper       = NULL;
+        comp_ctx->chunk_wrapper_elems = 0;
+    }
     
     free(comp_ctx->compressor_id);
     free(comp_ctx->dims);
@@ -626,12 +631,6 @@ void gpu_vol_file_destroy(gpu_vol_file_t *file_ctx) {
 void gpu_vol_dataset_destroy(gpu_vol_dataset_t *ds_ctx)
 {
     if (!ds_ctx) return;
-
-    if (ctx->chunk_wrapper) {
-        pressio_compressor_release(ctx->chunk_wrapper);
-        ctx->chunk_wrapper       = NULL;
-        ctx->chunk_wrapper_elems = 0;
-    }
 
     if (ds_ctx->comp_ctx)
         compression_ctx_destroy(ds_ctx->comp_ctx);
