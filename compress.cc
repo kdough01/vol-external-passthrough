@@ -1316,6 +1316,18 @@ vol_compress_pressio_impl(compression_ctx *ctx,
         chunk_elems = (uint64_t)total_elems;        /* single chunk */
     nch = (total_elems + (size_t)chunk_elems - 1) / (size_t)chunk_elems;
 
+    if (total_elems % (size_t)chunk_elems != 0) {
+        H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                vol_err_class, maj_compression, min_compress_failed,
+                "chunking_mode 'pressio': %zu elements is not evenly divisible "
+                "by chunk_elems=%llu; libpressio's chunking plugin would "
+                "zero-pad the final chunk, which is not bound-safe for all "
+                "codecs (observed with cuszp). Choose a divisible chunk size "
+                "or use chunking_mode 'vol'",
+                total_elems, (unsigned long long)chunk_elems);
+        return -1;
+    }
+
 #ifdef ENABLE_EXT_PASSTHRU_LOGGING
     printf("------- COMPRESS PRESSIO: id=%s nbytes=%zu total_elems=%zu "
            "chunk_elems=%llu nchunks=%zu\n",
