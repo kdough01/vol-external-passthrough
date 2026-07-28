@@ -1,0 +1,539 @@
+Job started on Mon Jul 27 16:30:25 CDT 2026
+Running on: gpu2
+PWD: /home/kdougherty/hdf5_projs/vol-external-passthrough
+mpicc:   /gpfs/fs1/home/software/swing/HPCX/hpcx-v2.26-gcc-doca_ofed-ubuntu22.04-cuda13-x86_64/ompi4/bin/mpicc
+nvcc:    /gpfs/fs1/soft/swing/software/spack-built/linux-ubuntu22.04-x86_64/gcc-11.4.0/cuda-12.6.0-qb3dlng/bin/nvcc
+gcc:     gcc (Ubuntu 11.4.0-1ubuntu1~22.04.2) 11.4.0
+GCC_LIB: /usr/lib/gcc/x86_64-linux-gnu/11
+gcc (Ubuntu 11.4.0-1ubuntu1~22.04.2) 11.4.0
+Copyright (C) 2021 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+LibPressio cmake dir: /home/kdougherty/libpressio_cuda/.spack-env/view/lib/cmake/LibPressio
+
+=== Building (USE_CUDA=ON -> CUDA-event timing in the connector) ===
+-- The C compiler identification is GNU 11.4.0
+-- The CXX compiler identification is GNU 11.4.0
+-- The CUDA compiler identification is NVIDIA 12.9.86
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /gpfs/fs1/home/software/swing/HPCX/hpcx-v2.26-gcc-doca_ofed-ubuntu22.04-cuda13-x86_64/ompi4/bin/mpicc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /gpfs/fs1/home/software/swing/HPCX/hpcx-v2.26-gcc-doca_ofed-ubuntu22.04-cuda13-x86_64/ompi4/bin/mpicxx - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Detecting CUDA compiler ABI info
+-- Detecting CUDA compiler ABI info - done
+-- Check for working CUDA compiler: /home/kdougherty/libpressio_cuda/.spack-env/view/bin/nvcc - skipped
+-- Detecting CUDA compile features
+-- Detecting CUDA compile features - done
+-- Found HDF5: hdf5-shared (found version "1.14.6")  
+-- Found OpenMP_C: -fopenmp (found version "4.5") 
+-- Found OpenMP_CXX: -fopenmp (found version "4.5") 
+-- Found OpenMP: TRUE (found version "4.5")  
+-- Found BZip2: /home/kdougherty/libpressio_cuda/.spack-env/view/lib/libbz2.so (found version "1.0.8") 
+-- Looking for BZ2_bzCompressInit
+-- Looking for BZ2_bzCompressInit - found
+-- Found ZFP: /home/kdougherty/libpressio_cuda/.spack-env/view/lib/cmake/zfp/zfp-config.cmake (found version "0.5.5") 
+-- Found OpenMP_C: -fopenmp (found version "4.5") 
+-- Found OpenMP_CXX: -fopenmp (found version "4.5") 
+-- Found PkgConfig: /home/kdougherty/libpressio_cuda/.spack-env/view/bin/pkg-config (found version "2.5.1") 
+-- Found GSL: /home/kdougherty/libpressio_cuda/.spack-env/view/include (found version "2.8") 
+-- Checking for one of the modules 'libzstd'
+-- Checking for one of the modules 'blosc'
+-- Found CUDAToolkit: /home/kdougherty/libpressio_cuda/.spack-env/view/include (found version "12.9.86") 
+-- Looking for pthread.h
+-- Looking for pthread.h - found
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE  
+-- Found HDF5: hdf5-shared (found version "1.14.6") found components: C 
+-- Found MPI_C: /gpfs/fs1/home/software/swing/HPCX/hpcx-v2.26-gcc-doca_ofed-ubuntu22.04-cuda13-x86_64/ompi4/bin/mpicc (found version "3.1") 
+-- Found MPI_CXX: /gpfs/fs1/home/software/swing/HPCX/hpcx-v2.26-gcc-doca_ofed-ubuntu22.04-cuda13-x86_64/ompi4/bin/mpicxx (found version "3.1") 
+-- Found MPI: TRUE (found version "3.1")  
+-- Found MPI: TRUE (found version "3.1") found components: CXX 
+-- Checking for one of the modules 'lua;luajit'
+-- Found nlohmann_json: /home/kdougherty/libpressio_cuda/.spack-env/view/share/cmake/nlohmann_json/nlohmann_jsonConfig.cmake (found version "3.12.0") 
+-- Found Python3: /home/kdougherty/libpressio_cuda/.spack-env/view/bin/python3 (found version "3.14.5") found components: Interpreter Development NumPy Development.Module Development.Embed 
+-- Found SWIG: /home/kdougherty/libpressio_cuda/.spack-env/view/bin/swig4.0 (found version "4.1.1")  
+-- Found MPI: TRUE (found version "3.1")  
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/kdougherty/hdf5_projs/vol-external-passthrough/build
+[  9%] Building C object CMakeFiles/hdf5_vol_passthrough.dir/H5VLpassthru_ext.c.o
+[  9%] Building CXX object CMakeFiles/hdf5_vol_passthrough.dir/compress.cc.o
+[ 14%] Building CXX object tests/CMakeFiles/dump_cuszp_opts.dir/dump_cuszp_opts.cc.o
+[ 19%] Linking CXX executable dump_cuszp_opts
+[ 19%] Built target dump_cuszp_opts
+[ 23%] Linking CXX shared library libhdf5_vol_passthrough.so
+[ 23%] Built target hdf5_vol_passthrough
+[ 28%] Building C object tests/CMakeFiles/test_cpu_write.dir/test_cpu_write.c.o
+[ 38%] Building C object tests/CMakeFiles/test_ci.dir/test_ci.c.o
+[ 38%] Building C object tests/CMakeFiles/test_time_hurricane.dir/test_time_hurricane.c.o
+[ 42%] Building C object tests/CMakeFiles/test_time_miranda.dir/test_time_miranda.c.o
+[ 47%] Linking C executable test_cpu_write
+[ 52%] Linking C executable test_time_hurricane
+[ 57%] Linking C executable test_ci
+[ 61%] Linking C executable test_time_miranda
+[ 61%] Built target test_cpu_write
+[ 61%] Built target test_time_hurricane
+[ 66%] Building C object tests/CMakeFiles/test_error_miranda.dir/test_error_miranda.c.o
+[ 71%] Built target test_ci
+[ 71%] Building CXX object tests/CMakeFiles/bench_vol_timing.dir/bench_vol_timing.cc.o
+[ 71%] Built target test_time_miranda
+[ 76%] Building CXX object tests/CMakeFiles/bench_pressio_timing.dir/bench_pressio_timing.cc.o
+[ 80%] Building CXX object tests/CMakeFiles/bench_filter_timing.dir/bench_filter_timing.cc.o
+[ 85%] Linking C executable test_error_miranda
+[ 85%] Built target test_error_miranda
+[ 90%] Linking CXX executable bench_vol_timing
+[ 95%] Linking CXX executable bench_pressio_timing
+[100%] Linking CXX executable bench_filter_timing
+[100%] Built target bench_vol_timing
+[100%] Built target bench_filter_timing
+[100%] Built target bench_pressio_timing
+--- build/ ---
+CMakeCache.txt
+CMakeFiles
+Makefile
+cmake_install.cmake
+libhdf5_vol_passthrough.so
+tests
+--- build/tests/ ---
+CMakeFiles
+Makefile
+bench_filter_timing
+bench_pressio_timing
+bench_vol_timing
+cmake_install.cmake
+dump_cuszp_opts
+test_ci
+test_cpu_write
+test_error_miranda
+test_time_hurricane
+test_time_miranda
+
+=== [0/3] Dump cuszp option keys ===
+cuszp:metric <char*> = "noop"
+cuszp:mode <int32> = 0
+cuszp:mode_str <char*> = "plain"
+
+=== [1/3] VOL timing [miranda_cuszp_1e6_native] : miranda (chunking: native) ===
+[dbg main] h5=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_miranda_cuszp_1e6_native.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results_vol_miranda_cuszp_1e6_native.csv only=miranda comp=cuszp_1e6 debug=0
+name           dtype  rank src    dims                   MiB        exists
+miranda        double 3    raw    256x384x384            288.0      yes
+ocean_temp     float  0    hdf5   (from file)            0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        yes
+4/4 dataset paths readable
+RANGE miranda        min=9.999878e-01 max=3.000046e+00 range=2.000058e+00 xform=none
+Info: 0x5564db962590
+
+=== miranda (288.0 MiB, double, raw) ===
+  miranda_cuszp_1e6            W=  780.13 ms  R=  444.29 ms  ratio= 11.08x  RMSE=3.091e-07
+[dbg main] done: 1 datasets, 0 skipped
+
+=== FILE /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_miranda_cuszp_1e6_native.h5: 1 dataset-writes | create=1.44  write=780.13  close/flush=0.56 => write_total=782.13 ms | read_total=444.29 ms | ratio=11.08x ===
+
+=== [1/3] VOL timing [qmc_cuszp_1e6_native] : einspline37 (chunking: native) ===
+[dbg main] h5=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_qmc_cuszp_1e6_native.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results_vol_qmc_cuszp_1e6_native.csv only=einspline37 comp=cuszp_1e6 debug=0
+name           dtype  rank src    dims                   MiB        exists
+miranda        double 3    raw    256x384x384            288.0      yes
+ocean_temp     float  0    hdf5   (from file)            0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        yes
+4/4 dataset paths readable
+RANGE einspline37    min=-2.125822e+01 max=2.036857e+01 range=4.162679e+01 xform=none
+HDF5-DIAG: Error detected in HDF5 (1.14.6):
+  #000: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5D.c line 1044 in H5Dread(): can't synchronously read data
+    major: Dataset
+    minor: Read failed
+  #001: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5D.c line 992 in H5D__read_api_common(): can't read data
+    major: Dataset
+    minor: Read failed
+  #002: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5VLcallback.c line 2078 in H5VL_dataset_read(): dataset read failed
+    major: Virtual Object Layer
+    minor: Read failed
+  #003: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5VLcallback.c line 2034 in H5VL__dataset_read(): dataset read failed
+    major: Virtual Object Layer
+    minor: Read failed
+VOL Passthrough-DIAG: Error detected in vol_passthrough (1.0):
+  #004: /home/kdougherty/hdf5_projs/vol-external-passthrough/H5VLpassthru_ext.c line 2177 in H5VL_pass_through_ext_dataset_read(): decompression failed for dataset 0 compressor='cuszp'
+    major: Compression
+    minor: Decompression failed
+  #005: /home/kdougherty/hdf5_projs/vol-external-passthrough/compress.cc line 764 in H5VL_pass_through_ext_decompress_native(): native decompress for 'cuszp' threw: an illegal memory access was encountered
+    major: Compression
+    minor: Decompression failed
+[ERR] H5Dread failed einspline37_cuszp_1e6
+[dbg main] done: 1 datasets, 0 skipped
+Info: 0x55916d38b590
+
+=== einspline37 (12932.6 MiB, float, raw) ===
+
+=== FILE /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_qmc_cuszp_1e6_native.h5: 0 dataset-writes | create=1.10  write=3410.92  close/flush=1.04 => write_total=3413.07 ms | read_total=0.00 ms | ratio=14.34x ===
+
+=== [1/3] VOL timing [miranda_cuszp_1e6_vol_64mb] : miranda (chunking: vol, 64 MB) ===
+[dbg main] h5=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_miranda_cuszp_1e6_vol_64mb.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results_vol_miranda_cuszp_1e6_vol_64mb.csv only=miranda comp=cuszp_1e6 debug=0
+name           dtype  rank src    dims                   MiB        exists
+miranda        double 3    raw    256x384x384            288.0      yes
+ocean_temp     float  0    hdf5   (from file)            0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        yes
+4/4 dataset paths readable
+RANGE miranda        min=9.999878e-01 max=3.000046e+00 range=2.000058e+00 xform=none
+Info: 0x56456aa11590
+
+=== miranda (288.0 MiB, double, raw) ===
+  miranda_cuszp_1e6            W=  605.07 ms  R=  426.81 ms  ratio= 11.08x  RMSE=3.091e-07
+[dbg main] done: 1 datasets, 0 skipped
+
+=== FILE /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_miranda_cuszp_1e6_vol_64mb.h5: 1 dataset-writes | create=1.04  write=605.07  close/flush=0.44 => write_total=606.56 ms | read_total=426.81 ms | ratio=11.08x ===
+
+=== [1/3] VOL timing [miranda_cuszp_1e6_vol_128mb] : miranda (chunking: vol, 128 MB) ===
+[dbg main] h5=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_miranda_cuszp_1e6_vol_128mb.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results_vol_miranda_cuszp_1e6_vol_128mb.csv only=miranda comp=cuszp_1e6 debug=0
+name           dtype  rank src    dims                   MiB        exists
+miranda        double 3    raw    256x384x384            288.0      yes
+ocean_temp     float  0    hdf5   (from file)            0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        yes
+4/4 dataset paths readable
+RANGE miranda        min=9.999878e-01 max=3.000046e+00 range=2.000058e+00 xform=none
+Info: 0x557940f48590
+
+=== miranda (288.0 MiB, double, raw) ===
+  miranda_cuszp_1e6            W=  596.34 ms  R=  444.86 ms  ratio= 11.08x  RMSE=8.839e-02
+[dbg main] done: 1 datasets, 0 skipped
+
+=== FILE /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_miranda_cuszp_1e6_vol_128mb.h5: 1 dataset-writes | create=1.02  write=596.34  close/flush=0.86 => write_total=598.23 ms | read_total=444.86 ms | ratio=11.08x ===
+
+=== [1/3] VOL timing [qmc_cuszp_1e6_vol_4000mb] : einspline37 (chunking: vol, 4000 MB) ===
+[dbg main] h5=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_qmc_cuszp_1e6_vol_4000mb.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results_vol_qmc_cuszp_1e6_vol_4000mb.csv only=einspline37 comp=cuszp_1e6 debug=0
+name           dtype  rank src    dims                   MiB        exists
+miranda        double 3    raw    256x384x384            288.0      yes
+ocean_temp     float  0    hdf5   (from file)            0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        yes
+4/4 dataset paths readable
+RANGE einspline37    min=-2.125822e+01 max=2.036857e+01 range=4.162679e+01 xform=none
+Info: 0x557a85251590
+
+=== einspline37 (12932.6 MiB, float, raw) ===
+  einspline37_cuszp_1e6        W=18309.12 ms  R=28249.18 ms  ratio=  1.65x  RMSE=5.784e-07
+[dbg main] done: 1 datasets, 0 skipped
+
+=== FILE /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_qmc_cuszp_1e6_vol_4000mb.h5: 1 dataset-writes | create=1.10  write=18309.12  close/flush=120.57 => write_total=18430.79 ms | read_total=28249.18 ms | ratio=1.65x ===
+
+=== [1/3] VOL timing [qmc_cuszp_1e6_vol_5000mb] : einspline37 (chunking: vol, 5000 MB) ===
+[dbg main] h5=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_qmc_cuszp_1e6_vol_5000mb.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results_vol_qmc_cuszp_1e6_vol_5000mb.csv only=einspline37 comp=cuszp_1e6 debug=0
+name           dtype  rank src    dims                   MiB        exists
+miranda        double 3    raw    256x384x384            288.0      yes
+ocean_temp     float  0    hdf5   (from file)            0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        yes
+4/4 dataset paths readable
+RANGE einspline37    min=-2.125822e+01 max=2.036857e+01 range=4.162679e+01 xform=none
+Info: 0x55d6286fd590
+
+=== einspline37 (12932.6 MiB, float, raw) ===
+  einspline37_cuszp_1e6        W=18371.04 ms  R=28248.31 ms  ratio=  1.65x  RMSE=5.784e-07
+[dbg main] done: 1 datasets, 0 skipped
+
+=== FILE /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_qmc_cuszp_1e6_vol_5000mb.h5: 1 dataset-writes | create=1.07  write=18371.04  close/flush=4.11 => write_total=18376.22 ms | read_total=28248.31 ms | ratio=1.65x ===
+
+=== [1/3] VOL timing [miranda_cuszp_1e6_pressio_64mb] : miranda (chunking: pressio, 64 MB) ===
+[dbg main] h5=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_miranda_cuszp_1e6_pressio_64mb.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results_vol_miranda_cuszp_1e6_pressio_64mb.csv only=miranda comp=cuszp_1e6 debug=0
+name           dtype  rank src    dims                   MiB        exists
+miranda        double 3    raw    256x384x384            288.0      yes
+ocean_temp     float  0    hdf5   (from file)            0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        yes
+4/4 dataset paths readable
+RANGE miranda        min=9.999878e-01 max=3.000046e+00 range=2.000058e+00 xform=none
+[VOL BUILT PIPELINE 'cuszp']
+chunking:chunk_nthreads <uint64> = 1
+chunking:compressor <char*> = "many_independent_threaded"
+chunking:metric <char*> = "noop"
+chunking:size <data> = data{ type=uint64_t dims={1, } domain=malloc has_data=[8388608, ]}
+cuszp:metric <char*> = "noop"
+cuszp:mode <int32> = 1
+cuszp:mode_str <char*> = "outlier"
+many_independent_threaded:collect_metrics_on_compression <int32> = 0
+many_independent_threaded:collect_metrics_on_decompression <int32> = 0
+many_independent_threaded:compressor <char*> = <empty>
+many_independent_threaded:compressors <char*[]> = {vol_host_output, }
+many_independent_threaded:metric <char*> = "noop"
+many_independent_threaded:nthreads <uint32> = 1
+many_independent_threaded:preserve_metrics <int32> = 0
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+subgroups:input_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+subgroups:output_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+vol_host_output:compressor <char*> = "cuszp"
+vol_host_output:metric <char*> = "noop"
+
+[VOL BUILT PIPELINE 'cuszp']
+chunking:chunk_nthreads <uint64> = 1
+chunking:compressor <char*> = "many_independent_threaded"
+chunking:metric <char*> = "noop"
+chunking:size <data> = data{ type=uint64_t dims={1, } domain=malloc has_data=[8388608, ]}
+cuszp:metric <char*> = "noop"
+cuszp:mode <int32> = 1
+cuszp:mode_str <char*> = "outlier"
+many_independent_threaded:collect_metrics_on_compression <int32> = 0
+many_independent_threaded:collect_metrics_on_decompression <int32> = 0
+many_independent_threaded:compressor <char*> = <empty>
+many_independent_threaded:compressors <char*[]> = {vol_host_output, }
+many_independent_threaded:metric <char*> = "noop"
+many_independent_threaded:nthreads <uint32> = 1
+many_independent_threaded:preserve_metrics <int32> = 0
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+subgroups:input_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+subgroups:output_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+vol_host_output:compressor <char*> = "cuszp"
+vol_host_output:metric <char*> = "noop"
+
+Info: 0x559227559590
+
+=== miranda (288.0 MiB, double, raw) ===
+  miranda_cuszp_1e6            W=  812.53 ms  R=  917.07 ms  ratio= 11.08x  RMSE=3.091e-07
+[dbg main] done: 1 datasets, 0 skipped
+
+=== FILE /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_miranda_cuszp_1e6_pressio_64mb.h5: 1 dataset-writes | create=1.05  write=812.53  close/flush=0.69 => write_total=814.26 ms | read_total=917.07 ms | ratio=11.08x ===
+
+=== [1/3] VOL timing [miranda_cuszp_1e6_pressio_128mb] : miranda (chunking: pressio, 128 MB) ===
+[dbg main] h5=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_miranda_cuszp_1e6_pressio_128mb.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results_vol_miranda_cuszp_1e6_pressio_128mb.csv only=miranda comp=cuszp_1e6 debug=0
+name           dtype  rank src    dims                   MiB        exists
+miranda        double 3    raw    256x384x384            288.0      yes
+ocean_temp     float  0    hdf5   (from file)            0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        yes
+4/4 dataset paths readable
+RANGE miranda        min=9.999878e-01 max=3.000046e+00 range=2.000058e+00 xform=none
+[VOL BUILT PIPELINE 'cuszp']
+chunking:chunk_nthreads <uint64> = 1
+chunking:compressor <char*> = "many_independent_threaded"
+chunking:metric <char*> = "noop"
+chunking:size <data> = data{ type=uint64_t dims={1, } domain=malloc has_data=[16777216, ]}
+cuszp:metric <char*> = "noop"
+cuszp:mode <int32> = 1
+cuszp:mode_str <char*> = "outlier"
+many_independent_threaded:collect_metrics_on_compression <int32> = 0
+many_independent_threaded:collect_metrics_on_decompression <int32> = 0
+many_independent_threaded:compressor <char*> = <empty>
+many_independent_threaded:compressors <char*[]> = {vol_host_output, }
+many_independent_threaded:metric <char*> = "noop"
+many_independent_threaded:nthreads <uint32> = 1
+many_independent_threaded:preserve_metrics <int32> = 0
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+subgroups:input_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+subgroups:output_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+vol_host_output:compressor <char*> = "cuszp"
+vol_host_output:metric <char*> = "noop"
+
+[VOL BUILT PIPELINE 'cuszp']
+chunking:chunk_nthreads <uint64> = 1
+chunking:compressor <char*> = "many_independent_threaded"
+chunking:metric <char*> = "noop"
+chunking:size <data> = data{ type=uint64_t dims={1, } domain=malloc has_data=[16777216, ]}
+cuszp:metric <char*> = "noop"
+cuszp:mode <int32> = 1
+cuszp:mode_str <char*> = "outlier"
+many_independent_threaded:collect_metrics_on_compression <int32> = 0
+many_independent_threaded:collect_metrics_on_decompression <int32> = 0
+many_independent_threaded:compressor <char*> = <empty>
+many_independent_threaded:compressors <char*[]> = {vol_host_output, }
+many_independent_threaded:metric <char*> = "noop"
+many_independent_threaded:nthreads <uint32> = 1
+many_independent_threaded:preserve_metrics <int32> = 0
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+subgroups:input_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+subgroups:output_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+vol_host_output:compressor <char*> = "cuszp"
+vol_host_output:metric <char*> = "noop"
+
+Info: 0x55640fd9d590
+
+=== miranda (288.0 MiB, double, raw) ===
+  miranda_cuszp_1e6            W= 1018.89 ms  R=  997.00 ms  ratio= 10.67x  RMSE=8.839e-02
+[dbg main] done: 1 datasets, 0 skipped
+
+=== FILE /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_miranda_cuszp_1e6_pressio_128mb.h5: 1 dataset-writes | create=1.03  write=1018.89  close/flush=0.72 => write_total=1020.65 ms | read_total=997.00 ms | ratio=10.67x ===
+
+=== [1/3] VOL timing [qmc_cuszp_1e6_pressio_4000mb] : einspline37 (chunking: pressio, 4000 MB) ===
+[dbg main] h5=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_qmc_cuszp_1e6_pressio_4000mb.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results_vol_qmc_cuszp_1e6_pressio_4000mb.csv only=einspline37 comp=cuszp_1e6 debug=0
+name           dtype  rank src    dims                   MiB        exists
+miranda        double 3    raw    256x384x384            288.0      yes
+ocean_temp     float  0    hdf5   (from file)            0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        yes
+4/4 dataset paths readable
+RANGE einspline37    min=-2.125822e+01 max=2.036857e+01 range=4.162679e+01 xform=none
+[VOL BUILT PIPELINE 'cuszp']
+chunking:chunk_nthreads <uint64> = 1
+chunking:compressor <char*> = "many_independent_threaded"
+chunking:metric <char*> = "noop"
+chunking:size <data> = data{ type=uint64_t dims={1, } domain=malloc has_data=[1048576000, ]}
+cuszp:metric <char*> = "noop"
+cuszp:mode <int32> = 1
+cuszp:mode_str <char*> = "outlier"
+many_independent_threaded:collect_metrics_on_compression <int32> = 0
+many_independent_threaded:collect_metrics_on_decompression <int32> = 0
+many_independent_threaded:compressor <char*> = <empty>
+many_independent_threaded:compressors <char*[]> = {vol_host_output, }
+many_independent_threaded:metric <char*> = "noop"
+many_independent_threaded:nthreads <uint32> = 1
+many_independent_threaded:preserve_metrics <int32> = 0
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+subgroups:input_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+subgroups:output_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+vol_host_output:compressor <char*> = "cuszp"
+vol_host_output:metric <char*> = "noop"
+
+[VOL BUILT PIPELINE 'cuszp']
+chunking:chunk_nthreads <uint64> = 1
+chunking:compressor <char*> = "many_independent_threaded"
+chunking:metric <char*> = "noop"
+chunking:size <data> = data{ type=uint64_t dims={1, } domain=malloc has_data=[1048576000, ]}
+cuszp:metric <char*> = "noop"
+cuszp:mode <int32> = 1
+cuszp:mode_str <char*> = "outlier"
+many_independent_threaded:collect_metrics_on_compression <int32> = 0
+many_independent_threaded:collect_metrics_on_decompression <int32> = 0
+many_independent_threaded:compressor <char*> = <empty>
+many_independent_threaded:compressors <char*[]> = {vol_host_output, }
+many_independent_threaded:metric <char*> = "noop"
+many_independent_threaded:nthreads <uint32> = 1
+many_independent_threaded:preserve_metrics <int32> = 0
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+subgroups:input_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+subgroups:output_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+vol_host_output:compressor <char*> = "cuszp"
+vol_host_output:metric <char*> = "noop"
+
+Info: 0x55bdb8581590
+
+=== einspline37 (12932.6 MiB, float, raw) ===
+  einspline37_cuszp_1e6        W=39079.25 ms  R=49326.10 ms  ratio=  1.30x  RMSE=5.914e+02
+[dbg main] done: 1 datasets, 0 skipped
+
+=== FILE /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_qmc_cuszp_1e6_pressio_4000mb.h5: 1 dataset-writes | create=1.44  write=39079.25  close/flush=4.99 => write_total=39085.68 ms | read_total=49326.10 ms | ratio=1.30x ===
+
+=== [1/3] VOL timing [qmc_cuszp_1e6_pressio_5000mb] : einspline37 (chunking: pressio, 5000 MB) ===
+[dbg main] h5=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_qmc_cuszp_1e6_pressio_5000mb.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results_vol_qmc_cuszp_1e6_pressio_5000mb.csv only=einspline37 comp=cuszp_1e6 debug=0
+name           dtype  rank src    dims                   MiB        exists
+miranda        double 3    raw    256x384x384            288.0      yes
+ocean_temp     float  0    hdf5   (from file)            0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        yes
+4/4 dataset paths readable
+RANGE einspline37    min=-2.125822e+01 max=2.036857e+01 range=4.162679e+01 xform=none
+[VOL BUILT PIPELINE 'cuszp']
+chunking:chunk_nthreads <uint64> = 1
+chunking:compressor <char*> = "many_independent_threaded"
+chunking:metric <char*> = "noop"
+chunking:size <data> = data{ type=uint64_t dims={1, } domain=malloc has_data=[1310720000, ]}
+cuszp:metric <char*> = "noop"
+cuszp:mode <int32> = 1
+cuszp:mode_str <char*> = "outlier"
+many_independent_threaded:collect_metrics_on_compression <int32> = 0
+many_independent_threaded:collect_metrics_on_decompression <int32> = 0
+many_independent_threaded:compressor <char*> = <empty>
+many_independent_threaded:compressors <char*[]> = {vol_host_output, }
+many_independent_threaded:metric <char*> = "noop"
+many_independent_threaded:nthreads <uint32> = 1
+many_independent_threaded:preserve_metrics <int32> = 0
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+subgroups:input_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+subgroups:output_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+vol_host_output:compressor <char*> = "cuszp"
+vol_host_output:metric <char*> = "noop"
+
+[VOL BUILT PIPELINE 'cuszp']
+chunking:chunk_nthreads <uint64> = 1
+chunking:compressor <char*> = "many_independent_threaded"
+chunking:metric <char*> = "noop"
+chunking:size <data> = data{ type=uint64_t dims={1, } domain=malloc has_data=[1310720000, ]}
+cuszp:metric <char*> = "noop"
+cuszp:mode <int32> = 1
+cuszp:mode_str <char*> = "outlier"
+many_independent_threaded:collect_metrics_on_compression <int32> = 0
+many_independent_threaded:collect_metrics_on_decompression <int32> = 0
+many_independent_threaded:compressor <char*> = <empty>
+many_independent_threaded:compressors <char*[]> = {vol_host_output, }
+many_independent_threaded:metric <char*> = "noop"
+many_independent_threaded:nthreads <uint32> = 1
+many_independent_threaded:preserve_metrics <int32> = 0
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+subgroups:input_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+subgroups:output_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+vol_host_output:compressor <char*> = "cuszp"
+vol_host_output:metric <char*> = "noop"
+
+Info: 0x555b8b55d590
+
+=== einspline37 (12932.6 MiB, float, raw) ===
+  einspline37_cuszp_1e6        W=36469.37 ms  R=47095.60 ms  ratio=  1.42x  RMSE=7.474e-01
+[dbg main] done: 1 datasets, 0 skipped
+
+=== FILE /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_qmc_cuszp_1e6_pressio_5000mb.h5: 1 dataset-writes | create=1.17  write=36469.37  close/flush=276.99 => write_total=36747.52 ms | read_total=47095.60 ms | ratio=1.42x ===
+
+=== [1/3] VOL timing [miranda_sz3_1e6_native] : miranda (chunking: native) ===
+[dbg main] h5=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_miranda_sz3_1e6_native.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results_vol_miranda_sz3_1e6_native.csv only=miranda comp=sz3_1e6 debug=0
+name           dtype  rank src    dims                   MiB        exists
+miranda        double 3    raw    256x384x384            288.0      yes
+ocean_temp     float  0    hdf5   (from file)            0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        yes
+4/4 dataset paths readable
+RANGE miranda        min=9.999878e-01 max=3.000046e+00 range=2.000058e+00 xform=none
+Info: 0x559097b90590
+
+=== miranda (288.0 MiB, double, raw) ===
+  miranda_sz3_1e6              W= 1599.71 ms  R=  994.58 ms  ratio=  8.73x  RMSE=2.709e-07
+[dbg main] done: 1 datasets, 0 skipped
+
+=== FILE /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_miranda_sz3_1e6_native.h5: 1 dataset-writes | create=0.81  write=1599.71  close/flush=0.78 => write_total=1601.30 ms | read_total=994.58 ms | ratio=8.73x ===
+
+=== [1/3] VOL timing [qmc_sz3_1e6_native] : einspline37 (chunking: native) ===
+[dbg main] h5=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_qmc_sz3_1e6_native.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results_vol_qmc_sz3_1e6_native.csv only=einspline37 comp=sz3_1e6 debug=0
+name           dtype  rank src    dims                   MiB        exists
+miranda        double 3    raw    256x384x384            288.0      yes
+ocean_temp     float  0    hdf5   (from file)            0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        yes
+4/4 dataset paths readable
+RANGE einspline37    min=-2.125822e+01 max=2.036857e+01 range=4.162679e+01 xform=none
