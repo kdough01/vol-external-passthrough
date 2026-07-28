@@ -83,41 +83,41 @@ static const bench_dataset_t BENCH_DATASETS[] = {
         BENCH_SRC_HDF5, "/temp"
     },
 
-    // {
-    //     "einspline37",
-    //     BENCH_DATA_ROOT "/QMCPACK-bigdata/einspline.tile_37-1-242-23-8.spin_0.tw_0.l0u6144.g112x66x66.dat",
-    //     1, {13560851520 / 4, 0, 0, 0}, BENCH_F32,
-    //     BENCH_BOUND_REL, 1e-3, 0.0, 1,
-    //     "Raw headerless float32 dump; 1D flat for the codec. spin/tw may be complex.",
-    //     BENCH_SRC_RAW, NULL
-    // },
+    {
+        "einspline37",
+        BENCH_DATA_ROOT "/QMCPACK-bigdata/einspline.tile_37-1-242-23-8.spin_0.tw_0.l0u6144.g112x66x66.dat",
+        1, {13560851520 / 4, 0, 0, 0}, BENCH_F32,
+        BENCH_BOUND_REL, 1e-3, 0.0, 1,
+        "Raw headerless float32 dump; 1D flat for the codec. spin/tw may be complex.",
+        BENCH_SRC_RAW, NULL
+    },
 
-    // {
-    //     "scale-T",
-    //     BENCH_DATA_ROOT "/scale-letkf/T-98x1200x1200.f32",
-    //     3, {98, 1200, 1200, 0}, BENCH_F32,
-    //     BENCH_BOUND_REL, 1e-3, 0.0, 1,
-    //     "SCALE-LETKF air temperature. Smooth, well-correlated; representative easy case.",
-    //     BENCH_SRC_RAW, NULL
-    // },
+    {
+        "scale-T",
+        BENCH_DATA_ROOT "/scale-letkf/T-98x1200x1200.f32",
+        3, {98, 1200, 1200, 0}, BENCH_F32,
+        BENCH_BOUND_REL, 1e-3, 0.0, 1,
+        "SCALE-LETKF air temperature. Smooth, well-correlated; representative easy case.",
+        BENCH_SRC_RAW, NULL
+    },
 
-    // {
-    //     "s3d",
-    //     BENCH_DATA_ROOT "/S3D/stat_planar.1.1000E-03.field.mpi",
-    //     3, {500, 500, 500, 0}, BENCH_F64,
-    //     BENCH_BOUND_REL, 1e-3, 0.0, 1,
-    //     "SDRBench lists S3D as f64 (.d64) despite one stray f32 line on the site.",
-    //     BENCH_SRC_RAW, NULL
-    // },
+    {
+        "s3d",
+        BENCH_DATA_ROOT "/S3D/stat_planar.1.1000E-03.field.mpi",
+        3, {500, 500, 500, 0}, BENCH_F64,
+        BENCH_BOUND_REL, 1e-3, 0.0, 1,
+        "SDRBench lists S3D as f64 (.d64) despite one stray f32 line on the site.",
+        BENCH_SRC_RAW, NULL
+    },
 
-    // {
-    //     "nyx_baryon",
-    //     BENCH_DATA_ROOT "/NYX-Zarija/z42_n512_l10.h5",
-    //     0, {0, 0, 0, 0}, BENCH_F32,
-    //     BENCH_BOUND_REL, 1e-3, 0.0, 1,
-    //     "NYX 512^3.",
-    //     BENCH_SRC_HDF5, "/native_fields/baryon_density"
-    // },
+    {
+        "nyx_baryon",
+        BENCH_DATA_ROOT "/NYX-Zarija/z42_n512_l10.h5",
+        0, {0, 0, 0, 0}, BENCH_F32,
+        BENCH_BOUND_REL, 1e-3, 0.0, 1,
+        "NYX 512^3.",
+        BENCH_SRC_HDF5, "/native_fields/baryon_density"
+    },
 
     // --------------------------------------------------------------------
 
