@@ -35,7 +35,7 @@ typedef struct compression_ctx {
     void  *stream;
     char dataset_name[256];
     int                        chunking_mode;       /* VOL_CHUNKING_* from opts_json */
-    usize_t chunk_n;            /* "vol:chunk_n", 0 = default   */
+    uint64_t chunk_n;            /* "vol:chunk_n", 0 = default   */
     struct pressio_compressor *chunk_wrapper;       /* cached 'chunking' meta        */
     uint64_t                   chunk_wrapper_elems; /* chunk size wrapper was built with */
 } compression_ctx;

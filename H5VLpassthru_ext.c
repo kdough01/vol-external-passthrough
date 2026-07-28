@@ -207,7 +207,7 @@ herr_t H5VL_pass_through_ext_compress_native(compression_ctx *ctx, const void *d
 herr_t H5VL_pass_through_ext_decompress_native(compression_ctx *ctx, const void *cbuf, size_t csize, void *out, size_t out_bytes);
 
 int    H5VL_pass_through_ext_chunking_mode(const compression_ctx *ctx);
-size_t H5VL_pass_through_ext_chunk_bytes(const compression_ctx *ctx, size_t dsize);
+size_t H5VL_pass_through_ext_chunk_bytes(const compression_ctx *ctx, size_t total_bytes, size_t dsize);
 void   H5VL_pass_through_ext_parse_chunking_opts(compression_ctx *ctx, struct pressio_options *opts);
 herr_t H5VL_pass_through_ext_compress_pressio(compression_ctx *ctx, const void *data, size_t nbytes, size_t chunk_bytes_req, void **out_cbuf, uint64_t *out_csize, uint64_t *out_chunk_elems);
 herr_t H5VL_pass_through_ext_decompress_pressio(compression_ctx *ctx, const void *cbuf, size_t csize, uint64_t chunk_elems, void *out, size_t out_bytes);
