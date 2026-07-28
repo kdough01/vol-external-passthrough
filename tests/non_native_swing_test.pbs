@@ -122,14 +122,18 @@ run_vol_group () {
 # Chunk sizes are per-dataset so both actually chunk:
 #   miranda     = 288 MiB  -> 64/128 MB gives 5/3 chunks (64 exercises a ragged tail)
 #   einspline37 = ~12.6 GiB -> 4000/5000 MB gives 4/3 chunks (old sweep values)
-CHUNKS_MIRANDA="64 128"
+CHUNKS_MIRANDA="64 96"
 CHUNKS_QMC="4000 5000"
 
 # noop cuszp_1e3 cuszp_1e6 sz3_1e3 sz3_1e6
-for comp in cuszp_1e6 sz3_1e6; do
+for comp in noop bzip2 cuszp_1e3 cuszp_1e6 sz3_1e3 sz3_1e6; do
     # native baseline (no chunking of any kind — the default path)
     run_vol_group miranda "miranda"     "$comp" "" ""
-    run_vol_group qmc     "einspline37" "$comp" "" ""
+    run_vol_group ocean_temp     "ocean_temp" "$comp" "" ""
+    # run_vol_group qmc     "einspline37" "$comp" "" ""
+    # run_vol_group scale-T "scale-T"     "$comp" "" ""
+    # run_vol_group s3d "s3d"     "$comp" "" ""
+    # run_vol_group nyx_baryon "nyx_baryon"     "$comp" "" ""
 
     for mode in vol pressio; do
         # the VOL rejects noop under pressio chunking by design — skip, don't fail

@@ -61,43 +61,65 @@ typedef struct {
 } bench_dataset_t;
 
 static const bench_dataset_t BENCH_DATASETS[] = {
+
+// --------------------------------------------------------------------
+
     {
         "miranda",
         BENCH_DATA_ROOT "/Miranda/SDRBENCH-Miranda-256x384x384/density.d64",
         3, {256, 384, 384, 0}, BENCH_F64,
-        BENCH_BOUND_REL, 1e-3,
-        0.0,   /* assumed_range: not used for REL-mode datasets */
-        1,
-        "Clean d64; cuszp returns RMSE~2.7e-4 here. SDRBench names it density.d64."
+        BENCH_BOUND_REL, 1e-3, 0.0, 1,
+        "Clean d64; cuszp returns RMSE~2.7e-4 here. SDRBench names it density.d64.",
+        BENCH_SRC_RAW, NULL
     },
 
     {
         "ocean_temp",
         BENCH_DATA_ROOT "/oceanbox/Tobbeholmane_0001.nc",
         0, {0, 0, 0, 0}, BENCH_F32,
-        BENCH_BOUND_REL, 1e-3,
-        0.0,   /* assumed_range: not used for REL-mode datasets */
-        1,     /* gpu_suitable */
-        "NetCDF-4 (HDF5-backed). Confirm netCDF-4 via `ncdump -k`. Shape/type "
-        "read at load. NetCDF scale_factor/add_offset packing is NOT applied.",
+        BENCH_BOUND_REL, 1e-3, 0.0, 1,
+        "NetCDF-4 (HDF5-backed). Confirm via `ncdump -k`. Shape/type read at load. "
+        "scale_factor/add_offset packing NOT applied.",
         BENCH_SRC_HDF5, "/temp"
     },
 
-    // this will fail unless we set chunking
-    {
-        "einspline37",
-        BENCH_DATA_ROOT "/QMCPACK-bigdata/einspline.tile_37-1-242-23-8.spin_0.tw_0.l0u6144.g112x66x66.dat",
-        1, {13560851520 / 4, 0, 0, 0}, BENCH_F32,          
-        BENCH_BOUND_ABS, 1e-3, 
-        7.84e5,
-        1,
-        "Raw headerless float32 dump; 1D flat for the codec. spin/tw may be complex.",
-        BENCH_SRC_RAW, NULL                  
-    },
+    // {
+    //     "einspline37",
+    //     BENCH_DATA_ROOT "/QMCPACK-bigdata/einspline.tile_37-1-242-23-8.spin_0.tw_0.l0u6144.g112x66x66.dat",
+    //     1, {13560851520 / 4, 0, 0, 0}, BENCH_F32,
+    //     BENCH_BOUND_REL, 1e-3, 0.0, 1,
+    //     "Raw headerless float32 dump; 1D flat for the codec. spin/tw may be complex.",
+    //     BENCH_SRC_RAW, NULL
+    // },
 
-    /* NYX */
-    { "nyx_baryon",   BENCH_DATA_ROOT "/NYX-Zarija/z42_n512_l10.h5", 0,{0,0,0,0},BENCH_F32,
-      BENCH_BOUND_REL,1e-3, 0.0,1, "NYX 512^3", BENCH_SRC_HDF5, "/native_fields/baryon_density" },
+    // {
+    //     "scale-T",
+    //     BENCH_DATA_ROOT "/scale-letkf/T-98x1200x1200.f32",
+    //     3, {98, 1200, 1200, 0}, BENCH_F32,
+    //     BENCH_BOUND_REL, 1e-3, 0.0, 1,
+    //     "SCALE-LETKF air temperature. Smooth, well-correlated; representative easy case.",
+    //     BENCH_SRC_RAW, NULL
+    // },
+
+    // {
+    //     "s3d",
+    //     BENCH_DATA_ROOT "/S3D/stat_planar.1.1000E-03.field.mpi",
+    //     3, {500, 500, 500, 0}, BENCH_F64,
+    //     BENCH_BOUND_REL, 1e-3, 0.0, 1,
+    //     "SDRBench lists S3D as f64 (.d64) despite one stray f32 line on the site.",
+    //     BENCH_SRC_RAW, NULL
+    // },
+
+    // {
+    //     "nyx_baryon",
+    //     BENCH_DATA_ROOT "/NYX-Zarija/z42_n512_l10.h5",
+    //     0, {0, 0, 0, 0}, BENCH_F32,
+    //     BENCH_BOUND_REL, 1e-3, 0.0, 1,
+    //     "NYX 512^3.",
+    //     BENCH_SRC_HDF5, "/native_fields/baryon_density"
+    // },
+
+    // --------------------------------------------------------------------
 
     // It is typical to only show the baryon dataset
     // { "nyx_dm",       BENCH_DATA_ROOT "/NYX-Zarija/z42_n512_l10.h5", 0,{0,0,0,0},BENCH_F32,
@@ -130,13 +152,6 @@ static const bench_dataset_t BENCH_DATASETS[] = {
     //     3, {512, 512, 512, 0}, BENCH_F32,
     //     BENCH_BOUND_REL, 1e-3, 1,
     //     "Confirm field name; SDRBench canonical also ships temperature.f32 etc."
-    // },
-    // {
-    //     "s3d",
-    //     BENCH_DATA_ROOT "/S3D/stat_planar.1.1000E-03.field.mpi",
-    //     3, {500, 500, 500, 0}, BENCH_F64,
-    //     BENCH_BOUND_REL, 1e-3, 1,
-    //     "SDRBench lists S3D as f64 (.d64) despite one stray f32 line on the site."
     // },
     // {
     //     "cesm_atm_2d",
