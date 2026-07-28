@@ -408,10 +408,10 @@ typedef struct {
  * Nothing else in the header changes.
  *
  * Two new entries at the bottom select chunking through opts_json
- * ("vol:chunking_mode" / "vol:chunk_mb") instead of env. They validate the
+ * ("vol:chunking_mode" / "vol:chunk_n") instead of env. They validate the
  * persistence chain (DCPL JSON -> parse at ctx create -> _VOL_OPTIONS_JSON
  * snapshot -> replay at open) — run them WITHOUT VOL_COMP_CHUNKING /
- * VOL_COMP_CHUNK_MB set, since env overrides JSON. 64 MB on miranda
+ * VOL_COMP_CHUNK_N set, since env overrides JSON. N=8 splits any static
  * (288 MiB) also exercises a ragged final chunk in both modes.
  * ======================================================================== */
 
@@ -420,12 +420,12 @@ static const bench_compressor_t BENCH_COMPRESSORS[] = {
       "Connector default (no compressor). Bit-exact baseline; isolates overhead." },
 
     { "cuszp_1e3", "cuszp",
-    "{\"pressio:abs\":1e-3,\"cuszp:mode_str\":\"outlier\"}",
-    BENCH_GPU_CODEC, 0, "cuszp:cuda_stream", "GPU abs 1e-3, outlier mode." },
+      "{\"pressio:abs\":1e-3,\"cuszp:mode_str\":\"outlier\"}",
+      BENCH_GPU_CODEC, 0, "cuszp:cuda_stream", "GPU abs 1e-3, outlier mode." },
 
     { "cuszp_1e6", "cuszp",
-    "{\"pressio:abs\":1e-6,\"cuszp:mode_str\":\"outlier\"}",
-    BENCH_GPU_CODEC, 0, "cuszp:cuda_stream", "GPU abs 1e-6, outlier mode." },
+      "{\"pressio:abs\":1e-6,\"cuszp:mode_str\":\"outlier\"}",
+      BENCH_GPU_CODEC, 0, "cuszp:cuda_stream", "GPU abs 1e-6, outlier mode." },
 
     { "sz3_1e3", "sz3",
       "{\"sz3:error_bound_mode_str\":\"abs\",\"sz3:abs_error_bound\":1e-3}",
@@ -439,19 +439,56 @@ static const bench_compressor_t BENCH_COMPRESSORS[] = {
       "{\"bzip2:block_size\":9}",
       BENCH_CPU_CODEC, 1, NULL, "CPU lossless, general purpose. CPU comparator." },
 
-    /* --- JSON-path chunking selection (do NOT set VOL_COMP_* env for these) --- */
+    /* --- JSON-path chunking (N chunks via opts_json; do NOT set VOL_COMP_* env).
+     *     chunk_n=8 divides every static dataset; run only against those (not
+     *     ocean_temp). noop+pressio is omitted: rejected by the VOL by design. --- */
+
+    { "noop_vjson", "noop",
+      "{\"vol:chunking_mode\":\"vol\",\"vol:chunk_n\":8}",
+      BENCH_CPU_CODEC, 1, NULL, "noop, VOL chunking via opts_json." },
+
+    { "bzip2_vjson", "bzip2",
+      "{\"bzip2:block_size\":9,\"vol:chunking_mode\":\"vol\",\"vol:chunk_n\":8}",
+      BENCH_CPU_CODEC, 1, NULL, "bzip2, VOL chunking via opts_json." },
+    { "bzip2_pjson", "bzip2",
+      "{\"bzip2:block_size\":9,\"vol:chunking_mode\":\"pressio\",\"vol:chunk_n\":8}",
+      BENCH_CPU_CODEC, 1, NULL, "bzip2, pressio chunking via opts_json." },
 
     { "sz3_1e3_vjson", "sz3",
       "{\"sz3:error_bound_mode_str\":\"abs\",\"sz3:abs_error_bound\":1e-3,"
-       "\"vol:chunking_mode\":\"vol\",\"vol:chunk_mb\":64}",
-      BENCH_CPU_CODEC, 0, NULL,
-      "VOL-level chunking selected via opts_json (validates attr persistence)." },
-
+       "\"vol:chunking_mode\":\"vol\",\"vol:chunk_n\":8}",
+      BENCH_CPU_CODEC, 0, NULL, "sz3 1e-3, VOL chunking via opts_json." },
     { "sz3_1e3_pjson", "sz3",
       "{\"sz3:error_bound_mode_str\":\"abs\",\"sz3:abs_error_bound\":1e-3,"
-       "\"vol:chunking_mode\":\"pressio\",\"vol:chunk_mb\":64}",
-      BENCH_CPU_CODEC, 0, NULL,
-      "libpressio 'chunking' meta selected via opts_json (validates attr persistence)." },
+       "\"vol:chunking_mode\":\"pressio\",\"vol:chunk_n\":8}",
+      BENCH_CPU_CODEC, 0, NULL, "sz3 1e-3, pressio chunking via opts_json." },
+
+    { "sz3_1e6_vjson", "sz3",
+      "{\"sz3:error_bound_mode_str\":\"abs\",\"sz3:abs_error_bound\":1e-6,"
+       "\"vol:chunking_mode\":\"vol\",\"vol:chunk_n\":8}",
+      BENCH_CPU_CODEC, 0, NULL, "sz3 1e-6, VOL chunking via opts_json." },
+    { "sz3_1e6_pjson", "sz3",
+      "{\"sz3:error_bound_mode_str\":\"abs\",\"sz3:abs_error_bound\":1e-6,"
+       "\"vol:chunking_mode\":\"pressio\",\"vol:chunk_n\":8}",
+      BENCH_CPU_CODEC, 0, NULL, "sz3 1e-6, pressio chunking via opts_json." },
+
+    { "cuszp_1e3_vjson", "cuszp",
+      "{\"pressio:abs\":1e-3,\"cuszp:mode_str\":\"outlier\","
+       "\"vol:chunking_mode\":\"vol\",\"vol:chunk_n\":8}",
+      BENCH_GPU_CODEC, 0, "cuszp:cuda_stream", "cuszp 1e-3, VOL chunking via opts_json." },
+    { "cuszp_1e3_pjson", "cuszp",
+      "{\"pressio:abs\":1e-3,\"cuszp:mode_str\":\"outlier\","
+       "\"vol:chunking_mode\":\"pressio\",\"vol:chunk_n\":8}",
+      BENCH_GPU_CODEC, 0, "cuszp:cuda_stream", "cuszp 1e-3, pressio chunking via opts_json." },
+
+    { "cuszp_1e6_vjson", "cuszp",
+      "{\"pressio:abs\":1e-6,\"cuszp:mode_str\":\"outlier\","
+       "\"vol:chunking_mode\":\"vol\",\"vol:chunk_n\":8}",
+      BENCH_GPU_CODEC, 0, "cuszp:cuda_stream", "cuszp 1e-6, VOL chunking via opts_json." },
+    { "cuszp_1e6_pjson", "cuszp",
+      "{\"pressio:abs\":1e-6,\"cuszp:mode_str\":\"outlier\","
+       "\"vol:chunking_mode\":\"pressio\",\"vol:chunk_n\":8}",
+      BENCH_GPU_CODEC, 0, "cuszp:cuda_stream", "cuszp 1e-6, pressio chunking via opts_json." },
 };
 
 #define BENCH_NUM_COMPRESSORS \

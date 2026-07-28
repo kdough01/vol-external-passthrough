@@ -91,49 +91,53 @@ echo "=== [0/3] Dump cuszp option keys ==="
 PLUGIN_DIR="$(pwd)/build"
 
 # ---------------------------------------------------------------------------
-# run_vol_group TAG SEL COMP MODE CHUNK_MB
+# run_vol_group TAG SEL COMP MODE NCHUNKS
 #   MODE:     "" = native (no chunking, default)
 #             "vol"     = VOL-level chunking      (VOL_COMP_CHUNKING=vol)
 #             "pressio" = libpressio chunking meta (VOL_COMP_CHUNKING=pressio)
-#   CHUNK_MB: chunk size for vol/pressio modes; "" = VOL default (1024)
+#   NCHUNKS: number of equal chunks for vol/pressio modes; "" = single chunk (N=1)
 # The env vars override any vol:* keys in opts_json, so the *_pjson JSON-path
-# runs below must be launched with MODE="" and CHUNK_MB="".
+# runs below must be launched with MODE="" and NCHUNKS="".
 # ---------------------------------------------------------------------------
 run_vol_group () {
-    local tag="$1"; local sel="$2"; local comp="$3"; local mode="$4"; local chunk_mb="$5"
-    local label="${tag}_${comp}_${mode:-native}${chunk_mb:+_${chunk_mb}mb}"
+    local tag="$1"; local sel="$2"; local comp="$3"; local mode="$4"; local nchunks="$5"
+    local label="${tag}_${comp}_${mode:-native}${nchunks:+_N${nchunks}}"
     local h5="$WORK/bench_${label}.h5"
     local rcsv="$WORK/results_vol_${label}.csv"
     local pcsv="$WORK/connector_phases_${label}.csv"
     rm -f "$h5"
     echo ""
-    echo "=== [1/3] VOL timing [$label] : $sel (chunking: ${mode:-native}${chunk_mb:+, ${chunk_mb} MB}) ==="
+    echo "=== [1/3] VOL timing [$label] : $sel (chunking: ${mode:-native}${nchunks:+, N=${nchunks}}) ==="
     env HDF5_VOL_CONNECTOR="pass_through_ext under_vol=0;under_info={}" \
         HDF5_PLUGIN_PATH="$PLUGIN_DIR" \
         HDF5_VOL_DUMP_PIPELINE=1 \
+        VOL_COMP_CHUNK_LOG=1 \
         ${mode:+VOL_COMP_CHUNKING="$mode"} \
-        ${chunk_mb:+VOL_COMP_CHUNK_MB="$chunk_mb"} \
+        ${nchunks:+VOL_COMP_CHUNK_N="$nchunks"} \
         BENCH_ONLY="$sel" \
         BENCH_COMP="$comp" \
         BENCH_CSV="$pcsv" \
         ./build/tests/bench_vol_timing "$h5" "$rcsv"
 }
 
+declare -A DATASET=(
+  [miranda]=miranda   [ocean_temp]=ocean_temp  [qmc]=einspline37
+  [scale-T]=scale-T   [s3d]=s3d                [nyx_baryon]=nyx_baryon )
+
 # Chunk sizes are per-dataset so both actually chunk:
 #   miranda     = 288 MiB  -> 64/128 MB gives 5/3 chunks (64 exercises a ragged tail)
 #   einspline37 = ~12.6 GiB -> 4000/5000 MB gives 4/3 chunks (old sweep values)
-CHUNKS_MIRANDA="64 96"
-CHUNKS_QMC="4000 5000"
+CHUNK_COUNTS="8 16"
 
 # noop cuszp_1e3 cuszp_1e6 sz3_1e3 sz3_1e6
 for comp in noop bzip2 cuszp_1e3 cuszp_1e6 sz3_1e3 sz3_1e6; do
     # native baseline (no chunking of any kind — the default path)
     run_vol_group miranda "miranda"     "$comp" "" ""
     run_vol_group ocean_temp     "ocean_temp" "$comp" "" ""
-    # run_vol_group qmc     "einspline37" "$comp" "" ""
-    # run_vol_group scale-T "scale-T"     "$comp" "" ""
-    # run_vol_group s3d "s3d"     "$comp" "" ""
-    # run_vol_group nyx_baryon "nyx_baryon"     "$comp" "" ""
+    run_vol_group qmc     "einspline37" "$comp" "" ""
+    run_vol_group scale-T "scale-T"     "$comp" "" ""
+    run_vol_group s3d "s3d"     "$comp" "" ""
+    run_vol_group nyx_baryon "nyx_baryon"     "$comp" "" ""
 
     for mode in vol pressio; do
         # the VOL rejects noop under pressio chunking by design — skip, don't fail
@@ -142,18 +146,17 @@ for comp in noop bzip2 cuszp_1e3 cuszp_1e6 sz3_1e3 sz3_1e6; do
             echo "=== skip: noop x pressio (rejected by the VOL by design) ==="
             continue
         fi
-        for mb in $CHUNKS_MIRANDA; do
-            run_vol_group miranda "miranda" "$comp" "$mode" "$mb"
-        done
-        for mb in $CHUNKS_QMC; do
-            run_vol_group qmc "einspline37" "$comp" "$mode" "$mb"
+        for g in miranda ocean_temp qmc scale-T s3d nyx_baryon; do
+            for N in $CHUNK_COUNTS; do
+                run_vol_group "$g" "${DATASET[$g]}" "$comp" "$mode" "$N"
+            done
         done
     done
 done
 
 # ---------------------------------------------------------------------------
 # JSON-path validation: chunking selected via opts_json ("vol:chunking_mode",
-# "vol:chunk_mb") with NO env override. This exercises the full persistence
+# "vol:chunk_n") with NO env override. This exercises the full persistence
 # chain: DCPL JSON -> parse at ctx create -> _VOL_OPTIONS_JSON snapshot ->
 # replay+parse at dataset_open. Entries defined in bench_config.h.
 # ---------------------------------------------------------------------------

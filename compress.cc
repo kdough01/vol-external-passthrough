@@ -290,58 +290,6 @@ vol_logical_nbytes(const compression_ctx *ctx)
     return n;
 }
 
-/*
- * Path selection knob.
- *
- * Returns the VOL-level chunk size in bytes, or 0 when VOL_COMP_CHUNK_MB is
- * unset/invalid. 0 means "native compressor chunking": the whole dataset is
- * handed to the compressor in a single compress call and the codec does its
- * own internal blocking (SZ3 blocks, ZFP 4^d blocks, nvcomp batching, ...).
- *
- * Setting VOL_COMP_CHUNK_MB=<n> switches to VOL-level chunking: the VOL
- * splits the buffer into <n>-MB pieces and compresses each independently
- * (e.g. VOL_COMP_CHUNK_MB=1024 reproduces the old 1 GB behavior).
- */
-size_t
-vol_comp_chunk_bytes(size_t dsize)
-{
-    const char *env = getenv("VOL_COMP_CHUNK_MB");
-    if (!env || !*env)
-        return 0;                       /* default: native compressor chunking */
-
-    char *end = NULL;
-    unsigned long long v = strtoull(env, &end, 10);
-    if (end == env || v == 0)
-        return 0;
-
-    if (dsize == 0) dsize = 1;
-    size_t bytes = (size_t)v << 20;
-    bytes -= bytes % dsize;             /* whole elements only */
-    if (bytes < dsize) bytes = dsize;
-    return bytes;
-}
-
-/* Native compressor chunking */
-static size_t
-vol_native_chunk_elems(compression_ctx *ctx, size_t dsize)
-{
-    (void)ctx;
-    size_t mb = 1024;
-    const char *env = getenv("VOL_COMP_CHUNK_MB");
-    if (env && *env) {
-        char *end = NULL;
-        unsigned long long v = strtoull(env, &end, 10);
-        if (end != env && v > 0)
-            mb = (size_t)v;
-    }
-    if (dsize == 0) dsize = 1;
-    size_t bytes = mb << 20;
-    bytes -= bytes % dsize;
-    if (bytes < dsize) bytes = dsize;
-    size_t elems = bytes / dsize;
-    return elems ? elems : 1;
-}
-
 int
 H5VL_pass_through_ext_compressor_available(const char *compressor_id)
 {
@@ -776,7 +724,7 @@ H5VL_pass_through_ext_decompress_native(compression_ctx *ctx,
 }
 
 /* ========================================================================
- * VOL-LEVEL CHUNKED PATH (opt-in via VOL_COMP_CHUNK_MB): the write loop
+ * VOL-LEVEL CHUNKED PATH: the write loop
  * slices the buffer and calls these once per chunk. Each chunk is an
  * independent compressed blob recorded in the v2 container header.
  * ======================================================================== */
@@ -1183,33 +1131,52 @@ H5VL_pass_through_ext_chunking_mode(const compression_ctx *ctx)
     if (ctx && ctx->chunking_mode != VOL_CHUNKING_NONE)
         return ctx->chunking_mode;
 
-    /* legacy knob: VOL_COMP_CHUNK_MB alone selects VOL-level chunking */
-    env = getenv("VOL_COMP_CHUNK_MB");
+    env = getenv("VOL_COMP_CHUNK_N");
     if (env && *env && strtoull(env, NULL, 10) > 0)
         return VOL_CHUNKING_VOL;
 
     return VOL_CHUNKING_NONE;
 }
 
+/* N-based: the knob is now "number of equal chunks", not MiB.
+ * Needs total_bytes (to split) and elem_size (to stay element-aligned). */
 size_t
-H5VL_pass_through_ext_chunk_bytes(const compression_ctx *ctx, size_t dsize)
+H5VL_pass_through_ext_chunk_bytes(const compression_ctx *ctx,
+                                  size_t total_bytes, size_t elem_size)
 {
-    uint64_t mb = 0;
+    uint64_t n = 0;
 
-    const char *env = getenv("VOL_COMP_CHUNK_MB");
+    const char *env = getenv("VOL_COMP_CHUNK_N");
     if (env && *env) {
         char *end = NULL;
         unsigned long long v = strtoull(env, &end, 10);
-        if (end != env) mb = (uint64_t)v;
+        if (end != env) n = (uint64_t)v;
     }
-    if (mb == 0 && ctx) mb = ctx->chunk_mb;
-    if (mb == 0) mb = 1024;
+    if (n == 0 && ctx) n = ctx->chunk_n;     /* was ctx->chunk_n */
+    if (n == 0) n = 1;                        /* default: single chunk */
 
-    if (dsize == 0) dsize = 1;
-    size_t bytes = (size_t)mb << 20;
-    bytes -= bytes % dsize;             /* whole elements only */
-    if (bytes < dsize) bytes = dsize;
-    return bytes;
+    if (elem_size == 0)   elem_size = 1;
+    if (total_bytes == 0) total_bytes = elem_size;
+
+    size_t total_elems = total_bytes / elem_size;
+    if (n > total_elems) n = total_elems;     /* at most 1 elem/chunk */
+
+    size_t chunk_elems = total_elems / n;                  /* exact when n | total_elems */
+    size_t chunk_bytes = chunk_elems * elem_size;          /* == total_bytes / n if exact */
+
+    /* actual layout (differs from n only if n doesn't divide evenly) */
+    size_t nch   = (total_elems + chunk_elems - 1) / chunk_elems;
+    int    exact = (total_elems % chunk_elems == 0);
+
+    if (getenv("VOL_COMP_CHUNK_LOG"))
+        fprintf(stderr,
+            "[chunk] %-10s N=%-3llu -> %zu chunks x %zu B (%.3f MiB, %zu elems)"
+            " total=%zu B%s\n",
+            ctx ? ctx->compressor_id : "?", (unsigned long long)n,
+            nch, chunk_bytes, chunk_bytes / (1024.0 * 1024.0),
+            chunk_elems, total_bytes, exact ? "" : "  [RAGGED -> pressio will reject]");
+
+    return chunk_bytes;
 }
 
 void
@@ -1218,7 +1185,7 @@ H5VL_pass_through_ext_parse_chunking_opts(compression_ctx *ctx,
 {
     if (!ctx) return;
     ctx->chunking_mode = VOL_CHUNKING_NONE;
-    ctx->chunk_mb      = 0;
+    ctx->chunk_n      = 0;
     if (!opts) return;
 
     const char *mode = NULL;
@@ -1239,18 +1206,18 @@ H5VL_pass_through_ext_parse_chunking_opts(compression_ctx *ctx,
     /* JSON numbers can land as any integer flavor; try them in turn. */
     {
         uint64_t u64 = 0; int64_t i64 = 0; unsigned u32 = 0; int i32 = 0;
-        if (pressio_options_get_uinteger64(opts, "vol:chunk_mb", &u64) ==
+        if (pressio_options_get_uinteger64(opts, "vol:chunk_n", &u64) ==
                 pressio_options_key_set)
-            ctx->chunk_mb = u64;
-        else if (pressio_options_get_integer64(opts, "vol:chunk_mb", &i64) ==
+            ctx->chunk_n = u64;
+        else if (pressio_options_get_integer64(opts, "vol:chunk_n", &i64) ==
                      pressio_options_key_set && i64 > 0)
-            ctx->chunk_mb = (uint64_t)i64;
-        else if (pressio_options_get_uinteger(opts, "vol:chunk_mb", &u32) ==
+            ctx->chunk_n = (uint64_t)i64;
+        else if (pressio_options_get_uinteger(opts, "vol:chunk_n", &u32) ==
                      pressio_options_key_set)
-            ctx->chunk_mb = u32;
-        else if (pressio_options_get_integer(opts, "vol:chunk_mb", &i32) ==
+            ctx->chunk_n = u32;
+        else if (pressio_options_get_integer(opts, "vol:chunk_n", &i32) ==
                      pressio_options_key_set && i32 > 0)
-            ctx->chunk_mb = (uint64_t)i32;
+            ctx->chunk_n = (uint64_t)i32;
     }
 }
 

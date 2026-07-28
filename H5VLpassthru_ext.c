@@ -215,8 +215,6 @@ herr_t H5VL_pass_through_ext_decompress_pressio(compression_ctx *ctx, const void
 int H5VL_pass_through_ext_compressor_available(const char *compressor_id);
 int H5VL_pass_through_ext_buf_is_device(const void *p);
 
-size_t vol_comp_chunk_bytes(size_t dsize);
-
 /* Destroy Functions */
 void config_params_destroy(config_params *p);
 
@@ -1718,8 +1716,8 @@ H5VL_pass_through_ext_dataset_create(void *obj,
                         pressio_options_set_string(opts, "vol:chunking_mode", "vol");
                     else if (ds_ctx->comp_ctx->chunking_mode == VOL_CHUNKING_PRESSIO)
                         pressio_options_set_string(opts, "vol:chunking_mode", "pressio");
-                    if (ds_ctx->comp_ctx->chunk_mb > 0)
-                        pressio_options_set_uinteger64(opts, "vol:chunk_mb", ds_ctx->comp_ctx->chunk_mb);
+                    if (ds_ctx->comp_ctx->chunk_n > 0)
+                        pressio_options_set_uinteger64(opts, "vol:chunk_n", ds_ctx->comp_ctx->chunk_n);
                     char *json = pressio_options_to_json(ds_ctx->comp_ctx->library, opts);
                     if (json) {
                         hid_t json_str_type = H5Tcopy(H5T_C_S1);
@@ -2399,8 +2397,8 @@ H5VL_pass_through_ext_dataset_write(
          * Path selection. Chunking is strictly opt-in: the default is the
          * NATIVE path (one compress call, codec-internal blocking). The user
          * selects 'vol' or 'pressio' chunking via opts_json
-         * ("vol:chunking_mode", "vol:chunk_mb") or globally via env
-         * (VOL_COMP_CHUNKING, VOL_COMP_CHUNK_MB).
+         * ("vol:chunking_mode", "vol:chunk_n") or globally via env
+         * (VOL_COMP_CHUNKING).
         */
         const int chunk_mode = H5VL_pass_through_ext_chunking_mode(ctx);
 
@@ -2526,7 +2524,7 @@ H5VL_pass_through_ext_dataset_write(
             uint64_t chunk_elems = 0;
             herr_t   cret;
             const size_t chunk_bytes_req =
-                H5VL_pass_through_ext_chunk_bytes(ctx, dsize);
+            H5VL_pass_through_ext_chunk_bytes(ctx, total_bytes, dsize);
 
             ctx->compress_ms = 0.0;
             double _c0 = bench_now_ms();
@@ -2635,7 +2633,7 @@ H5VL_pass_through_ext_dataset_write(
          * VOL path (chunking_mode == "vol"): compress in VOL-sliced chunks,
          * then write [magic][nchunks][chunk_bytes][csize table][payloads].
         */
-        const size_t chunk_bytes = H5VL_pass_through_ext_chunk_bytes(ctx, dsize);
+        const size_t chunk_bytes = H5VL_pass_through_ext_chunk_bytes(ctx, total_bytes, dsize);
         const size_t nchunks = (total_bytes + chunk_bytes - 1) / chunk_bytes;
 
         void    **chunk_bufs = (void **)calloc(nchunks, sizeof(void *));
