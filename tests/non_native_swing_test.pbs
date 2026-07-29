@@ -129,7 +129,10 @@ run_vol_group () {
     local xcsv="$RESULTS/results_ext_${label}.csv"
     local pcsv="$RESULTS/connector_phases_${label}.csv"
 
-    rm -f "$h5" "$pcsv"
+    # bench_vol_timing writes ONE FILE PER REPETITION, derived from $h5:
+    #   <base>_<comp>_r<N>.h5 and <base>_warmup.h5
+    # It unlinks them itself; this glob only cleans up after a killed run.
+    rm -f "$H5DIR"/bench_"${label}"*.h5 "$pcsv"
     echo ""
     echo "=== VOL timing [$label] : $sel (chunking: ${mode:-native}${nchunks:+, N=${nchunks}}) ==="
     env HDF5_VOL_CONNECTOR="pass_through_ext under_vol=0;under_info={}" \
@@ -145,19 +148,19 @@ run_vol_group () {
         BENCH_REPS="${BENCH_REPS:-1}" \
         BENCH_WARMUP="${BENCH_WARMUP:-1}" \
         BENCH_VERIFY="${BENCH_VERIFY:-0}" \
-        BENCH_COLD_READ="${BENCH_COLD_READ:-1}" \
+        BENCH_KEEP_H5="${BENCH_KEEP_H5:-0}" \
         timeout --signal=KILL "${VOL_TIMEOUT:-1800}" \
             ./build/tests/bench_vol_timing "$h5" "$rcsv" "$xcsv"
     local rc=$?
-    rm -f "$h5"                                  # reclaim space even on failure
+    rm -f "$H5DIR"/bench_"${label}"*.h5           # reclaim space even on failure
 
     if [ $rc -ne 0 ]; then
         # Record the failure AS A ROW so a missing run shows up as missing in the
         # plots rather than silently vanishing. Column order must match
-        # XCSV_HEADER in bench_vol_timing.cc (15 fields).
+        # XCSV_HEADER in bench_vol_timing.cc (18 fields).
         [ -f "$xcsv" ] || printf '%s\n' \
-          "dataset,compressor,codec_kind,chunk_n,rep,logical_bytes,stored_bytes,ratio,write_ms,flush_ms,read_ms,rmse,abs_thresh,maxae,bound_ok" > "$xcsv"
-        printf '%s,%s,NA,0,-1,0,0,0,-1,-1,-1,-1,-1,-1,0\n' "$sel" "$comp" >> "$xcsv"
+          "dataset,compressor,codec_kind,chunk_n,rep,logical_bytes,stored_bytes,ratio,create_ms,write_ms,flush_ms,close_ms,open_ms,read_ms,rmse,abs_thresh,maxae,bound_ok" > "$xcsv"
+        printf '%s,%s,NA,0,-1,0,0,0,-1,-1,-1,-1,-1,-1,-1,-1,-1,0\n' "$sel" "$comp" >> "$xcsv"
         if [ $rc -eq 137 ]; then
             echo "  [FAIL] $label KILLED BY TIMEOUT (${VOL_TIMEOUT:-1800}s) — recorded as rep=-1"
         else
@@ -212,11 +215,13 @@ for comp in cuszp_1e3 cuszp_1e6; do
 done
 
 echo ""
-echo "--- per-rep write times (look for r0 as an outlier) ---"
+echo "--- per-rep timings (look for r0 as an outlier) ---"
 for f in "$RESULTS"/results_ext_reps_*.csv; do
     [ -f "$f" ] || continue
     echo "== $(basename "$f") =="
-    awk -F, 'NR==1{next} {printf "  rep %-3s write=%10.2f flush=%10.2f read=%10.2f ratio=%6.2f\n", $5,$9,$10,$11,$8}' "$f"
+    awk -F, 'NR==1{next} {
+        printf "  rep %-3s create=%8.2f write=%10.2f flush=%9.2f close=%9.2f open=%8.2f read=%10.2f ratio=%6.2f\n",
+               $5,$9,$10,$11,$12,$13,$14,$8 }' "$f"
 done
 
 # ===========================================================================
@@ -320,7 +325,7 @@ awk -F, 'FNR>1 && $5=="-1" {print FILENAME": "$1" "$2}' \
 
 echo ""
 echo "=== fidelity failures (bound_ok=0, excluding failed runs) ==="
-awk -F, 'FNR>1 && $5!="-1" && $15=="0" {print $1" "$2" maxae="$14" thr="$13}' \
+awk -F, 'FNR>1 && $5!="-1" && $18=="0" {print $1" "$2" maxae="$17" thr="$16}' \
     "$RESULTS"/results_ext_*.csv 2>/dev/null || echo "(none)"
 
 echo ""

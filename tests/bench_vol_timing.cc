@@ -4,41 +4,41 @@
  * Drives the compressor THROUGH the VOL: H5Dcreate/H5Dwrite/H5Dread with the
  * connector active. The phase split (stage / compress / container / io) comes
  * from the connector itself via vol_timing_phases.c -> $VOL_PHASES_CSV. This
- * harness measures the envelope: write, explicit flush, read, ratio, fidelity.
+ * harness measures the envelope: create, write, flush, close, open, read,
+ * ratio, fidelity.
  *
- * WHAT CHANGED
- * ------------
- * 1. BENCH_REPS. Every measurement used to be a cold process: run_vol_group
- *    sets BENCH_ONLY and BENCH_COMP to one value each, so exactly one H5Dwrite
- *    happened per process and it absorbed CUDA context creation, cuSZp module
- *    load, the first (expensive) cudaMalloc, and libpressio plugin
- *    construction. All one-time, all charged to the single timed write, and all
- *    invariant to the error bound -- which is at least as good an explanation
- *    for 1e-3 and 1e-6 looking identical as any theory about H2D traffic.
- *    Run BENCH_REPS=4 and compare r0 against r1..rN to settle it.
+ * ONE FILE PER REPETITION -- this is load-bearing.
  *
- * 2. BENCH_WARMUP (default on). A tiny dataset is written through the VOL with
- *    the same codec before the timed reps, so device/plugin initialisation
- *    happens outside every timed region. Done through the VOL rather than with
- *    cudaFree(0) because this TU is built by h5c++ without CUDA linkage.
+ *   An earlier version of this harness kept a single file open, wrote every
+ *   repetition into it, and did H5Fclose + H5Fopen between write and read to
+ *   defeat the HDF5 cache. That breaks the connector: after the reopen, the
+ *   file handle's connector state is not the one that created the file, so the
+ *   NEXT H5Dcreate2 produces a dataset without the _VOL_ORIG_RANK /
+ *   _VOL_ORIG_TYPE / _VOL_OPTIONS_JSON attribute set, and the following
+ *   H5Dopen2 fails with "can't locate attribute: '_VOL_ORIG_RANK'". Rep 0 was
+ *   clean, rep 1 died.
  *
- * 3. Per-write flush. H5Dwrite returns once data is in HDF5's cache; the real
- *    disk traffic used to happen at H5Fclose, outside every timed region. Now
- *    H5Fflush is timed per write and reported as its own column.
+ *   Each repetition now gets its own file: create -> write -> flush -> close,
+ *   then a fresh open -> read -> close. The read is cold with respect to the
+ *   HDF5 cache without ever mutating a live handle, file-level create/close
+ *   become per-repetition attributable, and this matches the one-dataset-per-
+ *   file usage that tier2_h5repack_roundtrip.pbs already exercises.
  *
- * 4. BENCH_VERIFY (default off) gates the three O(nelem) diagnostic passes.
- *    On einspline37 (3.39e9 elements) they were five full passes over 13.5 GB
- *    on every run, inside a 900 s timeout.
+ *   NOTE: a fresh open does not clear the OS page cache, so reads remain
+ *   page-cache-warm. State that in methods.
  *
- * 5. Fidelity thresholds now come from bench_abs_threshold(), i.e. from the
- *    bound the codec was actually configured with. They used to threshold on
- *    d->bound (nominal relative 1e-3) while the entries configure pressio:abs,
- *    so cuszp_1e6 was checked at 2e-3 against a 1e-6 bound and passed
- *    vacuously.
+ * OTHER BEHAVIOUR
+ *   BENCH_REPS      (1)  repetitions per (dataset x compressor)
+ *   BENCH_WARMUP    (1)  tiny write through the VOL first, in its own throwaway
+ *                        file, so CUDA context creation, cuSZp module load, the
+ *                        first cudaMalloc and libpressio plugin construction all
+ *                        land outside every timed region
+ *   BENCH_VERIFY    (0)  gates the three O(nelem) diagnostic passes
+ *   BENCH_KEEP_H5   (0)  keep the per-rep .h5 files instead of unlinking them
  *
- * 6. BENCH_COLD_READ (default on) closes and reopens the file between write
- *    and read so H5Dread doesn't hit the HDF5 cache. NOTE: this does not clear
- *    the OS page cache, so reads remain page-cache-warm. State that in methods.
+ * Fidelity thresholds come from bench_abs_threshold(), i.e. the bound the codec
+ * was actually configured with -- not d->bound, which is the dataset's nominal
+ * relative bound and made the old checks vacuous.
  *
  * Build:
  *   h5c++ -O2 -std=c++17 bench_vol_timing.cc -lpressio -o bench_vol_timing
@@ -58,11 +58,9 @@
 #include "miranda.h"     /* register_vol_properties(), make_dcpl(id, opts_json) */
 
 /* ---------------------------------------------------------------------------
- * Extended CSV.
- *
- * Written alongside the legacy bench_csv_row output so existing merges keep
- * working. The legacy 9-field schema has no room for a repetition index or a
- * separate flush column, and both are load-bearing now.
+ * Extended CSV. Written alongside the legacy bench_csv_row output so existing
+ * merges keep working; the legacy 9-field schema has no room for a repetition
+ * index or the separate flush/close/open columns.
  *
  * bench_pressio_timing.cc and bench_filter_timing.cc need this same header if
  * you want to merge across all three harnesses.
@@ -70,22 +68,29 @@
 static const char *XCSV_HEADER =
     "dataset,compressor,codec_kind,chunk_n,rep,"
     "logical_bytes,stored_bytes,ratio,"
-    "write_ms,flush_ms,read_ms,"
+    "create_ms,write_ms,flush_ms,close_ms,open_ms,read_ms,"
     "rmse,abs_thresh,maxae,bound_ok\n";
 
+typedef struct {
+    double create_ms, write_ms, flush_ms, close_ms, open_ms, read_ms;
+    unsigned long long stored;
+} rep_timing;
+
 static void xcsv_row(FILE *fp, const char *dset, const bench_compressor_t *c,
-                     int chunk_n, int rep,
-                     unsigned long long logical, unsigned long long stored,
-                     double write_ms, double flush_ms, double read_ms,
+                     int chunk_n, int rep, unsigned long long logical,
+                     const rep_timing *t,
                      double rmse, double abs_thresh, double maxae) {
     if (!fp) return;
-    const double ratio = stored ? (double)logical / (double)stored : 0.0;
+    const double ratio = t->stored ? (double)logical / (double)t->stored : 0.0;
     const int bound_ok = (abs_thresh > 0.0) ? (maxae <= 2.0 * abs_thresh)
                                             : (maxae == 0.0);
     std::fprintf(fp,
-        "%s,%s,%s,%d,%d,%llu,%llu,%.4f,%.4f,%.4f,%.4f,%.6e,%.6e,%.6e,%d\n",
+        "%s,%s,%s,%d,%d,%llu,%llu,%.4f,"
+        "%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,"
+        "%.6e,%.6e,%.6e,%d\n",
         dset, c->name, bench_codec_kind_name(c->kind), chunk_n, rep,
-        logical, stored, ratio, write_ms, flush_ms, read_ms,
+        logical, t->stored, ratio,
+        t->create_ms, t->write_ms, t->flush_ms, t->close_ms, t->open_ms, t->read_ms,
         rmse, abs_thresh, maxae, bound_ok);
     std::fflush(fp);
 }
@@ -136,7 +141,7 @@ static void bench_zero_run(const void *orig, const void *dec,
         label, total, 100.0*total/nelem, best, best_start, best_start + best);
 }
 
-/* thr is now an ABSOLUTE error threshold from bench_abs_threshold(), not the
+/* thr is an ABSOLUTE error threshold from bench_abs_threshold(), not the
  * dataset's nominal relative bound. */
 static int bench_check_chunks(const void *orig, const void *dec, size_t nelem,
                               bench_dtype_t dt, int nchunks, double thr,
@@ -167,9 +172,9 @@ static int bench_check_chunks(const void *orig, const void *dec, size_t nelem,
     return bad;
 }
 
-/* Locate contiguous corrupt blocks and map each to chunk + offset.
- * Targets GROSS corruption (error >> thr), so it ignores the near-bound points
- * that are legitimately quantized. */
+/* Locate contiguous corrupt blocks and map each to chunk + offset. Targets
+ * GROSS corruption (error >> thr), ignoring points that are legitimately
+ * quantized near the bound. */
 static int bench_locate_bad(const void *orig, const void *dec, size_t nelem,
                             bench_dtype_t dt, int nchunks, double thr_in,
                             const char *label) {
@@ -219,13 +224,12 @@ static int bench_locate_bad(const void *orig, const void *dec, size_t nelem,
 static int env_int(const char *name, int dflt) {
     const char *s = std::getenv(name);
     if (!s || !*s) return dflt;
-    int n = std::atoi(s);
-    return n;
+    return std::atoi(s);
 }
-static int bench_reps(void)      { int n = env_int("BENCH_REPS", 1);  return n > 0 ? n : 1; }
-static int bench_warmup(void)    { return env_int("BENCH_WARMUP", 1) != 0; }
-static int bench_verify(void)    { return env_int("BENCH_VERIFY", 0) != 0; }
-static int bench_cold_read(void) { return env_int("BENCH_COLD_READ", 1) != 0; }
+static int bench_reps(void)    { int n = env_int("BENCH_REPS", 1); return n > 0 ? n : 1; }
+static int bench_warmup(void)  { return env_int("BENCH_WARMUP", 1) != 0; }
+static int bench_verify(void)  { return env_int("BENCH_VERIFY", 0) != 0; }
+static int bench_keep_h5(void) { return env_int("BENCH_KEEP_H5", 0) != 0; }
 
 static int name_selected(const char *sel, const char *name) {
     if (!sel || !*sel) return 1;
@@ -237,65 +241,165 @@ static int name_selected(const char *sel, const char *name) {
     return 0;
 }
 
+/* "<base>.h5" + suffix -> "<base><suffix>.h5"; no extension -> plain append. */
+static void derive_path(const char *base, const char *suffix,
+                        char *out, size_t n) {
+    const char *dot = std::strrchr(base, '.');
+    if (dot && 0 == std::strcmp(dot, ".h5"))
+        std::snprintf(out, n, "%.*s%s.h5", (int)(dot - base), base, suffix);
+    else
+        std::snprintf(out, n, "%s%s.h5", base, suffix);
+}
+
 typedef struct {
-    double             write_ms;   /* sum of timed H5Dwrite wall time  */
-    double             flush_ms;   /* sum of timed H5Fflush wall time  */
-    double             read_ms;    /* sum of timed H5Dread  wall time  */
+    double             write_ms, flush_ms, close_ms, create_ms, open_ms, read_ms;
     size_t             raw_bytes;
     unsigned long long storage;
-    int                n;          /* dataset writes counted           */
+    int                n;
 } bench_file_acc;
 
 /* --------------------------------------------------------------------------
- * Warmup: force device context creation, codec module load, and libpressio
- * plugin construction to happen OUTSIDE any timed region. A tiny dataset
- * through the VOL is enough, and needs no CUDA linkage in this TU.
+ * Warmup, in its own throwaway file so it cannot perturb the measured one.
+ * Forces device context creation, codec module load, and plugin construction
+ * to happen outside every timed region. Done through the VOL because this TU
+ * is built by h5c++ without CUDA linkage, so cudaFree(0) is not available.
  * ----------------------------------------------------------------------- */
-static void warmup_codec(hid_t file, const bench_dataset_t *d,
+static void warmup_codec(const char *h5base, const bench_dataset_t *d,
                          const bench_compressor_t *c, const char *oj) {
-    char    name[224];
+    char    path[1024];
     hsize_t wdims[1] = { 65536 };
     hid_t   ntype = bench_dataset_h5native(d);
     size_t  nb    = (size_t)wdims[0] * bench_dtype_size(d->dtype);
     void   *tmp   = std::calloc(1, nb);
 
     if (!tmp) return;
-    std::snprintf(name, sizeof(name), "_warmup_%s", c->name);
+    derive_path(h5base, "_warmup", path, sizeof(path));
 
   try {
-    hid_t space = H5Screate_simple(1, wdims, NULL);
-    hid_t dcpl  = make_dcpl(c->pressio_id, oj);
-    hid_t dset  = H5Dcreate2(file, name, ntype, space, H5P_DEFAULT, dcpl, H5P_DEFAULT);
-    if (dset >= 0) {
-        (void)H5Dwrite(dset, ntype, H5S_ALL, H5S_ALL, H5P_DEFAULT, tmp);
-        (void)H5Dread (dset, ntype, H5S_ALL, H5S_ALL, H5P_DEFAULT, tmp);
-        H5Dclose(dset);
+    hid_t file = H5Fcreate(path, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    if (file >= 0) {
+        hid_t space = H5Screate_simple(1, wdims, NULL);
+        hid_t dcpl  = make_dcpl(c->pressio_id, oj);
+        hid_t dset  = H5Dcreate2(file, "warmup", ntype, space, H5P_DEFAULT,
+                                 dcpl, H5P_DEFAULT);
+        if (dset >= 0) {
+            (void)H5Dwrite(dset, ntype, H5S_ALL, H5S_ALL, H5P_DEFAULT, tmp);
+            (void)H5Dread (dset, ntype, H5S_ALL, H5S_ALL, H5P_DEFAULT, tmp);
+            H5Dclose(dset);
+        }
+        H5Pclose(dcpl);
+        H5Sclose(space);
+        H5Fclose(file);
     }
-    H5Pclose(dcpl);
-    H5Sclose(space);
-    H5Ldelete(file, name, H5P_DEFAULT);   /* keep the container tidy */
   } catch (...) {
-    /* A codec may reject a tiny input; that's fine, it still initialised. */
+    /* A codec may reject a tiny input; it still initialised, which is the point. */
     std::fprintf(stderr, "[warmup] %s threw on the warmup dataset (ignored)\n",
                  c->name);
   }
     std::free(tmp);
+    if (!bench_keep_h5()) std::remove(path);
+}
+
+/* --------------------------------------------------------------------------
+ * One repetition: its own file, write phase then a fresh-open read phase.
+ * Returns 0 on success.
+ * ----------------------------------------------------------------------- */
+static int run_rep(const char *path, const char *dsname,
+                   const bench_dataset_t *d, const bench_compressor_t *c,
+                   const char *oj, hid_t space, hid_t ntype,
+                   const void *hbuf, void *rbuf, size_t raw_bytes,
+                   rep_timing *t) {
+    std::memset(t, 0, sizeof(*t));
+
+    /* ---------------- WRITE PHASE (own file) ---------------- */
+    {
+        BenchCpuTimer ct; ct.start();
+        hid_t file = H5Fcreate(path, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+        t->create_ms = ct.stop_ms();
+        if (file < 0) {
+            std::fprintf(stderr, "[ERR] H5Fcreate failed %s\n", path);
+            return -1;
+        }
+
+        hid_t dcpl = make_dcpl(c->pressio_id, oj);
+        hid_t dset = H5Dcreate2(file, dsname, ntype, space, H5P_DEFAULT,
+                                dcpl, H5P_DEFAULT);
+        if (dset < 0) {
+            std::fprintf(stderr, "[ERR] H5Dcreate2 failed %s\n", dsname);
+            H5Pclose(dcpl); H5Fclose(file);
+            return -1;
+        }
+
+        BenchCpuTimer wt; wt.start();
+        herr_t wret = H5Dwrite(dset, ntype, H5S_ALL, H5S_ALL, H5P_DEFAULT, hbuf);
+        t->write_ms = wt.stop_ms();
+
+        /* H5Dwrite only reaches HDF5's cache; time the flush separately so io
+         * means io. H5Fclose below covers whatever the flush did not. */
+        BenchCpuTimer ft; ft.start();
+        (void)H5Fflush(file, H5F_SCOPE_LOCAL);
+        t->flush_ms = ft.stop_ms();
+
+        t->stored = (unsigned long long)H5Dget_storage_size(dset);
+        H5Dclose(dset);
+        H5Pclose(dcpl);
+
+        BenchCpuTimer clt; clt.start();
+        H5Fclose(file);
+        t->close_ms = clt.stop_ms();
+
+        if (wret < 0) {
+            std::fprintf(stderr, "[ERR] H5Dwrite failed %s\n", dsname);
+            return -1;
+        }
+    }
+
+    /* ---------------- READ PHASE (fresh open) ---------------- */
+    {
+        std::memset(rbuf, 0, raw_bytes);
+
+        BenchCpuTimer ot; ot.start();
+        hid_t file = H5Fopen(path, H5F_ACC_RDONLY, H5P_DEFAULT);
+        t->open_ms = ot.stop_ms();
+        if (file < 0) {
+            std::fprintf(stderr, "[ERR] H5Fopen failed %s\n", path);
+            return -1;
+        }
+
+        hid_t dset = H5Dopen2(file, dsname, H5P_DEFAULT);
+        if (dset < 0) {
+            std::fprintf(stderr, "[ERR] H5Dopen2 failed %s\n", dsname);
+            H5Fclose(file);
+            return -1;
+        }
+
+        BenchCpuTimer rt; rt.start();
+        herr_t rret = H5Dread(dset, ntype, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf);
+        t->read_ms = rt.stop_ms();
+
+        H5Dclose(dset);
+        H5Fclose(file);
+
+        if (rret < 0) {
+            std::fprintf(stderr, "[ERR] H5Dread failed %s\n", dsname);
+            return -1;
+        }
+    }
+    return 0;
 }
 
 /* --------------------------------------------------------------------------
  * One (dataset x compressor) pair, repeated BENCH_REPS times.
- * filep is in/out: cold reads close and reopen the file.
  * ----------------------------------------------------------------------- */
-static void run_pair(hid_t *filep, const char *h5path,
+static void run_pair(const char *h5base,
                      const bench_dataset_t *d, const bench_compressor_t *c,
                      const void *hbuf, void *rbuf, size_t raw_bytes,
                      double measured_range,
                      FILE *csv, FILE *xcsv, bench_file_acc *acc) {
-    const bool dbg       = std::getenv("BENCH_DEBUG") != NULL;
-    const int  reps      = bench_reps();
-    const int  verify    = bench_verify();
-    const int  cold      = bench_cold_read();
-    const int  chunk_n   = bench_effective_chunk_n(c);
+    const bool   dbg     = std::getenv("BENCH_DEBUG") != NULL;
+    const int    reps    = bench_reps();
+    const int    verify  = bench_verify();
+    const int    chunk_n = bench_effective_chunk_n(c);
     const double thr     = bench_abs_threshold(c, d, measured_range);
 
     hid_t space = H5I_INVALID_HID;
@@ -320,79 +424,21 @@ static void run_pair(hid_t *filep, const char *h5path,
             oj ? oj : "(default)");
 
     if (bench_warmup())
-        warmup_codec(*filep, d, c, oj);
+        warmup_codec(h5base, d, c, oj);
 
     for (int r = 0; r < reps; ++r) {
-        char dsname[224];
-        std::snprintf(dsname, sizeof(dsname), "%s_%s_r%d", d->name, c->name, r);
+        char       path[1024], suffix[64], dsname[224];
+        rep_timing t;
 
-        /* ---------------- WRITE ---------------- */
-        hid_t dcpl = make_dcpl(c->pressio_id, oj);
-        hid_t dset = H5Dcreate2(*filep, dsname, ntype, space, H5P_DEFAULT,
-                                dcpl, H5P_DEFAULT);
-        if (dset < 0) {
-            std::fprintf(stderr, "[ERR] H5Dcreate2 failed %s\n", dsname);
-            H5Pclose(dcpl);
+        std::snprintf(suffix, sizeof(suffix), "_%s_r%d", c->name, r);
+        derive_path(h5base, suffix, path, sizeof(path));
+        std::snprintf(dsname, sizeof(dsname), "%s_%s", d->name, c->name);
+
+        if (run_rep(path, dsname, d, c, oj, space, ntype,
+                    hbuf, rbuf, raw_bytes, &t) != 0) {
+            if (!bench_keep_h5()) std::remove(path);
             continue;
         }
-
-        BenchCpuTimer wt; wt.start();
-        herr_t wret = H5Dwrite(dset, ntype, H5S_ALL, H5S_ALL, H5P_DEFAULT, hbuf);
-        double wms = wt.stop_ms();
-
-        /* The write above only reaches HDF5's cache. Time the flush separately
-         * so io means io. This does change the I/O pattern relative to a single
-         * close-time flush -- say so in methods. */
-        BenchCpuTimer ft; ft.start();
-        (void)H5Fflush(*filep, H5F_SCOPE_LOCAL);
-        double fms = ft.stop_ms();
-
-        hsize_t storage = H5Dget_storage_size(dset);
-        H5Dclose(dset);
-        H5Pclose(dcpl);
-
-        if (wret < 0) {
-            std::fprintf(stderr, "[ERR] H5Dwrite failed %s\n", dsname);
-            continue;
-        }
-
-        double wratio = storage ? (double)raw_bytes / (double)storage : 0.0;
-        bench_csv_row(csv, d->name, c->name, "vol", "write", "total", wms, wratio, -1.0);
-        bench_csv_row(csv, d->name, c->name, "vol", "write", "flush", fms, -1.0, -1.0);
-
-        if (acc) { acc->write_ms += wms; acc->flush_ms += fms;
-                   acc->raw_bytes += raw_bytes;
-                   acc->storage += (unsigned long long)storage; }
-
-        /* ---------------- COLD READ SETUP ---------------- */
-        if (cold) {
-            H5Fclose(*filep);
-            *filep = H5Fopen(h5path, H5F_ACC_RDWR, H5P_DEFAULT);
-            if (*filep < 0) {
-                std::fprintf(stderr, "[ERR] reopen failed for cold read: %s\n", h5path);
-                return;
-            }
-        }
-
-        /* ---------------- READ ---------------- */
-        std::memset(rbuf, 0, raw_bytes);
-        dset = H5Dopen2(*filep, dsname, H5P_DEFAULT);
-        if (dset < 0) {
-            std::fprintf(stderr, "[ERR] H5Dopen2 failed %s\n", dsname);
-            continue;
-        }
-
-        BenchCpuTimer rt; rt.start();
-        herr_t rret = H5Dread(dset, ntype, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf);
-        double rms = rt.stop_ms();
-        H5Dclose(dset);
-
-        if (rret < 0) {
-            std::fprintf(stderr, "[ERR] H5Dread failed %s\n", dsname);
-            continue;
-        }
-
-        if (acc) { acc->read_ms += rms; acc->n += 1; }
 
         /* ---------------- FIDELITY ---------------- */
         bench_stats st = bench_compute_stats(hbuf, rbuf, nelem, d->dtype,
@@ -411,21 +457,38 @@ static void run_pair(hid_t *filep, const char *h5path,
             std::fprintf(stderr, "[FAIL] %-28s maxae=%.6e exceeds 2x configured "
                                  "bound %.6e\n", dsname, st.maxae, thr);
 
-        bench_csv_row(csv, d->name, c->name, "vol", "read", "total", rms, -1.0, st.rmse);
-        xcsv_row(xcsv, d->name, c, chunk_n, r,
-                 (unsigned long long)raw_bytes, (unsigned long long)storage,
-                 wms, fms, rms, st.rmse, thr, st.maxae);
+        const double ratio = t.stored ? (double)raw_bytes / (double)t.stored : 0.0;
 
-        std::printf("  %-30s r%-2d W=%8.2f F=%8.2f R=%8.2f ms  ratio=%6.2fx  "
-                    "RMSE=%.3e maxae=%.3e%s\n",
-                    dsname, r, wms, fms, rms, wratio, st.rmse, st.maxae,
+        bench_csv_row(csv, d->name, c->name, "vol", "write", "total", t.write_ms, ratio, -1.0);
+        bench_csv_row(csv, d->name, c->name, "vol", "write", "flush", t.flush_ms, -1.0, -1.0);
+        bench_csv_row(csv, d->name, c->name, "vol", "write", "close", t.close_ms, -1.0, -1.0);
+        bench_csv_row(csv, d->name, c->name, "vol", "read",  "total", t.read_ms, -1.0, st.rmse);
+
+        xcsv_row(xcsv, d->name, c, chunk_n, r,
+                 (unsigned long long)raw_bytes, &t, st.rmse, thr, st.maxae);
+
+        if (acc) {
+            acc->create_ms += t.create_ms; acc->write_ms += t.write_ms;
+            acc->flush_ms  += t.flush_ms;  acc->close_ms += t.close_ms;
+            acc->open_ms   += t.open_ms;   acc->read_ms  += t.read_ms;
+            acc->raw_bytes += raw_bytes;   acc->storage  += t.stored;
+            acc->n         += 1;
+        }
+
+        std::printf("  %-28s r%-2d C=%7.2f W=%9.2f F=%8.2f X=%8.2f | "
+                    "O=%7.2f R=%9.2f ms  ratio=%6.2fx  RMSE=%.3e maxae=%.3e%s\n",
+                    dsname, r, t.create_ms, t.write_ms, t.flush_ms, t.close_ms,
+                    t.open_ms, t.read_ms, ratio, st.rmse, st.maxae,
                     (d->xform != BENCH_XFORM_NONE) ? " (log-space)" : "");
         std::fflush(stdout);
+
+        if (!bench_keep_h5()) std::remove(path);
     }
 
     if (reps > 1)
-        std::printf("  ^ compare r0 against r1..r%d: a large gap means you were "
-                    "measuring initialisation, not steady-state cost\n", reps - 1);
+        std::printf("  ^ C=create W=write F=flush X=close O=open R=read. "
+                    "Compare r0 against r1..r%d: a large gap means you were "
+                    "measuring initialisation, not steady-state cost.\n", reps - 1);
 
   } catch (const std::exception &e) {
       std::fprintf(stderr, "[ERR] run_pair %s/%s threw: %s (skipped; sweep continues)\n",
@@ -441,7 +504,7 @@ static void run_pair(hid_t *filep, const char *h5path,
 }
 
 int main(int argc, char **argv) {
-    const char *h5path   = (argc > 1) ? argv[1] : "bench_out.h5";
+    const char *h5base   = (argc > 1) ? argv[1] : "bench_out.h5";
     const char *csvpath  = (argc > 2) ? argv[2] : "results_vol.csv";
     const char *xcsvpath = (argc > 3) ? argv[3] : std::getenv("BENCH_CSV_EX");
     const char *only     = std::getenv("BENCH_ONLY");
@@ -455,11 +518,15 @@ int main(int argc, char **argv) {
     }
 
     std::fprintf(stderr,
-        "[dbg main] h5=%s csv=%s xcsv=%s only=%s comp=%s "
-        "reps=%d warmup=%d verify=%d cold_read=%d debug=%d\n",
-        h5path, csvpath, xcsvpath, only ? only : "(all)",
+        "[dbg main] h5base=%s csv=%s xcsv=%s only=%s comp=%s "
+        "reps=%d warmup=%d verify=%d keep_h5=%d debug=%d\n",
+        h5base, csvpath, xcsvpath, only ? only : "(all)",
         only_cmp ? only_cmp : "(all)",
-        bench_reps(), bench_warmup(), bench_verify(), bench_cold_read(), (int)dbg);
+        bench_reps(), bench_warmup(), bench_verify(), bench_keep_h5(), (int)dbg);
+    std::fprintf(stderr,
+        "[dbg main] one file per repetition: <base>_<comp>_r<N>.h5 "
+        "(the connector loses its _VOL_* attribute state if a file handle is "
+        "closed and reopened mid-run)\n");
 
     register_vol_properties();
     bench_datasets_validate();
@@ -472,16 +539,8 @@ int main(int argc, char **argv) {
     if (!xcsv) { std::perror("xcsv"); std::fclose(csv); return 1; }
     std::fputs(XCSV_HEADER, xcsv);
 
-    /* ---- file-level: time creation ---- */
-    BenchCpuTimer fct; fct.start();
-    hid_t file = H5Fcreate(h5path, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-    double create_ms = fct.stop_ms();
-    if (file < 0) {
-        std::fprintf(stderr, "[ERR] H5Fcreate failed\n");
-        std::fclose(csv); std::fclose(xcsv); return 1;
-    }
-
-    bench_file_acc acc = {0.0, 0.0, 0.0, 0, 0ULL, 0};
+    bench_file_acc acc;
+    std::memset(&acc, 0, sizeof(acc));
     int n_ok = 0, n_skip = 0;
 
     const size_t mem_avail = bench_mem_available_bytes();
@@ -494,8 +553,9 @@ int main(int argc, char **argv) {
             n_skip++; continue;
         }
 
-        /* Fail fast instead of getting OOM-killed mid-sweep. einspline37 needs
-         * ~26 GiB for hbuf+rbuf alone, which no 8 GiB job can satisfy. */
+        /* Fail fast instead of getting OOM-killed mid-sweep: hbuf and rbuf are
+         * both resident, so einspline37 needs ~26 GiB before the connector
+         * allocates anything at all. */
         if (d->src != BENCH_SRC_HDF5 && mem_avail) {
             size_t need = 2 * bench_num_bytes(d);
             if (need > (size_t)(0.9 * (double)mem_avail)) {
@@ -518,8 +578,8 @@ int main(int argc, char **argv) {
             bench_apply_xform(hbuf, bench_num_elements(&rz), rz.dtype, rz.xform);
         }
 
-        /* Range scan (post-transform). Feeds bench_abs_threshold() for any
-         * relative-bounded entry, so verification uses a measured range rather
+        /* Range scan (post-transform); feeds bench_abs_threshold() for any
+         * relative-bounded entry so verification uses a measured range rather
          * than the assumed_range placeholder. */
         double measured_range = 0.0;
         {
@@ -547,43 +607,32 @@ int main(int argc, char **argv) {
         for (int ci = 0; ci < BENCH_NUM_COMPRESSORS; ++ci) {
             const bench_compressor_t *c = &BENCH_COMPRESSORS[ci];
             if (!name_selected(only_cmp, c->name)) continue;
-            run_pair(&file, h5path, &rz, c, hbuf, rbuf, raw,
+            run_pair(h5base, &rz, c, hbuf, rbuf, raw,
                      measured_range, csv, xcsv, &acc);
         }
         std::free(rbuf); std::free(hbuf);
         n_ok++;
     }
 
-    /* ---- file-level: time close/flush, emit file rows ---- */
-    BenchCpuTimer fclt; fclt.start();
-    H5Fclose(file);
-    double close_ms = fclt.stop_ms();
+    /* File-level rows are now sums over per-repetition files, so create and
+     * close are genuinely attributable rather than a single aggregate for a
+     * whole multi-dataset container. */
+    const double file_wtotal = acc.create_ms + acc.write_ms + acc.flush_ms + acc.close_ms;
+    const double file_rtotal = acc.open_ms + acc.read_ms;
+    const double file_ratio  = acc.storage ? (double)acc.raw_bytes / (double)acc.storage : 0.0;
 
-    /* Per-dataset flush is now timed inside run_pair, so close_ms should be
-     * small. It is still an aggregate over everything in the file: warn if more
-     * than one write landed here, because then create/close are not
-     * attributable to any single (dataset x compressor) pair. */
-    if (acc.n > 1)
-        std::fprintf(stderr,
-            "[WARN] %d dataset-writes in one file: create_ms and close_ms are "
-            "aggregates and are NOT per-pair attributable. Drive one dataset x "
-            "one compressor per process (BENCH_ONLY + BENCH_COMP) if you need "
-            "per-pair file-level numbers.\n", acc.n);
+    std::printf("\n=== TOTALS over %d repetition-files: create=%.2f write=%.2f "
+                "flush=%.2f close=%.2f => write_total=%.2f ms | open=%.2f "
+                "read=%.2f => read_total=%.2f ms | ratio=%.2fx ===\n",
+                acc.n, acc.create_ms, acc.write_ms, acc.flush_ms, acc.close_ms,
+                file_wtotal, acc.open_ms, acc.read_ms, file_rtotal, file_ratio);
 
-    double file_wtotal = create_ms + acc.write_ms + acc.flush_ms + close_ms;
-    double file_rtotal = acc.read_ms;
-    double file_ratio  = acc.storage ? (double)acc.raw_bytes / (double)acc.storage : 0.0;
-
-    std::printf("\n=== FILE %s: %d dataset-writes | create=%.2f  write=%.2f  "
-                "flush=%.2f  close=%.2f => write_total=%.2f ms | "
-                "read_total=%.2f ms | ratio=%.2fx ===\n",
-                h5path, acc.n, create_ms, acc.write_ms, acc.flush_ms, close_ms,
-                file_wtotal, file_rtotal, file_ratio);
-    bench_csv_row(csv, h5path, "ALL", "vol", "write", "file", file_wtotal, file_ratio, -1.0);
-    bench_csv_row(csv, h5path, "ALL", "vol", "read",  "file", file_rtotal, -1.0,       -1.0);
+    bench_csv_row(csv, h5base, "ALL", "vol", "write", "file", file_wtotal, file_ratio, -1.0);
+    bench_csv_row(csv, h5base, "ALL", "vol", "read",  "file", file_rtotal, -1.0,       -1.0);
 
     std::fclose(csv);
     std::fclose(xcsv);
-    std::fprintf(stderr, "[dbg main] done: %d datasets, %d skipped\n", n_ok, n_skip);
+    std::fprintf(stderr, "[dbg main] done: %d datasets, %d skipped, %d reps\n",
+                 n_ok, n_skip, acc.n);
     return 0;
 }
