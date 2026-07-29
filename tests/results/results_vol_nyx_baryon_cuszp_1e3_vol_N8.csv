@@ -1,0 +1,5 @@
+dataset,compressor,path,op,phase,ms,ratio,rmse
+nyx_baryon,cuszp_1e3,vol,write,total,980.6388,3.7647,
+nyx_baryon,cuszp_1e3,vol,read,total,952.4146,,5.773606e-04
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_nyx_baryon_cuszp_1e3_vol_N8.h5,ALL,vol,write,file,982.6799,3.7647,
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_nyx_baryon_cuszp_1e3_vol_N8.h5,ALL,vol,read,file,952.4146,,

@@ -1,3 +1,5 @@
 payload.bin
 *.h5
 build/
+/h5_outfiles
+

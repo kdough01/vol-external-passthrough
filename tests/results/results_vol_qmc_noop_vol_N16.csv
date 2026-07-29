@@ -1,0 +1,5 @@
+dataset,compressor,path,op,phase,ms,ratio,rmse
+einspline37,noop,vol,write,total,23099.0199,1.0000,
+einspline37,noop,vol,read,total,22968.4238,,0.000000e+00
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_qmc_noop_vol_N16.h5,ALL,vol,write,file,23400.1130,1.0000,
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_qmc_noop_vol_N16.h5,ALL,vol,read,file,22968.4238,,

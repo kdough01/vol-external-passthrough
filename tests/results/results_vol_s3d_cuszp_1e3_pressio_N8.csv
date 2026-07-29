@@ -1,0 +1,5 @@
+dataset,compressor,path,op,phase,ms,ratio,rmse
+s3d,cuszp_1e3,vol,write,total,806.1755,45.4131,
+s3d,cuszp_1e3,vol,read,total,2348.6351,,4.898672e-04
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_s3d_cuszp_1e3_pressio_N8.h5,ALL,vol,write,file,808.0617,45.4131,
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_s3d_cuszp_1e3_pressio_N8.h5,ALL,vol,read,file,2348.6351,,

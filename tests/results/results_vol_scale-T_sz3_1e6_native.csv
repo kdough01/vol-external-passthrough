@@ -1,0 +1,5 @@
+dataset,compressor,path,op,phase,ms,ratio,rmse
+scale-T,sz3_1e6,vol,write,total,12784.5601,1.8126,
+scale-T,sz3_1e6,vol,read,total,5721.6469,,2.692201e-06
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_scale-T_sz3_1e6_native.h5,ALL,vol,write,file,12786.2984,1.8126,
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_scale-T_sz3_1e6_native.h5,ALL,vol,read,file,5721.6469,,
