@@ -1,3 +1,0 @@
-dataset,compressor,op,total_ms,compress_ms,io_ms,overhead_ms,overhead_pct
-scale-T_cuszp_1e6,cuszp,write,1006.8061,101.3718,205.5876,699.8466,69.51
-scale-T_cuszp_1e6,cuszp,read,943.0966,777.0641,105.0293,61.0032,6.47

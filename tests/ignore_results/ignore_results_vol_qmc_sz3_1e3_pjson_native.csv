@@ -1,2 +1,0 @@
-dataset,compressor,path,op,phase,ms,ratio,rmse
-einspline37,sz3_1e3_pjson,vol,write,total,121024.6592,3.3784,

@@ -86,9 +86,9 @@ static int bench_check_chunks(const void *orig, const void *dec, size_t nelem,
             double v = (dt==BENCH_F64)? ((const double*)dec )[i] : (double)((const float*)dec )[i];
             double e = o - v, ae = std::fabs(e);
             se += e*e; if (ae > maxae) maxae = ae;
-            if (v == 0.0 && o != 0.0) ++nz;
+            if (v == 0.0 && std::fabs(o) > bound) ++nz;
         }
-        int chunk_bad = (maxae > 100.0*bound) || ((double)nz/cn > 0.5);
+        int chunk_bad = (maxae > 2.0 * bound);
         bad += chunk_bad;
         std::fprintf(stderr,
             "[chunkchk] %-28s chunk %2d/%-2d n=%zu rmse=%.3e maxae=%.3e fillzero=%zu %s\n",
@@ -97,6 +97,59 @@ static int bench_check_chunks(const void *orig, const void *dec, size_t nelem,
     }
     if (bad) std::fprintf(stderr, "[chunkchk] %-28s **%d/%d chunks bad**\n", label, bad, nchunks);
     return bad;
+}
+
+/* Locate contiguous corrupt blocks and map each to chunk + offset.
+ * Targets GROSS corruption (error >> bound), so it ignores the near-bound
+ * points that are legitimately quantized. off_in_chunk is the position inside
+ * that chunk's decompressed output -> trace it into the payload reader. */
+static int bench_locate_bad(const void *orig, const void *dec, size_t nelem,
+                            bench_dtype_t dt, int nchunks, double bound,
+                            const char *label) {
+    if (nchunks < 1) nchunks = 1;
+    const size_t dsize = bench_dtype_size(dt);
+    const size_t base  = nelem / (size_t)nchunks;   // equal split (matches your VOL log);
+    const size_t rem   = nelem % (size_t)nchunks;   // if your VOL dumps the remainder in the
+                                                    // LAST chunk instead, adjust chunk_of below
+    const double thr   = 2.0 * bound;               // healthy points sit at ~1.0-1.001x bound
+    const size_t GAP   = 256;                        // merge bad runs split by < GAP good elems
+
+    auto chunk_of = [&](size_t i, size_t *cstart) -> int {
+        size_t big = rem * (base + 1);              // first `rem` chunks hold base+1
+        if (i < big) { int c = (int)(i / (base + 1)); *cstart = (size_t)c * (base + 1); return c; }
+        size_t j = i - big; int c = (int)rem + (int)(j / base);
+        *cstart = big + (j - j % base); return c;
+    };
+    auto val = [&](const void *p, size_t i) {
+        return (dt == BENCH_F64) ? ((const double*)p)[i] : (double)((const float*)p)[i];
+    };
+
+    int nblocks = 0, printed = 0;
+    size_t i = 0;
+    while (i < nelem) {
+        if (std::fabs(val(orig, i) - val(dec, i)) <= thr) { ++i; continue; }
+        size_t start = i, last_bad = i, nbad = 0; double blk_maxae = 0.0;
+        while (i < nelem) {
+            double ae = std::fabs(val(orig, i) - val(dec, i));
+            if (ae > thr) { last_bad = i; ++nbad; if (ae > blk_maxae) blk_maxae = ae; }
+            else if (i - last_bad > GAP) break;
+            ++i;
+        }
+        size_t len = last_bad - start + 1, cstart; int c = chunk_of(start, &cstart);
+        size_t off = start - cstart;
+        ++nblocks;
+        if (printed++ < 40)
+            std::fprintf(stderr,
+              "[badblk] %-24s blk %d: elem[%zu..%zu] len=%zu nbad=%zu maxae=%.3e | "
+              "byte_off=%zu | chunk %d (starts elem %zu) off_in_chunk=%zu elem / %zu B | "
+              "len=2^%.1f off_in_chunk=2^%.1f\n",
+              label, nblocks, start, last_bad, len, nbad, blk_maxae,
+              start * dsize, c, cstart, off, off * dsize,
+              std::log2((double)len), std::log2((double)(off ? off : 1)));
+    }
+    std::fprintf(stderr, nblocks ? "[badblk] %-24s %d bad block(s)\n"
+                                 : "[badblk] %-24s clean\n", label, nblocks);
+    return nblocks;
 }
 
 static void *load_field(const bench_dataset_t *d, size_t *nbytes_out) {
@@ -198,6 +251,7 @@ static void run_pair(hid_t file, const bench_dataset_t *d,
     if (const char *s = std::getenv("VOL_COMP_CHUNK_N")) nchunks = std::atoi(s);
     bench_zero_run(hbuf, rbuf, nelem, d->dtype, dsname);
     bench_check_chunks(hbuf, rbuf, nelem, d->dtype, nchunks, d->bound, dsname);
+    bench_locate_bad(hbuf, rbuf, nelem, d->dtype, nchunks, d->bound, dsname);
 
     if (acc) { acc->read_ms += rms; acc->n += 1; }   /* count dataset once */
 

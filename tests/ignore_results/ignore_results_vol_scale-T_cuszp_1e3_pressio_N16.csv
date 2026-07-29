@@ -1,5 +1,0 @@
-dataset,compressor,path,op,phase,ms,ratio,rmse
-scale-T,cuszp_1e3,vol,write,total,1088.2391,12.2348,
-scale-T,cuszp_1e3,vol,read,total,1219.6962,,5.773690e-04
-/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_scale-T_cuszp_1e3_pressio_N16.h5,ALL,vol,write,file,1089.7494,12.2348,
-/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_scale-T_cuszp_1e3_pressio_N16.h5,ALL,vol,read,file,1219.6962,,

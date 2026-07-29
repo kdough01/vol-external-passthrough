@@ -1,5 +1,0 @@
-dataset,compressor,path,op,phase,ms,ratio,rmse
-ocean_temp,cuszp_1e6,vol,write,total,1019.9549,1.6869,
-ocean_temp,cuszp_1e6,vol,read,total,310.6567,,7.317529e-07
-/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_ocean_temp_cuszp_1e6_vol_N16.h5,ALL,vol,write,file,1021.6749,1.6869,
-/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_ocean_temp_cuszp_1e6_vol_N16.h5,ALL,vol,read,file,310.6567,,

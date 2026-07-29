@@ -1,3 +1,0 @@
-dataset,compressor,op,total_ms,compress_ms,io_ms,overhead_ms,overhead_pct
-s3d_cuszp_1e3,cuszp,write,890.0968,173.2384,157.0483,559.8100,62.89
-s3d_cuszp_1e3,cuszp,read,2051.0469,1740.1120,13.6304,297.3045,14.50

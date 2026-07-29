@@ -1,5 +1,0 @@
-dataset,compressor,path,op,phase,ms,ratio,rmse
-miranda,sz3_1e3_pjson,vol,write,total,1420.1152,57.6000,
-miranda,sz3_1e3_pjson,vol,read,total,780.0114,,2.785627e-04
-/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_miranda_sz3_1e3_pjson_native.h5,ALL,vol,write,file,1421.6383,57.6000,
-/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_miranda_sz3_1e3_pjson_native.h5,ALL,vol,read,file,780.0114,,

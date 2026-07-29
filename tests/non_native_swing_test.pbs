@@ -155,7 +155,8 @@ for comp in cuszp_1e3 cuszp_1e6; do
             echo "=== skip: noop x pressio (rejected by the VOL by design) ==="
             continue
         fi
-        for g in miranda ocean_temp qmc scale-T s3d nyx_baryon; do
+        # miranda ocean_temp qmc scale-T s3d nyx_baryon
+        for g in qmc scale-T s3d nyx_baryon; do
             for N in $CHUNK_COUNTS; do
                 run_vol_group "$g" "${DATASET[$g]}" "$comp" "$mode" "$N"
             done

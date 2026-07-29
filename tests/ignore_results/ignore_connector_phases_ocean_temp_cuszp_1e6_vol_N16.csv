@@ -1,3 +1,0 @@
-dataset,compressor,op,total_ms,compress_ms,io_ms,overhead_ms,overhead_pct
-ocean_temp_cuszp_1e6,cuszp,write,1018.0304,97.8913,197.5488,722.5903,70.98
-ocean_temp_cuszp_1e6,cuszp,read,310.5218,209.6703,77.9882,22.8632,7.36
