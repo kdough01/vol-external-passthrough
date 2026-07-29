@@ -139,11 +139,11 @@ declare -A DATASET=(
 CHUNK_COUNTS="8 16"
 
 # noop cuszp_1e3 cuszp_1e6 sz3_1e3 sz3_1e6
-for comp in noop cuszp_1e3 cuszp_1e6 sz3_1e3 sz3_1e6; do
+for comp in cuszp_1e3 cuszp_1e6; do
     # native baseline (no chunking of any kind — the default path)
-    run_vol_group miranda "miranda"     "$comp" "" ""
-    run_vol_group ocean_temp     "ocean_temp" "$comp" "" ""
-    run_vol_group qmc     "einspline37" "$comp" "" ""
+    # run_vol_group miranda "miranda"     "$comp" "" ""
+    # run_vol_group ocean_temp     "ocean_temp" "$comp" "" ""
+    # run_vol_group qmc     "einspline37" "$comp" "" ""
     run_vol_group scale-T "scale-T"     "$comp" "" ""
     run_vol_group s3d "s3d"     "$comp" "" ""
     run_vol_group nyx_baryon "nyx_baryon"     "$comp" "" ""
