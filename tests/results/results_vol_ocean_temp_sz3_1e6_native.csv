@@ -1,5 +1,0 @@
-dataset,compressor,path,op,phase,ms,ratio,rmse
-ocean_temp,sz3_1e6,vol,write,total,3688.4219,1.5588,
-ocean_temp,sz3_1e6,vol,read,total,2380.8977,,5.192602e-07
-/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_ocean_temp_sz3_1e6_native.h5,ALL,vol,write,file,3691.1814,1.5588,
-/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_ocean_temp_sz3_1e6_native.h5,ALL,vol,read,file,2380.8977,,

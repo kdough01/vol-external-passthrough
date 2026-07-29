@@ -1,3 +1,0 @@
-dataset,compressor,op,total_ms,compress_ms,io_ms,overhead_ms,overhead_pct
-einspline37_sz3_1e3,sz3,write,132372.2986,130413.8505,1578.7777,379.6704,0.29
-einspline37_sz3_1e3,sz3,read,157433.7077,149614.2653,2859.5832,4959.8591,3.15

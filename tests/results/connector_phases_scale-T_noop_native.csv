@@ -1,3 +1,3 @@
 dataset,compressor,op,total_ms,compress_ms,io_ms,overhead_ms,overhead_pct
-scale-T_noop,noop,write,1587.4821,1251.3455,277.1718,58.9647,3.71
-scale-T_noop,noop,read,969.6687,325.6470,396.5944,247.4272,25.52
+scale-T_noop,noop,write,1503.1271,1092.6012,362.6831,47.8428,3.18
+scale-T_noop,noop,read,852.8856,294.2309,350.1712,208.4836,24.44

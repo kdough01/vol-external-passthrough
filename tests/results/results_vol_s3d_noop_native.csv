@@ -1,5 +1,5 @@
 dataset,compressor,path,op,phase,ms,ratio,rmse
-s3d,noop,vol,write,total,2397.0762,0.9997,
-s3d,noop,vol,read,total,1716.2203,,0.000000e+00
-/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_s3d_noop_native.h5,ALL,vol,write,file,2399.5113,0.9997,
-/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_s3d_noop_native.h5,ALL,vol,read,file,1716.2203,,
+s3d,noop,vol,write,total,2319.0159,0.9997,
+s3d,noop,vol,read,total,1459.1749,,0.000000e+00
+/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_s3d_noop_native.h5,ALL,vol,write,file,2321.3208,0.9997,
+/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_s3d_noop_native.h5,ALL,vol,read,file,1459.1749,,

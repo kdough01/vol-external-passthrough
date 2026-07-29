@@ -1,3 +1,3 @@
 dataset,compressor,op,total_ms,compress_ms,io_ms,overhead_ms,overhead_pct
-ocean_temp_noop,noop,write,733.1917,662.0007,56.5872,14.6038,1.99
-ocean_temp_noop,noop,read,186.6333,77.2156,86.7238,22.6939,12.16
+ocean_temp_noop,noop,write,805.9878,574.1418,216.6338,15.2122,1.89
+ocean_temp_noop,noop,read,181.3965,67.4039,91.7661,22.2266,12.25

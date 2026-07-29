@@ -1,5 +1,5 @@
 dataset,compressor,path,op,phase,ms,ratio,rmse
-s3d,cuszp_1e6,vol,write,total,939.1490,15.1377,
-s3d,cuszp_1e6,vol,read,total,1533.5741,,3.420841e-07
-/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_s3d_cuszp_1e6_native.h5,ALL,vol,write,file,941.2178,15.1377,
-/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_s3d_cuszp_1e6_native.h5,ALL,vol,read,file,1533.5741,,
+s3d,cuszp_1e6,vol,write,total,1058.6663,15.1377,
+s3d,cuszp_1e6,vol,read,total,1521.7784,,3.420841e-07
+/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_s3d_cuszp_1e6_native.h5,ALL,vol,write,file,1060.1433,15.1377,
+/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_s3d_cuszp_1e6_native.h5,ALL,vol,read,file,1521.7784,,
