@@ -1,0 +1,3 @@
+dataset,compressor,op,total_ms,compress_ms,io_ms,overhead_ms,overhead_pct
+nyx_baryon_sz3_1e3,sz3,write,5873.1291,5645.4180,218.5687,9.1424,0.16
+nyx_baryon_sz3_1e3,sz3,read,4948.8243,4764.2202,60.0943,124.5098,2.52
