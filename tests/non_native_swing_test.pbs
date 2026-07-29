@@ -1,13 +1,21 @@
 #!/bin/bash
 #PBS -N vol_test_swing
-#PBS -l select=1:ncpus=4:ngpus=1:mpiprocs=1:mem=8gb
-#PBS -l walltime=02:00:00
+#PBS -l select=1:ncpus=16:ngpus=1:mpiprocs=1:mem=256gb
+#PBS -l walltime=04:00:00
 #PBS -j oe
 #PBS -A SDR
 #PBS -q gpu
 
+# mem= MUST exceed 2x the largest dataset: the harness holds hbuf and rbuf
+# simultaneously. einspline37 is 12.6 GiB -> ~26 GiB of buffers, so the old
+# mem=8gb could never run it; the job was being OOM-killed or timing out and
+# `return 0` in run_vol_group made that look like a plotting gap instead of a
+# failure. bench_vol_timing now checks MemAvailable and prints [SKIP] instead.
+
 cd $PBS_O_WORKDIR/..
 WORK="$(pwd)/tests"
+RESULTS="$WORK/results"
+mkdir -p "$RESULTS"
 
 echo "Job started on $(date)"
 echo "Running on: $(hostname)"
@@ -69,7 +77,7 @@ cmake -S . -B build \
     -Wno-dev
 
 env PATH="$CLEAN_PATH" LD_LIBRARY_PATH="$GCC_LIB" \
-cmake --build build -j4
+cmake --build build -j16
 
 echo "--- build/ ---"
 ls build/ || { echo "Build failed"; exit 1; }
@@ -77,76 +85,154 @@ echo "--- build/tests/ ---"
 ls build/tests/ || { echo "No tests/ in build"; exit 1; }
 
 export LD_LIBRARY_PATH=${GCC_LIB}:${LP_VIEW}/lib64:${LP_VIEW}/lib
-
 export HDF5_USE_FILE_LOCKING=FALSE
-rm -f "$WORK/bench_out.h5"        # clear any stale/half-written file
-
-# Which datasets to sweep
-# export BENCH_ONLY="miranda,hurricane,s3d"
-
-echo ""
-echo "=== [0/3] Dump cuszp option keys ==="
-./build/tests/dump_cuszp_opts | tr ',' '\n' | grep -i cuszp
 
 PLUGIN_DIR="$(pwd)/build"
-
-# ---------------------------------------------------------------------------
-# run_vol_group TAG SEL COMP MODE NCHUNKS
-#   MODE:     "" = native (no chunking, default)
-#             "vol"     = VOL-level chunking      (VOL_COMP_CHUNKING=vol)
-#             "pressio" = libpressio chunking meta (VOL_COMP_CHUNKING=pressio)
-#   NCHUNKS: number of equal chunks for vol/pressio modes; "" = single chunk (N=1)
-# The env vars override any vol:* keys in opts_json, so the *_pjson JSON-path
-# runs below must be launched with MODE="" and NCHUNKS="".
-# ---------------------------------------------------------------------------
-# put the big, disposable .h5 files on your SDR project allocation, not home
 H5DIR="${VOL_H5DIR:-/lcrc/project/SDR/$USER/vol_bench_h5}"
 mkdir -p "$H5DIR" || { echo "cannot create $H5DIR"; exit 1; }
 
+# ===========================================================================
+# STEP 0 -- Does the cuszp CUDA-stream option key actually exist?
+#
+# If it does not, vol_set_cuda_stream() never applied anything, the codec ran on
+# its own stream, our events bracketed an empty one, and every device_ms in the
+# results is meaningless. This is a ten-second check and it gates everything
+# downstream. (The old script grepped this dump for 'cuszp' but never for
+# 'stream'.)
+# ===========================================================================
+echo ""
+echo "=== [0] cuszp option keys: looking for a cuda_stream knob ==="
+./build/tests/dump_cuszp_opts | tr ',' '\n' | grep -i cuszp
+echo "--- stream keys ---"
+STREAM_KEYS=$(./build/tests/dump_cuszp_opts | tr ',' '\n' | grep -i stream)
+if [ -z "$STREAM_KEYS" ]; then
+    echo "*** NO STREAM OPTION FOUND for cuszp. ***"
+    echo "*** device_ms from CUDA events will NOT be trustworthy.            ***"
+    echo "*** Report host wall-clock only, and use nsys for device evidence. ***"
+    export VOL_COMP_GPU_EVENTS=0
+else
+    echo "$STREAM_KEYS"
+fi
+
+# ===========================================================================
+# run_vol_group TAG SEL COMP MODE NCHUNKS
+#   MODE:    "" = native (default), "vol", "pressio"
+#   NCHUNKS: chunk count for vol/pressio; "" = single chunk
+# Env vars override any vol:* keys in opts_json, so the *_?json JSON-path runs
+# must be launched with MODE="" and NCHUNKS="".
+# ===========================================================================
 run_vol_group () {
     local tag="$1"; local sel="$2"; local comp="$3"; local mode="$4"; local nchunks="$5"
     local label="${tag}_${comp}_${mode:-native}${nchunks:+_N${nchunks}}"
-    local h5="$H5DIR/bench_${label}.h5"          # big file off the quota'd home dir
-    local rcsv="$WORK/ignore_results_vol_${label}.csv"  # small CSVs stay in tests/
-    local pcsv="$WORK/ignore_connector_phases_${label}.csv"
-    rm -f "$h5"
+    local h5="$H5DIR/bench_${label}.h5"
+    local rcsv="$RESULTS/results_vol_${label}.csv"
+    local xcsv="$RESULTS/results_ext_${label}.csv"
+    local pcsv="$RESULTS/connector_phases_${label}.csv"
+
+    rm -f "$h5" "$pcsv"
     echo ""
-    echo "=== [1/3] VOL timing [$label] : $sel (chunking: ${mode:-native}${nchunks:+, N=${nchunks}}) ==="
+    echo "=== VOL timing [$label] : $sel (chunking: ${mode:-native}${nchunks:+, N=${nchunks}}) ==="
     env HDF5_VOL_CONNECTOR="pass_through_ext under_vol=0;under_info={}" \
         HDF5_PLUGIN_PATH="$PLUGIN_DIR" \
-        HDF5_VOL_DUMP_PIPELINE=1 \
         VOL_COMP_CHUNK_LOG=1 \
+        VOL_PHASES_CSV="$pcsv" \
+        VOL_TIMING_STRICT="${VOL_TIMING_STRICT:-1}" \
+        ${VOL_COMP_GPU_EVENTS:+VOL_COMP_GPU_EVENTS="$VOL_COMP_GPU_EVENTS"} \
         ${mode:+VOL_COMP_CHUNKING="$mode"} \
         ${nchunks:+VOL_COMP_CHUNK_N="$nchunks"} \
         BENCH_ONLY="$sel" \
         BENCH_COMP="$comp" \
-        BENCH_CSV="$pcsv" \
-        timeout --signal=KILL 900 ./build/tests/bench_vol_timing "$h5" "$rcsv"
+        BENCH_REPS="${BENCH_REPS:-1}" \
+        BENCH_WARMUP="${BENCH_WARMUP:-1}" \
+        BENCH_VERIFY="${BENCH_VERIFY:-0}" \
+        BENCH_COLD_READ="${BENCH_COLD_READ:-1}" \
+        timeout --signal=KILL "${VOL_TIMEOUT:-1800}" \
+            ./build/tests/bench_vol_timing "$h5" "$rcsv" "$xcsv"
     local rc=$?
-    rm -f "$h5"                                  # reclaim space EVERY time, even on failure/timeout
-    [ $rc -eq 137 ] && echo "  [warn] $label killed by timeout — moving on"
-    [ $rc -ne 0 ]  && echo "  [warn] $label exited rc=$rc — moving on"
-    return 0                                     # never let one run abort the sweep
+    rm -f "$h5"                                  # reclaim space even on failure
+
+    if [ $rc -ne 0 ]; then
+        # Record the failure AS A ROW so a missing run shows up as missing in the
+        # plots rather than silently vanishing. Column order must match
+        # XCSV_HEADER in bench_vol_timing.cc (15 fields).
+        [ -f "$xcsv" ] || printf '%s\n' \
+          "dataset,compressor,codec_kind,chunk_n,rep,logical_bytes,stored_bytes,ratio,write_ms,flush_ms,read_ms,rmse,abs_thresh,maxae,bound_ok" > "$xcsv"
+        printf '%s,%s,NA,0,-1,0,0,0,-1,-1,-1,-1,-1,-1,0\n' "$sel" "$comp" >> "$xcsv"
+        if [ $rc -eq 137 ]; then
+            echo "  [FAIL] $label KILLED BY TIMEOUT (${VOL_TIMEOUT:-1800}s) — recorded as rep=-1"
+        else
+            echo "  [FAIL] $label exited rc=$rc — recorded as rep=-1"
+        fi
+    fi
+    return 0                                     # never abort the sweep
 }
 
 declare -A DATASET=(
   [miranda]=miranda   [ocean_temp]=ocean_temp  [qmc]=einspline37
   [scale-T]=scale-T   [s3d]=s3d                [nyx_baryon]=nyx_baryon )
 
-# Chunk sizes are per-dataset so both actually chunk:
-#   miranda     = 288 MiB  -> 64/128 MB gives 5/3 chunks (64 exercises a ragged tail)
-#   einspline37 = ~12.6 GiB -> 4000/5000 MB gives 4/3 chunks (old sweep values)
-CHUNK_COUNTS="8 16"
+# ===========================================================================
+# STEP 1 -- noop gate.
+#
+# noop has no device work, so device_ms must be exactly 0.0 and the residual
+# near zero. If noop is not clean, the instrumentation is wrong and nothing
+# downstream is worth reading. Run this before the sweep, every time.
+# ===========================================================================
+echo ""
+echo "=== [1] noop instrumentation gate (miranda) ==="
+BENCH_REPS=2 BENCH_VERIFY=1 VOL_TIMING_STRICT=1 \
+    run_vol_group gate "miranda" "noop" "" ""
 
-# noop cuszp_1e3 cuszp_1e6 sz3_1e3 sz3_1e6
+GATE_CSV="$RESULTS/connector_phases_gate_noop_native.csv"
+if [ -f "$GATE_CSV" ]; then
+    echo "--- gate phases ---"
+    column -t -s, "$GATE_CSV"
+    # device_ms is column 10, residual_frac is column 14 in VOL_PHASES_CSV_HEADER
+    awk -F, 'NR>1 && $10+0 != 0 { print "  [FAIL] noop reported device_ms="$10 }' "$GATE_CSV"
+    awk -F, 'NR>1 && ($14+0 > 0.03 || $14+0 < -0.03) \
+             { printf "  [FAIL] residual %.1f%% of total\n", $14*100 }' "$GATE_CSV"
+else
+    echo "  [FAIL] no phases CSV produced — is vol_timing_phases.c in the build?"
+fi
+
+# ===========================================================================
+# STEP 2 -- Initialisation vs steady-state.
+#
+# Every measurement used to be a cold process (one dataset x one compressor),
+# so a single H5Dwrite absorbed CUDA context creation, cuSZp module load, the
+# first cudaMalloc, and libpressio plugin construction -- all one-time, all
+# invariant to the error bound. Compare r0 against r1..r3 here:
+#   r0 >> r1~r3  -> you were reporting initialisation as VOL overhead
+#   all equal    -> the cost is per-write; the compress-path fixes are the target
+# ===========================================================================
+echo ""
+echo "=== [2] repetition diagnostic (miranda x cuszp, 4 reps) ==="
 for comp in cuszp_1e3 cuszp_1e6; do
-    # native baseline (no chunking of any kind — the default path)
-    # run_vol_group miranda "miranda"     "$comp" "" ""
-    # run_vol_group ocean_temp     "ocean_temp" "$comp" "" ""
-    # run_vol_group qmc     "einspline37" "$comp" "" ""
-    run_vol_group scale-T "scale-T"     "$comp" "" ""
-    run_vol_group s3d "s3d"     "$comp" "" ""
-    run_vol_group nyx_baryon "nyx_baryon"     "$comp" "" ""
+    BENCH_REPS=4 run_vol_group reps "miranda" "$comp" "" ""
+done
+
+echo ""
+echo "--- per-rep write times (look for r0 as an outlier) ---"
+for f in "$RESULTS"/results_ext_reps_*.csv; do
+    [ -f "$f" ] || continue
+    echo "== $(basename "$f") =="
+    awk -F, 'NR==1{next} {printf "  rep %-3s write=%10.2f flush=%10.2f read=%10.2f ratio=%6.2f\n", $5,$9,$10,$11,$8}' "$f"
+done
+
+# ===========================================================================
+# STEP 3 -- The sweep.
+# ===========================================================================
+CHUNK_COUNTS="8 16"
+SWEEP_COMPS="noop cuszp_1e3 cuszp_1e6 sz3_1e3 sz3_1e6"
+SWEEP_GROUPS="miranda scale-T s3d nyx_baryon qmc"
+
+echo ""
+echo "=== [3] full sweep ==="
+for comp in $SWEEP_COMPS; do
+    # native baseline (the default path)
+    for g in $SWEEP_GROUPS; do
+        run_vol_group "$g" "${DATASET[$g]}" "$comp" "" ""
+    done
 
     for mode in vol pressio; do
         # the VOL rejects noop under pressio chunking by design — skip, don't fail
@@ -155,8 +241,7 @@ for comp in cuszp_1e3 cuszp_1e6; do
             echo "=== skip: noop x pressio (rejected by the VOL by design) ==="
             continue
         fi
-        # miranda ocean_temp qmc scale-T s3d nyx_baryon
-        for g in qmc scale-T s3d nyx_baryon; do
+        for g in $SWEEP_GROUPS; do
             for N in $CHUNK_COUNTS; do
                 run_vol_group "$g" "${DATASET[$g]}" "$comp" "$mode" "$N"
             done
@@ -165,51 +250,86 @@ for comp in cuszp_1e3 cuszp_1e6; do
 done
 
 # ---------------------------------------------------------------------------
-# JSON-path validation: chunking selected via opts_json ("vol:chunking_mode",
-# "vol:chunk_n") with NO env override. This exercises the full persistence
-# chain: DCPL JSON -> parse at ctx create -> _VOL_OPTIONS_JSON snapshot ->
-# replay+parse at dataset_open. Entries defined in bench_config.h.
+# JSON-path validation: chunking selected via opts_json with NO env override.
+# Exercises DCPL JSON -> parse at ctx create -> _VOL_OPTIONS_JSON snapshot ->
+# replay+parse at dataset_open.
 # ---------------------------------------------------------------------------
 echo ""
-echo "=== JSON-path chunking selection (no VOL_COMP_* env set) ==="
-for comp in sz3_1e3_vjson sz3_1e3_pjson; do
-    run_vol_group miranda "miranda"     "$comp" "" ""
-    run_vol_group qmc     "einspline37" "$comp" "" ""
+echo "=== [4] JSON-path chunking selection (no VOL_COMP_* env set) ==="
+for comp in sz3_1e3_vjson sz3_1e3_pjson cuszp_1e3_vjson cuszp_1e3_pjson; do
+    run_vol_group miranda "miranda" "$comp" "" ""
 done
 
-# echo ""
-# echo "=== [2/3] Pressio-only compressor timing ==="
-# ./build/tests/bench_pressio_timing "$WORK/payload.bin" "$WORK/results_pressio.csv"
+# ---------------------------------------------------------------------------
+# Optional: device-level ground truth for the stream question. Confirms which
+# stream the cuSZp kernels actually run on, independent of libpressio's option
+# read-back, and gives HtoD/DtoH byte totals to check against dataset size.
+# ---------------------------------------------------------------------------
+if [ -n "${VOL_NSYS:-}" ] && command -v nsys >/dev/null 2>&1; then
+    echo ""
+    echo "=== [5] nsys trace (miranda x cuszp_1e3) ==="
+    env HDF5_VOL_CONNECTOR="pass_through_ext under_vol=0;under_info={}" \
+        HDF5_PLUGIN_PATH="$PLUGIN_DIR" \
+        BENCH_ONLY=miranda BENCH_COMP=cuszp_1e3 BENCH_REPS=2 \
+        nsys profile --trace=cuda,nvtx -o "$RESULTS/vol_cuszp" --force-overwrite true \
+            ./build/tests/bench_vol_timing "$H5DIR/bench_nsys.h5" \
+                "$RESULTS/results_vol_nsys.csv" "$RESULTS/results_ext_nsys.csv"
+    rm -f "$H5DIR/bench_nsys.h5"
+    echo "--- kernel/memcpy stream assignment (Strm column) ---"
+    nsys stats --report cuda_gpu_trace "$RESULTS/vol_cuszp.nsys-rep" 2>/dev/null | head -40
+    echo "--- transfer byte totals (HtoD should be ~dataset size, DtoH ~compressed) ---"
+    nsys stats --report cuda_gpu_mem_size_sum "$RESULTS/vol_cuszp.nsys-rep" 2>/dev/null | head -20
+fi
 
 echo ""
-echo "=== [3/3] Filter (deflate) timing ==="
+echo "=== [6] Filter (deflate) timing ==="
 ./build/tests/bench_filter_timing --deflate \
-    --h5 "$WORK/bench_filter.h5" --out "$WORK/results_filter.csv"
+    --h5 "$WORK/bench_filter.h5" --out "$RESULTS/results_filter.csv"
 
-# Summaries: iterate whatever labels actually ran (labels now encode mode+size)
-for pcsv in "$WORK"/connector_phases_*.csv; do
+# ===========================================================================
+# SUMMARIES
+#
+# The old script wrote ignore_connector_phases_*.csv but globbed
+# connector_phases_*.csv, so every summary block below matched nothing. Both
+# now use $RESULTS with no prefix.
+# ===========================================================================
+echo ""
+echo "=== connector phase breakdown (per label) ==="
+for pcsv in "$RESULTS"/connector_phases_*.csv; do
     [ -f "$pcsv" ] || continue
     label=$(basename "$pcsv" .csv); label=${label#connector_phases_}
     echo ""
-    echo "=== [$label] connector_phases (VOL total/compress/io) ==="
+    echo "--- [$label] ---"
     column -t -s, "$pcsv"
-    if [ -f "$WORK/results_vol_${label}.csv" ]; then
-        echo ""
-        echo "=== [$label] results_vol (harness total + ratio + RMSE) ==="
-        column -t -s, "$WORK/results_vol_${label}.csv"
-    fi
 done
 
 echo ""
-echo "=== FILE-LEVEL summary (phase=file, per group × codec) ==="
-grep -h ',file,' "$WORK"/results_vol_*.csv 2>/dev/null | sort || echo "(no file rows)"
+echo "=== VOL overhead vs libpressio cost (write rows only) ==="
+echo "dataset compressor total_ms compress_ms vol_compress_ms pressio_host_ms device_ms io_ms container_ms residual%"
+for pcsv in "$RESULTS"/connector_phases_*.csv; do
+    [ -f "$pcsv" ] || continue
+    awk -F, 'NR>1 && $3=="write" {
+        printf "%-22s %-16s %10.2f %10.2f %10.2f %10.2f %10.2f %10.2f %10.2f %7.2f%%\n",
+               $1,$2,$4,$6,$11,$12,$10,$8,$7,$14*100 }' "$pcsv"
+done
 
-# echo "=== results_pressio.csv ==="
-# column -t -s, "$WORK/results_pressio.csv"
-# echo ""
+echo ""
+echo "=== runs that FAILED or TIMED OUT (rep=-1) ==="
+awk -F, 'FNR>1 && $5=="-1" {print FILENAME": "$1" "$2}' \
+    "$RESULTS"/results_ext_*.csv 2>/dev/null || echo "(none)"
 
+echo ""
+echo "=== fidelity failures (bound_ok=0, excluding failed runs) ==="
+awk -F, 'FNR>1 && $5!="-1" && $15=="0" {print $1" "$2" maxae="$14" thr="$13}' \
+    "$RESULTS"/results_ext_*.csv 2>/dev/null || echo "(none)"
+
+echo ""
+echo "=== FILE-LEVEL summary ==="
+grep -h ',file,' "$RESULTS"/results_vol_*.csv 2>/dev/null | sort || echo "(no file rows)"
+
+echo ""
 echo "=== results_filter.csv ==="
-column -t -s, "$WORK/results_filter.csv"
+column -t -s, "$RESULTS/results_filter.csv"
 
 echo ""
 echo "Job finished on $(date)"

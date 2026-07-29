@@ -50,19 +50,22 @@ typedef struct {
     int                rank;        /* number of dimensions (RAW: required)    */
     size_t             dims[BENCH_MAX_RANK]; /* row-major (HDF5 order)         */
     bench_dtype_t      dtype;
-    bench_bound_mode_t bound_mode;  /* default error control for lossy runs   */
-    double             bound;       /* default error bound value              */
-    double             assumed_range; /* NEW: Required for relative-only codecs like cuSZp */
+    bench_bound_mode_t bound_mode;  /* NOMINAL bound mode for this field      */
+    double             bound;       /* NOMINAL bound value                    */
+    double             assumed_range; /* fallback range when none measured     */
     int                gpu_suitable;/* 1 = large/contiguous enough for GPU codec */
     const char        *note;        /* provenance / caveats                   */
     bench_src_t        src;         /* BENCH_SRC_RAW (default/0) or _HDF5      */
-    const char        *h5dset;      /* HDF5 src: dataset path inside file,     */
+    const char        *h5dset;      /* HDF5 src: dataset path inside file      */
     bench_xform_t      xform;
 } bench_dataset_t;
 
-static const bench_dataset_t BENCH_DATASETS[] = {
+/* IMPORTANT: bound_mode/bound here are the field's NOMINAL error control. They
+ * are NOT what the codec is actually configured with when a compressor entry
+ * carries a literal opts_json — and every lossy entry below does. Use
+ * bench_abs_threshold() for fidelity checks, never d->bound. */
 
-// --------------------------------------------------------------------
+static const bench_dataset_t BENCH_DATASETS[] = {
 
     {
         "miranda",
@@ -88,7 +91,8 @@ static const bench_dataset_t BENCH_DATASETS[] = {
         BENCH_DATA_ROOT "/QMCPACK-bigdata/einspline.tile_37-1-242-23-8.spin_0.tw_0.l0u6144.g112x66x66.dat",
         1, {13560851520 / 4, 0, 0, 0}, BENCH_F32,
         BENCH_BOUND_REL, 1e-3, 0.0, 1,
-        "Raw headerless float32 dump; 1D flat for the codec. spin/tw may be complex.",
+        "Raw headerless float32 dump; 1D flat for the codec. 12.6 GiB -> needs "
+        "~26 GiB RAM for hbuf+rbuf. Check your PBS mem= request.",
         BENCH_SRC_RAW, NULL
     },
 
@@ -118,55 +122,6 @@ static const bench_dataset_t BENCH_DATASETS[] = {
         "NYX 512^3.",
         BENCH_SRC_HDF5, "/native_fields/baryon_density", BENCH_XFORM_LOG1P
     },
-
-    // --------------------------------------------------------------------
-
-    // It is typical to only show the baryon dataset
-    // { "nyx_dm",       BENCH_DATA_ROOT "/NYX-Zarija/z42_n512_l10.h5", 0,{0,0,0,0},BENCH_F32,
-    //   BENCH_BOUND_REL,1e-3, 0.0,1, "NYX 512^3", BENCH_SRC_HDF5, "/native_fields/dark_matter_density" },
-
-    // /* NYX log - these give absurd RMSE without taking the log */
-    // { "nyx_temp_log",  BENCH_DATA_ROOT "/NYX-Zarija/z42_n512_l10.h5", 0,{0,0,0,0},BENCH_F32,
-    //   BENCH_BOUND_REL,1e-3, 0.0,1, "NYX 512^3 log1p(temperature)", BENCH_SRC_HDF5,
-    //   "/native_fields/temperature", BENCH_XFORM_LOG1P },
-    // { "nyx_vx_asinh",  BENCH_DATA_ROOT "/NYX-Zarija/z42_n512_l10.h5", 0,{0,0,0,0},BENCH_F32,
-    //   BENCH_BOUND_REL,1e-3, 0.0,1, "NYX 512^3 asinh(velocity_x)", BENCH_SRC_HDF5,
-    //   "/native_fields/velocity_x", BENCH_XFORM_ASINH },
-    // { "nyx_vy_asinh",  BENCH_DATA_ROOT "/NYX-Zarija/z42_n512_l10.h5", 0,{0,0,0,0},BENCH_F32,
-    //   BENCH_BOUND_REL,1e-3, 0.0,1, "NYX 512^3 asinh(velocity_y)", BENCH_SRC_HDF5,
-    //   "/native_fields/velocity_y", BENCH_XFORM_ASINH },
-    // { "nyx_vz_asinh",  BENCH_DATA_ROOT "/NYX-Zarija/z42_n512_l10.h5", 0,{0,0,0,0},BENCH_F32,
-    //   BENCH_BOUND_REL,1e-3, 0.0,1, "NYX 512^3 asinh(velocity_z)", BENCH_SRC_HDF5,
-    //   "/native_fields/velocity_z", BENCH_XFORM_ASINH },
-
-    // {
-    //     "hurricane",
-    //     BENCH_DATA_ROOT "/Hurricane-ISABEL/nonclean-data/Pf48.bin.f32",
-    //     3, {100, 500, 500, 0}, BENCH_F32,
-    //     BENCH_BOUND_REL, 1e-3, 1,
-    //     "Use a CLEARED field. nonclean-data fields contain NaN fill -> bad for fidelity."
-    // },
-    // {
-    //     "nyx",
-    //     BENCH_DATA_ROOT "/NYX_baryon_density_512/baryon_density.f32",
-    //     3, {512, 512, 512, 0}, BENCH_F32,
-    //     BENCH_BOUND_REL, 1e-3, 1,
-    //     "Confirm field name; SDRBench canonical also ships temperature.f32 etc."
-    // },
-    // {
-    //     "cesm_atm_2d",
-    //     BENCH_DATA_ROOT "/cesm/climate-bigdata-1.5T/f1850_ne120tx01.cam2.h0.0001-01.nc-vars/4/1800x3600/CLDHGH_1_1800_3600.f32",
-    //     2, {1800, 3600, 0, 0}, BENCH_F32,
-    //     BENCH_BOUND_REL, 1e-2, 0,
-    //     "2D f32. Cluster may hold only the 26x1800x3600 3D version -- confirm path."
-    // },
-    // {
-    //     "scale_letkf",
-    //     BENCH_DATA_ROOT "/scale-letkf/PRES-98x1200x1200.f32",
-    //     3, {98, 1200, 1200, 0}, BENCH_F32,
-    //     BENCH_BOUND_REL, 1e-3, 1,
-    //     "Confirm which variable/field file is present (T-, PRES-, U-, ...)."
-    // },
 };
 
 #define BENCH_NUM_DATASETS \
@@ -192,6 +147,9 @@ static inline const char *bench_bound_mode_name(bench_bound_mode_t m) {
 static inline const char *bench_src_name(bench_src_t s) {
     return (s == BENCH_SRC_HDF5) ? "hdf5" : "raw";
 }
+static inline double bench_gib(size_t bytes) {
+    return (double)bytes / (1024.0 * 1024.0 * 1024.0);
+}
 static inline const bench_dataset_t *bench_dataset_by_name(const char *name) {
     for (int i = 0; i < BENCH_NUM_DATASETS; ++i)
         if (name && BENCH_DATASETS[i].name &&
@@ -199,29 +157,55 @@ static inline const bench_dataset_t *bench_dataset_by_name(const char *name) {
             return &BENCH_DATASETS[i];
     return NULL;
 }
+
+/* MemAvailable from /proc/meminfo, in bytes. 0 if unknown.
+ * Used to skip a dataset cleanly instead of getting OOM-killed halfway
+ * through a sweep (einspline37 needs ~26 GiB for hbuf+rbuf alone). */
+static inline size_t bench_mem_available_bytes(void) {
+    FILE  *fp = fopen("/proc/meminfo", "r");
+    char   line[256];
+    size_t kb = 0;
+    if (!fp) return 0;
+    while (fgets(line, sizeof(line), fp)) {
+        if (0 == strncmp(line, "MemAvailable:", 13)) {
+            if (1 == sscanf(line + 13, "%zu", &kb)) break;
+            kb = 0;
+        }
+    }
+    fclose(fp);
+    return kb * 1024u;
+}
+
 static inline int bench_datasets_validate(void) {
-    int found = 0;
-    fprintf(stderr, "%-14s %-6s %-4s %-6s %-22s %-10s %s\n",
-            "name", "dtype", "rank", "src", "dims", "MiB", "exists");
+    int    found = 0;
+    size_t avail = bench_mem_available_bytes();
+
+    fprintf(stderr, "%-14s %-6s %-4s %-6s %-22s %-10s %-10s %s\n",
+            "name", "dtype", "rank", "src", "dims", "MiB", "needGiB", "exists");
     for (int i = 0; i < BENCH_NUM_DATASETS; ++i) {
         const bench_dataset_t *d = &BENCH_DATASETS[i];
         char dims[64]; size_t off = 0;
+        size_t nb = 0;
         if (d->src == BENCH_SRC_HDF5 && d->rank == 0) {
             snprintf(dims, sizeof(dims), "(from file)");
         } else {
             for (int k = 0; k < d->rank; ++k)
                 off += (size_t)snprintf(dims + off, sizeof(dims) - off,
                                         k ? "x%zu" : "%zu", d->dims[k]);
+            nb = bench_num_bytes(d);
         }
         int ok = (access(d->path, R_OK) == 0);
         found += ok;
-        fprintf(stderr, "%-14s %-6s %-4d %-6s %-22s %-10.1f %s\n",
+        fprintf(stderr, "%-14s %-6s %-4d %-6s %-22s %-10.1f %-10.1f %s\n",
                 d->name, bench_dtype_name(d->dtype), d->rank,
                 bench_src_name(d->src), dims,
-                (d->src == BENCH_SRC_HDF5) ? 0.0
-                    : bench_num_bytes(d) / (1024.0 * 1024.0),
+                nb / (1024.0 * 1024.0), bench_gib(2 * nb),
                 ok ? "yes" : "NO  <-- fix path");
     }
+    if (avail)
+        fprintf(stderr, "MemAvailable: %.1f GiB "
+                        "(needGiB is hbuf+rbuf only; the connector needs more)\n",
+                bench_gib(avail));
     fprintf(stderr, "%d/%d dataset paths readable\n", found, BENCH_NUM_DATASETS);
     return found;
 }
@@ -282,7 +266,7 @@ static inline void *bench_load_h5(const bench_dataset_t *in,
         return NULL;
     }
     hid_t fapl = H5Pcreate(H5P_FILE_ACCESS);
-    H5Pset_vol(fapl, H5VL_NATIVE, NULL);   /* read the pre-existing file natively; bypass passthrough */
+    H5Pset_vol(fapl, H5VL_NATIVE, NULL);   /* read the source natively; bypass passthrough */
     hid_t fid = H5Fopen(in->path, H5F_ACC_RDONLY, fapl);
     H5Pclose(fapl);
     if (fid < 0) {
@@ -326,7 +310,7 @@ static inline void *bench_load_h5(const bench_dataset_t *in,
     resolved->rank  = rank;
     resolved->dtype = dt;
     resolved->src   = BENCH_SRC_HDF5;
-    for (int i = 0; i < rank; ++i)            resolved->dims[i] = (size_t)hdims[i];
+    for (int i = 0; i < rank; ++i)              resolved->dims[i] = (size_t)hdims[i];
     for (int i = rank; i < BENCH_MAX_RANK; ++i) resolved->dims[i] = 0;
 
     size_t nbytes = bench_num_bytes(resolved);
@@ -394,101 +378,115 @@ typedef enum {
 } bench_codec_kind_t;
 
 typedef struct {
-    const char        *name;          /* config label / dataset suffix / CSV tag */
+    const char        *name;          /* config label / dataset suffix / CSV tag  */
     const char        *pressio_id;    /* compressor id for make_dcpl; NULL=default*/
-    const char        *opts_json;     /* literal libpressio options JSON; NULL=none*/
+    const char        *opts_json;     /* literal libpressio options JSON          */
     bench_codec_kind_t kind;
     int                lossless;      /* 1 => bit-exact expected                  */
+
+    /* The bound this entry ACTUALLY configures. Declared explicitly rather than
+     * parsed out of opts_json, so fidelity checks can't drift from what the
+     * codec was told. Every lossy entry below sets an ABSOLUTE bound even though
+     * the datasets declare a nominal RELATIVE one -- that mismatch is exactly
+     * what made the old checks (which thresholded on d->bound) vacuous. */
+    bench_bound_mode_t cfg_bound_mode;
+    double             cfg_bound;
+
     const char        *stream_opt_key;/* GPU: userptr key for the cudaStream_t    */
     const char        *note;
 } bench_compressor_t;
 
-/* ========================================================================
- * Drop-in replacement for the BENCH_COMPRESSORS array in bench_config.h.
- * Nothing else in the header changes.
- *
- * Two new entries at the bottom select chunking through opts_json
- * ("vol:chunking_mode" / "vol:chunk_n") instead of env. They validate the
- * persistence chain (DCPL JSON -> parse at ctx create -> _VOL_OPTIONS_JSON
- * snapshot -> replay at open) — run them WITHOUT VOL_COMP_CHUNKING /
- * VOL_COMP_CHUNK_N set, since env overrides JSON. N=8 splits any static
- * (288 MiB) also exercises a ragged final chunk in both modes.
- * ======================================================================== */
-
 static const bench_compressor_t BENCH_COMPRESSORS[] = {
-    { "noop", "noop", NULL, BENCH_CPU_CODEC, 1, NULL,
+    { "noop", "noop", NULL, BENCH_CPU_CODEC, 1,
+      BENCH_BOUND_ABS, 0.0, NULL,
       "Connector default (no compressor). Bit-exact baseline; isolates overhead." },
 
     { "cuszp_1e3", "cuszp",
       "{\"pressio:abs\":1e-3,\"cuszp:mode_str\":\"outlier\"}",
-      BENCH_GPU_CODEC, 0, "cuszp:cuda_stream", "GPU abs 1e-3, outlier mode." },
+      BENCH_GPU_CODEC, 0, BENCH_BOUND_ABS, 1e-3, "cuszp:cuda_stream",
+      "GPU abs 1e-3, outlier mode." },
 
     { "cuszp_1e6", "cuszp",
       "{\"pressio:abs\":1e-6,\"cuszp:mode_str\":\"outlier\"}",
-      BENCH_GPU_CODEC, 0, "cuszp:cuda_stream", "GPU abs 1e-6, outlier mode." },
+      BENCH_GPU_CODEC, 0, BENCH_BOUND_ABS, 1e-6, "cuszp:cuda_stream",
+      "GPU abs 1e-6, outlier mode." },
 
     { "sz3_1e3", "sz3",
       "{\"sz3:error_bound_mode_str\":\"abs\",\"sz3:abs_error_bound\":1e-3}",
-      BENCH_CPU_CODEC, 0, NULL, "CPU error-bounded lossy, abs 1e-3." },
+      BENCH_CPU_CODEC, 0, BENCH_BOUND_ABS, 1e-3, NULL,
+      "CPU error-bounded lossy, abs 1e-3." },
 
     { "sz3_1e6", "sz3",
       "{\"sz3:error_bound_mode_str\":\"abs\",\"sz3:abs_error_bound\":1e-6}",
-      BENCH_CPU_CODEC, 0, NULL, "CPU error-bounded lossy, abs 1e-6 (tighter)." },
+      BENCH_CPU_CODEC, 0, BENCH_BOUND_ABS, 1e-6, NULL,
+      "CPU error-bounded lossy, abs 1e-6 (tighter)." },
 
     { "bzip2", "bzip2",
       "{\"bzip2:block_size\":9}",
-      BENCH_CPU_CODEC, 1, NULL, "CPU lossless, general purpose. CPU comparator." },
+      BENCH_CPU_CODEC, 1, BENCH_BOUND_ABS, 0.0, NULL,
+      "CPU lossless, general purpose. CPU comparator." },
 
     /* --- JSON-path chunking (N chunks via opts_json; do NOT set VOL_COMP_* env).
-     *     chunk_n=8 divides every static dataset; run only against those (not
-     *     ocean_temp). noop+pressio is omitted: rejected by the VOL by design. --- */
+     *     chunk_n=8 divides every static dataset. noop+pressio is omitted:
+     *     rejected by the VOL by design. --- */
 
     { "noop_vjson", "noop",
       "{\"vol:chunking_mode\":\"vol\",\"vol:chunk_n\":8}",
-      BENCH_CPU_CODEC, 1, NULL, "noop, VOL chunking via opts_json." },
+      BENCH_CPU_CODEC, 1, BENCH_BOUND_ABS, 0.0, NULL,
+      "noop, VOL chunking via opts_json." },
 
     { "bzip2_vjson", "bzip2",
       "{\"bzip2:block_size\":9,\"vol:chunking_mode\":\"vol\",\"vol:chunk_n\":8}",
-      BENCH_CPU_CODEC, 1, NULL, "bzip2, VOL chunking via opts_json." },
+      BENCH_CPU_CODEC, 1, BENCH_BOUND_ABS, 0.0, NULL,
+      "bzip2, VOL chunking via opts_json." },
     { "bzip2_pjson", "bzip2",
       "{\"bzip2:block_size\":9,\"vol:chunking_mode\":\"pressio\",\"vol:chunk_n\":8}",
-      BENCH_CPU_CODEC, 1, NULL, "bzip2, pressio chunking via opts_json." },
+      BENCH_CPU_CODEC, 1, BENCH_BOUND_ABS, 0.0, NULL,
+      "bzip2, pressio chunking via opts_json." },
 
     { "sz3_1e3_vjson", "sz3",
       "{\"sz3:error_bound_mode_str\":\"abs\",\"sz3:abs_error_bound\":1e-3,"
        "\"vol:chunking_mode\":\"vol\",\"vol:chunk_n\":8}",
-      BENCH_CPU_CODEC, 0, NULL, "sz3 1e-3, VOL chunking via opts_json." },
+      BENCH_CPU_CODEC, 0, BENCH_BOUND_ABS, 1e-3, NULL,
+      "sz3 1e-3, VOL chunking via opts_json." },
     { "sz3_1e3_pjson", "sz3",
       "{\"sz3:error_bound_mode_str\":\"abs\",\"sz3:abs_error_bound\":1e-3,"
        "\"vol:chunking_mode\":\"pressio\",\"vol:chunk_n\":8}",
-      BENCH_CPU_CODEC, 0, NULL, "sz3 1e-3, pressio chunking via opts_json." },
+      BENCH_CPU_CODEC, 0, BENCH_BOUND_ABS, 1e-3, NULL,
+      "sz3 1e-3, pressio chunking via opts_json." },
 
     { "sz3_1e6_vjson", "sz3",
       "{\"sz3:error_bound_mode_str\":\"abs\",\"sz3:abs_error_bound\":1e-6,"
        "\"vol:chunking_mode\":\"vol\",\"vol:chunk_n\":8}",
-      BENCH_CPU_CODEC, 0, NULL, "sz3 1e-6, VOL chunking via opts_json." },
+      BENCH_CPU_CODEC, 0, BENCH_BOUND_ABS, 1e-6, NULL,
+      "sz3 1e-6, VOL chunking via opts_json." },
     { "sz3_1e6_pjson", "sz3",
       "{\"sz3:error_bound_mode_str\":\"abs\",\"sz3:abs_error_bound\":1e-6,"
        "\"vol:chunking_mode\":\"pressio\",\"vol:chunk_n\":8}",
-      BENCH_CPU_CODEC, 0, NULL, "sz3 1e-6, pressio chunking via opts_json." },
+      BENCH_CPU_CODEC, 0, BENCH_BOUND_ABS, 1e-6, NULL,
+      "sz3 1e-6, pressio chunking via opts_json." },
 
     { "cuszp_1e3_vjson", "cuszp",
       "{\"pressio:abs\":1e-3,\"cuszp:mode_str\":\"outlier\","
        "\"vol:chunking_mode\":\"vol\",\"vol:chunk_n\":8}",
-      BENCH_GPU_CODEC, 0, "cuszp:cuda_stream", "cuszp 1e-3, VOL chunking via opts_json." },
+      BENCH_GPU_CODEC, 0, BENCH_BOUND_ABS, 1e-3, "cuszp:cuda_stream",
+      "cuszp 1e-3, VOL chunking via opts_json." },
     { "cuszp_1e3_pjson", "cuszp",
       "{\"pressio:abs\":1e-3,\"cuszp:mode_str\":\"outlier\","
        "\"vol:chunking_mode\":\"pressio\",\"vol:chunk_n\":8}",
-      BENCH_GPU_CODEC, 0, "cuszp:cuda_stream", "cuszp 1e-3, pressio chunking via opts_json." },
+      BENCH_GPU_CODEC, 0, BENCH_BOUND_ABS, 1e-3, "cuszp:cuda_stream",
+      "cuszp 1e-3, pressio chunking via opts_json." },
 
     { "cuszp_1e6_vjson", "cuszp",
       "{\"pressio:abs\":1e-6,\"cuszp:mode_str\":\"outlier\","
        "\"vol:chunking_mode\":\"vol\",\"vol:chunk_n\":8}",
-      BENCH_GPU_CODEC, 0, "cuszp:cuda_stream", "cuszp 1e-6, VOL chunking via opts_json." },
+      BENCH_GPU_CODEC, 0, BENCH_BOUND_ABS, 1e-6, "cuszp:cuda_stream",
+      "cuszp 1e-6, VOL chunking via opts_json." },
     { "cuszp_1e6_pjson", "cuszp",
       "{\"pressio:abs\":1e-6,\"cuszp:mode_str\":\"outlier\","
        "\"vol:chunking_mode\":\"pressio\",\"vol:chunk_n\":8}",
-      BENCH_GPU_CODEC, 0, "cuszp:cuda_stream", "cuszp 1e-6, pressio chunking via opts_json." },
+      BENCH_GPU_CODEC, 0, BENCH_BOUND_ABS, 1e-6, "cuszp:cuda_stream",
+      "cuszp 1e-6, pressio chunking via opts_json." },
 };
 
 #define BENCH_NUM_COMPRESSORS \
@@ -508,16 +506,66 @@ static inline const char *bench_compressor_opts(const bench_compressor_t *c) {
     return (c->opts_json && c->opts_json[0]) ? c->opts_json : "{}";
 }
 
+/* ------------------------------------------------------------------------
+ * Fidelity threshold.
+ *
+ * Returns the ABSOLUTE error above which a point is considered wrong, derived
+ * from what the codec was actually configured with (cfg_bound_mode/cfg_bound),
+ * not from the dataset's nominal bound. The old code thresholded fidelity
+ * checks on d->bound (relative 1e-3) while configuring pressio:abs, so e.g.
+ * cuszp_1e6 was tested at 2e-3 against a 1e-6 bound and passed vacuously.
+ * --------------------------------------------------------------------- */
+static inline double bench_abs_threshold(const bench_compressor_t *c,
+                                         const bench_dataset_t *d,
+                                         double measured_range) {
+    double range;
+    if (!c) return 0.0;
+    if (c->lossless) return 0.0;                      /* bit-exact expected */
+    if (c->cfg_bound_mode == BENCH_BOUND_ABS) return c->cfg_bound;
+
+    range = (measured_range > 0.0) ? measured_range
+          : (d && d->assumed_range > 0.0) ? d->assumed_range
+          : 1.0;
+    return c->cfg_bound * range;
+}
+
+/* Number of chunks declared in opts_json ("vol:chunk_n"). 1 if absent. */
+static inline int bench_compressor_chunk_n(const bench_compressor_t *c) {
+    const char *p;
+    int n;
+    if (!c || !c->opts_json) return 1;
+    p = strstr(c->opts_json, "\"vol:chunk_n\"");
+    if (!p) return 1;
+    p = strchr(p, ':');
+    if (!p) return 1;
+    ++p;
+    while (*p == ' ' || *p == '\t') ++p;
+    n = atoi(p);
+    return n > 0 ? n : 1;
+}
+
+/* Effective chunk count: VOL_COMP_CHUNK_N env overrides opts_json, matching
+ * the connector's own precedence in H5VL_pass_through_ext_chunk_bytes(). */
+static inline int bench_effective_chunk_n(const bench_compressor_t *c) {
+    const char *e = getenv("VOL_COMP_CHUNK_N");
+    if (e && *e) {
+        int n = atoi(e);
+        if (n > 0) return n;
+    }
+    return bench_compressor_chunk_n(c);
+}
+
 static inline int bench_compressor_opts_json(const bench_compressor_t *c,
                                              const bench_dataset_t *d,
                                              char *buf, size_t n) {
-    int   ret;
-    int   dbg = (getenv("BENCH_DEBUG") != NULL);
+    int ret;
+    int dbg = (getenv("BENCH_DEBUG") != NULL);
 
-    /* 1) An explicit literal opts_json on the compressor entry wins outright. */
+    /* 1) An explicit literal opts_json on the compressor entry wins outright.
+     *    Every lossy entry in the table above takes this path. */
     if (c->opts_json && c->opts_json[0]) {
         ret = snprintf(buf, n, "%s", c->opts_json);
-        if (dbg) fprintf(stderr, "[dbg opts] %-8s %-12s LITERAL   -> %s\n",
+        if (dbg) fprintf(stderr, "[dbg opts] %-16s %-12s LITERAL  -> %s\n",
                          c->name, d->name, buf);
         return ret;
     }
@@ -525,47 +573,37 @@ static inline int bench_compressor_opts_json(const bench_compressor_t *c,
     /* 2) Lossless codecs take no bound. */
     if (c->lossless) {
         ret = snprintf(buf, n, "{}");
-        if (dbg) fprintf(stderr, "[dbg opts] %-8s %-12s LOSSLESS  -> %s\n",
+        if (dbg) fprintf(stderr, "[dbg opts] %-16s %-12s LOSSLESS -> %s\n",
                          c->name, d->name, buf);
         return ret;
     }
 
-    /* 3) cuSZp is a value-range RELATIVE codec with no native absolute mode,
-     *    and it ABORTS (std::runtime_error "invalid argument") on wide-range /
-     *    signed fields unless cuszp:mode_str=outlier is set. Handle BOTH bound
-     *    modes here and always emit outlier:
-     *      - ABS datasets: emulate absolute via abs/assumed_range -> rel.
-     *      - REL datasets: pass the relative bound straight through.          */
-    if (strcmp(c->name, "cuszp") == 0) {
-        /* cuSZp is natively ABSOLUTE; its libpressio plugin's only bound knob is
-        * pressio:abs, passed straight to the kernel. outlier mode survives
-        * wide-range/signed fields. */
-        if (d->bound_mode == BENCH_BOUND_ABS) {
-            ret = snprintf(buf, n,
-                "{\"pressio:abs\": %.10e, \"cuszp:mode_str\": \"outlier\"}", d->bound);
-            if (dbg) fprintf(stderr,
-                "[dbg opts] cuszp    %-12s ABS bound=%.10e (outlier)\n", d->name, d->bound);
-        } else {
-            /* REL dataset: convert to a fixed abs using the range so cuSZp sees a
-            * value you control. Prefer a range measured at load over assumed_range. */
-            double range = (d->assumed_range > 0.0) ? d->assumed_range : 1.0;
-            double abs   = d->bound * range;
-            ret = snprintf(buf, n,
-                "{\"pressio:abs\": %.10e, \"cuszp:mode_str\": \"outlier\"}", abs);
-            if (dbg) fprintf(stderr,
-                "[dbg opts] cuszp    %-12s REL bound=%.6e range=%g -> abs=%.10e (outlier)\n",
-                d->name, d->bound, range, abs);
-        }
-        return ret;
-    }
-
-    /* 4) Standard error-bounded codecs: map straight onto pressio:abs / :rel. */
+    /* 3) No literal JSON: build one from the entry's declared bound. cuSZp is
+     *    natively absolute and its libpressio plugin's only bound knob is
+     *    pressio:abs, so a relative request is converted using the dataset's
+     *    assumed_range. (The old unreachable `strcmp(c->name, "cuszp")` branch
+     *    is gone -- no entry is named exactly "cuszp", so it never ran.) */
     {
-        const char *mode = (d->bound_mode == BENCH_BOUND_ABS) ? "pressio:abs"
-                                                              : "pressio:rel";
-        ret = snprintf(buf, n, "{\"%s\": %g}", mode, d->bound);
-        if (dbg) fprintf(stderr, "[dbg opts] %-8s %-12s %s=%g -> %s\n",
-                         c->name, d->name, mode, d->bound, buf);
+        const int is_cuszp = (c->pressio_id && 0 == strcmp(c->pressio_id, "cuszp"));
+        double    absb;
+
+        if (c->cfg_bound_mode == BENCH_BOUND_ABS) {
+            absb = c->cfg_bound;
+        } else {
+            double range = (d->assumed_range > 0.0) ? d->assumed_range : 1.0;
+            absb = c->cfg_bound * range;
+        }
+
+        if (is_cuszp)
+            ret = snprintf(buf, n,
+                "{\"pressio:abs\": %.10e, \"cuszp:mode_str\": \"outlier\"}", absb);
+        else if (c->cfg_bound_mode == BENCH_BOUND_ABS)
+            ret = snprintf(buf, n, "{\"pressio:abs\": %.10e}", absb);
+        else
+            ret = snprintf(buf, n, "{\"pressio:rel\": %.10e}", c->cfg_bound);
+
+        if (dbg) fprintf(stderr, "[dbg opts] %-16s %-12s DERIVED  -> %s\n",
+                         c->name, d->name, buf);
         return ret;
     }
 }
