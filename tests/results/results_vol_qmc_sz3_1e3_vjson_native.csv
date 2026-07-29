@@ -1,0 +1,5 @@
+dataset,compressor,path,op,phase,ms,ratio,rmse
+einspline37,sz3_1e3_vjson,vol,write,total,118663.9915,3.3784,
+einspline37,sz3_1e3_vjson,vol,read,total,139443.4839,,5.741519e-04
+/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_qmc_sz3_1e3_vjson_native.h5,ALL,vol,write,file,118667.6366,3.3784,
+/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_qmc_sz3_1e3_vjson_native.h5,ALL,vol,read,file,139443.4839,,

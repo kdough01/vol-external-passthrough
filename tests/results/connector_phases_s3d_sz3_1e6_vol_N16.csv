@@ -1,0 +1,3 @@
+dataset,compressor,op,total_ms,compress_ms,io_ms,overhead_ms,overhead_pct
+s3d_sz3_1e6,sz3,write,5164.6178,4983.8740,180.5692,0.1746,0.00
+s3d_sz3_1e6,sz3,read,3149.0806,2961.2403,20.2545,167.5858,5.32

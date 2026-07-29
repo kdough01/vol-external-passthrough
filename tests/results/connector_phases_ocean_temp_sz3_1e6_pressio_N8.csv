@@ -1,0 +1,3 @@
+dataset,compressor,op,total_ms,compress_ms,io_ms,overhead_ms,overhead_pct
+ocean_temp_sz3_1e6,sz3,write,3754.4095,3502.6812,242.7162,9.0121,0.24
+ocean_temp_sz3_1e6,sz3,read,2308.6206,2082.3167,178.8687,47.4352,2.05

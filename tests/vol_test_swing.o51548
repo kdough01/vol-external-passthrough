@@ -4693,3 +4693,1910 @@ nyx_baryon     float  0    hdf5   (from file)            0.0        yes
 6/6 dataset paths readable
 RANGE einspline37    min=-2.125822e+01 max=2.036857e+01 range=4.162679e+01 xform=none
 [chunk] sz3        N=8   -> 8 chunks x 1695106440 B (1616.579 MiB, 423776610 elems) total=13560851520 B
+Info: 0x55948d360590
+
+=== einspline37 (12932.6 MiB, float, raw) ===
+  einspline37_sz3_1e6          W=200838.21 ms  R=153955.43 ms  ratio=  1.27x  RMSE=2.849e-07
+[dbg main] done: 1 datasets, 0 skipped
+
+=== FILE /lcrc/project/SDR/kdougherty/vol_bench_h5/bench_qmc_sz3_1e6_vol_N8.h5: 1 dataset-writes | create=0.91  write=200838.21  close/flush=409.62 => write_total=201248.73 ms | read_total=153955.43 ms | ratio=1.27x ===
+
+=== [1/3] VOL timing [qmc_sz3_1e6_vol_N16] : einspline37 (chunking: vol, N=16) ===
+[dbg main] h5=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_qmc_sz3_1e6_vol_N16.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results_vol_qmc_sz3_1e6_vol_N16.csv only=einspline37 comp=sz3_1e6 debug=0
+name           dtype  rank src    dims                   MiB        exists
+miranda        double 3    raw    256x384x384            288.0      yes
+ocean_temp     float  0    hdf5   (from file)            0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    yes
+scale-T        float  3    raw    98x1200x1200           538.3      yes
+s3d            double 3    raw    500x500x500            953.7      yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        yes
+6/6 dataset paths readable
+RANGE einspline37    min=-2.125822e+01 max=2.036857e+01 range=4.162679e+01 xform=none
+[chunk] sz3        N=16  -> 16 chunks x 847553220 B (808.290 MiB, 211888305 elems) total=13560851520 B
+Info: 0x55948e4c0590
+
+=== einspline37 (12932.6 MiB, float, raw) ===
+  einspline37_sz3_1e6          W=197955.27 ms  R=152491.30 ms  ratio=  1.27x  RMSE=2.848e-07
+[dbg main] done: 1 datasets, 0 skipped
+
+=== FILE /lcrc/project/SDR/kdougherty/vol_bench_h5/bench_qmc_sz3_1e6_vol_N16.h5: 1 dataset-writes | create=0.89  write=197955.27  close/flush=393.76 => write_total=198349.92 ms | read_total=152491.30 ms | ratio=1.27x ===
+
+=== [1/3] VOL timing [scale-T_sz3_1e6_vol_N8] : scale-T (chunking: vol, N=8) ===
+[dbg main] h5=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_scale-T_sz3_1e6_vol_N8.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results_vol_scale-T_sz3_1e6_vol_N8.csv only=scale-T comp=sz3_1e6 debug=0
+name           dtype  rank src    dims                   MiB        exists
+miranda        double 3    raw    256x384x384            288.0      yes
+ocean_temp     float  0    hdf5   (from file)            0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    yes
+scale-T        float  3    raw    98x1200x1200           538.3      yes
+s3d            double 3    raw    500x500x500            953.7      yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        yes
+6/6 dataset paths readable
+RANGE scale-T        min=5.209023e+00 max=5.754571e+00 range=5.455480e-01 xform=log1p
+[chunk] sz3        N=8   -> 8 chunks x 70560000 B (67.291 MiB, 17640000 elems) total=564480000 B
+Info: 0x55f794834590
+
+=== scale-T (538.3 MiB, float, raw, transformed) ===
+  scale-T_sz3_1e6              W= 6436.13 ms  R= 5642.92 ms  ratio=  3.99x  RMSE=6.060e-07 (log-space)
+[dbg main] done: 1 datasets, 0 skipped
+
+=== FILE /lcrc/project/SDR/kdougherty/vol_bench_h5/bench_scale-T_sz3_1e6_vol_N8.h5: 1 dataset-writes | create=0.83  write=6436.13  close/flush=0.58 => write_total=6437.54 ms | read_total=5642.92 ms | ratio=3.99x ===
+
+=== [1/3] VOL timing [scale-T_sz3_1e6_vol_N16] : scale-T (chunking: vol, N=16) ===
+[dbg main] h5=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_scale-T_sz3_1e6_vol_N16.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results_vol_scale-T_sz3_1e6_vol_N16.csv only=scale-T comp=sz3_1e6 debug=0
+name           dtype  rank src    dims                   MiB        exists
+miranda        double 3    raw    256x384x384            288.0      yes
+ocean_temp     float  0    hdf5   (from file)            0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    yes
+scale-T        float  3    raw    98x1200x1200           538.3      yes
+s3d            double 3    raw    500x500x500            953.7      yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        yes
+6/6 dataset paths readable
+RANGE scale-T        min=5.209023e+00 max=5.754571e+00 range=5.455480e-01 xform=log1p
+[chunk] sz3        N=16  -> 16 chunks x 35280000 B (33.646 MiB, 8820000 elems) total=564480000 B
+Info: 0x55ce8844d590
+
+=== scale-T (538.3 MiB, float, raw, transformed) ===
+  scale-T_sz3_1e6              W= 6701.52 ms  R= 5044.26 ms  ratio=  3.99x  RMSE=6.060e-07 (log-space)
+[dbg main] done: 1 datasets, 0 skipped
+
+=== FILE /lcrc/project/SDR/kdougherty/vol_bench_h5/bench_scale-T_sz3_1e6_vol_N16.h5: 1 dataset-writes | create=0.90  write=6701.52  close/flush=0.56 => write_total=6702.98 ms | read_total=5044.26 ms | ratio=3.99x ===
+
+=== [1/3] VOL timing [s3d_sz3_1e6_vol_N8] : s3d (chunking: vol, N=8) ===
+[dbg main] h5=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_s3d_sz3_1e6_vol_N8.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results_vol_s3d_sz3_1e6_vol_N8.csv only=s3d comp=sz3_1e6 debug=0
+name           dtype  rank src    dims                   MiB        exists
+miranda        double 3    raw    256x384x384            288.0      yes
+ocean_temp     float  0    hdf5   (from file)            0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    yes
+scale-T        float  3    raw    98x1200x1200           538.3      yes
+s3d            double 3    raw    500x500x500            953.7      yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        yes
+6/6 dataset paths readable
+RANGE s3d            min=-6.362436e-15 max=3.920002e-02 range=3.920002e-02 xform=none
+[chunk] sz3        N=8   -> 8 chunks x 125000000 B (119.209 MiB, 15625000 elems) total=1000000000 B
+Info: 0x56212bd21590
+
+=== s3d (953.7 MiB, double, raw) ===
+  s3d_sz3_1e6                  W= 5266.53 ms  R= 3630.77 ms  ratio= 31.79x  RMSE=3.421e-07
+[dbg main] done: 1 datasets, 0 skipped
+
+=== FILE /lcrc/project/SDR/kdougherty/vol_bench_h5/bench_s3d_sz3_1e6_vol_N8.h5: 1 dataset-writes | create=0.87  write=5266.53  close/flush=0.58 => write_total=5267.97 ms | read_total=3630.77 ms | ratio=31.79x ===
+
+=== [1/3] VOL timing [s3d_sz3_1e6_vol_N16] : s3d (chunking: vol, N=16) ===
+[dbg main] h5=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_s3d_sz3_1e6_vol_N16.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results_vol_s3d_sz3_1e6_vol_N16.csv only=s3d comp=sz3_1e6 debug=0
+name           dtype  rank src    dims                   MiB        exists
+miranda        double 3    raw    256x384x384            288.0      yes
+ocean_temp     float  0    hdf5   (from file)            0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    yes
+scale-T        float  3    raw    98x1200x1200           538.3      yes
+s3d            double 3    raw    500x500x500            953.7      yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        yes
+6/6 dataset paths readable
+RANGE s3d            min=-6.362436e-15 max=3.920002e-02 range=3.920002e-02 xform=none
+[chunk] sz3        N=16  -> 16 chunks x 62500000 B (59.605 MiB, 7812500 elems) total=1000000000 B
+Info: 0x556ee950c590
+
+=== s3d (953.7 MiB, double, raw) ===
+  s3d_sz3_1e6                  W= 5165.13 ms  R= 3149.23 ms  ratio= 31.79x  RMSE=3.421e-07
+[dbg main] done: 1 datasets, 0 skipped
+
+=== FILE /lcrc/project/SDR/kdougherty/vol_bench_h5/bench_s3d_sz3_1e6_vol_N16.h5: 1 dataset-writes | create=0.83  write=5165.13  close/flush=0.56 => write_total=5166.52 ms | read_total=3149.23 ms | ratio=31.79x ===
+
+=== [1/3] VOL timing [nyx_baryon_sz3_1e6_vol_N8] : nyx_baryon (chunking: vol, N=8) ===
+[dbg main] h5=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_nyx_baryon_sz3_1e6_vol_N8.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results_vol_nyx_baryon_sz3_1e6_vol_N8.csv only=nyx_baryon comp=sz3_1e6 debug=0
+name           dtype  rank src    dims                   MiB        exists
+miranda        double 3    raw    256x384x384            288.0      yes
+ocean_temp     float  0    hdf5   (from file)            0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    yes
+scale-T        float  3    raw    98x1200x1200           538.3      yes
+s3d            double 3    raw    500x500x500            953.7      yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        yes
+6/6 dataset paths readable
+RANGE nyx_baryon     min=5.637747e-02 max=1.166017e+01 range=1.160379e+01 xform=log1p
+[chunk] sz3        N=8   -> 8 chunks x 67108864 B (64.000 MiB, 16777216 elems) total=536870912 B
+Info: 0x557d76ec3590
+
+=== nyx_baryon (512.0 MiB, float, hdf5, transformed) ===
+  nyx_baryon_sz3_1e6           W= 8753.87 ms  R= 9283.23 ms  ratio=  1.79x  RMSE=4.867e-07 (log-space)
+[dbg main] done: 1 datasets, 0 skipped
+
+=== FILE /lcrc/project/SDR/kdougherty/vol_bench_h5/bench_nyx_baryon_sz3_1e6_vol_N8.h5: 1 dataset-writes | create=0.90  write=8753.87  close/flush=0.66 => write_total=8755.43 ms | read_total=9283.23 ms | ratio=1.79x ===
+
+=== [1/3] VOL timing [nyx_baryon_sz3_1e6_vol_N16] : nyx_baryon (chunking: vol, N=16) ===
+[dbg main] h5=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_nyx_baryon_sz3_1e6_vol_N16.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results_vol_nyx_baryon_sz3_1e6_vol_N16.csv only=nyx_baryon comp=sz3_1e6 debug=0
+name           dtype  rank src    dims                   MiB        exists
+miranda        double 3    raw    256x384x384            288.0      yes
+ocean_temp     float  0    hdf5   (from file)            0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    yes
+scale-T        float  3    raw    98x1200x1200           538.3      yes
+s3d            double 3    raw    500x500x500            953.7      yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        yes
+6/6 dataset paths readable
+RANGE nyx_baryon     min=5.637747e-02 max=1.166017e+01 range=1.160379e+01 xform=log1p
+[chunk] sz3        N=16  -> 16 chunks x 33554432 B (32.000 MiB, 8388608 elems) total=536870912 B
+Info: 0x562cdb648590
+
+=== nyx_baryon (512.0 MiB, float, hdf5, transformed) ===
+  nyx_baryon_sz3_1e6           W= 9367.81 ms  R= 9164.26 ms  ratio=  1.75x  RMSE=4.710e-07 (log-space)
+[dbg main] done: 1 datasets, 0 skipped
+
+=== FILE /lcrc/project/SDR/kdougherty/vol_bench_h5/bench_nyx_baryon_sz3_1e6_vol_N16.h5: 1 dataset-writes | create=0.91  write=9367.81  close/flush=20.62 => write_total=9389.35 ms | read_total=9164.26 ms | ratio=1.75x ===
+
+=== [1/3] VOL timing [miranda_sz3_1e6_pressio_N8] : miranda (chunking: pressio, N=8) ===
+[dbg main] h5=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_miranda_sz3_1e6_pressio_N8.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results_vol_miranda_sz3_1e6_pressio_N8.csv only=miranda comp=sz3_1e6 debug=0
+name           dtype  rank src    dims                   MiB        exists
+miranda        double 3    raw    256x384x384            288.0      yes
+ocean_temp     float  0    hdf5   (from file)            0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    yes
+scale-T        float  3    raw    98x1200x1200           538.3      yes
+s3d            double 3    raw    500x500x500            953.7      yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        yes
+6/6 dataset paths readable
+RANGE miranda        min=9.999878e-01 max=3.000046e+00 range=2.000058e+00 xform=none
+[chunk] sz3        N=8   -> 8 chunks x 37748736 B (36.000 MiB, 4718592 elems) total=301989888 B
+[VOL BUILT PIPELINE 'sz3']
+chunking:chunk_nthreads <uint64> = 1
+chunking:compressor <char*> = "many_independent_threaded"
+chunking:metric <char*> = "noop"
+chunking:size <data> = data{ type=uint64_t dims={1, } domain=malloc has_data=[4718592, ]}
+many_independent_threaded:collect_metrics_on_compression <int32> = 0
+many_independent_threaded:collect_metrics_on_decompression <int32> = 0
+many_independent_threaded:compressor <char*> = <empty>
+many_independent_threaded:compressors <char*[]> = {vol_host_output, }
+many_independent_threaded:metric <char*> = "noop"
+many_independent_threaded:nthreads <uint32> = 1
+many_independent_threaded:preserve_metrics <int32> = 0
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+pressio:rel <double> = <empty>
+subgroups:input_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+subgroups:output_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+sz3:abs_error_bound <double> = 1e-06
+sz3:algorithm <uint8> = 1
+sz3:algorithm_str <char*> = <empty>
+sz3:error_bound_mode <uint8> = 0
+sz3:error_bound_mode_str <char*> = <empty>
+sz3:interp_algo <uint8> = 1
+sz3:interp_direction <uint8> = 0
+sz3:intrep_algo_str <char*> = <empty>
+sz3:l2_norm_error_bound <double> = 0
+sz3:lorenzo <bool> = true
+sz3:lorenzo2 <bool> = false
+sz3:metric <char*> = "noop"
+sz3:openmp <bool> = false
+sz3:pred_dim <uint8> = 1
+sz3:psnr_error_bound <double> = 0
+sz3:quant_bin_size <int32> = 65536
+sz3:regression <bool> = true
+sz3:regression2 <bool> = false
+sz3:rel_error_bound <double> = 0
+vol_host_output:compressor <char*> = "sz3"
+vol_host_output:metric <char*> = "noop"
+
+[VOL BUILT PIPELINE 'sz3']
+chunking:chunk_nthreads <uint64> = 1
+chunking:compressor <char*> = "many_independent_threaded"
+chunking:metric <char*> = "noop"
+chunking:size <data> = data{ type=uint64_t dims={1, } domain=malloc has_data=[4718592, ]}
+many_independent_threaded:collect_metrics_on_compression <int32> = 0
+many_independent_threaded:collect_metrics_on_decompression <int32> = 0
+many_independent_threaded:compressor <char*> = <empty>
+many_independent_threaded:compressors <char*[]> = {vol_host_output, }
+many_independent_threaded:metric <char*> = "noop"
+many_independent_threaded:nthreads <uint32> = 1
+many_independent_threaded:preserve_metrics <int32> = 0
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+pressio:rel <double> = <empty>
+subgroups:input_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+subgroups:output_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+sz3:abs_error_bound <double> = 1e-06
+sz3:algorithm <uint8> = 1
+sz3:algorithm_str <char*> = <empty>
+sz3:error_bound_mode <uint8> = 0
+sz3:error_bound_mode_str <char*> = <empty>
+sz3:interp_algo <uint8> = 1
+sz3:interp_direction <uint8> = 0
+sz3:intrep_algo_str <char*> = <empty>
+sz3:l2_norm_error_bound <double> = 0
+sz3:lorenzo <bool> = true
+sz3:lorenzo2 <bool> = false
+sz3:metric <char*> = "noop"
+sz3:openmp <bool> = false
+sz3:pred_dim <uint8> = 1
+sz3:psnr_error_bound <double> = 0
+sz3:quant_bin_size <int32> = 65536
+sz3:regression <bool> = true
+sz3:regression2 <bool> = false
+sz3:rel_error_bound <double> = 0
+vol_host_output:compressor <char*> = "sz3"
+vol_host_output:metric <char*> = "noop"
+
+Info: 0x556019299590
+
+=== miranda (288.0 MiB, double, raw) ===
+  miranda_sz3_1e6              W= 1866.77 ms  R= 1254.02 ms  ratio= 13.09x  RMSE=2.968e-07
+[dbg main] done: 1 datasets, 0 skipped
+
+=== FILE /lcrc/project/SDR/kdougherty/vol_bench_h5/bench_miranda_sz3_1e6_pressio_N8.h5: 1 dataset-writes | create=0.94  write=1866.77  close/flush=0.55 => write_total=1868.25 ms | read_total=1254.02 ms | ratio=13.09x ===
+
+=== [1/3] VOL timing [miranda_sz3_1e6_pressio_N16] : miranda (chunking: pressio, N=16) ===
+[dbg main] h5=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_miranda_sz3_1e6_pressio_N16.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results_vol_miranda_sz3_1e6_pressio_N16.csv only=miranda comp=sz3_1e6 debug=0
+name           dtype  rank src    dims                   MiB        exists
+miranda        double 3    raw    256x384x384            288.0      yes
+ocean_temp     float  0    hdf5   (from file)            0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    yes
+scale-T        float  3    raw    98x1200x1200           538.3      yes
+s3d            double 3    raw    500x500x500            953.7      yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        yes
+6/6 dataset paths readable
+RANGE miranda        min=9.999878e-01 max=3.000046e+00 range=2.000058e+00 xform=none
+[chunk] sz3        N=16  -> 16 chunks x 18874368 B (18.000 MiB, 2359296 elems) total=301989888 B
+[VOL BUILT PIPELINE 'sz3']
+chunking:chunk_nthreads <uint64> = 1
+chunking:compressor <char*> = "many_independent_threaded"
+chunking:metric <char*> = "noop"
+chunking:size <data> = data{ type=uint64_t dims={1, } domain=malloc has_data=[2359296, ]}
+many_independent_threaded:collect_metrics_on_compression <int32> = 0
+many_independent_threaded:collect_metrics_on_decompression <int32> = 0
+many_independent_threaded:compressor <char*> = <empty>
+many_independent_threaded:compressors <char*[]> = {vol_host_output, }
+many_independent_threaded:metric <char*> = "noop"
+many_independent_threaded:nthreads <uint32> = 1
+many_independent_threaded:preserve_metrics <int32> = 0
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+pressio:rel <double> = <empty>
+subgroups:input_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+subgroups:output_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+sz3:abs_error_bound <double> = 1e-06
+sz3:algorithm <uint8> = 1
+sz3:algorithm_str <char*> = <empty>
+sz3:error_bound_mode <uint8> = 0
+sz3:error_bound_mode_str <char*> = <empty>
+sz3:interp_algo <uint8> = 1
+sz3:interp_direction <uint8> = 0
+sz3:intrep_algo_str <char*> = <empty>
+sz3:l2_norm_error_bound <double> = 0
+sz3:lorenzo <bool> = true
+sz3:lorenzo2 <bool> = false
+sz3:metric <char*> = "noop"
+sz3:openmp <bool> = false
+sz3:pred_dim <uint8> = 1
+sz3:psnr_error_bound <double> = 0
+sz3:quant_bin_size <int32> = 65536
+sz3:regression <bool> = true
+sz3:regression2 <bool> = false
+sz3:rel_error_bound <double> = 0
+vol_host_output:compressor <char*> = "sz3"
+vol_host_output:metric <char*> = "noop"
+
+[VOL BUILT PIPELINE 'sz3']
+chunking:chunk_nthreads <uint64> = 1
+chunking:compressor <char*> = "many_independent_threaded"
+chunking:metric <char*> = "noop"
+chunking:size <data> = data{ type=uint64_t dims={1, } domain=malloc has_data=[2359296, ]}
+many_independent_threaded:collect_metrics_on_compression <int32> = 0
+many_independent_threaded:collect_metrics_on_decompression <int32> = 0
+many_independent_threaded:compressor <char*> = <empty>
+many_independent_threaded:compressors <char*[]> = {vol_host_output, }
+many_independent_threaded:metric <char*> = "noop"
+many_independent_threaded:nthreads <uint32> = 1
+many_independent_threaded:preserve_metrics <int32> = 0
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+pressio:rel <double> = <empty>
+subgroups:input_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+subgroups:output_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+sz3:abs_error_bound <double> = 1e-06
+sz3:algorithm <uint8> = 1
+sz3:algorithm_str <char*> = <empty>
+sz3:error_bound_mode <uint8> = 0
+sz3:error_bound_mode_str <char*> = <empty>
+sz3:interp_algo <uint8> = 1
+sz3:interp_direction <uint8> = 0
+sz3:intrep_algo_str <char*> = <empty>
+sz3:l2_norm_error_bound <double> = 0
+sz3:lorenzo <bool> = true
+sz3:lorenzo2 <bool> = false
+sz3:metric <char*> = "noop"
+sz3:openmp <bool> = false
+sz3:pred_dim <uint8> = 1
+sz3:psnr_error_bound <double> = 0
+sz3:quant_bin_size <int32> = 65536
+sz3:regression <bool> = true
+sz3:regression2 <bool> = false
+sz3:rel_error_bound <double> = 0
+vol_host_output:compressor <char*> = "sz3"
+vol_host_output:metric <char*> = "noop"
+
+Info: 0x5629af2fc590
+
+=== miranda (288.0 MiB, double, raw) ===
+  miranda_sz3_1e6              W= 2143.45 ms  R= 1161.55 ms  ratio= 12.00x  RMSE=2.767e-07
+[dbg main] done: 1 datasets, 0 skipped
+
+=== FILE /lcrc/project/SDR/kdougherty/vol_bench_h5/bench_miranda_sz3_1e6_pressio_N16.h5: 1 dataset-writes | create=0.86  write=2143.45  close/flush=0.50 => write_total=2144.82 ms | read_total=1161.55 ms | ratio=12.00x ===
+
+=== [1/3] VOL timing [ocean_temp_sz3_1e6_pressio_N8] : ocean_temp (chunking: pressio, N=8) ===
+[dbg main] h5=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_ocean_temp_sz3_1e6_pressio_N8.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results_vol_ocean_temp_sz3_1e6_pressio_N8.csv only=ocean_temp comp=sz3_1e6 debug=0
+name           dtype  rank src    dims                   MiB        exists
+miranda        double 3    raw    256x384x384            288.0      yes
+ocean_temp     float  0    hdf5   (from file)            0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    yes
+scale-T        float  3    raw    98x1200x1200           538.3      yes
+s3d            double 3    raw    500x500x500            953.7      yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        yes
+6/6 dataset paths readable
+RANGE ocean_temp     min=4.445019e+00 max=1.072704e+01 range=6.282023e+00 xform=none
+[chunk] sz3        N=8   -> 8 chunks x 16140480 B (15.393 MiB, 4035120 elems) total=129123840 B
+[VOL BUILT PIPELINE 'sz3']
+chunking:chunk_nthreads <uint64> = 1
+chunking:compressor <char*> = "many_independent_threaded"
+chunking:metric <char*> = "noop"
+chunking:size <data> = data{ type=uint64_t dims={1, } domain=malloc has_data=[4035120, ]}
+many_independent_threaded:collect_metrics_on_compression <int32> = 0
+many_independent_threaded:collect_metrics_on_decompression <int32> = 0
+many_independent_threaded:compressor <char*> = <empty>
+many_independent_threaded:compressors <char*[]> = {vol_host_output, }
+many_independent_threaded:metric <char*> = "noop"
+many_independent_threaded:nthreads <uint32> = 1
+many_independent_threaded:preserve_metrics <int32> = 0
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+pressio:rel <double> = <empty>
+subgroups:input_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+subgroups:output_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+sz3:abs_error_bound <double> = 1e-06
+sz3:algorithm <uint8> = 1
+sz3:algorithm_str <char*> = <empty>
+sz3:error_bound_mode <uint8> = 0
+sz3:error_bound_mode_str <char*> = <empty>
+sz3:interp_algo <uint8> = 1
+sz3:interp_direction <uint8> = 0
+sz3:intrep_algo_str <char*> = <empty>
+sz3:l2_norm_error_bound <double> = 0
+sz3:lorenzo <bool> = true
+sz3:lorenzo2 <bool> = false
+sz3:metric <char*> = "noop"
+sz3:openmp <bool> = false
+sz3:pred_dim <uint8> = 1
+sz3:psnr_error_bound <double> = 0
+sz3:quant_bin_size <int32> = 65536
+sz3:regression <bool> = true
+sz3:regression2 <bool> = false
+sz3:rel_error_bound <double> = 0
+vol_host_output:compressor <char*> = "sz3"
+vol_host_output:metric <char*> = "noop"
+
+[VOL BUILT PIPELINE 'sz3']
+chunking:chunk_nthreads <uint64> = 1
+chunking:compressor <char*> = "many_independent_threaded"
+chunking:metric <char*> = "noop"
+chunking:size <data> = data{ type=uint64_t dims={1, } domain=malloc has_data=[4035120, ]}
+many_independent_threaded:collect_metrics_on_compression <int32> = 0
+many_independent_threaded:collect_metrics_on_decompression <int32> = 0
+many_independent_threaded:compressor <char*> = <empty>
+many_independent_threaded:compressors <char*[]> = {vol_host_output, }
+many_independent_threaded:metric <char*> = "noop"
+many_independent_threaded:nthreads <uint32> = 1
+many_independent_threaded:preserve_metrics <int32> = 0
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+pressio:rel <double> = <empty>
+subgroups:input_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+subgroups:output_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+sz3:abs_error_bound <double> = 1e-06
+sz3:algorithm <uint8> = 1
+sz3:algorithm_str <char*> = <empty>
+sz3:error_bound_mode <uint8> = 0
+sz3:error_bound_mode_str <char*> = <empty>
+sz3:interp_algo <uint8> = 1
+sz3:interp_direction <uint8> = 0
+sz3:intrep_algo_str <char*> = <empty>
+sz3:l2_norm_error_bound <double> = 0
+sz3:lorenzo <bool> = true
+sz3:lorenzo2 <bool> = false
+sz3:metric <char*> = "noop"
+sz3:openmp <bool> = false
+sz3:pred_dim <uint8> = 1
+sz3:psnr_error_bound <double> = 0
+sz3:quant_bin_size <int32> = 65536
+sz3:regression <bool> = true
+sz3:regression2 <bool> = false
+sz3:rel_error_bound <double> = 0
+vol_host_output:compressor <char*> = "sz3"
+vol_host_output:metric <char*> = "noop"
+
+Info: 0x55dcce89e590
+
+=== ocean_temp (123.1 MiB, float, hdf5) ===
+  ocean_temp_sz3_1e6           W= 3754.84 ms  R= 2308.76 ms  ratio=  1.52x  RMSE=4.751e-07
+[dbg main] done: 1 datasets, 0 skipped
+
+=== FILE /lcrc/project/SDR/kdougherty/vol_bench_h5/bench_ocean_temp_sz3_1e6_pressio_N8.h5: 1 dataset-writes | create=0.84  write=3754.84  close/flush=0.46 => write_total=3756.14 ms | read_total=2308.76 ms | ratio=1.52x ===
+
+=== [1/3] VOL timing [ocean_temp_sz3_1e6_pressio_N16] : ocean_temp (chunking: pressio, N=16) ===
+[dbg main] h5=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_ocean_temp_sz3_1e6_pressio_N16.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results_vol_ocean_temp_sz3_1e6_pressio_N16.csv only=ocean_temp comp=sz3_1e6 debug=0
+name           dtype  rank src    dims                   MiB        exists
+miranda        double 3    raw    256x384x384            288.0      yes
+ocean_temp     float  0    hdf5   (from file)            0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    yes
+scale-T        float  3    raw    98x1200x1200           538.3      yes
+s3d            double 3    raw    500x500x500            953.7      yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        yes
+6/6 dataset paths readable
+RANGE ocean_temp     min=4.445019e+00 max=1.072704e+01 range=6.282023e+00 xform=none
+[chunk] sz3        N=16  -> 16 chunks x 8070240 B (7.696 MiB, 2017560 elems) total=129123840 B
+[VOL BUILT PIPELINE 'sz3']
+chunking:chunk_nthreads <uint64> = 1
+chunking:compressor <char*> = "many_independent_threaded"
+chunking:metric <char*> = "noop"
+chunking:size <data> = data{ type=uint64_t dims={1, } domain=malloc has_data=[2017560, ]}
+many_independent_threaded:collect_metrics_on_compression <int32> = 0
+many_independent_threaded:collect_metrics_on_decompression <int32> = 0
+many_independent_threaded:compressor <char*> = <empty>
+many_independent_threaded:compressors <char*[]> = {vol_host_output, }
+many_independent_threaded:metric <char*> = "noop"
+many_independent_threaded:nthreads <uint32> = 1
+many_independent_threaded:preserve_metrics <int32> = 0
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+pressio:rel <double> = <empty>
+subgroups:input_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+subgroups:output_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+sz3:abs_error_bound <double> = 1e-06
+sz3:algorithm <uint8> = 1
+sz3:algorithm_str <char*> = <empty>
+sz3:error_bound_mode <uint8> = 0
+sz3:error_bound_mode_str <char*> = <empty>
+sz3:interp_algo <uint8> = 1
+sz3:interp_direction <uint8> = 0
+sz3:intrep_algo_str <char*> = <empty>
+sz3:l2_norm_error_bound <double> = 0
+sz3:lorenzo <bool> = true
+sz3:lorenzo2 <bool> = false
+sz3:metric <char*> = "noop"
+sz3:openmp <bool> = false
+sz3:pred_dim <uint8> = 1
+sz3:psnr_error_bound <double> = 0
+sz3:quant_bin_size <int32> = 65536
+sz3:regression <bool> = true
+sz3:regression2 <bool> = false
+sz3:rel_error_bound <double> = 0
+vol_host_output:compressor <char*> = "sz3"
+vol_host_output:metric <char*> = "noop"
+
+[VOL BUILT PIPELINE 'sz3']
+chunking:chunk_nthreads <uint64> = 1
+chunking:compressor <char*> = "many_independent_threaded"
+chunking:metric <char*> = "noop"
+chunking:size <data> = data{ type=uint64_t dims={1, } domain=malloc has_data=[2017560, ]}
+many_independent_threaded:collect_metrics_on_compression <int32> = 0
+many_independent_threaded:collect_metrics_on_decompression <int32> = 0
+many_independent_threaded:compressor <char*> = <empty>
+many_independent_threaded:compressors <char*[]> = {vol_host_output, }
+many_independent_threaded:metric <char*> = "noop"
+many_independent_threaded:nthreads <uint32> = 1
+many_independent_threaded:preserve_metrics <int32> = 0
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+pressio:rel <double> = <empty>
+subgroups:input_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+subgroups:output_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+sz3:abs_error_bound <double> = 1e-06
+sz3:algorithm <uint8> = 1
+sz3:algorithm_str <char*> = <empty>
+sz3:error_bound_mode <uint8> = 0
+sz3:error_bound_mode_str <char*> = <empty>
+sz3:interp_algo <uint8> = 1
+sz3:interp_direction <uint8> = 0
+sz3:intrep_algo_str <char*> = <empty>
+sz3:l2_norm_error_bound <double> = 0
+sz3:lorenzo <bool> = true
+sz3:lorenzo2 <bool> = false
+sz3:metric <char*> = "noop"
+sz3:openmp <bool> = false
+sz3:pred_dim <uint8> = 1
+sz3:psnr_error_bound <double> = 0
+sz3:quant_bin_size <int32> = 65536
+sz3:regression <bool> = true
+sz3:regression2 <bool> = false
+sz3:rel_error_bound <double> = 0
+vol_host_output:compressor <char*> = "sz3"
+vol_host_output:metric <char*> = "noop"
+
+Info: 0x557ed1025590
+
+=== ocean_temp (123.1 MiB, float, hdf5) ===
+  ocean_temp_sz3_1e6           W= 4097.11 ms  R= 2274.60 ms  ratio=  1.45x  RMSE=4.761e-07
+[dbg main] done: 1 datasets, 0 skipped
+
+=== FILE /lcrc/project/SDR/kdougherty/vol_bench_h5/bench_ocean_temp_sz3_1e6_pressio_N16.h5: 1 dataset-writes | create=0.92  write=4097.11  close/flush=81.54 => write_total=4179.57 ms | read_total=2274.60 ms | ratio=1.45x ===
+
+=== [1/3] VOL timing [qmc_sz3_1e6_pressio_N8] : einspline37 (chunking: pressio, N=8) ===
+[dbg main] h5=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_qmc_sz3_1e6_pressio_N8.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results_vol_qmc_sz3_1e6_pressio_N8.csv only=einspline37 comp=sz3_1e6 debug=0
+name           dtype  rank src    dims                   MiB        exists
+miranda        double 3    raw    256x384x384            288.0      yes
+ocean_temp     float  0    hdf5   (from file)            0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    yes
+scale-T        float  3    raw    98x1200x1200           538.3      yes
+s3d            double 3    raw    500x500x500            953.7      yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        yes
+6/6 dataset paths readable
+RANGE einspline37    min=-2.125822e+01 max=2.036857e+01 range=4.162679e+01 xform=none
+[chunk] sz3        N=8   -> 8 chunks x 1695106440 B (1616.579 MiB, 423776610 elems) total=13560851520 B
+[VOL BUILT PIPELINE 'sz3']
+chunking:chunk_nthreads <uint64> = 1
+chunking:compressor <char*> = "many_independent_threaded"
+chunking:metric <char*> = "noop"
+chunking:size <data> = data{ type=uint64_t dims={1, } domain=malloc has_data=[423776610, ]}
+many_independent_threaded:collect_metrics_on_compression <int32> = 0
+many_independent_threaded:collect_metrics_on_decompression <int32> = 0
+many_independent_threaded:compressor <char*> = <empty>
+many_independent_threaded:compressors <char*[]> = {vol_host_output, }
+many_independent_threaded:metric <char*> = "noop"
+many_independent_threaded:nthreads <uint32> = 1
+many_independent_threaded:preserve_metrics <int32> = 0
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+pressio:rel <double> = <empty>
+subgroups:input_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+subgroups:output_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+sz3:abs_error_bound <double> = 1e-06
+sz3:algorithm <uint8> = 1
+sz3:algorithm_str <char*> = <empty>
+sz3:error_bound_mode <uint8> = 0
+sz3:error_bound_mode_str <char*> = <empty>
+sz3:interp_algo <uint8> = 1
+sz3:interp_direction <uint8> = 0
+sz3:intrep_algo_str <char*> = <empty>
+sz3:l2_norm_error_bound <double> = 0
+sz3:lorenzo <bool> = true
+sz3:lorenzo2 <bool> = false
+sz3:metric <char*> = "noop"
+sz3:openmp <bool> = false
+sz3:pred_dim <uint8> = 1
+sz3:psnr_error_bound <double> = 0
+sz3:quant_bin_size <int32> = 65536
+sz3:regression <bool> = true
+sz3:regression2 <bool> = false
+sz3:rel_error_bound <double> = 0
+vol_host_output:compressor <char*> = "sz3"
+vol_host_output:metric <char*> = "noop"
+
+[VOL BUILT PIPELINE 'sz3']
+chunking:chunk_nthreads <uint64> = 1
+chunking:compressor <char*> = "many_independent_threaded"
+chunking:metric <char*> = "noop"
+chunking:size <data> = data{ type=uint64_t dims={1, } domain=malloc has_data=[423776610, ]}
+many_independent_threaded:collect_metrics_on_compression <int32> = 0
+many_independent_threaded:collect_metrics_on_decompression <int32> = 0
+many_independent_threaded:compressor <char*> = <empty>
+many_independent_threaded:compressors <char*[]> = {vol_host_output, }
+many_independent_threaded:metric <char*> = "noop"
+many_independent_threaded:nthreads <uint32> = 1
+many_independent_threaded:preserve_metrics <int32> = 0
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+pressio:rel <double> = <empty>
+subgroups:input_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+subgroups:output_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+sz3:abs_error_bound <double> = 1e-06
+sz3:algorithm <uint8> = 1
+sz3:algorithm_str <char*> = <empty>
+sz3:error_bound_mode <uint8> = 0
+sz3:error_bound_mode_str <char*> = <empty>
+sz3:interp_algo <uint8> = 1
+sz3:interp_direction <uint8> = 0
+sz3:intrep_algo_str <char*> = <empty>
+sz3:l2_norm_error_bound <double> = 0
+sz3:lorenzo <bool> = true
+sz3:lorenzo2 <bool> = false
+sz3:metric <char*> = "noop"
+sz3:openmp <bool> = false
+sz3:pred_dim <uint8> = 1
+sz3:psnr_error_bound <double> = 0
+sz3:quant_bin_size <int32> = 65536
+sz3:regression <bool> = true
+sz3:regression2 <bool> = false
+sz3:rel_error_bound <double> = 0
+vol_host_output:compressor <char*> = "sz3"
+vol_host_output:metric <char*> = "noop"
+
+Info: 0x56209e578590
+
+=== einspline37 (12932.6 MiB, float, raw) ===
+  einspline37_sz3_1e6          W=205119.13 ms  R=162356.31 ms  ratio=  1.27x  RMSE=2.849e-07
+[dbg main] done: 1 datasets, 0 skipped
+
+=== FILE /lcrc/project/SDR/kdougherty/vol_bench_h5/bench_qmc_sz3_1e6_pressio_N8.h5: 1 dataset-writes | create=0.88  write=205119.13  close/flush=212.20 => write_total=205332.21 ms | read_total=162356.31 ms | ratio=1.27x ===
+
+=== [1/3] VOL timing [qmc_sz3_1e6_pressio_N16] : einspline37 (chunking: pressio, N=16) ===
+[dbg main] h5=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_qmc_sz3_1e6_pressio_N16.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results_vol_qmc_sz3_1e6_pressio_N16.csv only=einspline37 comp=sz3_1e6 debug=0
+name           dtype  rank src    dims                   MiB        exists
+miranda        double 3    raw    256x384x384            288.0      yes
+ocean_temp     float  0    hdf5   (from file)            0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    yes
+scale-T        float  3    raw    98x1200x1200           538.3      yes
+s3d            double 3    raw    500x500x500            953.7      yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        yes
+6/6 dataset paths readable
+RANGE einspline37    min=-2.125822e+01 max=2.036857e+01 range=4.162679e+01 xform=none
+[chunk] sz3        N=16  -> 16 chunks x 847553220 B (808.290 MiB, 211888305 elems) total=13560851520 B
+[VOL BUILT PIPELINE 'sz3']
+chunking:chunk_nthreads <uint64> = 1
+chunking:compressor <char*> = "many_independent_threaded"
+chunking:metric <char*> = "noop"
+chunking:size <data> = data{ type=uint64_t dims={1, } domain=malloc has_data=[211888305, ]}
+many_independent_threaded:collect_metrics_on_compression <int32> = 0
+many_independent_threaded:collect_metrics_on_decompression <int32> = 0
+many_independent_threaded:compressor <char*> = <empty>
+many_independent_threaded:compressors <char*[]> = {vol_host_output, }
+many_independent_threaded:metric <char*> = "noop"
+many_independent_threaded:nthreads <uint32> = 1
+many_independent_threaded:preserve_metrics <int32> = 0
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+pressio:rel <double> = <empty>
+subgroups:input_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+subgroups:output_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+sz3:abs_error_bound <double> = 1e-06
+sz3:algorithm <uint8> = 1
+sz3:algorithm_str <char*> = <empty>
+sz3:error_bound_mode <uint8> = 0
+sz3:error_bound_mode_str <char*> = <empty>
+sz3:interp_algo <uint8> = 1
+sz3:interp_direction <uint8> = 0
+sz3:intrep_algo_str <char*> = <empty>
+sz3:l2_norm_error_bound <double> = 0
+sz3:lorenzo <bool> = true
+sz3:lorenzo2 <bool> = false
+sz3:metric <char*> = "noop"
+sz3:openmp <bool> = false
+sz3:pred_dim <uint8> = 1
+sz3:psnr_error_bound <double> = 0
+sz3:quant_bin_size <int32> = 65536
+sz3:regression <bool> = true
+sz3:regression2 <bool> = false
+sz3:rel_error_bound <double> = 0
+vol_host_output:compressor <char*> = "sz3"
+vol_host_output:metric <char*> = "noop"
+
+[VOL BUILT PIPELINE 'sz3']
+chunking:chunk_nthreads <uint64> = 1
+chunking:compressor <char*> = "many_independent_threaded"
+chunking:metric <char*> = "noop"
+chunking:size <data> = data{ type=uint64_t dims={1, } domain=malloc has_data=[211888305, ]}
+many_independent_threaded:collect_metrics_on_compression <int32> = 0
+many_independent_threaded:collect_metrics_on_decompression <int32> = 0
+many_independent_threaded:compressor <char*> = <empty>
+many_independent_threaded:compressors <char*[]> = {vol_host_output, }
+many_independent_threaded:metric <char*> = "noop"
+many_independent_threaded:nthreads <uint32> = 1
+many_independent_threaded:preserve_metrics <int32> = 0
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+pressio:rel <double> = <empty>
+subgroups:input_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+subgroups:output_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+sz3:abs_error_bound <double> = 1e-06
+sz3:algorithm <uint8> = 1
+sz3:algorithm_str <char*> = <empty>
+sz3:error_bound_mode <uint8> = 0
+sz3:error_bound_mode_str <char*> = <empty>
+sz3:interp_algo <uint8> = 1
+sz3:interp_direction <uint8> = 0
+sz3:intrep_algo_str <char*> = <empty>
+sz3:l2_norm_error_bound <double> = 0
+sz3:lorenzo <bool> = true
+sz3:lorenzo2 <bool> = false
+sz3:metric <char*> = "noop"
+sz3:openmp <bool> = false
+sz3:pred_dim <uint8> = 1
+sz3:psnr_error_bound <double> = 0
+sz3:quant_bin_size <int32> = 65536
+sz3:regression <bool> = true
+sz3:regression2 <bool> = false
+sz3:rel_error_bound <double> = 0
+vol_host_output:compressor <char*> = "sz3"
+vol_host_output:metric <char*> = "noop"
+
+Info: 0x55e656f5a590
+
+=== einspline37 (12932.6 MiB, float, raw) ===
+  einspline37_sz3_1e6          W=203909.67 ms  R=160065.42 ms  ratio=  1.27x  RMSE=2.848e-07
+[dbg main] done: 1 datasets, 0 skipped
+
+=== FILE /lcrc/project/SDR/kdougherty/vol_bench_h5/bench_qmc_sz3_1e6_pressio_N16.h5: 1 dataset-writes | create=0.90  write=203909.67  close/flush=347.21 => write_total=204257.78 ms | read_total=160065.42 ms | ratio=1.27x ===
+
+=== [1/3] VOL timing [scale-T_sz3_1e6_pressio_N8] : scale-T (chunking: pressio, N=8) ===
+[dbg main] h5=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_scale-T_sz3_1e6_pressio_N8.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results_vol_scale-T_sz3_1e6_pressio_N8.csv only=scale-T comp=sz3_1e6 debug=0
+name           dtype  rank src    dims                   MiB        exists
+miranda        double 3    raw    256x384x384            288.0      yes
+ocean_temp     float  0    hdf5   (from file)            0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    yes
+scale-T        float  3    raw    98x1200x1200           538.3      yes
+s3d            double 3    raw    500x500x500            953.7      yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        yes
+6/6 dataset paths readable
+RANGE scale-T        min=5.209023e+00 max=5.754571e+00 range=5.455480e-01 xform=log1p
+[chunk] sz3        N=8   -> 8 chunks x 70560000 B (67.291 MiB, 17640000 elems) total=564480000 B
+[VOL BUILT PIPELINE 'sz3']
+chunking:chunk_nthreads <uint64> = 1
+chunking:compressor <char*> = "many_independent_threaded"
+chunking:metric <char*> = "noop"
+chunking:size <data> = data{ type=uint64_t dims={1, } domain=malloc has_data=[17640000, ]}
+many_independent_threaded:collect_metrics_on_compression <int32> = 0
+many_independent_threaded:collect_metrics_on_decompression <int32> = 0
+many_independent_threaded:compressor <char*> = <empty>
+many_independent_threaded:compressors <char*[]> = {vol_host_output, }
+many_independent_threaded:metric <char*> = "noop"
+many_independent_threaded:nthreads <uint32> = 1
+many_independent_threaded:preserve_metrics <int32> = 0
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+pressio:rel <double> = <empty>
+subgroups:input_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+subgroups:output_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+sz3:abs_error_bound <double> = 1e-06
+sz3:algorithm <uint8> = 1
+sz3:algorithm_str <char*> = <empty>
+sz3:error_bound_mode <uint8> = 0
+sz3:error_bound_mode_str <char*> = <empty>
+sz3:interp_algo <uint8> = 1
+sz3:interp_direction <uint8> = 0
+sz3:intrep_algo_str <char*> = <empty>
+sz3:l2_norm_error_bound <double> = 0
+sz3:lorenzo <bool> = true
+sz3:lorenzo2 <bool> = false
+sz3:metric <char*> = "noop"
+sz3:openmp <bool> = false
+sz3:pred_dim <uint8> = 1
+sz3:psnr_error_bound <double> = 0
+sz3:quant_bin_size <int32> = 65536
+sz3:regression <bool> = true
+sz3:regression2 <bool> = false
+sz3:rel_error_bound <double> = 0
+vol_host_output:compressor <char*> = "sz3"
+vol_host_output:metric <char*> = "noop"
+
+[VOL BUILT PIPELINE 'sz3']
+chunking:chunk_nthreads <uint64> = 1
+chunking:compressor <char*> = "many_independent_threaded"
+chunking:metric <char*> = "noop"
+chunking:size <data> = data{ type=uint64_t dims={1, } domain=malloc has_data=[17640000, ]}
+many_independent_threaded:collect_metrics_on_compression <int32> = 0
+many_independent_threaded:collect_metrics_on_decompression <int32> = 0
+many_independent_threaded:compressor <char*> = <empty>
+many_independent_threaded:compressors <char*[]> = {vol_host_output, }
+many_independent_threaded:metric <char*> = "noop"
+many_independent_threaded:nthreads <uint32> = 1
+many_independent_threaded:preserve_metrics <int32> = 0
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+pressio:rel <double> = <empty>
+subgroups:input_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+subgroups:output_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+sz3:abs_error_bound <double> = 1e-06
+sz3:algorithm <uint8> = 1
+sz3:algorithm_str <char*> = <empty>
+sz3:error_bound_mode <uint8> = 0
+sz3:error_bound_mode_str <char*> = <empty>
+sz3:interp_algo <uint8> = 1
+sz3:interp_direction <uint8> = 0
+sz3:intrep_algo_str <char*> = <empty>
+sz3:l2_norm_error_bound <double> = 0
+sz3:lorenzo <bool> = true
+sz3:lorenzo2 <bool> = false
+sz3:metric <char*> = "noop"
+sz3:openmp <bool> = false
+sz3:pred_dim <uint8> = 1
+sz3:psnr_error_bound <double> = 0
+sz3:quant_bin_size <int32> = 65536
+sz3:regression <bool> = true
+sz3:regression2 <bool> = false
+sz3:rel_error_bound <double> = 0
+vol_host_output:compressor <char*> = "sz3"
+vol_host_output:metric <char*> = "noop"
+
+[zerorun] scale-T_sz3_1e6              fill_zeros=0 (0.00%)  longest=0 @ [0..0]
+[chunkchk] scale-T_sz3_1e6              chunk  0/8  n=17640000 rmse=6.060e-07 maxae=9.537e-07 fillzero=0 
+[chunkchk] scale-T_sz3_1e6              chunk  1/8  n=17640000 rmse=6.059e-07 maxae=9.537e-07 fillzero=0 
+[chunkchk] scale-T_sz3_1e6              chunk  2/8  n=17640000 rmse=6.060e-07 maxae=9.537e-07 fillzero=0 
+[chunkchk] scale-T_sz3_1e6              chunk  3/8  n=17640000 rmse=6.060e-07 maxae=9.537e-07 fillzero=0 
+[chunkchk] scale-T_sz3_1e6              chunk  4/8  n=17640000 rmse=6.059e-07 maxae=9.537e-07 fillzero=0 
+[chunkchk] scale-T_sz3_1e6              chunk  5/8  n=17640000 rmse=6.060e-07 maxae=9.537e-07 fillzero=0 
+[chunkchk] scale-T_sz3_1e6              chunk  6/8  n=17640000 rmse=6.061e-07 maxae=9.537e-07 fillzero=0 
+[chunkchk] scale-T_sz3_1e6              chunk  7/8  n=17640000 rmse=6.060e-07 maxae=9.537e-07 fillzero=0 
+Info: 0x556b1df73590
+
+=== scale-T (538.3 MiB, float, raw, transformed) ===
+  scale-T_sz3_1e6              W= 6640.52 ms  R= 5982.12 ms  ratio=  3.99x  RMSE=6.060e-07 (log-space)
+[dbg main] done: 1 datasets, 0 skipped
+
+=== FILE /lcrc/project/SDR/kdougherty/vol_bench_h5/bench_scale-T_sz3_1e6_pressio_N8.h5: 1 dataset-writes | create=0.91  write=6640.52  close/flush=0.62 => write_total=6642.05 ms | read_total=5982.12 ms | ratio=3.99x ===
+
+=== [1/3] VOL timing [scale-T_sz3_1e6_pressio_N16] : scale-T (chunking: pressio, N=16) ===
+[dbg main] h5=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_scale-T_sz3_1e6_pressio_N16.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results_vol_scale-T_sz3_1e6_pressio_N16.csv only=scale-T comp=sz3_1e6 debug=0
+name           dtype  rank src    dims                   MiB        exists
+miranda        double 3    raw    256x384x384            288.0      yes
+ocean_temp     float  0    hdf5   (from file)            0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    yes
+scale-T        float  3    raw    98x1200x1200           538.3      yes
+s3d            double 3    raw    500x500x500            953.7      yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        yes
+6/6 dataset paths readable
+RANGE scale-T        min=5.209023e+00 max=5.754571e+00 range=5.455480e-01 xform=log1p
+[chunk] sz3        N=16  -> 16 chunks x 35280000 B (33.646 MiB, 8820000 elems) total=564480000 B
+[VOL BUILT PIPELINE 'sz3']
+chunking:chunk_nthreads <uint64> = 1
+chunking:compressor <char*> = "many_independent_threaded"
+chunking:metric <char*> = "noop"
+chunking:size <data> = data{ type=uint64_t dims={1, } domain=malloc has_data=[8820000, ]}
+many_independent_threaded:collect_metrics_on_compression <int32> = 0
+many_independent_threaded:collect_metrics_on_decompression <int32> = 0
+many_independent_threaded:compressor <char*> = <empty>
+many_independent_threaded:compressors <char*[]> = {vol_host_output, }
+many_independent_threaded:metric <char*> = "noop"
+many_independent_threaded:nthreads <uint32> = 1
+many_independent_threaded:preserve_metrics <int32> = 0
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+pressio:rel <double> = <empty>
+subgroups:input_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+subgroups:output_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+sz3:abs_error_bound <double> = 1e-06
+sz3:algorithm <uint8> = 1
+sz3:algorithm_str <char*> = <empty>
+sz3:error_bound_mode <uint8> = 0
+sz3:error_bound_mode_str <char*> = <empty>
+sz3:interp_algo <uint8> = 1
+sz3:interp_direction <uint8> = 0
+sz3:intrep_algo_str <char*> = <empty>
+sz3:l2_norm_error_bound <double> = 0
+sz3:lorenzo <bool> = true
+sz3:lorenzo2 <bool> = false
+sz3:metric <char*> = "noop"
+sz3:openmp <bool> = false
+sz3:pred_dim <uint8> = 1
+sz3:psnr_error_bound <double> = 0
+sz3:quant_bin_size <int32> = 65536
+sz3:regression <bool> = true
+sz3:regression2 <bool> = false
+sz3:rel_error_bound <double> = 0
+vol_host_output:compressor <char*> = "sz3"
+vol_host_output:metric <char*> = "noop"
+
+[VOL BUILT PIPELINE 'sz3']
+chunking:chunk_nthreads <uint64> = 1
+chunking:compressor <char*> = "many_independent_threaded"
+chunking:metric <char*> = "noop"
+chunking:size <data> = data{ type=uint64_t dims={1, } domain=malloc has_data=[8820000, ]}
+many_independent_threaded:collect_metrics_on_compression <int32> = 0
+many_independent_threaded:collect_metrics_on_decompression <int32> = 0
+many_independent_threaded:compressor <char*> = <empty>
+many_independent_threaded:compressors <char*[]> = {vol_host_output, }
+many_independent_threaded:metric <char*> = "noop"
+many_independent_threaded:nthreads <uint32> = 1
+many_independent_threaded:preserve_metrics <int32> = 0
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+pressio:rel <double> = <empty>
+subgroups:input_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+subgroups:output_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+sz3:abs_error_bound <double> = 1e-06
+sz3:algorithm <uint8> = 1
+sz3:algorithm_str <char*> = <empty>
+sz3:error_bound_mode <uint8> = 0
+sz3:error_bound_mode_str <char*> = <empty>
+sz3:interp_algo <uint8> = 1
+sz3:interp_direction <uint8> = 0
+sz3:intrep_algo_str <char*> = <empty>
+sz3:l2_norm_error_bound <double> = 0
+sz3:lorenzo <bool> = true
+sz3:lorenzo2 <bool> = false
+sz3:metric <char*> = "noop"
+sz3:openmp <bool> = false
+sz3:pred_dim <uint8> = 1
+sz3:psnr_error_bound <double> = 0
+sz3:quant_bin_size <int32> = 65536
+sz3:regression <bool> = true
+sz3:regression2 <bool> = false
+sz3:rel_error_bound <double> = 0
+vol_host_output:compressor <char*> = "sz3"
+vol_host_output:metric <char*> = "noop"
+
+[zerorun] scale-T_sz3_1e6              fill_zeros=0 (0.00%)  longest=0 @ [0..0]
+[chunkchk] scale-T_sz3_1e6              chunk  0/16 n=8820000 rmse=6.061e-07 maxae=9.537e-07 fillzero=0 
+[chunkchk] scale-T_sz3_1e6              chunk  1/16 n=8820000 rmse=6.059e-07 maxae=9.537e-07 fillzero=0 
+[chunkchk] scale-T_sz3_1e6              chunk  2/16 n=8820000 rmse=6.059e-07 maxae=9.537e-07 fillzero=0 
+[chunkchk] scale-T_sz3_1e6              chunk  3/16 n=8820000 rmse=6.059e-07 maxae=9.537e-07 fillzero=0 
+[chunkchk] scale-T_sz3_1e6              chunk  4/16 n=8820000 rmse=6.059e-07 maxae=9.537e-07 fillzero=0 
+[chunkchk] scale-T_sz3_1e6              chunk  5/16 n=8820000 rmse=6.060e-07 maxae=9.537e-07 fillzero=0 
+[chunkchk] scale-T_sz3_1e6              chunk  6/16 n=8820000 rmse=6.059e-07 maxae=9.537e-07 fillzero=0 
+[chunkchk] scale-T_sz3_1e6              chunk  7/16 n=8820000 rmse=6.061e-07 maxae=9.537e-07 fillzero=0 
+[chunkchk] scale-T_sz3_1e6              chunk  8/16 n=8820000 rmse=6.060e-07 maxae=9.537e-07 fillzero=0 
+[chunkchk] scale-T_sz3_1e6              chunk  9/16 n=8820000 rmse=6.056e-07 maxae=9.537e-07 fillzero=0 
+[chunkchk] scale-T_sz3_1e6              chunk 10/16 n=8820000 rmse=6.058e-07 maxae=9.537e-07 fillzero=0 
+[chunkchk] scale-T_sz3_1e6              chunk 11/16 n=8820000 rmse=6.062e-07 maxae=9.537e-07 fillzero=0 
+[chunkchk] scale-T_sz3_1e6              chunk 12/16 n=8820000 rmse=6.061e-07 maxae=9.537e-07 fillzero=0 
+[chunkchk] scale-T_sz3_1e6              chunk 13/16 n=8820000 rmse=6.063e-07 maxae=9.537e-07 fillzero=0 
+[chunkchk] scale-T_sz3_1e6              chunk 14/16 n=8820000 rmse=6.061e-07 maxae=9.537e-07 fillzero=0 
+[chunkchk] scale-T_sz3_1e6              chunk 15/16 n=8820000 rmse=6.061e-07 maxae=9.537e-07 fillzero=0 
+Info: 0x55e0da77c590
+
+=== scale-T (538.3 MiB, float, raw, transformed) ===
+  scale-T_sz3_1e6              W= 6590.44 ms  R= 5964.75 ms  ratio=  3.99x  RMSE=6.060e-07 (log-space)
+[dbg main] done: 1 datasets, 0 skipped
+
+=== FILE /lcrc/project/SDR/kdougherty/vol_bench_h5/bench_scale-T_sz3_1e6_pressio_N16.h5: 1 dataset-writes | create=0.88  write=6590.44  close/flush=0.61 => write_total=6591.93 ms | read_total=5964.75 ms | ratio=3.99x ===
+
+=== [1/3] VOL timing [s3d_sz3_1e6_pressio_N8] : s3d (chunking: pressio, N=8) ===
+[dbg main] h5=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_s3d_sz3_1e6_pressio_N8.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results_vol_s3d_sz3_1e6_pressio_N8.csv only=s3d comp=sz3_1e6 debug=0
+name           dtype  rank src    dims                   MiB        exists
+miranda        double 3    raw    256x384x384            288.0      yes
+ocean_temp     float  0    hdf5   (from file)            0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    yes
+scale-T        float  3    raw    98x1200x1200           538.3      yes
+s3d            double 3    raw    500x500x500            953.7      yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        yes
+6/6 dataset paths readable
+RANGE s3d            min=-6.362436e-15 max=3.920002e-02 range=3.920002e-02 xform=none
+[chunk] sz3        N=8   -> 8 chunks x 125000000 B (119.209 MiB, 15625000 elems) total=1000000000 B
+[VOL BUILT PIPELINE 'sz3']
+chunking:chunk_nthreads <uint64> = 1
+chunking:compressor <char*> = "many_independent_threaded"
+chunking:metric <char*> = "noop"
+chunking:size <data> = data{ type=uint64_t dims={1, } domain=malloc has_data=[15625000, ]}
+many_independent_threaded:collect_metrics_on_compression <int32> = 0
+many_independent_threaded:collect_metrics_on_decompression <int32> = 0
+many_independent_threaded:compressor <char*> = <empty>
+many_independent_threaded:compressors <char*[]> = {vol_host_output, }
+many_independent_threaded:metric <char*> = "noop"
+many_independent_threaded:nthreads <uint32> = 1
+many_independent_threaded:preserve_metrics <int32> = 0
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+pressio:rel <double> = <empty>
+subgroups:input_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+subgroups:output_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+sz3:abs_error_bound <double> = 1e-06
+sz3:algorithm <uint8> = 1
+sz3:algorithm_str <char*> = <empty>
+sz3:error_bound_mode <uint8> = 0
+sz3:error_bound_mode_str <char*> = <empty>
+sz3:interp_algo <uint8> = 1
+sz3:interp_direction <uint8> = 0
+sz3:intrep_algo_str <char*> = <empty>
+sz3:l2_norm_error_bound <double> = 0
+sz3:lorenzo <bool> = true
+sz3:lorenzo2 <bool> = false
+sz3:metric <char*> = "noop"
+sz3:openmp <bool> = false
+sz3:pred_dim <uint8> = 1
+sz3:psnr_error_bound <double> = 0
+sz3:quant_bin_size <int32> = 65536
+sz3:regression <bool> = true
+sz3:regression2 <bool> = false
+sz3:rel_error_bound <double> = 0
+vol_host_output:compressor <char*> = "sz3"
+vol_host_output:metric <char*> = "noop"
+
+[VOL BUILT PIPELINE 'sz3']
+chunking:chunk_nthreads <uint64> = 1
+chunking:compressor <char*> = "many_independent_threaded"
+chunking:metric <char*> = "noop"
+chunking:size <data> = data{ type=uint64_t dims={1, } domain=malloc has_data=[15625000, ]}
+many_independent_threaded:collect_metrics_on_compression <int32> = 0
+many_independent_threaded:collect_metrics_on_decompression <int32> = 0
+many_independent_threaded:compressor <char*> = <empty>
+many_independent_threaded:compressors <char*[]> = {vol_host_output, }
+many_independent_threaded:metric <char*> = "noop"
+many_independent_threaded:nthreads <uint32> = 1
+many_independent_threaded:preserve_metrics <int32> = 0
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+pressio:rel <double> = <empty>
+subgroups:input_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+subgroups:output_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+sz3:abs_error_bound <double> = 1e-06
+sz3:algorithm <uint8> = 1
+sz3:algorithm_str <char*> = <empty>
+sz3:error_bound_mode <uint8> = 0
+sz3:error_bound_mode_str <char*> = <empty>
+sz3:interp_algo <uint8> = 1
+sz3:interp_direction <uint8> = 0
+sz3:intrep_algo_str <char*> = <empty>
+sz3:l2_norm_error_bound <double> = 0
+sz3:lorenzo <bool> = true
+sz3:lorenzo2 <bool> = false
+sz3:metric <char*> = "noop"
+sz3:openmp <bool> = false
+sz3:pred_dim <uint8> = 1
+sz3:psnr_error_bound <double> = 0
+sz3:quant_bin_size <int32> = 65536
+sz3:regression <bool> = true
+sz3:regression2 <bool> = false
+sz3:rel_error_bound <double> = 0
+vol_host_output:compressor <char*> = "sz3"
+vol_host_output:metric <char*> = "noop"
+
+[zerorun] s3d_sz3_1e6                  fill_zeros=0 (0.00%)  longest=0 @ [0..0]
+[chunkchk] s3d_sz3_1e6                  chunk  0/8  n=15625000 rmse=3.258e-07 maxae=1.000e-06 fillzero=0 
+[chunkchk] s3d_sz3_1e6                  chunk  1/8  n=15625000 rmse=3.326e-07 maxae=1.000e-06 fillzero=0 
+[chunkchk] s3d_sz3_1e6                  chunk  2/8  n=15625000 rmse=3.496e-07 maxae=1.000e-06 fillzero=0 
+[chunkchk] s3d_sz3_1e6                  chunk  3/8  n=15625000 rmse=3.438e-07 maxae=1.000e-06 fillzero=0 
+[chunkchk] s3d_sz3_1e6                  chunk  4/8  n=15625000 rmse=3.502e-07 maxae=1.000e-06 fillzero=0 
+[chunkchk] s3d_sz3_1e6                  chunk  5/8  n=15625000 rmse=3.537e-07 maxae=1.000e-06 fillzero=0 
+[chunkchk] s3d_sz3_1e6                  chunk  6/8  n=15625000 rmse=3.379e-07 maxae=1.000e-06 fillzero=0 
+[chunkchk] s3d_sz3_1e6                  chunk  7/8  n=15625000 rmse=3.420e-07 maxae=1.000e-06 fillzero=0 
+Info: 0x559d9e820590
+
+=== s3d (953.7 MiB, double, raw) ===
+  s3d_sz3_1e6                  W= 5329.37 ms  R= 4183.83 ms  ratio= 31.79x  RMSE=3.421e-07
+[dbg main] done: 1 datasets, 0 skipped
+
+=== FILE /lcrc/project/SDR/kdougherty/vol_bench_h5/bench_s3d_sz3_1e6_pressio_N8.h5: 1 dataset-writes | create=0.87  write=5329.37  close/flush=0.52 => write_total=5330.76 ms | read_total=4183.83 ms | ratio=31.79x ===
+
+=== [1/3] VOL timing [s3d_sz3_1e6_pressio_N16] : s3d (chunking: pressio, N=16) ===
+[dbg main] h5=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_s3d_sz3_1e6_pressio_N16.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results_vol_s3d_sz3_1e6_pressio_N16.csv only=s3d comp=sz3_1e6 debug=0
+name           dtype  rank src    dims                   MiB        exists
+miranda        double 3    raw    256x384x384            288.0      yes
+ocean_temp     float  0    hdf5   (from file)            0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    yes
+scale-T        float  3    raw    98x1200x1200           538.3      yes
+s3d            double 3    raw    500x500x500            953.7      yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        yes
+6/6 dataset paths readable
+RANGE s3d            min=-6.362436e-15 max=3.920002e-02 range=3.920002e-02 xform=none
+[chunk] sz3        N=16  -> 16 chunks x 62500000 B (59.605 MiB, 7812500 elems) total=1000000000 B
+[VOL BUILT PIPELINE 'sz3']
+chunking:chunk_nthreads <uint64> = 1
+chunking:compressor <char*> = "many_independent_threaded"
+chunking:metric <char*> = "noop"
+chunking:size <data> = data{ type=uint64_t dims={1, } domain=malloc has_data=[7812500, ]}
+many_independent_threaded:collect_metrics_on_compression <int32> = 0
+many_independent_threaded:collect_metrics_on_decompression <int32> = 0
+many_independent_threaded:compressor <char*> = <empty>
+many_independent_threaded:compressors <char*[]> = {vol_host_output, }
+many_independent_threaded:metric <char*> = "noop"
+many_independent_threaded:nthreads <uint32> = 1
+many_independent_threaded:preserve_metrics <int32> = 0
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+pressio:rel <double> = <empty>
+subgroups:input_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+subgroups:output_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+sz3:abs_error_bound <double> = 1e-06
+sz3:algorithm <uint8> = 1
+sz3:algorithm_str <char*> = <empty>
+sz3:error_bound_mode <uint8> = 0
+sz3:error_bound_mode_str <char*> = <empty>
+sz3:interp_algo <uint8> = 1
+sz3:interp_direction <uint8> = 0
+sz3:intrep_algo_str <char*> = <empty>
+sz3:l2_norm_error_bound <double> = 0
+sz3:lorenzo <bool> = true
+sz3:lorenzo2 <bool> = false
+sz3:metric <char*> = "noop"
+sz3:openmp <bool> = false
+sz3:pred_dim <uint8> = 1
+sz3:psnr_error_bound <double> = 0
+sz3:quant_bin_size <int32> = 65536
+sz3:regression <bool> = true
+sz3:regression2 <bool> = false
+sz3:rel_error_bound <double> = 0
+vol_host_output:compressor <char*> = "sz3"
+vol_host_output:metric <char*> = "noop"
+
+[VOL BUILT PIPELINE 'sz3']
+chunking:chunk_nthreads <uint64> = 1
+chunking:compressor <char*> = "many_independent_threaded"
+chunking:metric <char*> = "noop"
+chunking:size <data> = data{ type=uint64_t dims={1, } domain=malloc has_data=[7812500, ]}
+many_independent_threaded:collect_metrics_on_compression <int32> = 0
+many_independent_threaded:collect_metrics_on_decompression <int32> = 0
+many_independent_threaded:compressor <char*> = <empty>
+many_independent_threaded:compressors <char*[]> = {vol_host_output, }
+many_independent_threaded:metric <char*> = "noop"
+many_independent_threaded:nthreads <uint32> = 1
+many_independent_threaded:preserve_metrics <int32> = 0
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+pressio:rel <double> = <empty>
+subgroups:input_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+subgroups:output_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+sz3:abs_error_bound <double> = 1e-06
+sz3:algorithm <uint8> = 1
+sz3:algorithm_str <char*> = <empty>
+sz3:error_bound_mode <uint8> = 0
+sz3:error_bound_mode_str <char*> = <empty>
+sz3:interp_algo <uint8> = 1
+sz3:interp_direction <uint8> = 0
+sz3:intrep_algo_str <char*> = <empty>
+sz3:l2_norm_error_bound <double> = 0
+sz3:lorenzo <bool> = true
+sz3:lorenzo2 <bool> = false
+sz3:metric <char*> = "noop"
+sz3:openmp <bool> = false
+sz3:pred_dim <uint8> = 1
+sz3:psnr_error_bound <double> = 0
+sz3:quant_bin_size <int32> = 65536
+sz3:regression <bool> = true
+sz3:regression2 <bool> = false
+sz3:rel_error_bound <double> = 0
+vol_host_output:compressor <char*> = "sz3"
+vol_host_output:metric <char*> = "noop"
+
+[zerorun] s3d_sz3_1e6                  fill_zeros=0 (0.00%)  longest=0 @ [0..0]
+[chunkchk] s3d_sz3_1e6                  chunk  0/16 n=7812500 rmse=3.260e-07 maxae=1.000e-06 fillzero=0 
+[chunkchk] s3d_sz3_1e6                  chunk  1/16 n=7812500 rmse=3.256e-07 maxae=1.000e-06 fillzero=0 
+[chunkchk] s3d_sz3_1e6                  chunk  2/16 n=7812500 rmse=3.287e-07 maxae=1.000e-06 fillzero=0 
+[chunkchk] s3d_sz3_1e6                  chunk  3/16 n=7812500 rmse=3.364e-07 maxae=1.000e-06 fillzero=0 
+[chunkchk] s3d_sz3_1e6                  chunk  4/16 n=7812500 rmse=3.509e-07 maxae=1.000e-06 fillzero=0 
+[chunkchk] s3d_sz3_1e6                  chunk  5/16 n=7812500 rmse=3.483e-07 maxae=1.000e-06 fillzero=0 
+[chunkchk] s3d_sz3_1e6                  chunk  6/16 n=7812500 rmse=3.441e-07 maxae=1.000e-06 fillzero=0 
+[chunkchk] s3d_sz3_1e6                  chunk  7/16 n=7812500 rmse=3.436e-07 maxae=1.000e-06 fillzero=0 
+[chunkchk] s3d_sz3_1e6                  chunk  8/16 n=7812500 rmse=3.476e-07 maxae=1.000e-06 fillzero=0 
+[chunkchk] s3d_sz3_1e6                  chunk  9/16 n=7812500 rmse=3.529e-07 maxae=1.000e-06 fillzero=0 
+[chunkchk] s3d_sz3_1e6                  chunk 10/16 n=7812500 rmse=3.587e-07 maxae=1.000e-06 fillzero=0 
+[chunkchk] s3d_sz3_1e6                  chunk 11/16 n=7812500 rmse=3.487e-07 maxae=1.000e-06 fillzero=0 
+[chunkchk] s3d_sz3_1e6                  chunk 12/16 n=7812500 rmse=3.399e-07 maxae=1.000e-06 fillzero=0 
+[chunkchk] s3d_sz3_1e6                  chunk 13/16 n=7812500 rmse=3.359e-07 maxae=1.000e-06 fillzero=0 
+[chunkchk] s3d_sz3_1e6                  chunk 14/16 n=7812500 rmse=3.482e-07 maxae=1.000e-06 fillzero=0 
+[chunkchk] s3d_sz3_1e6                  chunk 15/16 n=7812500 rmse=3.357e-07 maxae=1.000e-06 fillzero=0 
+Info: 0x560c9d5fe590
+
+=== s3d (953.7 MiB, double, raw) ===
+  s3d_sz3_1e6                  W= 5174.81 ms  R= 3971.82 ms  ratio= 31.79x  RMSE=3.421e-07
+[dbg main] done: 1 datasets, 0 skipped
+
+=== FILE /lcrc/project/SDR/kdougherty/vol_bench_h5/bench_s3d_sz3_1e6_pressio_N16.h5: 1 dataset-writes | create=0.91  write=5174.81  close/flush=0.63 => write_total=5176.34 ms | read_total=3971.82 ms | ratio=31.79x ===
+
+=== [1/3] VOL timing [nyx_baryon_sz3_1e6_pressio_N8] : nyx_baryon (chunking: pressio, N=8) ===
+[dbg main] h5=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_nyx_baryon_sz3_1e6_pressio_N8.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results_vol_nyx_baryon_sz3_1e6_pressio_N8.csv only=nyx_baryon comp=sz3_1e6 debug=0
+name           dtype  rank src    dims                   MiB        exists
+miranda        double 3    raw    256x384x384            288.0      yes
+ocean_temp     float  0    hdf5   (from file)            0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    yes
+scale-T        float  3    raw    98x1200x1200           538.3      yes
+s3d            double 3    raw    500x500x500            953.7      yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        yes
+6/6 dataset paths readable
+RANGE nyx_baryon     min=5.637747e-02 max=1.166017e+01 range=1.160379e+01 xform=log1p
+[chunk] sz3        N=8   -> 8 chunks x 67108864 B (64.000 MiB, 16777216 elems) total=536870912 B
+[VOL BUILT PIPELINE 'sz3']
+chunking:chunk_nthreads <uint64> = 1
+chunking:compressor <char*> = "many_independent_threaded"
+chunking:metric <char*> = "noop"
+chunking:size <data> = data{ type=uint64_t dims={1, } domain=malloc has_data=[16777216, ]}
+many_independent_threaded:collect_metrics_on_compression <int32> = 0
+many_independent_threaded:collect_metrics_on_decompression <int32> = 0
+many_independent_threaded:compressor <char*> = <empty>
+many_independent_threaded:compressors <char*[]> = {vol_host_output, }
+many_independent_threaded:metric <char*> = "noop"
+many_independent_threaded:nthreads <uint32> = 1
+many_independent_threaded:preserve_metrics <int32> = 0
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+pressio:rel <double> = <empty>
+subgroups:input_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+subgroups:output_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+sz3:abs_error_bound <double> = 1e-06
+sz3:algorithm <uint8> = 1
+sz3:algorithm_str <char*> = <empty>
+sz3:error_bound_mode <uint8> = 0
+sz3:error_bound_mode_str <char*> = <empty>
+sz3:interp_algo <uint8> = 1
+sz3:interp_direction <uint8> = 0
+sz3:intrep_algo_str <char*> = <empty>
+sz3:l2_norm_error_bound <double> = 0
+sz3:lorenzo <bool> = true
+sz3:lorenzo2 <bool> = false
+sz3:metric <char*> = "noop"
+sz3:openmp <bool> = false
+sz3:pred_dim <uint8> = 1
+sz3:psnr_error_bound <double> = 0
+sz3:quant_bin_size <int32> = 65536
+sz3:regression <bool> = true
+sz3:regression2 <bool> = false
+sz3:rel_error_bound <double> = 0
+vol_host_output:compressor <char*> = "sz3"
+vol_host_output:metric <char*> = "noop"
+
+[VOL BUILT PIPELINE 'sz3']
+chunking:chunk_nthreads <uint64> = 1
+chunking:compressor <char*> = "many_independent_threaded"
+chunking:metric <char*> = "noop"
+chunking:size <data> = data{ type=uint64_t dims={1, } domain=malloc has_data=[16777216, ]}
+many_independent_threaded:collect_metrics_on_compression <int32> = 0
+many_independent_threaded:collect_metrics_on_decompression <int32> = 0
+many_independent_threaded:compressor <char*> = <empty>
+many_independent_threaded:compressors <char*[]> = {vol_host_output, }
+many_independent_threaded:metric <char*> = "noop"
+many_independent_threaded:nthreads <uint32> = 1
+many_independent_threaded:preserve_metrics <int32> = 0
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+pressio:rel <double> = <empty>
+subgroups:input_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+subgroups:output_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+sz3:abs_error_bound <double> = 1e-06
+sz3:algorithm <uint8> = 1
+sz3:algorithm_str <char*> = <empty>
+sz3:error_bound_mode <uint8> = 0
+sz3:error_bound_mode_str <char*> = <empty>
+sz3:interp_algo <uint8> = 1
+sz3:interp_direction <uint8> = 0
+sz3:intrep_algo_str <char*> = <empty>
+sz3:l2_norm_error_bound <double> = 0
+sz3:lorenzo <bool> = true
+sz3:lorenzo2 <bool> = false
+sz3:metric <char*> = "noop"
+sz3:openmp <bool> = false
+sz3:pred_dim <uint8> = 1
+sz3:psnr_error_bound <double> = 0
+sz3:quant_bin_size <int32> = 65536
+sz3:regression <bool> = true
+sz3:regression2 <bool> = false
+sz3:rel_error_bound <double> = 0
+vol_host_output:compressor <char*> = "sz3"
+vol_host_output:metric <char*> = "noop"
+
+[zerorun] nyx_baryon_sz3_1e6           fill_zeros=0 (0.00%)  longest=0 @ [0..0]
+[chunkchk] nyx_baryon_sz3_1e6           chunk  0/8  n=16777216 rmse=4.710e-07 maxae=1.431e-06 fillzero=0 
+[chunkchk] nyx_baryon_sz3_1e6           chunk  1/8  n=16777216 rmse=5.254e-07 maxae=1.431e-06 fillzero=0 
+[chunkchk] nyx_baryon_sz3_1e6           chunk  2/8  n=16777216 rmse=4.680e-07 maxae=1.669e-06 fillzero=0 
+[chunkchk] nyx_baryon_sz3_1e6           chunk  3/8  n=16777216 rmse=4.694e-07 maxae=1.431e-06 fillzero=0 
+[chunkchk] nyx_baryon_sz3_1e6           chunk  4/8  n=16777216 rmse=4.717e-07 maxae=1.431e-06 fillzero=0 
+[chunkchk] nyx_baryon_sz3_1e6           chunk  5/8  n=16777216 rmse=5.363e-07 maxae=1.431e-06 fillzero=0 
+[chunkchk] nyx_baryon_sz3_1e6           chunk  6/8  n=16777216 rmse=4.740e-07 maxae=1.431e-06 fillzero=0 
+[chunkchk] nyx_baryon_sz3_1e6           chunk  7/8  n=16777216 rmse=4.727e-07 maxae=1.192e-06 fillzero=0 
+Info: 0x56001032e590
+
+=== nyx_baryon (512.0 MiB, float, hdf5, transformed) ===
+  nyx_baryon_sz3_1e6           W= 8853.41 ms  R= 9492.59 ms  ratio=  1.79x  RMSE=4.867e-07 (log-space)
+[dbg main] done: 1 datasets, 0 skipped
+
+=== FILE /lcrc/project/SDR/kdougherty/vol_bench_h5/bench_nyx_baryon_sz3_1e6_pressio_N8.h5: 1 dataset-writes | create=0.91  write=8853.41  close/flush=0.67 => write_total=8854.99 ms | read_total=9492.59 ms | ratio=1.79x ===
+
+=== [1/3] VOL timing [nyx_baryon_sz3_1e6_pressio_N16] : nyx_baryon (chunking: pressio, N=16) ===
+[dbg main] h5=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_nyx_baryon_sz3_1e6_pressio_N16.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results_vol_nyx_baryon_sz3_1e6_pressio_N16.csv only=nyx_baryon comp=sz3_1e6 debug=0
+name           dtype  rank src    dims                   MiB        exists
+miranda        double 3    raw    256x384x384            288.0      yes
+ocean_temp     float  0    hdf5   (from file)            0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    yes
+scale-T        float  3    raw    98x1200x1200           538.3      yes
+s3d            double 3    raw    500x500x500            953.7      yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        yes
+6/6 dataset paths readable
+RANGE nyx_baryon     min=5.637747e-02 max=1.166017e+01 range=1.160379e+01 xform=log1p
+[chunk] sz3        N=16  -> 16 chunks x 33554432 B (32.000 MiB, 8388608 elems) total=536870912 B
+[VOL BUILT PIPELINE 'sz3']
+chunking:chunk_nthreads <uint64> = 1
+chunking:compressor <char*> = "many_independent_threaded"
+chunking:metric <char*> = "noop"
+chunking:size <data> = data{ type=uint64_t dims={1, } domain=malloc has_data=[8388608, ]}
+many_independent_threaded:collect_metrics_on_compression <int32> = 0
+many_independent_threaded:collect_metrics_on_decompression <int32> = 0
+many_independent_threaded:compressor <char*> = <empty>
+many_independent_threaded:compressors <char*[]> = {vol_host_output, }
+many_independent_threaded:metric <char*> = "noop"
+many_independent_threaded:nthreads <uint32> = 1
+many_independent_threaded:preserve_metrics <int32> = 0
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+pressio:rel <double> = <empty>
+subgroups:input_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+subgroups:output_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+sz3:abs_error_bound <double> = 1e-06
+sz3:algorithm <uint8> = 1
+sz3:algorithm_str <char*> = <empty>
+sz3:error_bound_mode <uint8> = 0
+sz3:error_bound_mode_str <char*> = <empty>
+sz3:interp_algo <uint8> = 1
+sz3:interp_direction <uint8> = 0
+sz3:intrep_algo_str <char*> = <empty>
+sz3:l2_norm_error_bound <double> = 0
+sz3:lorenzo <bool> = true
+sz3:lorenzo2 <bool> = false
+sz3:metric <char*> = "noop"
+sz3:openmp <bool> = false
+sz3:pred_dim <uint8> = 1
+sz3:psnr_error_bound <double> = 0
+sz3:quant_bin_size <int32> = 65536
+sz3:regression <bool> = true
+sz3:regression2 <bool> = false
+sz3:rel_error_bound <double> = 0
+vol_host_output:compressor <char*> = "sz3"
+vol_host_output:metric <char*> = "noop"
+
+[VOL BUILT PIPELINE 'sz3']
+chunking:chunk_nthreads <uint64> = 1
+chunking:compressor <char*> = "many_independent_threaded"
+chunking:metric <char*> = "noop"
+chunking:size <data> = data{ type=uint64_t dims={1, } domain=malloc has_data=[8388608, ]}
+many_independent_threaded:collect_metrics_on_compression <int32> = 0
+many_independent_threaded:collect_metrics_on_decompression <int32> = 0
+many_independent_threaded:compressor <char*> = <empty>
+many_independent_threaded:compressors <char*[]> = {vol_host_output, }
+many_independent_threaded:metric <char*> = "noop"
+many_independent_threaded:nthreads <uint32> = 1
+many_independent_threaded:preserve_metrics <int32> = 0
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+pressio:rel <double> = <empty>
+subgroups:input_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+subgroups:output_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+sz3:abs_error_bound <double> = 1e-06
+sz3:algorithm <uint8> = 1
+sz3:algorithm_str <char*> = <empty>
+sz3:error_bound_mode <uint8> = 0
+sz3:error_bound_mode_str <char*> = <empty>
+sz3:interp_algo <uint8> = 1
+sz3:interp_direction <uint8> = 0
+sz3:intrep_algo_str <char*> = <empty>
+sz3:l2_norm_error_bound <double> = 0
+sz3:lorenzo <bool> = true
+sz3:lorenzo2 <bool> = false
+sz3:metric <char*> = "noop"
+sz3:openmp <bool> = false
+sz3:pred_dim <uint8> = 1
+sz3:psnr_error_bound <double> = 0
+sz3:quant_bin_size <int32> = 65536
+sz3:regression <bool> = true
+sz3:regression2 <bool> = false
+sz3:rel_error_bound <double> = 0
+vol_host_output:compressor <char*> = "sz3"
+vol_host_output:metric <char*> = "noop"
+
+[zerorun] nyx_baryon_sz3_1e6           fill_zeros=0 (0.00%)  longest=0 @ [0..0]
+[chunkchk] nyx_baryon_sz3_1e6           chunk  0/16 n=8388608 rmse=4.715e-07 maxae=1.431e-06 fillzero=0 
+[chunkchk] nyx_baryon_sz3_1e6           chunk  1/16 n=8388608 rmse=4.705e-07 maxae=1.431e-06 fillzero=0 
+[chunkchk] nyx_baryon_sz3_1e6           chunk  2/16 n=8388608 rmse=4.676e-07 maxae=1.431e-06 fillzero=0 
+[chunkchk] nyx_baryon_sz3_1e6           chunk  3/16 n=8388608 rmse=4.673e-07 maxae=1.431e-06 fillzero=0 
+[chunkchk] nyx_baryon_sz3_1e6           chunk  4/16 n=8388608 rmse=4.684e-07 maxae=1.431e-06 fillzero=0 
+[chunkchk] nyx_baryon_sz3_1e6           chunk  5/16 n=8388608 rmse=4.676e-07 maxae=1.669e-06 fillzero=0 
+[chunkchk] nyx_baryon_sz3_1e6           chunk  6/16 n=8388608 rmse=4.695e-07 maxae=1.431e-06 fillzero=0 
+[chunkchk] nyx_baryon_sz3_1e6           chunk  7/16 n=8388608 rmse=4.693e-07 maxae=1.431e-06 fillzero=0 
+[chunkchk] nyx_baryon_sz3_1e6           chunk  8/16 n=8388608 rmse=4.706e-07 maxae=1.431e-06 fillzero=0 
+[chunkchk] nyx_baryon_sz3_1e6           chunk  9/16 n=8388608 rmse=4.728e-07 maxae=1.431e-06 fillzero=0 
+[chunkchk] nyx_baryon_sz3_1e6           chunk 10/16 n=8388608 rmse=4.740e-07 maxae=1.431e-06 fillzero=0 
+[chunkchk] nyx_baryon_sz3_1e6           chunk 11/16 n=8388608 rmse=4.738e-07 maxae=1.431e-06 fillzero=0 
+[chunkchk] nyx_baryon_sz3_1e6           chunk 12/16 n=8388608 rmse=4.740e-07 maxae=1.431e-06 fillzero=0 
+[chunkchk] nyx_baryon_sz3_1e6           chunk 13/16 n=8388608 rmse=4.740e-07 maxae=1.431e-06 fillzero=0 
+[chunkchk] nyx_baryon_sz3_1e6           chunk 14/16 n=8388608 rmse=4.733e-07 maxae=1.192e-06 fillzero=0 
+[chunkchk] nyx_baryon_sz3_1e6           chunk 15/16 n=8388608 rmse=4.720e-07 maxae=1.192e-06 fillzero=0 
+Info: 0x55c038d3c590
+
+=== nyx_baryon (512.0 MiB, float, hdf5, transformed) ===
+  nyx_baryon_sz3_1e6           W= 9569.73 ms  R= 9391.45 ms  ratio=  1.75x  RMSE=4.710e-07 (log-space)
+[dbg main] done: 1 datasets, 0 skipped
+
+=== FILE /lcrc/project/SDR/kdougherty/vol_bench_h5/bench_nyx_baryon_sz3_1e6_pressio_N16.h5: 1 dataset-writes | create=0.95  write=9569.73  close/flush=0.68 => write_total=9571.36 ms | read_total=9391.45 ms | ratio=1.75x ===
+
+=== JSON-path chunking selection (no VOL_COMP_* env set) ===
+
+=== [1/3] VOL timing [miranda_sz3_1e3_vjson_native] : miranda (chunking: native) ===
+[dbg main] h5=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_miranda_sz3_1e3_vjson_native.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results_vol_miranda_sz3_1e3_vjson_native.csv only=miranda comp=sz3_1e3_vjson debug=0
+name           dtype  rank src    dims                   MiB        exists
+miranda        double 3    raw    256x384x384            288.0      yes
+ocean_temp     float  0    hdf5   (from file)            0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    yes
+scale-T        float  3    raw    98x1200x1200           538.3      yes
+s3d            double 3    raw    500x500x500            953.7      yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        yes
+6/6 dataset paths readable
+RANGE miranda        min=9.999878e-01 max=3.000046e+00 range=2.000058e+00 xform=none
+[chunk] sz3        N=1   -> 1 chunks x 301989888 B (288.000 MiB, 37748736 elems) total=301989888 B
+[zerorun] miranda_sz3_1e3_vjson        fill_zeros=0 (0.00%)  longest=0 @ [0..0]
+[chunkchk] miranda_sz3_1e3_vjson        chunk  0/1  n=37748736 rmse=2.786e-04 maxae=1.000e-03 fillzero=0 
+Info: 0x5631a7cf8590
+
+=== miranda (288.0 MiB, double, raw) ===
+  miranda_sz3_1e3_vjson        W= 1552.54 ms  R=  748.79 ms  ratio= 57.60x  RMSE=2.786e-04
+[dbg main] done: 1 datasets, 0 skipped
+
+=== FILE /lcrc/project/SDR/kdougherty/vol_bench_h5/bench_miranda_sz3_1e3_vjson_native.h5: 1 dataset-writes | create=0.88  write=1552.54  close/flush=0.59 => write_total=1554.00 ms | read_total=748.79 ms | ratio=57.60x ===
+
+=== [1/3] VOL timing [qmc_sz3_1e3_vjson_native] : einspline37 (chunking: native) ===
+[dbg main] h5=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_qmc_sz3_1e3_vjson_native.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results_vol_qmc_sz3_1e3_vjson_native.csv only=einspline37 comp=sz3_1e3_vjson debug=0
+name           dtype  rank src    dims                   MiB        exists
+miranda        double 3    raw    256x384x384            288.0      yes
+ocean_temp     float  0    hdf5   (from file)            0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    yes
+scale-T        float  3    raw    98x1200x1200           538.3      yes
+s3d            double 3    raw    500x500x500            953.7      yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        yes
+6/6 dataset paths readable
+RANGE einspline37    min=-2.125822e+01 max=2.036857e+01 range=4.162679e+01 xform=none
+[chunk] sz3        N=1   -> 1 chunks x 13560851520 B (12932.636 MiB, 3390212880 elems) total=13560851520 B
+[zerorun] einspline37_sz3_1e3_vjson    fill_zeros=1 (0.00%)  longest=1 @ [903177694..903177695]
+[chunkchk] einspline37_sz3_1e3_vjson    chunk  0/1  n=3390212880 rmse=5.742e-04 maxae=1.000e-03 fillzero=1 
+Info: 0x55fc08d06590
+
+=== einspline37 (12932.6 MiB, float, raw) ===
+  einspline37_sz3_1e3_vjson    W=118663.99 ms  R=139443.48 ms  ratio=  3.38x  RMSE=5.742e-04
+[dbg main] done: 1 datasets, 0 skipped
+
+=== FILE /lcrc/project/SDR/kdougherty/vol_bench_h5/bench_qmc_sz3_1e3_vjson_native.h5: 1 dataset-writes | create=0.87  write=118663.99  close/flush=2.77 => write_total=118667.64 ms | read_total=139443.48 ms | ratio=3.38x ===
+
+=== [1/3] VOL timing [miranda_sz3_1e3_pjson_native] : miranda (chunking: native) ===
+[dbg main] h5=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_miranda_sz3_1e3_pjson_native.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results_vol_miranda_sz3_1e3_pjson_native.csv only=miranda comp=sz3_1e3_pjson debug=0
+name           dtype  rank src    dims                   MiB        exists
+miranda        double 3    raw    256x384x384            288.0      yes
+ocean_temp     float  0    hdf5   (from file)            0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    yes
+scale-T        float  3    raw    98x1200x1200           538.3      yes
+s3d            double 3    raw    500x500x500            953.7      yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        yes
+6/6 dataset paths readable
+RANGE miranda        min=9.999878e-01 max=3.000046e+00 range=2.000058e+00 xform=none
+[chunk] sz3        N=1   -> 1 chunks x 301989888 B (288.000 MiB, 37748736 elems) total=301989888 B
+[VOL BUILT PIPELINE 'sz3']
+chunking:chunk_nthreads <uint64> = 1
+chunking:compressor <char*> = "many_independent_threaded"
+chunking:metric <char*> = "noop"
+chunking:size <data> = data{ type=uint64_t dims={1, } domain=malloc has_data=[37748736, ]}
+many_independent_threaded:collect_metrics_on_compression <int32> = 0
+many_independent_threaded:collect_metrics_on_decompression <int32> = 0
+many_independent_threaded:compressor <char*> = <empty>
+many_independent_threaded:compressors <char*[]> = {vol_host_output, }
+many_independent_threaded:metric <char*> = "noop"
+many_independent_threaded:nthreads <uint32> = 1
+many_independent_threaded:preserve_metrics <int32> = 0
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 0.001
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+pressio:rel <double> = <empty>
+subgroups:input_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+subgroups:output_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+sz3:abs_error_bound <double> = 0.001
+sz3:algorithm <uint8> = 1
+sz3:algorithm_str <char*> = <empty>
+sz3:error_bound_mode <uint8> = 0
+sz3:error_bound_mode_str <char*> = <empty>
+sz3:interp_algo <uint8> = 1
+sz3:interp_direction <uint8> = 0
+sz3:intrep_algo_str <char*> = <empty>
+sz3:l2_norm_error_bound <double> = 0
+sz3:lorenzo <bool> = true
+sz3:lorenzo2 <bool> = false
+sz3:metric <char*> = "noop"
+sz3:openmp <bool> = false
+sz3:pred_dim <uint8> = 1
+sz3:psnr_error_bound <double> = 0
+sz3:quant_bin_size <int32> = 65536
+sz3:regression <bool> = true
+sz3:regression2 <bool> = false
+sz3:rel_error_bound <double> = 0
+vol_host_output:compressor <char*> = "sz3"
+vol_host_output:metric <char*> = "noop"
+
+[VOL BUILT PIPELINE 'sz3']
+chunking:chunk_nthreads <uint64> = 1
+chunking:compressor <char*> = "many_independent_threaded"
+chunking:metric <char*> = "noop"
+chunking:size <data> = data{ type=uint64_t dims={1, } domain=malloc has_data=[37748736, ]}
+many_independent_threaded:collect_metrics_on_compression <int32> = 0
+many_independent_threaded:collect_metrics_on_decompression <int32> = 0
+many_independent_threaded:compressor <char*> = <empty>
+many_independent_threaded:compressors <char*[]> = {vol_host_output, }
+many_independent_threaded:metric <char*> = "noop"
+many_independent_threaded:nthreads <uint32> = 1
+many_independent_threaded:preserve_metrics <int32> = 0
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 0.001
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+pressio:rel <double> = <empty>
+subgroups:input_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+subgroups:output_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+sz3:abs_error_bound <double> = 0.001
+sz3:algorithm <uint8> = 1
+sz3:algorithm_str <char*> = <empty>
+sz3:error_bound_mode <uint8> = 0
+sz3:error_bound_mode_str <char*> = <empty>
+sz3:interp_algo <uint8> = 1
+sz3:interp_direction <uint8> = 0
+sz3:intrep_algo_str <char*> = <empty>
+sz3:l2_norm_error_bound <double> = 0
+sz3:lorenzo <bool> = true
+sz3:lorenzo2 <bool> = false
+sz3:metric <char*> = "noop"
+sz3:openmp <bool> = false
+sz3:pred_dim <uint8> = 1
+sz3:psnr_error_bound <double> = 0
+sz3:quant_bin_size <int32> = 65536
+sz3:regression <bool> = true
+sz3:regression2 <bool> = false
+sz3:rel_error_bound <double> = 0
+vol_host_output:compressor <char*> = "sz3"
+vol_host_output:metric <char*> = "noop"
+
+[zerorun] miranda_sz3_1e3_pjson        fill_zeros=0 (0.00%)  longest=0 @ [0..0]
+[chunkchk] miranda_sz3_1e3_pjson        chunk  0/1  n=37748736 rmse=2.786e-04 maxae=1.000e-03 fillzero=0 
+Info: 0x556db89b0590
+
+=== miranda (288.0 MiB, double, raw) ===
+  miranda_sz3_1e3_pjson        W= 1526.20 ms  R=  829.26 ms  ratio= 57.60x  RMSE=2.786e-04
+[dbg main] done: 1 datasets, 0 skipped
+
+=== FILE /lcrc/project/SDR/kdougherty/vol_bench_h5/bench_miranda_sz3_1e3_pjson_native.h5: 1 dataset-writes | create=0.87  write=1526.20  close/flush=0.65 => write_total=1527.73 ms | read_total=829.26 ms | ratio=57.60x ===
+
+=== [1/3] VOL timing [qmc_sz3_1e3_pjson_native] : einspline37 (chunking: native) ===
+[dbg main] h5=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_qmc_sz3_1e3_pjson_native.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results_vol_qmc_sz3_1e3_pjson_native.csv only=einspline37 comp=sz3_1e3_pjson debug=0
+name           dtype  rank src    dims                   MiB        exists
+miranda        double 3    raw    256x384x384            288.0      yes
+ocean_temp     float  0    hdf5   (from file)            0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    yes
+scale-T        float  3    raw    98x1200x1200           538.3      yes
+s3d            double 3    raw    500x500x500            953.7      yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        yes
+6/6 dataset paths readable
+RANGE einspline37    min=-2.125822e+01 max=2.036857e+01 range=4.162679e+01 xform=none
+[chunk] sz3        N=1   -> 1 chunks x 13560851520 B (12932.636 MiB, 3390212880 elems) total=13560851520 B
+[VOL BUILT PIPELINE 'sz3']
+chunking:chunk_nthreads <uint64> = 1
+chunking:compressor <char*> = "many_independent_threaded"
+chunking:metric <char*> = "noop"
+chunking:size <data> = data{ type=uint64_t dims={1, } domain=malloc has_data=[3390212880, ]}
+many_independent_threaded:collect_metrics_on_compression <int32> = 0
+many_independent_threaded:collect_metrics_on_decompression <int32> = 0
+many_independent_threaded:compressor <char*> = <empty>
+many_independent_threaded:compressors <char*[]> = {vol_host_output, }
+many_independent_threaded:metric <char*> = "noop"
+many_independent_threaded:nthreads <uint32> = 1
+many_independent_threaded:preserve_metrics <int32> = 0
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 0.001
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+pressio:rel <double> = <empty>
+subgroups:input_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+subgroups:output_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+sz3:abs_error_bound <double> = 0.001
+sz3:algorithm <uint8> = 1
+sz3:algorithm_str <char*> = <empty>
+sz3:error_bound_mode <uint8> = 0
+sz3:error_bound_mode_str <char*> = <empty>
+sz3:interp_algo <uint8> = 1
+sz3:interp_direction <uint8> = 0
+sz3:intrep_algo_str <char*> = <empty>
+sz3:l2_norm_error_bound <double> = 0
+sz3:lorenzo <bool> = true
+sz3:lorenzo2 <bool> = false
+sz3:metric <char*> = "noop"
+sz3:openmp <bool> = false
+sz3:pred_dim <uint8> = 1
+sz3:psnr_error_bound <double> = 0
+sz3:quant_bin_size <int32> = 65536
+sz3:regression <bool> = true
+sz3:regression2 <bool> = false
+sz3:rel_error_bound <double> = 0
+vol_host_output:compressor <char*> = "sz3"
+vol_host_output:metric <char*> = "noop"
+
+[VOL BUILT PIPELINE 'sz3']
+chunking:chunk_nthreads <uint64> = 1
+chunking:compressor <char*> = "many_independent_threaded"
+chunking:metric <char*> = "noop"
+chunking:size <data> = data{ type=uint64_t dims={1, } domain=malloc has_data=[3390212880, ]}
+many_independent_threaded:collect_metrics_on_compression <int32> = 0
+many_independent_threaded:collect_metrics_on_decompression <int32> = 0
+many_independent_threaded:compressor <char*> = <empty>
+many_independent_threaded:compressors <char*[]> = {vol_host_output, }
+many_independent_threaded:metric <char*> = "noop"
+many_independent_threaded:nthreads <uint32> = 1
+many_independent_threaded:preserve_metrics <int32> = 0
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 0.001
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+pressio:rel <double> = <empty>
+subgroups:input_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+subgroups:output_data_groups <data> = data{ type=int32_t dims={0, } domain=malloc has_data=false}
+sz3:abs_error_bound <double> = 0.001
+sz3:algorithm <uint8> = 1
+sz3:algorithm_str <char*> = <empty>
+sz3:error_bound_mode <uint8> = 0
+sz3:error_bound_mode_str <char*> = <empty>
+sz3:interp_algo <uint8> = 1
+sz3:interp_direction <uint8> = 0
+sz3:intrep_algo_str <char*> = <empty>
+sz3:l2_norm_error_bound <double> = 0
+sz3:lorenzo <bool> = true
+sz3:lorenzo2 <bool> = false
+sz3:metric <char*> = "noop"
+sz3:openmp <bool> = false
+sz3:pred_dim <uint8> = 1
+sz3:psnr_error_bound <double> = 0
+sz3:quant_bin_size <int32> = 65536
+sz3:regression <bool> = true
+sz3:regression2 <bool> = false
+sz3:rel_error_bound <double> = 0
+vol_host_output:compressor <char*> = "sz3"
+vol_host_output:metric <char*> = "noop"
+
+[zerorun] einspline37_sz3_1e3_pjson    fill_zeros=1 (0.00%)  longest=1 @ [903177694..903177695]
+[chunkchk] einspline37_sz3_1e3_pjson    chunk  0/1  n=3390212880 rmse=5.742e-04 maxae=1.000e-03 fillzero=1 
+Info: 0x5581dbe3b590
+
+=== einspline37 (12932.6 MiB, float, raw) ===
+  einspline37_sz3_1e3_pjson    W=120953.01 ms  R=142578.58 ms  ratio=  3.38x  RMSE=5.742e-04
+[dbg main] done: 1 datasets, 0 skipped
+
+=== FILE /lcrc/project/SDR/kdougherty/vol_bench_h5/bench_qmc_sz3_1e3_pjson_native.h5: 1 dataset-writes | create=0.96  write=120953.01  close/flush=19.22 => write_total=120973.19 ms | read_total=142578.58 ms | ratio=3.38x ===
+
+=== [3/3] Filter (deflate) timing ===
+name           dtype  rank src    dims                   MiB        exists
+miranda        double 3    raw    256x384x384            288.0      yes
+ocean_temp     float  0    hdf5   (from file)            0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    yes
+scale-T        float  3    raw    98x1200x1200           538.3      yes
+s3d            double 3    raw    500x500x500            953.7      yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        yes
+6/6 dataset paths readable
+miranda/deflate                file=137.5 MiB (raw 288.0 MiB)
+HDF5-DIAG: Error detected in HDF5 (1.14.6):
+  #000: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Pdcpl.c line 1923 in H5Pset_chunk(): chunk dimensionality must be positive
+    major: Invalid arguments to routine
+    minor: Out of range
+ocean_temp/deflate             file=0.0 MiB (raw 0.0 MiB)
+HDF5-DIAG: Error detected in HDF5 (1.14.6):
+  #000: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5D.c line 186 in H5Dcreate2(): unable to synchronously create dataset
+    major: Dataset
+    minor: Unable to create file
+  #001: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5D.c line 135 in H5D__create_api_common(): unable to create dataset
+    major: Dataset
+    minor: Unable to create file
+  #002: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5VLcallback.c line 1865 in H5VL_dataset_create(): dataset create failed
+    major: Virtual Object Layer
+    minor: Unable to create file
+  #003: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5VLcallback.c line 1830 in H5VL__dataset_create(): dataset create failed
+    major: Virtual Object Layer
+    minor: Unable to create file
+  #004: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5VLnative_dataset.c line 282 in H5VL__native_dataset_create(): unable to create dataset
+    major: Dataset
+    minor: Unable to initialize object
+  #005: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Dint.c line 351 in H5D__create_named(): unable to create and link to dataset
+    major: Dataset
+    minor: Unable to initialize object
+  #006: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Lint.c line 492 in H5L_link_object(): unable to create new link to object
+    major: Links
+    minor: Unable to initialize object
+  #007: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Lint.c line 732 in H5L__create_real(): can't insert link
+    major: Links
+    minor: Unable to insert object
+  #008: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Gtraverse.c line 824 in H5G_traverse(): internal path traversal failed
+    major: Symbol table
+    minor: Object not found
+  #009: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Gtraverse.c line 596 in H5G__traverse_real(): traversal operator failed
+    major: Symbol table
+    minor: Callback failed
+  #010: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Lint.c line 537 in H5L__link_cb(): unable to create object
+    major: Links
+    minor: Unable to initialize object
+  #011: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Oint.c line 2346 in H5O_obj_create(): unable to open object
+    major: Object header
+    minor: Can't open object
+  #012: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Doh.c line 273 in H5O__dset_create(): unable to create dataset
+    major: Dataset
+    minor: Unable to initialize object
+  #013: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Dint.c line 1304 in H5D__create(): unable to construct layout information
+    major: Dataset
+    minor: Unable to initialize object
+  #014: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Dchunk.c line 835 in H5D__chunk_construct(): unable to set chunk sizes
+    major: Dataset
+    minor: Bad value
+  #015: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Dchunk.c line 798 in H5D__chunk_set_sizes(): chunk size must be < 4GB
+    major: Dataset
+    minor: Unable to initialize object
+HDF5-DIAG: Error detected in HDF5 (1.14.6):
+  #000: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5D.c line 1347 in H5Dwrite(): can't synchronously write data
+    major: Dataset
+    minor: Write failed
+  #001: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5D.c line 1263 in H5D__write_api_common(): dset_id is not a dataset ID
+    major: Invalid arguments to routine
+    minor: Inappropriate type
+HDF5-DIAG: Error detected in HDF5 (1.14.6):
+  #000: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5D.c line 468 in H5Dclose(): not a dataset ID
+    major: Invalid arguments to routine
+    minor: Inappropriate type
+einspline37/deflate            file=0.0 MiB (raw 12932.6 MiB)
+HDF5-DIAG: Error detected in HDF5 (1.14.6):
+  #000: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5D.c line 398 in H5Dopen2(): unable to synchronously open dataset
+    major: Dataset
+    minor: Can't open object
+  #001: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5D.c line 360 in H5D__open_api_common(): unable to open dataset
+    major: Dataset
+    minor: Can't open object
+  #002: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5VLcallback.c line 1967 in H5VL_dataset_open(): dataset open failed
+    major: Virtual Object Layer
+    minor: Can't open object
+  #003: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5VLcallback.c line 1934 in H5VL__dataset_open(): dataset open failed
+    major: Virtual Object Layer
+    minor: Can't open object
+  #004: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5VLnative_dataset.c line 332 in H5VL__native_dataset_open(): unable to open dataset
+    major: Dataset
+    minor: Can't open object
+  #005: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Dint.c line 1426 in H5D__open_name(): not found
+    major: Dataset
+    minor: Object not found
+  #006: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Gloc.c line 424 in H5G_loc_find(): can't find object
+    major: Symbol table
+    minor: Object not found
+  #007: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Gtraverse.c line 824 in H5G_traverse(): internal path traversal failed
+    major: Symbol table
+    minor: Object not found
+  #008: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Gtraverse.c line 596 in H5G__traverse_real(): traversal operator failed
+    major: Symbol table
+    minor: Callback failed
+  #009: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Gloc.c line 381 in H5G__loc_find_cb(): object 'einspline37' doesn't exist
+    major: Symbol table
+    minor: Object not found
+HDF5-DIAG: Error detected in HDF5 (1.14.6):
+  #000: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5D.c line 1044 in H5Dread(): can't synchronously read data
+    major: Dataset
+    minor: Read failed
+  #001: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5D.c line 961 in H5D__read_api_common(): dset_id is not a dataset ID
+    major: Invalid arguments to routine
+    minor: Inappropriate type
+  #002: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5VLint.c line 1786 in H5VL_vol_object_verify(): identifier is not of specified type
+    major: Invalid arguments to routine
+    minor: Inappropriate type
+HDF5-DIAG: Error detected in HDF5 (1.14.6):
+  #000: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5D.c line 468 in H5Dclose(): not a dataset ID
+    major: Invalid arguments to routine
+    minor: Inappropriate type
+scale-T/deflate                file=391.0 MiB (raw 538.3 MiB)
+s3d/deflate                    file=851.9 MiB (raw 953.7 MiB)
+HDF5-DIAG: Error detected in HDF5 (1.14.6):
+  #000: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Pdcpl.c line 1923 in H5Pset_chunk(): chunk dimensionality must be positive
+    major: Invalid arguments to routine
+    minor: Out of range
+nyx_baryon/deflate             file=0.0 MiB (raw 0.0 MiB)
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results_filter.csv
+
+=== [miranda_sz3_1e3_pjson_native] connector_phases (VOL total/compress/io) ===
+dataset                compressor  op     total_ms   compress_ms  io_ms   overhead_ms  overhead_pct
+miranda_sz3_1e3_pjson  sz3         write  1525.0858  1520.7873    3.8050  0.4935       0.03
+miranda_sz3_1e3_pjson  sz3         read   829.1220   743.2010     1.5674  84.3536      10.17
+
+=== [miranda_sz3_1e3_pjson_native] results_vol (harness total + ratio + RMSE) ===
+dataset                                                                          compressor     path  op     phase  ms         ratio    rmse
+miranda                                                                          sz3_1e3_pjson  vol   write  total  1526.2025  57.6000  
+miranda                                                                          sz3_1e3_pjson  vol   read   total  829.2577            2.785627e-04
+/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_miranda_sz3_1e3_pjson_native.h5  ALL            vol   write  file   1527.7278  57.6000  
+/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_miranda_sz3_1e3_pjson_native.h5  ALL            vol   read   file   829.2577            
+
+=== [qmc_sz3_1e3_pjson_native] connector_phases (VOL total/compress/io) ===
+dataset                    compressor  op     total_ms     compress_ms  io_ms      overhead_ms  overhead_pct
+einspline37_sz3_1e3_pjson  sz3         write  120945.9197  119173.4580  1438.5013  333.9604     0.28
+einspline37_sz3_1e3_pjson  sz3         read   142578.4127  135637.0372  2633.0635  4308.3120    3.02
+
+=== [qmc_sz3_1e3_pjson_native] results_vol (harness total + ratio + RMSE) ===
+dataset                                                                      compressor     path  op     phase  ms           ratio   rmse
+einspline37                                                                  sz3_1e3_pjson  vol   write  total  120953.0095  3.3784  
+einspline37                                                                  sz3_1e3_pjson  vol   read   total  142578.5832          5.741519e-04
+/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_qmc_sz3_1e3_pjson_native.h5  ALL            vol   write  file   120973.1857  3.3784  
+/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_qmc_sz3_1e3_pjson_native.h5  ALL            vol   read   file   142578.5832          
+
+=== FILE-LEVEL summary (phase=file, per group × codec) ===
+/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_miranda_sz3_1e3_pjson_native.h5,ALL,vol,read,file,829.2577,,
+/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_miranda_sz3_1e3_pjson_native.h5,ALL,vol,write,file,1527.7278,57.6000,
+/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_qmc_sz3_1e3_pjson_native.h5,ALL,vol,read,file,142578.5832,,
+/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_qmc_sz3_1e3_pjson_native.h5,ALL,vol,write,file,120973.1857,3.3784,
+=== results_filter.csv ===
+dataset      compressor  path    op     phase  ms          ratio         rmse
+miranda      deflate     filter  write  total  7059.5624   2.0948        
+miranda      deflate     filter  read   total  1023.5782                 
+ocean_temp   deflate     filter  write  total  0.0174      0.0010        
+ocean_temp   deflate     filter  read   total  0.0088                    
+einspline37  deflate     filter  write  total  0.0559      6621509.5312  
+einspline37  deflate     filter  read   total  0.0700                    
+scale-T      deflate     filter  write  total  16275.0344  1.3769        
+scale-T      deflate     filter  read   total  2739.9372                 
+s3d          deflate     filter  write  total  30394.2433  1.1194        
+s3d          deflate     filter  read   total  4851.1889                 
+nyx_baryon   deflate     filter  write  total  0.0108      0.0010        
+nyx_baryon   deflate     filter  read   total  0.0088                    
+
+Job finished on Wed Jul 29 15:38:08 CDT 2026
