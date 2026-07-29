@@ -107,8 +107,8 @@ run_vol_group () {
     local tag="$1"; local sel="$2"; local comp="$3"; local mode="$4"; local nchunks="$5"
     local label="${tag}_${comp}_${mode:-native}${nchunks:+_N${nchunks}}"
     local h5="$H5DIR/bench_${label}.h5"          # big file off the quota'd home dir
-    local rcsv="$WORK/results_vol_${label}.csv"  # small CSVs stay in tests/
-    local pcsv="$WORK/connector_phases_${label}.csv"
+    local rcsv="$WORK/ignore_results_vol_${label}.csv"  # small CSVs stay in tests/
+    local pcsv="$WORK/ignore_connector_phases_${label}.csv"
     rm -f "$h5"
     echo ""
     echo "=== [1/3] VOL timing [$label] : $sel (chunking: ${mode:-native}${nchunks:+, N=${nchunks}}) ==="
