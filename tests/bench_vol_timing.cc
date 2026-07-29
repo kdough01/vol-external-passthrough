@@ -31,7 +31,7 @@ typedef struct { double min, max, mean, rmse; } bench_stats;
 static bench_stats bench_compute_stats(const void *orig, const void *dec,
                                        size_t nelem, bench_dtype_t dt,
                                        bench_xform_t xf) {
-    double mn = DBL_MAX, mx = -DBL_MAX, sum = 0.0, se = 0.0;
+    double mn = DBL_MAX, mx = -DBL_MAX, sum = 0.0, se = 0.0, maxae = 0.0;
     for (size_t i = 0; i < nelem; ++i) {
         double o = (dt == BENCH_F64) ? ((const double *)orig)[i]
                                      : (double)((const float *)orig)[i];
@@ -45,12 +45,58 @@ static bench_stats bench_compute_stats(const void *orig, const void *dec,
         sum += o;
         double e = o - v;
         se += e * e;
+        double ae = std::fabs(e); if (ae > maxae) maxae = ae;
     }
     bench_stats s;
     s.min = mn; s.max = mx;
     s.mean = sum / (double)nelem;
     s.rmse = std::sqrt(se / (double)nelem);
     return s;
+}
+
+static void bench_zero_run(const void *orig, const void *dec,
+                           size_t nelem, bench_dtype_t dt, const char *label) {
+    size_t total = 0, run = 0, best = 0, best_start = 0, cur = 0;
+    for (size_t i = 0; i < nelem; ++i) {
+        double o = (dt==BENCH_F64)? ((const double*)orig)[i] : (double)((const float*)orig)[i];
+        double v = (dt==BENCH_F64)? ((const double*)dec )[i] : (double)((const float*)dec )[i];
+        if (v == 0.0 && o != 0.0) {
+            if (run == 0) cur = i;
+            if (++run > best) { best = run; best_start = cur; }
+            ++total;
+        } else run = 0;
+    }
+    std::fprintf(stderr,
+        "[zerorun] %-28s fill_zeros=%zu (%.2f%%)  longest=%zu @ [%zu..%zu]\n",
+        label, total, 100.0*total/nelem, best, best_start, best_start + best);
+}
+
+static int bench_check_chunks(const void *orig, const void *dec, size_t nelem,
+                              bench_dtype_t dt, int nchunks, double bound,
+                              const char *label) {
+    if (nchunks < 1) nchunks = 1;
+    size_t base = nelem / (size_t)nchunks, rem = nelem % (size_t)nchunks, off = 0;
+    int bad = 0;
+    for (int c = 0; c < nchunks; ++c) {
+        size_t cn = base + ((size_t)c < rem ? 1 : 0);   // if your VOL puts the whole
+        // remainder in the LAST chunk, use: cn = base + (c==nchunks-1 ? rem : 0);
+        double se = 0.0, maxae = 0.0; size_t nz = 0;
+        for (size_t i = off; i < off + cn; ++i) {
+            double o = (dt==BENCH_F64)? ((const double*)orig)[i] : (double)((const float*)orig)[i];
+            double v = (dt==BENCH_F64)? ((const double*)dec )[i] : (double)((const float*)dec )[i];
+            double e = o - v, ae = std::fabs(e);
+            se += e*e; if (ae > maxae) maxae = ae;
+            if (v == 0.0 && o != 0.0) ++nz;
+        }
+        int chunk_bad = (maxae > 100.0*bound) || ((double)nz/cn > 0.5);
+        bad += chunk_bad;
+        std::fprintf(stderr,
+            "[chunkchk] %-28s chunk %2d/%-2d n=%zu rmse=%.3e maxae=%.3e fillzero=%zu %s\n",
+            label, c, nchunks, cn, std::sqrt(se/cn), maxae, nz, chunk_bad ? "<-- BAD" : "");
+        off += cn;
+    }
+    if (bad) std::fprintf(stderr, "[chunkchk] %-28s **%d/%d chunks bad**\n", label, bad, nchunks);
+    return bad;
 }
 
 static void *load_field(const bench_dataset_t *d, size_t *nbytes_out) {
@@ -148,13 +194,13 @@ static void run_pair(hid_t file, const bench_dataset_t *d,
     H5Dclose(dset); H5Sclose(space);
     if (rret < 0) { std::fprintf(stderr, "[ERR] H5Dread failed %s\n", dsname); return; }
 
+    int nchunks = 1;
+    if (const char *s = std::getenv("VOL_COMP_CHUNK_N")) nchunks = std::atoi(s);
+    bench_zero_run(hbuf, rbuf, nelem, d->dtype, dsname);
+    bench_check_chunks(hbuf, rbuf, nelem, d->dtype, nchunks, d->bound, dsname);
+
     if (acc) { acc->read_ms += rms; acc->n += 1; }   /* count dataset once */
 
-    /* Two views of fidelity:
-     *   st_tx  = error in the space the codec bounds (transformed) -> bound check
-     *   st_lin = error inverse-transformed to physical units       -> reported   */
-/* RMSE in the space the codec bounds (transformed for log/asinh rows).
-     * For untransformed rows st_tx is already physical -- nothing changes. */
     bench_stats st_tx = bench_compute_stats(hbuf, rbuf, nelem, d->dtype, BENCH_XFORM_NONE);
 
     if (dbg) {
