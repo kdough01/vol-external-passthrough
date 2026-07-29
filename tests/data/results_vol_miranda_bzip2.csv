@@ -1,5 +1,0 @@
-dataset,compressor,path,op,phase,ms,ratio,rmse
-miranda,bzip2,vol,write,total,22926.8488,2.3415,
-miranda,bzip2,vol,read,total,11391.7041,,0.000000e+00
-/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_miranda_bzip2.h5,ALL,vol,write,file,22930.3235,2.3415,
-/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_miranda_bzip2.h5,ALL,vol,read,file,11391.7041,,

@@ -99,11 +99,15 @@ PLUGIN_DIR="$(pwd)/build"
 # The env vars override any vol:* keys in opts_json, so the *_pjson JSON-path
 # runs below must be launched with MODE="" and NCHUNKS="".
 # ---------------------------------------------------------------------------
+# put the big, disposable .h5 files on your SDR project allocation, not home
+H5DIR="${VOL_H5DIR:-/lcrc/project/SDR/$USER/vol_bench_h5}"
+mkdir -p "$H5DIR" || { echo "cannot create $H5DIR"; exit 1; }
+
 run_vol_group () {
     local tag="$1"; local sel="$2"; local comp="$3"; local mode="$4"; local nchunks="$5"
     local label="${tag}_${comp}_${mode:-native}${nchunks:+_N${nchunks}}"
-    local h5="$WORK/bench_${label}.h5"
-    local rcsv="$WORK/results_vol_${label}.csv"
+    local h5="$H5DIR/bench_${label}.h5"          # big file off the quota'd home dir
+    local rcsv="$WORK/results_vol_${label}.csv"  # small CSVs stay in tests/
     local pcsv="$WORK/connector_phases_${label}.csv"
     rm -f "$h5"
     echo ""
@@ -117,7 +121,12 @@ run_vol_group () {
         BENCH_ONLY="$sel" \
         BENCH_COMP="$comp" \
         BENCH_CSV="$pcsv" \
-        ./build/tests/bench_vol_timing "$h5" "$rcsv"
+        timeout --signal=KILL 900 ./build/tests/bench_vol_timing "$h5" "$rcsv"
+    local rc=$?
+    rm -f "$h5"                                  # reclaim space EVERY time, even on failure/timeout
+    [ $rc -eq 137 ] && echo "  [warn] $label killed by timeout — moving on"
+    [ $rc -ne 0 ]  && echo "  [warn] $label exited rc=$rc — moving on"
+    return 0                                     # never let one run abort the sweep
 }
 
 declare -A DATASET=(

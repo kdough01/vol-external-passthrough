@@ -1,5 +1,0 @@
-dataset,compressor,path,op,phase,ms,ratio,rmse
-ocean_temp,bzip2,vol,write,total,12498.8435,1.5017,
-ocean_temp,bzip2,vol,read,total,5831.3947,,0.000000e+00
-/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_ocean_bzip2.h5,ALL,vol,write,file,12502.9115,1.5017,
-/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_ocean_bzip2.h5,ALL,vol,read,file,5831.3947,,

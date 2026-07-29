@@ -98,7 +98,7 @@ static const bench_dataset_t BENCH_DATASETS[] = {
         3, {98, 1200, 1200, 0}, BENCH_F32,
         BENCH_BOUND_REL, 1e-3, 0.0, 1,
         "SCALE-LETKF air temperature. Smooth, well-correlated; representative easy case.",
-        BENCH_SRC_RAW, NULL
+        BENCH_SRC_RAW, NULL, BENCH_XFORM_LOG1P
     },
 
     {
@@ -116,7 +116,7 @@ static const bench_dataset_t BENCH_DATASETS[] = {
         0, {0, 0, 0, 0}, BENCH_F32,
         BENCH_BOUND_REL, 1e-3, 0.0, 1,
         "NYX 512^3.",
-        BENCH_SRC_HDF5, "/native_fields/baryon_density"
+        BENCH_SRC_HDF5, "/native_fields/baryon_density", BENCH_XFORM_LOG1P
     },
 
     // --------------------------------------------------------------------
