@@ -1,0 +1,7 @@
+dataset,compressor,path,op,phase,ms,ratio,rmse
+miranda,cuszp_1e6,vol,write,total,727.4368,11.0769,
+miranda,cuszp_1e6,vol,write,flush,0.3051,,
+miranda,cuszp_1e6,vol,write,close,0.2576,,
+miranda,cuszp_1e6,vol,read,total,584.7125,,3.091485e-07
+/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_miranda_cuszp_1e6_pressio_N8.h5,ALL,vol,write,file,729.2748,11.0769,
+/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_miranda_cuszp_1e6_pressio_N8.h5,ALL,vol,read,file,585.1505,,

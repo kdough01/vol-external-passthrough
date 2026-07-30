@@ -1,0 +1,879 @@
+Job started on Wed Jul 29 21:31:07 CDT 2026
+Running on: gpu2
+PWD: /home/kdougherty/hdf5_projs/vol-external-passthrough
+mpicc:   /gpfs/fs1/home/software/swing/HPCX/hpcx-v2.26-gcc-doca_ofed-ubuntu22.04-cuda13-x86_64/ompi4/bin/mpicc
+nvcc:    /gpfs/fs1/soft/swing/software/spack-built/linux-ubuntu22.04-x86_64/gcc-11.4.0/cuda-12.6.0-qb3dlng/bin/nvcc
+gcc:     gcc (Ubuntu 11.4.0-1ubuntu1~22.04.2) 11.4.0
+GCC_LIB: /usr/lib/gcc/x86_64-linux-gnu/11
+gcc (Ubuntu 11.4.0-1ubuntu1~22.04.2) 11.4.0
+Copyright (C) 2021 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+LibPressio cmake dir: /home/kdougherty/libpressio_cuda/.spack-env/view/lib/cmake/LibPressio
+
+=== Building (USE_CUDA=ON -> CUDA-event timing in the connector) ===
+-- The C compiler identification is GNU 11.4.0
+-- The CXX compiler identification is GNU 11.4.0
+-- The CUDA compiler identification is NVIDIA 12.9.86
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /gpfs/fs1/home/software/swing/HPCX/hpcx-v2.26-gcc-doca_ofed-ubuntu22.04-cuda13-x86_64/ompi4/bin/mpicc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /gpfs/fs1/home/software/swing/HPCX/hpcx-v2.26-gcc-doca_ofed-ubuntu22.04-cuda13-x86_64/ompi4/bin/mpicxx - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Detecting CUDA compiler ABI info
+-- Detecting CUDA compiler ABI info - done
+-- Check for working CUDA compiler: /home/kdougherty/libpressio_cuda/.spack-env/view/bin/nvcc - skipped
+-- Detecting CUDA compile features
+-- Detecting CUDA compile features - done
+-- Found HDF5: hdf5-shared (found version "1.14.6")  
+-- Found OpenMP_C: -fopenmp (found version "4.5") 
+-- Found OpenMP_CXX: -fopenmp (found version "4.5") 
+-- Found OpenMP: TRUE (found version "4.5")  
+-- Found BZip2: /home/kdougherty/libpressio_cuda/.spack-env/view/lib/libbz2.so (found version "1.0.8") 
+-- Looking for BZ2_bzCompressInit
+-- Looking for BZ2_bzCompressInit - found
+-- Found ZFP: /home/kdougherty/libpressio_cuda/.spack-env/view/lib/cmake/zfp/zfp-config.cmake (found version "0.5.5") 
+-- Found OpenMP_C: -fopenmp (found version "4.5") 
+-- Found OpenMP_CXX: -fopenmp (found version "4.5") 
+-- Found PkgConfig: /home/kdougherty/libpressio_cuda/.spack-env/view/bin/pkg-config (found version "2.5.1") 
+-- Found GSL: /home/kdougherty/libpressio_cuda/.spack-env/view/include (found version "2.8") 
+-- Checking for one of the modules 'libzstd'
+-- Checking for one of the modules 'blosc'
+-- Found CUDAToolkit: /home/kdougherty/libpressio_cuda/.spack-env/view/include (found version "12.9.86") 
+-- Looking for pthread.h
+-- Looking for pthread.h - found
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE  
+-- Found HDF5: hdf5-shared (found version "1.14.6") found components: C 
+-- Found MPI_C: /gpfs/fs1/home/software/swing/HPCX/hpcx-v2.26-gcc-doca_ofed-ubuntu22.04-cuda13-x86_64/ompi4/bin/mpicc (found version "3.1") 
+-- Found MPI_CXX: /gpfs/fs1/home/software/swing/HPCX/hpcx-v2.26-gcc-doca_ofed-ubuntu22.04-cuda13-x86_64/ompi4/bin/mpicxx (found version "3.1") 
+-- Found MPI: TRUE (found version "3.1")  
+-- Found MPI: TRUE (found version "3.1") found components: CXX 
+-- Checking for one of the modules 'lua;luajit'
+-- Found nlohmann_json: /home/kdougherty/libpressio_cuda/.spack-env/view/share/cmake/nlohmann_json/nlohmann_jsonConfig.cmake (found version "3.12.0") 
+-- Found Python3: /home/kdougherty/libpressio_cuda/.spack-env/view/bin/python3 (found version "3.14.5") found components: Interpreter Development NumPy Development.Module Development.Embed 
+-- Found SWIG: /home/kdougherty/libpressio_cuda/.spack-env/view/bin/swig4.0 (found version "4.1.1")  
+-- Found MPI: TRUE (found version "3.1")  
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/kdougherty/hdf5_projs/vol-external-passthrough/build
+[  4%] Building C object CMakeFiles/hdf5_vol_passthrough.dir/H5VLpassthru_ext.c.o
+[  9%] Building CXX object tests/CMakeFiles/dump_cuszp_opts.dir/dump_cuszp_opts.cc.o
+[ 14%] Building CXX object CMakeFiles/hdf5_vol_passthrough.dir/compress.cc.o
+[ 19%] Linking CXX executable dump_cuszp_opts
+/home/kdougherty/hdf5_projs/vol-external-passthrough/H5VLpassthru_ext.c: In function 'H5VL_pass_through_ext_dataset_write':
+/home/kdougherty/hdf5_projs/vol-external-passthrough/H5VLpassthru_ext.c:2535:24: warning: passing argument 5 of 'H5VL_pass_through_ext_compress_pressio' makes integer from pointer without a cast [-Wint-conversion]
+ 2535 |                        &blob, &clen, &chunk_elems);
+      |                        ^~~~~
+      |                        |
+      |                        void **
+/home/kdougherty/hdf5_projs/vol-external-passthrough/H5VLpassthru_ext.c:212:133: note: expected 'size_t' {aka 'long unsigned int'} but argument is of type 'void **'
+  212 | herr_t H5VL_pass_through_ext_compress_pressio(compression_ctx *ctx, const void *data, size_t nbytes, size_t chunk_bytes_req, size_t hdr_reserve, void **out_cbuf, uint64_t *out_csize, uint64_t *out_chunk_elems);
+      |                                                                                                                              ~~~~~~~^~~~~~~~~~~
+/home/kdougherty/hdf5_projs/vol-external-passthrough/H5VLpassthru_ext.c:2535:31: warning: passing argument 6 of 'H5VL_pass_through_ext_compress_pressio' from incompatible pointer type [-Wincompatible-pointer-types]
+ 2535 |                        &blob, &clen, &chunk_elems);
+      |                               ^~~~~
+      |                               |
+      |                               uint64_t * {aka long unsigned int *}
+/home/kdougherty/hdf5_projs/vol-external-passthrough/H5VLpassthru_ext.c:212:153: note: expected 'void **' but argument is of type 'uint64_t *' {aka 'long unsigned int *'}
+  212 | herr_t H5VL_pass_through_ext_compress_pressio(compression_ctx *ctx, const void *data, size_t nbytes, size_t chunk_bytes_req, size_t hdr_reserve, void **out_cbuf, uint64_t *out_csize, uint64_t *out_chunk_elems);
+      |                                                                                                                                                  ~~~~~~~^~~~~~~~
+/home/kdougherty/hdf5_projs/vol-external-passthrough/H5VLpassthru_ext.c:2533:20: error: too few arguments to function 'H5VL_pass_through_ext_compress_pressio'
+ 2533 |             cret = H5VL_pass_through_ext_compress_pressio(
+      |                    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/kdougherty/hdf5_projs/vol-external-passthrough/H5VLpassthru_ext.c:212:8: note: declared here
+  212 | herr_t H5VL_pass_through_ext_compress_pressio(compression_ctx *ctx, const void *data, size_t nbytes, size_t chunk_bytes_req, size_t hdr_reserve, void **out_cbuf, uint64_t *out_csize, uint64_t *out_chunk_elems);
+      |        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+gmake[2]: *** [CMakeFiles/hdf5_vol_passthrough.dir/build.make:76: CMakeFiles/hdf5_vol_passthrough.dir/H5VLpassthru_ext.c.o] Error 1
+gmake[2]: *** Waiting for unfinished jobs....
+[ 19%] Built target dump_cuszp_opts
+gmake[1]: *** [CMakeFiles/Makefile2:116: CMakeFiles/hdf5_vol_passthrough.dir/all] Error 2
+gmake: *** [Makefile:136: all] Error 2
+--- build/ ---
+CMakeCache.txt
+CMakeFiles
+Makefile
+cmake_install.cmake
+tests
+--- build/tests/ ---
+CMakeFiles
+Makefile
+cmake_install.cmake
+dump_cuszp_opts
+
+=== [0] cuszp option keys: looking for a cuda_stream knob ===
+cuszp:metric <char*> = "noop"
+cuszp:mode <int32> = 0
+cuszp:mode_str <char*> = "plain"
+--- stream keys ---
+*** NO STREAM OPTION FOUND for cuszp. ***
+*** device_ms from CUDA events will NOT be trustworthy.            ***
+*** Report host wall-clock only, and use nsys for device evidence. ***
+
+=== [1] noop instrumentation gate (miranda) ===
+
+=== VOL timing [gate_noop_native] : miranda (chunking: native) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] gate_noop_native exited rc=127 — recorded as rep=-1
+  [FAIL] no connector CSV produced — is BENCH_CSV reaching the connector?
+
+=== [2] repetition diagnostic (miranda x cuszp, 4 reps) ===
+
+=== VOL timing [reps_cuszp_1e3_native] : miranda (chunking: native) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] reps_cuszp_1e3_native exited rc=127 — recorded as rep=-1
+
+=== VOL timing [reps_cuszp_1e6_native] : miranda (chunking: native) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] reps_cuszp_1e6_native exited rc=127 — recorded as rep=-1
+
+--- per-rep timings (look for r0 as an outlier) ---
+== results_ext_reps_cuszp_1e3_native.csv ==
+  rep -1  create=   -1.00 write=     -1.00 flush=    -1.00 close=    -1.00 open=   -1.00 read=     -1.00 ratio=  0.00
+== results_ext_reps_cuszp_1e6_native.csv ==
+  rep -1  create=   -1.00 write=     -1.00 flush=    -1.00 close=    -1.00 open=   -1.00 read=     -1.00 ratio=  0.00
+
+=== [3] full sweep ===
+
+=== VOL timing [miranda_noop_native] : miranda (chunking: native) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] miranda_noop_native exited rc=127 — recorded as rep=-1
+
+=== VOL timing [scale-T_noop_native] : scale-T (chunking: native) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] scale-T_noop_native exited rc=127 — recorded as rep=-1
+
+=== VOL timing [s3d_noop_native] : s3d (chunking: native) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] s3d_noop_native exited rc=127 — recorded as rep=-1
+
+=== VOL timing [nyx_baryon_noop_native] : nyx_baryon (chunking: native) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] nyx_baryon_noop_native exited rc=127 — recorded as rep=-1
+
+=== VOL timing [ocean_temp_noop_native] : ocean_temp (chunking: native) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] ocean_temp_noop_native exited rc=127 — recorded as rep=-1
+
+=== VOL timing [qmc_noop_native] : einspline37 (chunking: native) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] qmc_noop_native exited rc=127 — recorded as rep=-1
+
+=== VOL timing [miranda_noop_vol_N8] : miranda (chunking: vol, N=8) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] miranda_noop_vol_N8 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [miranda_noop_vol_N16] : miranda (chunking: vol, N=16) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] miranda_noop_vol_N16 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [scale-T_noop_vol_N8] : scale-T (chunking: vol, N=8) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] scale-T_noop_vol_N8 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [scale-T_noop_vol_N16] : scale-T (chunking: vol, N=16) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] scale-T_noop_vol_N16 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [s3d_noop_vol_N8] : s3d (chunking: vol, N=8) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] s3d_noop_vol_N8 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [s3d_noop_vol_N16] : s3d (chunking: vol, N=16) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] s3d_noop_vol_N16 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [nyx_baryon_noop_vol_N8] : nyx_baryon (chunking: vol, N=8) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] nyx_baryon_noop_vol_N8 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [nyx_baryon_noop_vol_N16] : nyx_baryon (chunking: vol, N=16) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] nyx_baryon_noop_vol_N16 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [ocean_temp_noop_vol_N8] : ocean_temp (chunking: vol, N=8) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] ocean_temp_noop_vol_N8 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [ocean_temp_noop_vol_N16] : ocean_temp (chunking: vol, N=16) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] ocean_temp_noop_vol_N16 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [qmc_noop_vol_N8] : einspline37 (chunking: vol, N=8) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] qmc_noop_vol_N8 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [qmc_noop_vol_N16] : einspline37 (chunking: vol, N=16) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] qmc_noop_vol_N16 exited rc=127 — recorded as rep=-1
+
+=== skip: noop x pressio (rejected by the VOL by design) ===
+
+=== VOL timing [miranda_cuszp_1e3_native] : miranda (chunking: native) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] miranda_cuszp_1e3_native exited rc=127 — recorded as rep=-1
+
+=== VOL timing [scale-T_cuszp_1e3_native] : scale-T (chunking: native) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] scale-T_cuszp_1e3_native exited rc=127 — recorded as rep=-1
+
+=== VOL timing [s3d_cuszp_1e3_native] : s3d (chunking: native) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] s3d_cuszp_1e3_native exited rc=127 — recorded as rep=-1
+
+=== VOL timing [nyx_baryon_cuszp_1e3_native] : nyx_baryon (chunking: native) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] nyx_baryon_cuszp_1e3_native exited rc=127 — recorded as rep=-1
+
+=== VOL timing [ocean_temp_cuszp_1e3_native] : ocean_temp (chunking: native) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] ocean_temp_cuszp_1e3_native exited rc=127 — recorded as rep=-1
+
+=== VOL timing [qmc_cuszp_1e3_native] : einspline37 (chunking: native) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] qmc_cuszp_1e3_native exited rc=127 — recorded as rep=-1
+
+=== VOL timing [miranda_cuszp_1e3_vol_N8] : miranda (chunking: vol, N=8) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] miranda_cuszp_1e3_vol_N8 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [miranda_cuszp_1e3_vol_N16] : miranda (chunking: vol, N=16) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] miranda_cuszp_1e3_vol_N16 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [scale-T_cuszp_1e3_vol_N8] : scale-T (chunking: vol, N=8) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] scale-T_cuszp_1e3_vol_N8 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [scale-T_cuszp_1e3_vol_N16] : scale-T (chunking: vol, N=16) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] scale-T_cuszp_1e3_vol_N16 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [s3d_cuszp_1e3_vol_N8] : s3d (chunking: vol, N=8) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] s3d_cuszp_1e3_vol_N8 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [s3d_cuszp_1e3_vol_N16] : s3d (chunking: vol, N=16) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] s3d_cuszp_1e3_vol_N16 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [nyx_baryon_cuszp_1e3_vol_N8] : nyx_baryon (chunking: vol, N=8) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] nyx_baryon_cuszp_1e3_vol_N8 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [nyx_baryon_cuszp_1e3_vol_N16] : nyx_baryon (chunking: vol, N=16) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] nyx_baryon_cuszp_1e3_vol_N16 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [ocean_temp_cuszp_1e3_vol_N8] : ocean_temp (chunking: vol, N=8) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] ocean_temp_cuszp_1e3_vol_N8 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [ocean_temp_cuszp_1e3_vol_N16] : ocean_temp (chunking: vol, N=16) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] ocean_temp_cuszp_1e3_vol_N16 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [qmc_cuszp_1e3_vol_N8] : einspline37 (chunking: vol, N=8) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] qmc_cuszp_1e3_vol_N8 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [qmc_cuszp_1e3_vol_N16] : einspline37 (chunking: vol, N=16) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] qmc_cuszp_1e3_vol_N16 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [miranda_cuszp_1e3_pressio_N8] : miranda (chunking: pressio, N=8) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] miranda_cuszp_1e3_pressio_N8 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [miranda_cuszp_1e3_pressio_N16] : miranda (chunking: pressio, N=16) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] miranda_cuszp_1e3_pressio_N16 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [scale-T_cuszp_1e3_pressio_N8] : scale-T (chunking: pressio, N=8) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] scale-T_cuszp_1e3_pressio_N8 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [scale-T_cuszp_1e3_pressio_N16] : scale-T (chunking: pressio, N=16) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] scale-T_cuszp_1e3_pressio_N16 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [s3d_cuszp_1e3_pressio_N8] : s3d (chunking: pressio, N=8) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] s3d_cuszp_1e3_pressio_N8 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [s3d_cuszp_1e3_pressio_N16] : s3d (chunking: pressio, N=16) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] s3d_cuszp_1e3_pressio_N16 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [nyx_baryon_cuszp_1e3_pressio_N8] : nyx_baryon (chunking: pressio, N=8) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] nyx_baryon_cuszp_1e3_pressio_N8 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [nyx_baryon_cuszp_1e3_pressio_N16] : nyx_baryon (chunking: pressio, N=16) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] nyx_baryon_cuszp_1e3_pressio_N16 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [ocean_temp_cuszp_1e3_pressio_N8] : ocean_temp (chunking: pressio, N=8) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] ocean_temp_cuszp_1e3_pressio_N8 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [ocean_temp_cuszp_1e3_pressio_N16] : ocean_temp (chunking: pressio, N=16) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] ocean_temp_cuszp_1e3_pressio_N16 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [qmc_cuszp_1e3_pressio_N8] : einspline37 (chunking: pressio, N=8) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] qmc_cuszp_1e3_pressio_N8 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [qmc_cuszp_1e3_pressio_N16] : einspline37 (chunking: pressio, N=16) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] qmc_cuszp_1e3_pressio_N16 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [miranda_cuszp_1e6_native] : miranda (chunking: native) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] miranda_cuszp_1e6_native exited rc=127 — recorded as rep=-1
+
+=== VOL timing [scale-T_cuszp_1e6_native] : scale-T (chunking: native) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] scale-T_cuszp_1e6_native exited rc=127 — recorded as rep=-1
+
+=== VOL timing [s3d_cuszp_1e6_native] : s3d (chunking: native) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] s3d_cuszp_1e6_native exited rc=127 — recorded as rep=-1
+
+=== VOL timing [nyx_baryon_cuszp_1e6_native] : nyx_baryon (chunking: native) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] nyx_baryon_cuszp_1e6_native exited rc=127 — recorded as rep=-1
+
+=== VOL timing [ocean_temp_cuszp_1e6_native] : ocean_temp (chunking: native) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] ocean_temp_cuszp_1e6_native exited rc=127 — recorded as rep=-1
+
+=== VOL timing [qmc_cuszp_1e6_native] : einspline37 (chunking: native) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] qmc_cuszp_1e6_native exited rc=127 — recorded as rep=-1
+
+=== VOL timing [miranda_cuszp_1e6_vol_N8] : miranda (chunking: vol, N=8) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] miranda_cuszp_1e6_vol_N8 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [miranda_cuszp_1e6_vol_N16] : miranda (chunking: vol, N=16) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] miranda_cuszp_1e6_vol_N16 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [scale-T_cuszp_1e6_vol_N8] : scale-T (chunking: vol, N=8) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] scale-T_cuszp_1e6_vol_N8 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [scale-T_cuszp_1e6_vol_N16] : scale-T (chunking: vol, N=16) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] scale-T_cuszp_1e6_vol_N16 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [s3d_cuszp_1e6_vol_N8] : s3d (chunking: vol, N=8) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] s3d_cuszp_1e6_vol_N8 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [s3d_cuszp_1e6_vol_N16] : s3d (chunking: vol, N=16) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] s3d_cuszp_1e6_vol_N16 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [nyx_baryon_cuszp_1e6_vol_N8] : nyx_baryon (chunking: vol, N=8) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] nyx_baryon_cuszp_1e6_vol_N8 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [nyx_baryon_cuszp_1e6_vol_N16] : nyx_baryon (chunking: vol, N=16) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] nyx_baryon_cuszp_1e6_vol_N16 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [ocean_temp_cuszp_1e6_vol_N8] : ocean_temp (chunking: vol, N=8) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] ocean_temp_cuszp_1e6_vol_N8 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [ocean_temp_cuszp_1e6_vol_N16] : ocean_temp (chunking: vol, N=16) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] ocean_temp_cuszp_1e6_vol_N16 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [qmc_cuszp_1e6_vol_N8] : einspline37 (chunking: vol, N=8) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] qmc_cuszp_1e6_vol_N8 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [qmc_cuszp_1e6_vol_N16] : einspline37 (chunking: vol, N=16) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] qmc_cuszp_1e6_vol_N16 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [miranda_cuszp_1e6_pressio_N8] : miranda (chunking: pressio, N=8) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] miranda_cuszp_1e6_pressio_N8 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [miranda_cuszp_1e6_pressio_N16] : miranda (chunking: pressio, N=16) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] miranda_cuszp_1e6_pressio_N16 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [scale-T_cuszp_1e6_pressio_N8] : scale-T (chunking: pressio, N=8) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] scale-T_cuszp_1e6_pressio_N8 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [scale-T_cuszp_1e6_pressio_N16] : scale-T (chunking: pressio, N=16) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] scale-T_cuszp_1e6_pressio_N16 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [s3d_cuszp_1e6_pressio_N8] : s3d (chunking: pressio, N=8) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] s3d_cuszp_1e6_pressio_N8 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [s3d_cuszp_1e6_pressio_N16] : s3d (chunking: pressio, N=16) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] s3d_cuszp_1e6_pressio_N16 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [nyx_baryon_cuszp_1e6_pressio_N8] : nyx_baryon (chunking: pressio, N=8) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] nyx_baryon_cuszp_1e6_pressio_N8 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [nyx_baryon_cuszp_1e6_pressio_N16] : nyx_baryon (chunking: pressio, N=16) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] nyx_baryon_cuszp_1e6_pressio_N16 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [ocean_temp_cuszp_1e6_pressio_N8] : ocean_temp (chunking: pressio, N=8) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] ocean_temp_cuszp_1e6_pressio_N8 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [ocean_temp_cuszp_1e6_pressio_N16] : ocean_temp (chunking: pressio, N=16) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] ocean_temp_cuszp_1e6_pressio_N16 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [qmc_cuszp_1e6_pressio_N8] : einspline37 (chunking: pressio, N=8) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] qmc_cuszp_1e6_pressio_N8 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [qmc_cuszp_1e6_pressio_N16] : einspline37 (chunking: pressio, N=16) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] qmc_cuszp_1e6_pressio_N16 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [miranda_sz3_1e3_native] : miranda (chunking: native) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] miranda_sz3_1e3_native exited rc=127 — recorded as rep=-1
+
+=== VOL timing [scale-T_sz3_1e3_native] : scale-T (chunking: native) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] scale-T_sz3_1e3_native exited rc=127 — recorded as rep=-1
+
+=== VOL timing [s3d_sz3_1e3_native] : s3d (chunking: native) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] s3d_sz3_1e3_native exited rc=127 — recorded as rep=-1
+
+=== VOL timing [nyx_baryon_sz3_1e3_native] : nyx_baryon (chunking: native) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] nyx_baryon_sz3_1e3_native exited rc=127 — recorded as rep=-1
+
+=== VOL timing [ocean_temp_sz3_1e3_native] : ocean_temp (chunking: native) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] ocean_temp_sz3_1e3_native exited rc=127 — recorded as rep=-1
+
+=== VOL timing [qmc_sz3_1e3_native] : einspline37 (chunking: native) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] qmc_sz3_1e3_native exited rc=127 — recorded as rep=-1
+
+=== VOL timing [miranda_sz3_1e3_vol_N8] : miranda (chunking: vol, N=8) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] miranda_sz3_1e3_vol_N8 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [miranda_sz3_1e3_vol_N16] : miranda (chunking: vol, N=16) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] miranda_sz3_1e3_vol_N16 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [scale-T_sz3_1e3_vol_N8] : scale-T (chunking: vol, N=8) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] scale-T_sz3_1e3_vol_N8 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [scale-T_sz3_1e3_vol_N16] : scale-T (chunking: vol, N=16) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] scale-T_sz3_1e3_vol_N16 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [s3d_sz3_1e3_vol_N8] : s3d (chunking: vol, N=8) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] s3d_sz3_1e3_vol_N8 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [s3d_sz3_1e3_vol_N16] : s3d (chunking: vol, N=16) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] s3d_sz3_1e3_vol_N16 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [nyx_baryon_sz3_1e3_vol_N8] : nyx_baryon (chunking: vol, N=8) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] nyx_baryon_sz3_1e3_vol_N8 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [nyx_baryon_sz3_1e3_vol_N16] : nyx_baryon (chunking: vol, N=16) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] nyx_baryon_sz3_1e3_vol_N16 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [ocean_temp_sz3_1e3_vol_N8] : ocean_temp (chunking: vol, N=8) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] ocean_temp_sz3_1e3_vol_N8 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [ocean_temp_sz3_1e3_vol_N16] : ocean_temp (chunking: vol, N=16) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] ocean_temp_sz3_1e3_vol_N16 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [qmc_sz3_1e3_vol_N8] : einspline37 (chunking: vol, N=8) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] qmc_sz3_1e3_vol_N8 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [qmc_sz3_1e3_vol_N16] : einspline37 (chunking: vol, N=16) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] qmc_sz3_1e3_vol_N16 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [miranda_sz3_1e3_pressio_N8] : miranda (chunking: pressio, N=8) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] miranda_sz3_1e3_pressio_N8 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [miranda_sz3_1e3_pressio_N16] : miranda (chunking: pressio, N=16) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] miranda_sz3_1e3_pressio_N16 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [scale-T_sz3_1e3_pressio_N8] : scale-T (chunking: pressio, N=8) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] scale-T_sz3_1e3_pressio_N8 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [scale-T_sz3_1e3_pressio_N16] : scale-T (chunking: pressio, N=16) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] scale-T_sz3_1e3_pressio_N16 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [s3d_sz3_1e3_pressio_N8] : s3d (chunking: pressio, N=8) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] s3d_sz3_1e3_pressio_N8 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [s3d_sz3_1e3_pressio_N16] : s3d (chunking: pressio, N=16) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] s3d_sz3_1e3_pressio_N16 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [nyx_baryon_sz3_1e3_pressio_N8] : nyx_baryon (chunking: pressio, N=8) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] nyx_baryon_sz3_1e3_pressio_N8 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [nyx_baryon_sz3_1e3_pressio_N16] : nyx_baryon (chunking: pressio, N=16) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] nyx_baryon_sz3_1e3_pressio_N16 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [ocean_temp_sz3_1e3_pressio_N8] : ocean_temp (chunking: pressio, N=8) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] ocean_temp_sz3_1e3_pressio_N8 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [ocean_temp_sz3_1e3_pressio_N16] : ocean_temp (chunking: pressio, N=16) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] ocean_temp_sz3_1e3_pressio_N16 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [qmc_sz3_1e3_pressio_N8] : einspline37 (chunking: pressio, N=8) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] qmc_sz3_1e3_pressio_N8 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [qmc_sz3_1e3_pressio_N16] : einspline37 (chunking: pressio, N=16) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] qmc_sz3_1e3_pressio_N16 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [miranda_sz3_1e6_native] : miranda (chunking: native) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] miranda_sz3_1e6_native exited rc=127 — recorded as rep=-1
+
+=== VOL timing [scale-T_sz3_1e6_native] : scale-T (chunking: native) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] scale-T_sz3_1e6_native exited rc=127 — recorded as rep=-1
+
+=== VOL timing [s3d_sz3_1e6_native] : s3d (chunking: native) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] s3d_sz3_1e6_native exited rc=127 — recorded as rep=-1
+
+=== VOL timing [nyx_baryon_sz3_1e6_native] : nyx_baryon (chunking: native) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] nyx_baryon_sz3_1e6_native exited rc=127 — recorded as rep=-1
+
+=== VOL timing [ocean_temp_sz3_1e6_native] : ocean_temp (chunking: native) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] ocean_temp_sz3_1e6_native exited rc=127 — recorded as rep=-1
+
+=== VOL timing [qmc_sz3_1e6_native] : einspline37 (chunking: native) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] qmc_sz3_1e6_native exited rc=127 — recorded as rep=-1
+
+=== VOL timing [miranda_sz3_1e6_vol_N8] : miranda (chunking: vol, N=8) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] miranda_sz3_1e6_vol_N8 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [miranda_sz3_1e6_vol_N16] : miranda (chunking: vol, N=16) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] miranda_sz3_1e6_vol_N16 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [scale-T_sz3_1e6_vol_N8] : scale-T (chunking: vol, N=8) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] scale-T_sz3_1e6_vol_N8 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [scale-T_sz3_1e6_vol_N16] : scale-T (chunking: vol, N=16) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] scale-T_sz3_1e6_vol_N16 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [s3d_sz3_1e6_vol_N8] : s3d (chunking: vol, N=8) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] s3d_sz3_1e6_vol_N8 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [s3d_sz3_1e6_vol_N16] : s3d (chunking: vol, N=16) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] s3d_sz3_1e6_vol_N16 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [nyx_baryon_sz3_1e6_vol_N8] : nyx_baryon (chunking: vol, N=8) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] nyx_baryon_sz3_1e6_vol_N8 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [nyx_baryon_sz3_1e6_vol_N16] : nyx_baryon (chunking: vol, N=16) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] nyx_baryon_sz3_1e6_vol_N16 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [ocean_temp_sz3_1e6_vol_N8] : ocean_temp (chunking: vol, N=8) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] ocean_temp_sz3_1e6_vol_N8 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [ocean_temp_sz3_1e6_vol_N16] : ocean_temp (chunking: vol, N=16) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] ocean_temp_sz3_1e6_vol_N16 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [qmc_sz3_1e6_vol_N8] : einspline37 (chunking: vol, N=8) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] qmc_sz3_1e6_vol_N8 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [qmc_sz3_1e6_vol_N16] : einspline37 (chunking: vol, N=16) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] qmc_sz3_1e6_vol_N16 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [miranda_sz3_1e6_pressio_N8] : miranda (chunking: pressio, N=8) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] miranda_sz3_1e6_pressio_N8 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [miranda_sz3_1e6_pressio_N16] : miranda (chunking: pressio, N=16) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] miranda_sz3_1e6_pressio_N16 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [scale-T_sz3_1e6_pressio_N8] : scale-T (chunking: pressio, N=8) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] scale-T_sz3_1e6_pressio_N8 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [scale-T_sz3_1e6_pressio_N16] : scale-T (chunking: pressio, N=16) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] scale-T_sz3_1e6_pressio_N16 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [s3d_sz3_1e6_pressio_N8] : s3d (chunking: pressio, N=8) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] s3d_sz3_1e6_pressio_N8 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [s3d_sz3_1e6_pressio_N16] : s3d (chunking: pressio, N=16) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] s3d_sz3_1e6_pressio_N16 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [nyx_baryon_sz3_1e6_pressio_N8] : nyx_baryon (chunking: pressio, N=8) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] nyx_baryon_sz3_1e6_pressio_N8 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [nyx_baryon_sz3_1e6_pressio_N16] : nyx_baryon (chunking: pressio, N=16) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] nyx_baryon_sz3_1e6_pressio_N16 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [ocean_temp_sz3_1e6_pressio_N8] : ocean_temp (chunking: pressio, N=8) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] ocean_temp_sz3_1e6_pressio_N8 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [ocean_temp_sz3_1e6_pressio_N16] : ocean_temp (chunking: pressio, N=16) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] ocean_temp_sz3_1e6_pressio_N16 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [qmc_sz3_1e6_pressio_N8] : einspline37 (chunking: pressio, N=8) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] qmc_sz3_1e6_pressio_N8 exited rc=127 — recorded as rep=-1
+
+=== VOL timing [qmc_sz3_1e6_pressio_N16] : einspline37 (chunking: pressio, N=16) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] qmc_sz3_1e6_pressio_N16 exited rc=127 — recorded as rep=-1
+
+=== [4] JSON-path chunking selection (no VOL_COMP_* env set) ===
+
+=== VOL timing [miranda_sz3_1e3_vjson_native] : miranda (chunking: native) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] miranda_sz3_1e3_vjson_native exited rc=127 — recorded as rep=-1
+
+=== VOL timing [miranda_sz3_1e3_pjson_native] : miranda (chunking: native) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] miranda_sz3_1e3_pjson_native exited rc=127 — recorded as rep=-1
+
+=== VOL timing [miranda_cuszp_1e3_vjson_native] : miranda (chunking: native) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] miranda_cuszp_1e3_vjson_native exited rc=127 — recorded as rep=-1
+
+=== VOL timing [miranda_cuszp_1e3_pjson_native] : miranda (chunking: native) ===
+timeout: failed to run command './build/tests/bench_vol_timing': No such file or directory
+  [FAIL] miranda_cuszp_1e3_pjson_native exited rc=127 — recorded as rep=-1
+
+=== [6] Filter (deflate) timing ===
+/var/spool/pbs/mom_priv/jobs/51620.gpumgt1.SC: line 293: ./build/tests/bench_filter_timing: No such file or directory
+
+=== connector phase breakdown (per label) ===
+
+=== VOL overhead vs libpressio cost (write rows only) ===
+dataset compressor total_ms compress_ms vol_compress_ms pressio_host_ms device_ms io_ms container_ms residual%
+
+=== runs that FAILED or TIMED OUT (rep=-1) ===
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_gate_noop_native.csv: miranda noop
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_miranda_cuszp_1e3_native.csv: miranda cuszp_1e3
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_miranda_cuszp_1e3_pjson_native.csv: miranda cuszp_1e3_pjson
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_miranda_cuszp_1e3_pressio_N16.csv: miranda cuszp_1e3
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_miranda_cuszp_1e3_pressio_N8.csv: miranda cuszp_1e3
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_miranda_cuszp_1e3_vjson_native.csv: miranda cuszp_1e3_vjson
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_miranda_cuszp_1e3_vol_N16.csv: miranda cuszp_1e3
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_miranda_cuszp_1e3_vol_N8.csv: miranda cuszp_1e3
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_miranda_cuszp_1e6_native.csv: miranda cuszp_1e6
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_miranda_cuszp_1e6_pressio_N16.csv: miranda cuszp_1e6
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_miranda_cuszp_1e6_pressio_N8.csv: miranda cuszp_1e6
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_miranda_cuszp_1e6_vol_N16.csv: miranda cuszp_1e6
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_miranda_cuszp_1e6_vol_N8.csv: miranda cuszp_1e6
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_miranda_noop_native.csv: miranda noop
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_miranda_noop_vol_N16.csv: miranda noop
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_miranda_noop_vol_N8.csv: miranda noop
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_miranda_sz3_1e3_native.csv: miranda sz3_1e3
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_miranda_sz3_1e3_pjson_native.csv: miranda sz3_1e3_pjson
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_miranda_sz3_1e3_pressio_N16.csv: miranda sz3_1e3
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_miranda_sz3_1e3_pressio_N8.csv: miranda sz3_1e3
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_miranda_sz3_1e3_vjson_native.csv: miranda sz3_1e3_vjson
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_miranda_sz3_1e3_vol_N16.csv: miranda sz3_1e3
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_miranda_sz3_1e3_vol_N8.csv: miranda sz3_1e3
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_miranda_sz3_1e6_native.csv: miranda sz3_1e6
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_miranda_sz3_1e6_pressio_N16.csv: miranda sz3_1e6
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_miranda_sz3_1e6_pressio_N8.csv: miranda sz3_1e6
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_miranda_sz3_1e6_vol_N16.csv: miranda sz3_1e6
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_miranda_sz3_1e6_vol_N8.csv: miranda sz3_1e6
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_nyx_baryon_cuszp_1e3_native.csv: nyx_baryon cuszp_1e3
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_nyx_baryon_cuszp_1e3_pressio_N16.csv: nyx_baryon cuszp_1e3
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_nyx_baryon_cuszp_1e3_pressio_N8.csv: nyx_baryon cuszp_1e3
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_nyx_baryon_cuszp_1e3_vol_N16.csv: nyx_baryon cuszp_1e3
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_nyx_baryon_cuszp_1e3_vol_N8.csv: nyx_baryon cuszp_1e3
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_nyx_baryon_cuszp_1e6_native.csv: nyx_baryon cuszp_1e6
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_nyx_baryon_cuszp_1e6_pressio_N16.csv: nyx_baryon cuszp_1e6
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_nyx_baryon_cuszp_1e6_pressio_N8.csv: nyx_baryon cuszp_1e6
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_nyx_baryon_cuszp_1e6_vol_N16.csv: nyx_baryon cuszp_1e6
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_nyx_baryon_cuszp_1e6_vol_N8.csv: nyx_baryon cuszp_1e6
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_nyx_baryon_noop_native.csv: nyx_baryon noop
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_nyx_baryon_noop_vol_N16.csv: nyx_baryon noop
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_nyx_baryon_noop_vol_N8.csv: nyx_baryon noop
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_nyx_baryon_sz3_1e3_native.csv: nyx_baryon sz3_1e3
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_nyx_baryon_sz3_1e3_pressio_N16.csv: nyx_baryon sz3_1e3
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_nyx_baryon_sz3_1e3_pressio_N8.csv: nyx_baryon sz3_1e3
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_nyx_baryon_sz3_1e3_vol_N16.csv: nyx_baryon sz3_1e3
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_nyx_baryon_sz3_1e3_vol_N8.csv: nyx_baryon sz3_1e3
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_nyx_baryon_sz3_1e6_native.csv: nyx_baryon sz3_1e6
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_nyx_baryon_sz3_1e6_pressio_N16.csv: nyx_baryon sz3_1e6
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_nyx_baryon_sz3_1e6_pressio_N8.csv: nyx_baryon sz3_1e6
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_nyx_baryon_sz3_1e6_vol_N16.csv: nyx_baryon sz3_1e6
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_nyx_baryon_sz3_1e6_vol_N8.csv: nyx_baryon sz3_1e6
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_ocean_temp_cuszp_1e3_native.csv: ocean_temp cuszp_1e3
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_ocean_temp_cuszp_1e3_pressio_N16.csv: ocean_temp cuszp_1e3
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_ocean_temp_cuszp_1e3_pressio_N8.csv: ocean_temp cuszp_1e3
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_ocean_temp_cuszp_1e3_vol_N16.csv: ocean_temp cuszp_1e3
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_ocean_temp_cuszp_1e3_vol_N8.csv: ocean_temp cuszp_1e3
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_ocean_temp_cuszp_1e6_native.csv: ocean_temp cuszp_1e6
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_ocean_temp_cuszp_1e6_pressio_N16.csv: ocean_temp cuszp_1e6
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_ocean_temp_cuszp_1e6_pressio_N8.csv: ocean_temp cuszp_1e6
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_ocean_temp_cuszp_1e6_vol_N16.csv: ocean_temp cuszp_1e6
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_ocean_temp_cuszp_1e6_vol_N8.csv: ocean_temp cuszp_1e6
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_ocean_temp_noop_native.csv: ocean_temp noop
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_ocean_temp_noop_vol_N16.csv: ocean_temp noop
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_ocean_temp_noop_vol_N8.csv: ocean_temp noop
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_ocean_temp_sz3_1e3_native.csv: ocean_temp sz3_1e3
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_ocean_temp_sz3_1e3_pressio_N16.csv: ocean_temp sz3_1e3
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_ocean_temp_sz3_1e3_pressio_N8.csv: ocean_temp sz3_1e3
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_ocean_temp_sz3_1e3_vol_N16.csv: ocean_temp sz3_1e3
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_ocean_temp_sz3_1e3_vol_N8.csv: ocean_temp sz3_1e3
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_ocean_temp_sz3_1e6_native.csv: ocean_temp sz3_1e6
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_ocean_temp_sz3_1e6_pressio_N16.csv: ocean_temp sz3_1e6
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_ocean_temp_sz3_1e6_pressio_N8.csv: ocean_temp sz3_1e6
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_ocean_temp_sz3_1e6_vol_N16.csv: ocean_temp sz3_1e6
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_ocean_temp_sz3_1e6_vol_N8.csv: ocean_temp sz3_1e6
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_qmc_cuszp_1e3_native.csv: einspline37 cuszp_1e3
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_qmc_cuszp_1e3_pressio_N16.csv: einspline37 cuszp_1e3
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_qmc_cuszp_1e3_pressio_N8.csv: einspline37 cuszp_1e3
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_qmc_cuszp_1e3_vol_N16.csv: einspline37 cuszp_1e3
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_qmc_cuszp_1e3_vol_N8.csv: einspline37 cuszp_1e3
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_qmc_cuszp_1e6_native.csv: einspline37 cuszp_1e6
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_qmc_cuszp_1e6_pressio_N16.csv: einspline37 cuszp_1e6
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_qmc_cuszp_1e6_pressio_N8.csv: einspline37 cuszp_1e6
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_qmc_cuszp_1e6_vol_N16.csv: einspline37 cuszp_1e6
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_qmc_cuszp_1e6_vol_N8.csv: einspline37 cuszp_1e6
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_qmc_noop_native.csv: einspline37 noop
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_qmc_noop_vol_N16.csv: einspline37 noop
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_qmc_noop_vol_N8.csv: einspline37 noop
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_qmc_sz3_1e3_native.csv: einspline37 sz3_1e3
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_qmc_sz3_1e3_pressio_N16.csv: einspline37 sz3_1e3
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_qmc_sz3_1e3_pressio_N8.csv: einspline37 sz3_1e3
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_qmc_sz3_1e3_vol_N16.csv: einspline37 sz3_1e3
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_qmc_sz3_1e3_vol_N8.csv: einspline37 sz3_1e3
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_qmc_sz3_1e6_native.csv: einspline37 sz3_1e6
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_qmc_sz3_1e6_pressio_N16.csv: einspline37 sz3_1e6
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_qmc_sz3_1e6_pressio_N8.csv: einspline37 sz3_1e6
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_qmc_sz3_1e6_vol_N16.csv: einspline37 sz3_1e6
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_qmc_sz3_1e6_vol_N8.csv: einspline37 sz3_1e6
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_reps_cuszp_1e3_native.csv: miranda cuszp_1e3
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_reps_cuszp_1e6_native.csv: miranda cuszp_1e6
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_s3d_cuszp_1e3_native.csv: s3d cuszp_1e3
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_s3d_cuszp_1e3_pressio_N16.csv: s3d cuszp_1e3
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_s3d_cuszp_1e3_pressio_N8.csv: s3d cuszp_1e3
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_s3d_cuszp_1e3_vol_N16.csv: s3d cuszp_1e3
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_s3d_cuszp_1e3_vol_N8.csv: s3d cuszp_1e3
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_s3d_cuszp_1e6_native.csv: s3d cuszp_1e6
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_s3d_cuszp_1e6_pressio_N16.csv: s3d cuszp_1e6
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_s3d_cuszp_1e6_pressio_N8.csv: s3d cuszp_1e6
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_s3d_cuszp_1e6_vol_N16.csv: s3d cuszp_1e6
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_s3d_cuszp_1e6_vol_N8.csv: s3d cuszp_1e6
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_s3d_noop_native.csv: s3d noop
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_s3d_noop_vol_N16.csv: s3d noop
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_s3d_noop_vol_N8.csv: s3d noop
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_s3d_sz3_1e3_native.csv: s3d sz3_1e3
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_s3d_sz3_1e3_pressio_N16.csv: s3d sz3_1e3
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_s3d_sz3_1e3_pressio_N8.csv: s3d sz3_1e3
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_s3d_sz3_1e3_vol_N16.csv: s3d sz3_1e3
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_s3d_sz3_1e3_vol_N8.csv: s3d sz3_1e3
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_s3d_sz3_1e6_native.csv: s3d sz3_1e6
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_s3d_sz3_1e6_pressio_N16.csv: s3d sz3_1e6
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_s3d_sz3_1e6_pressio_N8.csv: s3d sz3_1e6
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_s3d_sz3_1e6_vol_N16.csv: s3d sz3_1e6
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_s3d_sz3_1e6_vol_N8.csv: s3d sz3_1e6
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_scale-T_cuszp_1e3_native.csv: scale-T cuszp_1e3
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_scale-T_cuszp_1e3_pressio_N16.csv: scale-T cuszp_1e3
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_scale-T_cuszp_1e3_pressio_N8.csv: scale-T cuszp_1e3
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_scale-T_cuszp_1e3_vol_N16.csv: scale-T cuszp_1e3
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_scale-T_cuszp_1e3_vol_N8.csv: scale-T cuszp_1e3
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_scale-T_cuszp_1e6_native.csv: scale-T cuszp_1e6
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_scale-T_cuszp_1e6_pressio_N16.csv: scale-T cuszp_1e6
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_scale-T_cuszp_1e6_pressio_N8.csv: scale-T cuszp_1e6
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_scale-T_cuszp_1e6_vol_N16.csv: scale-T cuszp_1e6
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_scale-T_cuszp_1e6_vol_N8.csv: scale-T cuszp_1e6
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_scale-T_noop_native.csv: scale-T noop
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_scale-T_noop_vol_N16.csv: scale-T noop
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_scale-T_noop_vol_N8.csv: scale-T noop
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_scale-T_sz3_1e3_native.csv: scale-T sz3_1e3
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_scale-T_sz3_1e3_pressio_N16.csv: scale-T sz3_1e3
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_scale-T_sz3_1e3_pressio_N8.csv: scale-T sz3_1e3
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_scale-T_sz3_1e3_vol_N16.csv: scale-T sz3_1e3
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_scale-T_sz3_1e3_vol_N8.csv: scale-T sz3_1e3
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_scale-T_sz3_1e6_native.csv: scale-T sz3_1e6
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_scale-T_sz3_1e6_pressio_N16.csv: scale-T sz3_1e6
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_scale-T_sz3_1e6_pressio_N8.csv: scale-T sz3_1e6
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_scale-T_sz3_1e6_vol_N16.csv: scale-T sz3_1e6
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_scale-T_sz3_1e6_vol_N8.csv: scale-T sz3_1e6
+
+=== fidelity failures (bound_ok=0, excluding failed runs) ===
+
+=== FILE-LEVEL summary ===
+
+=== results_filter.csv ===
+column: /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_filter.csv: No such file or directory
+
+Job finished on Wed Jul 29 21:31:19 CDT 2026
