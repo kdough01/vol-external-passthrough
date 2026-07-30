@@ -1,3 +1,0 @@
-dataset,compressor,path,op,phase,ms,ratio,rmse
-s3d,deflate,filter,write,total,30358.7981,1.1194,
-s3d,deflate,filter,read,total,4383.8613,,0.000000e+00

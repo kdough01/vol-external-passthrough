@@ -1,2 +1,0 @@
-dataset,compressor,codec_kind,chunk_n,rep,logical_bytes,stored_bytes,ratio,create_ms,write_ms,flush_ms,close_ms,open_ms,read_ms,rmse,abs_thresh,maxae,bound_ok
-s3d,deflate,cpu,16,0,1000000000,893348664,1.1194,1.1782,30746.4508,0.1650,0.3222,0.4387,4413.4570,0.000000e+00,0.000000e+00,0.000000e+00,1
