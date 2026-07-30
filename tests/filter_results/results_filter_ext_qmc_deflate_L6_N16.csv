@@ -1,2 +1,2 @@
 dataset,compressor,codec_kind,chunk_n,rep,logical_bytes,stored_bytes,ratio,create_ms,write_ms,flush_ms,close_ms,open_ms,read_ms,rmse,abs_thresh,maxae,bound_ok
-einspline37,deflate,cpu,8,0,13560851520,12813841077,1.0583,1.4159,414274.4215,0.2016,0.3441,0.4742,59439.7593,0.000000e+00,0.000000e+00,0.000000e+00,1
+einspline37,deflate,cpu,16,0,13560851520,12813838901,1.0583,1.2523,413548.3248,0.2146,0.4006,0.4851,59317.6220,0.000000e+00,0.000000e+00,0.000000e+00,1
