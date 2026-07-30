@@ -1,0 +1,7 @@
+dataset,compressor,path,op,phase,ms,ratio,rmse
+miranda,deflate,filter,write,total,7100.2579,2.0948,
+miranda,deflate,filter,read,total,1059.8193,,
+ocean_temp,deflate,filter,write,total,0.0292,0.0010,
+ocean_temp,deflate,filter,read,total,0.0096,,
+einspline37,deflate,filter,write,total,0.0503,6621509.5312,
+einspline37,deflate,filter,read,total,0.0757,,

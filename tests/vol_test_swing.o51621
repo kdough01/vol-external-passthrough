@@ -5187,3 +5187,2366 @@ sz3:regression <bool> = true
 sz3:regression2 <bool> = false
 sz3:rel_error_bound <double> = 0
 
+
+=== einspline37 (12932.6 MiB, float, raw) ===
+Info: 0x56204d7e85a0
+  einspline37_sz3_1e3          C=   2.33 W=114436.62 F=  364.30 X=    0.33 | O=   0.45 R=129163.02 ms  ratio=  3.38x  RMSE=5.742e-04 maxae=1.000e-03
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=2.33 write=114436.62 flush=364.30 close=0.33 => write_total=114803.58 ms | open=0.45 read=129163.02 => read_total=129163.47 ms | ratio=3.38x ===
+
+=== VOL timing [miranda_sz3_1e3_pressio_N8] : miranda (chunking: pressio, N=8) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_miranda_sz3_1e3_pressio_N8.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_vol_miranda_sz3_1e3_pressio_N8.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_miranda_sz3_1e3_pressio_N8.csv only=miranda comp=sz3_1e3 verify=0 keep_h5=0 debug=0
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 960.7 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE miranda        min=9.999878e-01 max=3.000046e+00 range=2.000058e+00 xform=none
+[chunk] sz3        N=8   -> 8 chunks x 37748736 B (36.000 MiB, 4718592 elems) total=301989888 B
+
+=== miranda (288.0 MiB, double, raw) ===
+Info: 0x55a89104c5c0
+  miranda_sz3_1e3              C=   2.29 W=  1473.46 F=    0.36 X=    0.29 | O=   0.45 R=   971.46 ms  ratio= 48.00x  RMSE=2.720e-04 maxae=1.000e-03
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=2.29 write=1473.46 flush=0.36 close=0.29 => write_total=1476.40 ms | open=0.45 read=971.46 => read_total=971.91 ms | ratio=48.00x ===
+
+=== VOL timing [miranda_sz3_1e3_pressio_N16] : miranda (chunking: pressio, N=16) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_miranda_sz3_1e3_pressio_N16.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_vol_miranda_sz3_1e3_pressio_N16.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_miranda_sz3_1e3_pressio_N16.csv only=miranda comp=sz3_1e3 verify=0 keep_h5=0 debug=0
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 960.7 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE miranda        min=9.999878e-01 max=3.000046e+00 range=2.000058e+00 xform=none
+[chunk] sz3        N=16  -> 16 chunks x 18874368 B (18.000 MiB, 2359296 elems) total=301989888 B
+
+=== miranda (288.0 MiB, double, raw) ===
+Info: 0x55859cc375c0
+  miranda_sz3_1e3              C=   1.24 W=  1459.56 F=    0.35 X=    0.26 | O=   0.44 R=   915.20 ms  ratio= 48.00x  RMSE=2.720e-04 maxae=1.000e-03
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.24 write=1459.56 flush=0.35 close=0.26 => write_total=1461.41 ms | open=0.44 read=915.20 => read_total=915.64 ms | ratio=48.00x ===
+
+=== VOL timing [scale-T_sz3_1e3_pressio_N8] : scale-T (chunking: pressio, N=8) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_scale-T_sz3_1e3_pressio_N8.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_vol_scale-T_sz3_1e3_pressio_N8.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_scale-T_sz3_1e3_pressio_N8.csv only=scale-T comp=sz3_1e3 verify=0 keep_h5=0 debug=0
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 960.7 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE scale-T        min=5.209023e+00 max=5.754571e+00 range=5.455480e-01 xform=log1p
+[chunk] sz3        N=8   -> 8 chunks x 70560000 B (67.291 MiB, 17640000 elems) total=564480000 B
+
+=== scale-T (538.3 MiB, float, raw, transformed) ===
+Info: 0x556cd1bc65c0
+  scale-T_sz3_1e3              C=   1.35 W=  3485.74 F=    0.36 X=    0.31 | O=   0.45 R=  2167.89 ms  ratio= 67.29x  RMSE=4.886e-04 maxae=1.002e-03 (log-space)
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.35 write=3485.74 flush=0.36 close=0.31 => write_total=3487.76 ms | open=0.45 read=2167.89 => read_total=2168.34 ms | ratio=67.29x ===
+
+=== VOL timing [scale-T_sz3_1e3_pressio_N16] : scale-T (chunking: pressio, N=16) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_scale-T_sz3_1e3_pressio_N16.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_vol_scale-T_sz3_1e3_pressio_N16.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_scale-T_sz3_1e3_pressio_N16.csv only=scale-T comp=sz3_1e3 verify=0 keep_h5=0 debug=0
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 960.7 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE scale-T        min=5.209023e+00 max=5.754571e+00 range=5.455480e-01 xform=log1p
+[chunk] sz3        N=16  -> 16 chunks x 35280000 B (33.646 MiB, 8820000 elems) total=564480000 B
+
+=== scale-T (538.3 MiB, float, raw, transformed) ===
+Info: 0x5605a80945c0
+  scale-T_sz3_1e3              C=   1.24 W=  3536.56 F=    0.37 X=    0.31 | O=   0.45 R=  2146.11 ms  ratio= 67.29x  RMSE=4.853e-04 maxae=1.002e-03 (log-space)
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.24 write=3536.56 flush=0.37 close=0.31 => write_total=3538.48 ms | open=0.45 read=2146.11 => read_total=2146.55 ms | ratio=67.29x ===
+
+=== VOL timing [s3d_sz3_1e3_pressio_N8] : s3d (chunking: pressio, N=8) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_s3d_sz3_1e3_pressio_N8.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_vol_s3d_sz3_1e3_pressio_N8.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_s3d_sz3_1e3_pressio_N8.csv only=s3d comp=sz3_1e3 verify=0 keep_h5=0 debug=0
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 960.7 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE s3d            min=-6.362436e-15 max=3.920002e-02 range=3.920002e-02 xform=none
+[chunk] sz3        N=8   -> 8 chunks x 125000000 B (119.209 MiB, 15625000 elems) total=1000000000 B
+
+=== s3d (953.7 MiB, double, raw) ===
+Info: 0x564a0d2805c0
+  s3d_sz3_1e3                  C=   1.24 W=  3084.80 F=    0.36 X=    0.27 | O=   0.62 R=  3055.52 ms  ratio=317.89x  RMSE=4.881e-04 maxae=1.000e-03
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.24 write=3084.80 flush=0.36 close=0.27 => write_total=3086.67 ms | open=0.62 read=3055.52 => read_total=3056.14 ms | ratio=317.89x ===
+
+=== VOL timing [s3d_sz3_1e3_pressio_N16] : s3d (chunking: pressio, N=16) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_s3d_sz3_1e3_pressio_N16.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_vol_s3d_sz3_1e3_pressio_N16.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_s3d_sz3_1e3_pressio_N16.csv only=s3d comp=sz3_1e3 verify=0 keep_h5=0 debug=0
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 960.7 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE s3d            min=-6.362436e-15 max=3.920002e-02 range=3.920002e-02 xform=none
+[chunk] sz3        N=16  -> 16 chunks x 62500000 B (59.605 MiB, 7812500 elems) total=1000000000 B
+
+=== s3d (953.7 MiB, double, raw) ===
+Info: 0x55dc784d55c0
+  s3d_sz3_1e3                  C=   1.26 W=  2836.51 F=    0.35 X=    0.30 | O=   0.65 R=  2807.71 ms  ratio=238.42x  RMSE=4.880e-04 maxae=1.000e-03
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.26 write=2836.51 flush=0.35 close=0.30 => write_total=2838.42 ms | open=0.65 read=2807.71 => read_total=2808.36 ms | ratio=238.42x ===
+
+=== VOL timing [nyx_baryon_sz3_1e3_pressio_N8] : nyx_baryon (chunking: pressio, N=8) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_nyx_baryon_sz3_1e3_pressio_N8.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_vol_nyx_baryon_sz3_1e3_pressio_N8.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_nyx_baryon_sz3_1e3_pressio_N8.csv only=nyx_baryon comp=sz3_1e3 verify=0 keep_h5=0 debug=0
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 960.7 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE nyx_baryon     min=5.637747e-02 max=1.166017e+01 range=1.160379e+01 xform=log1p
+[chunk] sz3        N=8   -> 8 chunks x 67108864 B (64.000 MiB, 16777216 elems) total=536870912 B
+
+=== nyx_baryon (512.0 MiB, float, hdf5, transformed) ===
+Info: 0x55f3dcc638d0
+  nyx_baryon_sz3_1e3           C=   1.06 W=  5881.96 F=  163.82 X=    0.19 | O=   0.53 R=  4910.12 ms  ratio=  5.63x  RMSE=5.773e-04 maxae=1.000e-03 (log-space)
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.06 write=5881.96 flush=163.82 close=0.19 => write_total=6047.02 ms | open=0.53 read=4910.12 => read_total=4910.65 ms | ratio=5.63x ===
+
+=== VOL timing [nyx_baryon_sz3_1e3_pressio_N16] : nyx_baryon (chunking: pressio, N=16) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_nyx_baryon_sz3_1e3_pressio_N16.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_vol_nyx_baryon_sz3_1e3_pressio_N16.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_nyx_baryon_sz3_1e3_pressio_N16.csv only=nyx_baryon comp=sz3_1e3 verify=0 keep_h5=0 debug=0
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 960.7 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE nyx_baryon     min=5.637747e-02 max=1.166017e+01 range=1.160379e+01 xform=log1p
+[chunk] sz3        N=16  -> 16 chunks x 33554432 B (32.000 MiB, 8388608 elems) total=536870912 B
+
+=== nyx_baryon (512.0 MiB, float, hdf5, transformed) ===
+Info: 0x55b0143fa8d0
+  nyx_baryon_sz3_1e3           C=   1.08 W=  5867.40 F=  109.59 X=    0.21 | O=   0.52 R=  4901.57 ms  ratio=  5.63x  RMSE=5.773e-04 maxae=1.000e-03 (log-space)
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.08 write=5867.40 flush=109.59 close=0.21 => write_total=5978.27 ms | open=0.52 read=4901.57 => read_total=4902.09 ms | ratio=5.63x ===
+
+=== VOL timing [ocean_temp_sz3_1e3_pressio_N8] : ocean_temp (chunking: pressio, N=8) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_ocean_temp_sz3_1e3_pressio_N8.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_vol_ocean_temp_sz3_1e3_pressio_N8.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_ocean_temp_sz3_1e3_pressio_N8.csv only=ocean_temp comp=sz3_1e3 verify=0 keep_h5=0 debug=0
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 960.7 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE ocean_temp     min=4.445019e+00 max=1.072704e+01 range=6.282023e+00 xform=none
+[chunk] sz3        N=8   -> 8 chunks x 16140480 B (15.393 MiB, 4035120 elems) total=129123840 B
+
+=== ocean_temp (123.1 MiB, float, hdf5) ===
+Info: 0x55ee602c6870
+  ocean_temp_sz3_1e3           C=   1.04 W=  1598.60 F=    0.29 X=    0.17 | O=   0.41 R=  1017.46 ms  ratio=  4.74x  RMSE=5.766e-04 maxae=9.999e-04
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.04 write=1598.60 flush=0.29 close=0.17 => write_total=1600.10 ms | open=0.41 read=1017.46 => read_total=1017.86 ms | ratio=4.74x ===
+
+=== VOL timing [ocean_temp_sz3_1e3_pressio_N16] : ocean_temp (chunking: pressio, N=16) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_ocean_temp_sz3_1e3_pressio_N16.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_vol_ocean_temp_sz3_1e3_pressio_N16.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_ocean_temp_sz3_1e3_pressio_N16.csv only=ocean_temp comp=sz3_1e3 verify=0 keep_h5=0 debug=0
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 960.7 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE ocean_temp     min=4.445019e+00 max=1.072704e+01 range=6.282023e+00 xform=none
+[chunk] sz3        N=16  -> 16 chunks x 8070240 B (7.696 MiB, 2017560 elems) total=129123840 B
+
+=== ocean_temp (123.1 MiB, float, hdf5) ===
+Info: 0x561841963870
+  ocean_temp_sz3_1e3           C=   1.03 W=  1894.53 F=    0.30 X=    0.18 | O=   0.40 R=  1038.09 ms  ratio=  4.74x  RMSE=5.768e-04 maxae=9.999e-04
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.03 write=1894.53 flush=0.30 close=0.18 => write_total=1896.03 ms | open=0.40 read=1038.09 => read_total=1038.49 ms | ratio=4.74x ===
+
+=== VOL timing [qmc_sz3_1e3_pressio_N8] : einspline37 (chunking: pressio, N=8) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_qmc_sz3_1e3_pressio_N8.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_vol_qmc_sz3_1e3_pressio_N8.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_qmc_sz3_1e3_pressio_N8.csv only=einspline37 comp=sz3_1e3 verify=0 keep_h5=0 debug=0
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 960.7 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE einspline37    min=-2.125822e+01 max=2.036857e+01 range=4.162679e+01 xform=none
+[chunk] sz3        N=8   -> 8 chunks x 1695106440 B (1616.579 MiB, 423776610 elems) total=13560851520 B
+
+=== einspline37 (12932.6 MiB, float, raw) ===
+Info: 0x5581cb13b5a0
+  einspline37_sz3_1e3          C=   1.32 W=116467.13 F=  116.36 X=   11.54 | O=   0.45 R=143127.43 ms  ratio=  3.37x  RMSE=5.742e-04 maxae=1.000e-03
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.32 write=116467.13 flush=116.36 close=11.54 => write_total=116596.35 ms | open=0.45 read=143127.43 => read_total=143127.88 ms | ratio=3.37x ===
+
+=== VOL timing [qmc_sz3_1e3_pressio_N16] : einspline37 (chunking: pressio, N=16) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_qmc_sz3_1e3_pressio_N16.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_vol_qmc_sz3_1e3_pressio_N16.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_qmc_sz3_1e3_pressio_N16.csv only=einspline37 comp=sz3_1e3 verify=0 keep_h5=0 debug=0
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 960.6 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE einspline37    min=-2.125822e+01 max=2.036857e+01 range=4.162679e+01 xform=none
+[chunk] sz3        N=16  -> 16 chunks x 847553220 B (808.290 MiB, 211888305 elems) total=13560851520 B
+
+=== einspline37 (12932.6 MiB, float, raw) ===
+Info: 0x5640578255a0
+  einspline37_sz3_1e3          C=   1.71 W=115623.44 F=    1.39 X=    0.35 | O=   0.47 R=141297.02 ms  ratio=  3.38x  RMSE=5.742e-04 maxae=1.000e-03
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.71 write=115623.44 flush=1.39 close=0.35 => write_total=115626.90 ms | open=0.47 read=141297.02 => read_total=141297.48 ms | ratio=3.38x ===
+
+=== VOL timing [miranda_sz3_1e6_native] : miranda (chunking: native) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_miranda_sz3_1e6_native.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_vol_miranda_sz3_1e6_native.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_miranda_sz3_1e6_native.csv only=miranda comp=sz3_1e6 verify=0 keep_h5=0 debug=0
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 960.6 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE miranda        min=9.999878e-01 max=3.000046e+00 range=2.000058e+00 xform=none
+[VOL stream] *** KEY NOT CONFIRMED *** 'sz3:cuda_stream' status=2 readback=(nil) expected=(nil)
+[VOL stream] GPU event timings (device_ms) are NOT trustworthy, and D2H ordering is not guaranteed.
+[VOL stream] Cross-check with: nsys stats --report cuda_gpu_trace
+[VOL stream] options declared by 'sz3':
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+pressio:rel <double> = <empty>
+sz3:abs_error_bound <double> = 1e-06
+sz3:algorithm <uint8> = 1
+sz3:algorithm_str <char*> = <empty>
+sz3:error_bound_mode <uint8> = 0
+sz3:error_bound_mode_str <char*> = <empty>
+sz3:interp_algo <uint8> = 1
+sz3:interp_direction <uint8> = 0
+sz3:intrep_algo_str <char*> = <empty>
+sz3:l2_norm_error_bound <double> = 0
+sz3:lorenzo <bool> = true
+sz3:lorenzo2 <bool> = false
+sz3:metric <char*> = "noop"
+sz3:openmp <bool> = false
+sz3:pred_dim <uint8> = 1
+sz3:psnr_error_bound <double> = 0
+sz3:quant_bin_size <int32> = 65536
+sz3:regression <bool> = true
+sz3:regression2 <bool> = false
+sz3:rel_error_bound <double> = 0
+
+[VOL stream] *** KEY NOT CONFIRMED *** 'sz3:cuda_stream' status=2 readback=(nil) expected=(nil)
+[VOL stream] GPU event timings (device_ms) are NOT trustworthy, and D2H ordering is not guaranteed.
+[VOL stream] Cross-check with: nsys stats --report cuda_gpu_trace
+[VOL stream] options declared by 'sz3':
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+pressio:rel <double> = <empty>
+sz3:abs_error_bound <double> = 1e-06
+sz3:algorithm <uint8> = 1
+sz3:algorithm_str <char*> = <empty>
+sz3:error_bound_mode <uint8> = 0
+sz3:error_bound_mode_str <char*> = <empty>
+sz3:interp_algo <uint8> = 1
+sz3:interp_direction <uint8> = 0
+sz3:intrep_algo_str <char*> = <empty>
+sz3:l2_norm_error_bound <double> = 0
+sz3:lorenzo <bool> = true
+sz3:lorenzo2 <bool> = false
+sz3:metric <char*> = "noop"
+sz3:openmp <bool> = false
+sz3:pred_dim <uint8> = 1
+sz3:psnr_error_bound <double> = 0
+sz3:quant_bin_size <int32> = 65536
+sz3:regression <bool> = true
+sz3:regression2 <bool> = false
+sz3:rel_error_bound <double> = 0
+
+
+=== miranda (288.0 MiB, double, raw) ===
+Info: 0x562ed606e5c0
+  miranda_sz3_1e6              C=   1.60 W=  1878.72 F=    0.29 X=    0.25 | O=   0.43 R=  1072.63 ms  ratio=  8.73x  RMSE=2.709e-07 maxae=1.000e-06
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.60 write=1878.72 flush=0.29 close=0.25 => write_total=1880.86 ms | open=0.43 read=1072.63 => read_total=1073.06 ms | ratio=8.73x ===
+
+=== VOL timing [scale-T_sz3_1e6_native] : scale-T (chunking: native) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_scale-T_sz3_1e6_native.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_vol_scale-T_sz3_1e6_native.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_scale-T_sz3_1e6_native.csv only=scale-T comp=sz3_1e6 verify=0 keep_h5=0 debug=0
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 960.6 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE scale-T        min=5.209023e+00 max=5.754571e+00 range=5.455480e-01 xform=log1p
+[VOL stream] *** KEY NOT CONFIRMED *** 'sz3:cuda_stream' status=2 readback=(nil) expected=(nil)
+[VOL stream] GPU event timings (device_ms) are NOT trustworthy, and D2H ordering is not guaranteed.
+[VOL stream] Cross-check with: nsys stats --report cuda_gpu_trace
+[VOL stream] options declared by 'sz3':
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+pressio:rel <double> = <empty>
+sz3:abs_error_bound <double> = 1e-06
+sz3:algorithm <uint8> = 1
+sz3:algorithm_str <char*> = <empty>
+sz3:error_bound_mode <uint8> = 0
+sz3:error_bound_mode_str <char*> = <empty>
+sz3:interp_algo <uint8> = 1
+sz3:interp_direction <uint8> = 0
+sz3:intrep_algo_str <char*> = <empty>
+sz3:l2_norm_error_bound <double> = 0
+sz3:lorenzo <bool> = true
+sz3:lorenzo2 <bool> = false
+sz3:metric <char*> = "noop"
+sz3:openmp <bool> = false
+sz3:pred_dim <uint8> = 1
+sz3:psnr_error_bound <double> = 0
+sz3:quant_bin_size <int32> = 65536
+sz3:regression <bool> = true
+sz3:regression2 <bool> = false
+sz3:rel_error_bound <double> = 0
+
+[VOL stream] *** KEY NOT CONFIRMED *** 'sz3:cuda_stream' status=2 readback=(nil) expected=(nil)
+[VOL stream] GPU event timings (device_ms) are NOT trustworthy, and D2H ordering is not guaranteed.
+[VOL stream] Cross-check with: nsys stats --report cuda_gpu_trace
+[VOL stream] options declared by 'sz3':
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+pressio:rel <double> = <empty>
+sz3:abs_error_bound <double> = 1e-06
+sz3:algorithm <uint8> = 1
+sz3:algorithm_str <char*> = <empty>
+sz3:error_bound_mode <uint8> = 0
+sz3:error_bound_mode_str <char*> = <empty>
+sz3:interp_algo <uint8> = 1
+sz3:interp_direction <uint8> = 0
+sz3:intrep_algo_str <char*> = <empty>
+sz3:l2_norm_error_bound <double> = 0
+sz3:lorenzo <bool> = true
+sz3:lorenzo2 <bool> = false
+sz3:metric <char*> = "noop"
+sz3:openmp <bool> = false
+sz3:pred_dim <uint8> = 1
+sz3:psnr_error_bound <double> = 0
+sz3:quant_bin_size <int32> = 65536
+sz3:regression <bool> = true
+sz3:regression2 <bool> = false
+sz3:rel_error_bound <double> = 0
+
+[FAIL] scale-T_sz3_1e6              maxae=4.768372e-06 exceeds 2x configured bound 1.000000e-06
+
+=== scale-T (538.3 MiB, float, raw, transformed) ===
+Info: 0x56269f2de5c0
+  scale-T_sz3_1e6              C=   1.27 W=  5569.10 F=   86.13 X=    0.38 | O=   0.44 R=  6254.44 ms  ratio=  3.02x  RMSE=6.622e-07 maxae=4.768e-06 (log-space)
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.27 write=5569.10 flush=86.13 close=0.38 => write_total=5656.87 ms | open=0.44 read=6254.44 => read_total=6254.88 ms | ratio=3.02x ===
+
+=== VOL timing [s3d_sz3_1e6_native] : s3d (chunking: native) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_s3d_sz3_1e6_native.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_vol_s3d_sz3_1e6_native.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_s3d_sz3_1e6_native.csv only=s3d comp=sz3_1e6 verify=0 keep_h5=0 debug=0
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 960.6 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE s3d            min=-6.362436e-15 max=3.920002e-02 range=3.920002e-02 xform=none
+[VOL stream] *** KEY NOT CONFIRMED *** 'sz3:cuda_stream' status=2 readback=(nil) expected=(nil)
+[VOL stream] GPU event timings (device_ms) are NOT trustworthy, and D2H ordering is not guaranteed.
+[VOL stream] Cross-check with: nsys stats --report cuda_gpu_trace
+[VOL stream] options declared by 'sz3':
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+pressio:rel <double> = <empty>
+sz3:abs_error_bound <double> = 1e-06
+sz3:algorithm <uint8> = 1
+sz3:algorithm_str <char*> = <empty>
+sz3:error_bound_mode <uint8> = 0
+sz3:error_bound_mode_str <char*> = <empty>
+sz3:interp_algo <uint8> = 1
+sz3:interp_direction <uint8> = 0
+sz3:intrep_algo_str <char*> = <empty>
+sz3:l2_norm_error_bound <double> = 0
+sz3:lorenzo <bool> = true
+sz3:lorenzo2 <bool> = false
+sz3:metric <char*> = "noop"
+sz3:openmp <bool> = false
+sz3:pred_dim <uint8> = 1
+sz3:psnr_error_bound <double> = 0
+sz3:quant_bin_size <int32> = 65536
+sz3:regression <bool> = true
+sz3:regression2 <bool> = false
+sz3:rel_error_bound <double> = 0
+
+[VOL stream] *** KEY NOT CONFIRMED *** 'sz3:cuda_stream' status=2 readback=(nil) expected=(nil)
+[VOL stream] GPU event timings (device_ms) are NOT trustworthy, and D2H ordering is not guaranteed.
+[VOL stream] Cross-check with: nsys stats --report cuda_gpu_trace
+[VOL stream] options declared by 'sz3':
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+pressio:rel <double> = <empty>
+sz3:abs_error_bound <double> = 1e-06
+sz3:algorithm <uint8> = 1
+sz3:algorithm_str <char*> = <empty>
+sz3:error_bound_mode <uint8> = 0
+sz3:error_bound_mode_str <char*> = <empty>
+sz3:interp_algo <uint8> = 1
+sz3:interp_direction <uint8> = 0
+sz3:intrep_algo_str <char*> = <empty>
+sz3:l2_norm_error_bound <double> = 0
+sz3:lorenzo <bool> = true
+sz3:lorenzo2 <bool> = false
+sz3:metric <char*> = "noop"
+sz3:openmp <bool> = false
+sz3:pred_dim <uint8> = 1
+sz3:psnr_error_bound <double> = 0
+sz3:quant_bin_size <int32> = 65536
+sz3:regression <bool> = true
+sz3:regression2 <bool> = false
+sz3:rel_error_bound <double> = 0
+
+
+=== s3d (953.7 MiB, double, raw) ===
+Info: 0x55bb9e8f25c0
+  s3d_sz3_1e6                  C=   1.21 W=  3267.02 F=    0.35 X=    0.27 | O=   0.45 R=  2103.15 ms  ratio=238.42x  RMSE=2.617e-07 maxae=1.000e-06
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.21 write=3267.02 flush=0.35 close=0.27 => write_total=3268.85 ms | open=0.45 read=2103.15 => read_total=2103.60 ms | ratio=238.42x ===
+
+=== VOL timing [nyx_baryon_sz3_1e6_native] : nyx_baryon (chunking: native) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_nyx_baryon_sz3_1e6_native.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_vol_nyx_baryon_sz3_1e6_native.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_nyx_baryon_sz3_1e6_native.csv only=nyx_baryon comp=sz3_1e6 verify=0 keep_h5=0 debug=0
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 960.6 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE nyx_baryon     min=5.637747e-02 max=1.166017e+01 range=1.160379e+01 xform=log1p
+[VOL stream] *** KEY NOT CONFIRMED *** 'sz3:cuda_stream' status=2 readback=(nil) expected=(nil)
+[VOL stream] GPU event timings (device_ms) are NOT trustworthy, and D2H ordering is not guaranteed.
+[VOL stream] Cross-check with: nsys stats --report cuda_gpu_trace
+[VOL stream] options declared by 'sz3':
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+pressio:rel <double> = <empty>
+sz3:abs_error_bound <double> = 1e-06
+sz3:algorithm <uint8> = 1
+sz3:algorithm_str <char*> = <empty>
+sz3:error_bound_mode <uint8> = 0
+sz3:error_bound_mode_str <char*> = <empty>
+sz3:interp_algo <uint8> = 1
+sz3:interp_direction <uint8> = 0
+sz3:intrep_algo_str <char*> = <empty>
+sz3:l2_norm_error_bound <double> = 0
+sz3:lorenzo <bool> = true
+sz3:lorenzo2 <bool> = false
+sz3:metric <char*> = "noop"
+sz3:openmp <bool> = false
+sz3:pred_dim <uint8> = 1
+sz3:psnr_error_bound <double> = 0
+sz3:quant_bin_size <int32> = 65536
+sz3:regression <bool> = true
+sz3:regression2 <bool> = false
+sz3:rel_error_bound <double> = 0
+
+[VOL stream] *** KEY NOT CONFIRMED *** 'sz3:cuda_stream' status=2 readback=(nil) expected=(nil)
+[VOL stream] GPU event timings (device_ms) are NOT trustworthy, and D2H ordering is not guaranteed.
+[VOL stream] Cross-check with: nsys stats --report cuda_gpu_trace
+[VOL stream] options declared by 'sz3':
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+pressio:rel <double> = <empty>
+sz3:abs_error_bound <double> = 1e-06
+sz3:algorithm <uint8> = 1
+sz3:algorithm_str <char*> = <empty>
+sz3:error_bound_mode <uint8> = 0
+sz3:error_bound_mode_str <char*> = <empty>
+sz3:interp_algo <uint8> = 1
+sz3:interp_direction <uint8> = 0
+sz3:intrep_algo_str <char*> = <empty>
+sz3:l2_norm_error_bound <double> = 0
+sz3:lorenzo <bool> = true
+sz3:lorenzo2 <bool> = false
+sz3:metric <char*> = "noop"
+sz3:openmp <bool> = false
+sz3:pred_dim <uint8> = 1
+sz3:psnr_error_bound <double> = 0
+sz3:quant_bin_size <int32> = 65536
+sz3:regression <bool> = true
+sz3:regression2 <bool> = false
+sz3:rel_error_bound <double> = 0
+
+
+=== nyx_baryon (512.0 MiB, float, hdf5, transformed) ===
+Info: 0x56317bb1c8d0
+  nyx_baryon_sz3_1e6           C=   1.05 W=  7783.50 F=  134.92 X=    0.20 | O=   0.52 R=  9448.16 ms  ratio=  2.20x  RMSE=5.531e-07 maxae=1.431e-06 (log-space)
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.05 write=7783.50 flush=134.92 close=0.20 => write_total=7919.67 ms | open=0.52 read=9448.16 => read_total=9448.68 ms | ratio=2.20x ===
+
+=== VOL timing [ocean_temp_sz3_1e6_native] : ocean_temp (chunking: native) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_ocean_temp_sz3_1e6_native.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_vol_ocean_temp_sz3_1e6_native.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_ocean_temp_sz3_1e6_native.csv only=ocean_temp comp=sz3_1e6 verify=0 keep_h5=0 debug=0
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 960.6 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE ocean_temp     min=4.445019e+00 max=1.072704e+01 range=6.282023e+00 xform=none
+[VOL stream] *** KEY NOT CONFIRMED *** 'sz3:cuda_stream' status=2 readback=(nil) expected=(nil)
+[VOL stream] GPU event timings (device_ms) are NOT trustworthy, and D2H ordering is not guaranteed.
+[VOL stream] Cross-check with: nsys stats --report cuda_gpu_trace
+[VOL stream] options declared by 'sz3':
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+pressio:rel <double> = <empty>
+sz3:abs_error_bound <double> = 1e-06
+sz3:algorithm <uint8> = 1
+sz3:algorithm_str <char*> = <empty>
+sz3:error_bound_mode <uint8> = 0
+sz3:error_bound_mode_str <char*> = <empty>
+sz3:interp_algo <uint8> = 1
+sz3:interp_direction <uint8> = 0
+sz3:intrep_algo_str <char*> = <empty>
+sz3:l2_norm_error_bound <double> = 0
+sz3:lorenzo <bool> = true
+sz3:lorenzo2 <bool> = false
+sz3:metric <char*> = "noop"
+sz3:openmp <bool> = false
+sz3:pred_dim <uint8> = 1
+sz3:psnr_error_bound <double> = 0
+sz3:quant_bin_size <int32> = 65536
+sz3:regression <bool> = true
+sz3:regression2 <bool> = false
+sz3:rel_error_bound <double> = 0
+
+[VOL stream] *** KEY NOT CONFIRMED *** 'sz3:cuda_stream' status=2 readback=(nil) expected=(nil)
+[VOL stream] GPU event timings (device_ms) are NOT trustworthy, and D2H ordering is not guaranteed.
+[VOL stream] Cross-check with: nsys stats --report cuda_gpu_trace
+[VOL stream] options declared by 'sz3':
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+pressio:rel <double> = <empty>
+sz3:abs_error_bound <double> = 1e-06
+sz3:algorithm <uint8> = 1
+sz3:algorithm_str <char*> = <empty>
+sz3:error_bound_mode <uint8> = 0
+sz3:error_bound_mode_str <char*> = <empty>
+sz3:interp_algo <uint8> = 1
+sz3:interp_direction <uint8> = 0
+sz3:intrep_algo_str <char*> = <empty>
+sz3:l2_norm_error_bound <double> = 0
+sz3:lorenzo <bool> = true
+sz3:lorenzo2 <bool> = false
+sz3:metric <char*> = "noop"
+sz3:openmp <bool> = false
+sz3:pred_dim <uint8> = 1
+sz3:psnr_error_bound <double> = 0
+sz3:quant_bin_size <int32> = 65536
+sz3:regression <bool> = true
+sz3:regression2 <bool> = false
+sz3:rel_error_bound <double> = 0
+
+
+=== ocean_temp (123.1 MiB, float, hdf5) ===
+Info: 0x55f3b7fd6870
+  ocean_temp_sz3_1e6           C=   1.03 W=  3238.01 F=    0.31 X=    0.19 | O=   0.52 R=  2172.10 ms  ratio=  1.56x  RMSE=5.193e-07 maxae=9.537e-07
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.03 write=3238.01 flush=0.31 close=0.19 => write_total=3239.54 ms | open=0.52 read=2172.10 => read_total=2172.62 ms | ratio=1.56x ===
+
+=== VOL timing [qmc_sz3_1e6_native] : einspline37 (chunking: native) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_qmc_sz3_1e6_native.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_vol_qmc_sz3_1e6_native.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_qmc_sz3_1e6_native.csv only=einspline37 comp=sz3_1e6 verify=0 keep_h5=0 debug=0
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 960.6 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE einspline37    min=-2.125822e+01 max=2.036857e+01 range=4.162679e+01 xform=none
+[VOL stream] *** KEY NOT CONFIRMED *** 'sz3:cuda_stream' status=2 readback=(nil) expected=(nil)
+[VOL stream] GPU event timings (device_ms) are NOT trustworthy, and D2H ordering is not guaranteed.
+[VOL stream] Cross-check with: nsys stats --report cuda_gpu_trace
+[VOL stream] options declared by 'sz3':
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+pressio:rel <double> = <empty>
+sz3:abs_error_bound <double> = 1e-06
+sz3:algorithm <uint8> = 1
+sz3:algorithm_str <char*> = <empty>
+sz3:error_bound_mode <uint8> = 0
+sz3:error_bound_mode_str <char*> = <empty>
+sz3:interp_algo <uint8> = 1
+sz3:interp_direction <uint8> = 0
+sz3:intrep_algo_str <char*> = <empty>
+sz3:l2_norm_error_bound <double> = 0
+sz3:lorenzo <bool> = true
+sz3:lorenzo2 <bool> = false
+sz3:metric <char*> = "noop"
+sz3:openmp <bool> = false
+sz3:pred_dim <uint8> = 1
+sz3:psnr_error_bound <double> = 0
+sz3:quant_bin_size <int32> = 65536
+sz3:regression <bool> = true
+sz3:regression2 <bool> = false
+sz3:rel_error_bound <double> = 0
+
+[VOL stream] *** KEY NOT CONFIRMED *** 'sz3:cuda_stream' status=2 readback=(nil) expected=(nil)
+[VOL stream] GPU event timings (device_ms) are NOT trustworthy, and D2H ordering is not guaranteed.
+[VOL stream] Cross-check with: nsys stats --report cuda_gpu_trace
+[VOL stream] options declared by 'sz3':
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+pressio:rel <double> = <empty>
+sz3:abs_error_bound <double> = 1e-06
+sz3:algorithm <uint8> = 1
+sz3:algorithm_str <char*> = <empty>
+sz3:error_bound_mode <uint8> = 0
+sz3:error_bound_mode_str <char*> = <empty>
+sz3:interp_algo <uint8> = 1
+sz3:interp_direction <uint8> = 0
+sz3:intrep_algo_str <char*> = <empty>
+sz3:l2_norm_error_bound <double> = 0
+sz3:lorenzo <bool> = true
+sz3:lorenzo2 <bool> = false
+sz3:metric <char*> = "noop"
+sz3:openmp <bool> = false
+sz3:pred_dim <uint8> = 1
+sz3:psnr_error_bound <double> = 0
+sz3:quant_bin_size <int32> = 65536
+sz3:regression <bool> = true
+sz3:regression2 <bool> = false
+sz3:rel_error_bound <double> = 0
+
+
+=== einspline37 (12932.6 MiB, float, raw) ===
+Info: 0x559fee0d45a0
+  einspline37_sz3_1e6          C=   1.35 W=204447.95 F=  454.35 X=    0.41 | O=   0.45 R=157076.38 ms  ratio=  1.27x  RMSE=2.848e-07 maxae=1.000e-06
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.35 write=204447.95 flush=454.35 close=0.41 => write_total=204904.06 ms | open=0.45 read=157076.38 => read_total=157076.83 ms | ratio=1.27x ===
+
+=== VOL timing [miranda_sz3_1e6_vol_N8] : miranda (chunking: vol, N=8) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_miranda_sz3_1e6_vol_N8.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_vol_miranda_sz3_1e6_vol_N8.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_miranda_sz3_1e6_vol_N8.csv only=miranda comp=sz3_1e6 verify=0 keep_h5=0 debug=0
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 960.6 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE miranda        min=9.999878e-01 max=3.000046e+00 range=2.000058e+00 xform=none
+[chunk] sz3        N=8   -> 8 chunks x 37748736 B (36.000 MiB, 4718592 elems) total=301989888 B
+[VOL RAGGED] dataset 0 'sz3': clean split, 8 x 37748736 B, no ragged tail
+[VOL stream] *** KEY NOT CONFIRMED *** 'sz3:cuda_stream' status=2 readback=(nil) expected=(nil)
+[VOL stream] GPU event timings (device_ms) are NOT trustworthy, and D2H ordering is not guaranteed.
+[VOL stream] Cross-check with: nsys stats --report cuda_gpu_trace
+[VOL stream] options declared by 'sz3':
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+pressio:rel <double> = <empty>
+sz3:abs_error_bound <double> = 1e-06
+sz3:algorithm <uint8> = 1
+sz3:algorithm_str <char*> = <empty>
+sz3:error_bound_mode <uint8> = 0
+sz3:error_bound_mode_str <char*> = <empty>
+sz3:interp_algo <uint8> = 1
+sz3:interp_direction <uint8> = 0
+sz3:intrep_algo_str <char*> = <empty>
+sz3:l2_norm_error_bound <double> = 0
+sz3:lorenzo <bool> = true
+sz3:lorenzo2 <bool> = false
+sz3:metric <char*> = "noop"
+sz3:openmp <bool> = false
+sz3:pred_dim <uint8> = 1
+sz3:psnr_error_bound <double> = 0
+sz3:quant_bin_size <int32> = 65536
+sz3:regression <bool> = true
+sz3:regression2 <bool> = false
+sz3:rel_error_bound <double> = 0
+
+[chunk-out] 'sz3' 37748736 -> 2842 B (13282.45x), cap 42532864 B
+[chunk-out] 'sz3' 37748736 -> 3280 B (11508.76x), cap 42532864 B
+[chunk-out] 'sz3' 37748736 -> 40082 B (941.79x), cap 42532864 B
+[chunk-out] 'sz3' 37748736 -> 8555007 B (4.41x), cap 42532864 B
+[chunk-out] 'sz3' 37748736 -> 12475830 B (3.03x), cap 42532864 B
+[chunk-out] 'sz3' 37748736 -> 1921630 B (19.64x), cap 42532864 B
+[chunk-out] 'sz3' 37748736 -> 4613 B (8183.12x), cap 42532864 B
+[chunk-out] 'sz3' 37748736 -> 2841 B (13287.13x), cap 42532864 B
+[VOL stream] *** KEY NOT CONFIRMED *** 'sz3:cuda_stream' status=2 readback=(nil) expected=(nil)
+[VOL stream] GPU event timings (device_ms) are NOT trustworthy, and D2H ordering is not guaranteed.
+[VOL stream] Cross-check with: nsys stats --report cuda_gpu_trace
+[VOL stream] options declared by 'sz3':
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+pressio:rel <double> = <empty>
+sz3:abs_error_bound <double> = 1e-06
+sz3:algorithm <uint8> = 1
+sz3:algorithm_str <char*> = <empty>
+sz3:error_bound_mode <uint8> = 0
+sz3:error_bound_mode_str <char*> = <empty>
+sz3:interp_algo <uint8> = 1
+sz3:interp_direction <uint8> = 0
+sz3:intrep_algo_str <char*> = <empty>
+sz3:l2_norm_error_bound <double> = 0
+sz3:lorenzo <bool> = true
+sz3:lorenzo2 <bool> = false
+sz3:metric <char*> = "noop"
+sz3:openmp <bool> = false
+sz3:pred_dim <uint8> = 1
+sz3:psnr_error_bound <double> = 0
+sz3:quant_bin_size <int32> = 65536
+sz3:regression <bool> = true
+sz3:regression2 <bool> = false
+sz3:rel_error_bound <double> = 0
+
+
+=== miranda (288.0 MiB, double, raw) ===
+Info: 0x559e47a5b5c0
+  miranda_sz3_1e6              C=   1.70 W=  1817.23 F=    0.30 X=    0.29 | O=  46.51 R=  1097.86 ms  ratio= 13.09x  RMSE=2.968e-07 maxae=1.000e-06
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.70 write=1817.23 flush=0.30 close=0.29 => write_total=1819.51 ms | open=46.51 read=1097.86 => read_total=1144.37 ms | ratio=13.09x ===
+
+=== VOL timing [miranda_sz3_1e6_vol_N16] : miranda (chunking: vol, N=16) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_miranda_sz3_1e6_vol_N16.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_vol_miranda_sz3_1e6_vol_N16.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_miranda_sz3_1e6_vol_N16.csv only=miranda comp=sz3_1e6 verify=0 keep_h5=0 debug=0
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 960.6 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE miranda        min=9.999878e-01 max=3.000046e+00 range=2.000058e+00 xform=none
+[chunk] sz3        N=16  -> 16 chunks x 18874368 B (18.000 MiB, 2359296 elems) total=301989888 B
+[VOL RAGGED] dataset 0 'sz3': clean split, 16 x 18874368 B, no ragged tail
+[VOL stream] *** KEY NOT CONFIRMED *** 'sz3:cuda_stream' status=2 readback=(nil) expected=(nil)
+[VOL stream] GPU event timings (device_ms) are NOT trustworthy, and D2H ordering is not guaranteed.
+[VOL stream] Cross-check with: nsys stats --report cuda_gpu_trace
+[VOL stream] options declared by 'sz3':
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+pressio:rel <double> = <empty>
+sz3:abs_error_bound <double> = 1e-06
+sz3:algorithm <uint8> = 1
+sz3:algorithm_str <char*> = <empty>
+sz3:error_bound_mode <uint8> = 0
+sz3:error_bound_mode_str <char*> = <empty>
+sz3:interp_algo <uint8> = 1
+sz3:interp_direction <uint8> = 0
+sz3:intrep_algo_str <char*> = <empty>
+sz3:l2_norm_error_bound <double> = 0
+sz3:lorenzo <bool> = true
+sz3:lorenzo2 <bool> = false
+sz3:metric <char*> = "noop"
+sz3:openmp <bool> = false
+sz3:pred_dim <uint8> = 1
+sz3:psnr_error_bound <double> = 0
+sz3:quant_bin_size <int32> = 65536
+sz3:regression <bool> = true
+sz3:regression2 <bool> = false
+sz3:rel_error_bound <double> = 0
+
+[chunk-out] 'sz3' 18874368 -> 1462 B (12909.96x), cap 21299200 B
+[chunk-out] 'sz3' 18874368 -> 1579 B (11953.37x), cap 21299200 B
+[chunk-out] 'sz3' 18874368 -> 1677 B (11254.84x), cap 21299200 B
+[chunk-out] 'sz3' 18874368 -> 1830 B (10313.86x), cap 21299200 B
+[chunk-out] 'sz3' 18874368 -> 2177 B (8669.90x), cap 21299200 B
+[chunk-out] 'sz3' 18874368 -> 38131 B (494.99x), cap 21299200 B
+[chunk-out] 'sz3' 18874368 -> 2686530 B (7.03x), cap 21299200 B
+[chunk-out] 'sz3' 18874368 -> 6597304 B (2.86x), cap 21299200 B
+[chunk-out] 'sz3' 18874368 -> 7224299 B (2.61x), cap 21299200 B
+[chunk-out] 'sz3' 18874368 -> 6559770 B (2.88x), cap 21299200 B
+[chunk-out] 'sz3' 18874368 -> 1886872 B (10.00x), cap 21299200 B
+[chunk-out] 'sz3' 18874368 -> 35603 B (530.13x), cap 21299200 B
+[chunk-out] 'sz3' 18874368 -> 3095 B (6098.34x), cap 21299200 B
+[chunk-out] 'sz3' 18874368 -> 1720 B (10973.47x), cap 21299200 B
+[chunk-out] 'sz3' 18874368 -> 1574 B (11991.34x), cap 21299200 B
+[chunk-out] 'sz3' 18874368 -> 1480 B (12752.95x), cap 21299200 B
+[VOL stream] *** KEY NOT CONFIRMED *** 'sz3:cuda_stream' status=2 readback=(nil) expected=(nil)
+[VOL stream] GPU event timings (device_ms) are NOT trustworthy, and D2H ordering is not guaranteed.
+[VOL stream] Cross-check with: nsys stats --report cuda_gpu_trace
+[VOL stream] options declared by 'sz3':
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+pressio:rel <double> = <empty>
+sz3:abs_error_bound <double> = 1e-06
+sz3:algorithm <uint8> = 1
+sz3:algorithm_str <char*> = <empty>
+sz3:error_bound_mode <uint8> = 0
+sz3:error_bound_mode_str <char*> = <empty>
+sz3:interp_algo <uint8> = 1
+sz3:interp_direction <uint8> = 0
+sz3:intrep_algo_str <char*> = <empty>
+sz3:l2_norm_error_bound <double> = 0
+sz3:lorenzo <bool> = true
+sz3:lorenzo2 <bool> = false
+sz3:metric <char*> = "noop"
+sz3:openmp <bool> = false
+sz3:pred_dim <uint8> = 1
+sz3:psnr_error_bound <double> = 0
+sz3:quant_bin_size <int32> = 65536
+sz3:regression <bool> = true
+sz3:regression2 <bool> = false
+sz3:rel_error_bound <double> = 0
+
+
+=== miranda (288.0 MiB, double, raw) ===
+Info: 0x55810db2f5c0
+  miranda_sz3_1e6              C=   1.24 W=  2038.25 F=    0.30 X=    0.29 | O=   0.43 R=   825.74 ms  ratio= 12.00x  RMSE=2.767e-07 maxae=1.000e-06
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.24 write=2038.25 flush=0.30 close=0.29 => write_total=2040.09 ms | open=0.43 read=825.74 => read_total=826.17 ms | ratio=12.00x ===
+
+=== VOL timing [scale-T_sz3_1e6_vol_N8] : scale-T (chunking: vol, N=8) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_scale-T_sz3_1e6_vol_N8.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_vol_scale-T_sz3_1e6_vol_N8.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_scale-T_sz3_1e6_vol_N8.csv only=scale-T comp=sz3_1e6 verify=0 keep_h5=0 debug=0
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 960.6 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE scale-T        min=5.209023e+00 max=5.754571e+00 range=5.455480e-01 xform=log1p
+[chunk] sz3        N=8   -> 8 chunks x 70560000 B (67.291 MiB, 17640000 elems) total=564480000 B
+[VOL RAGGED] dataset 0 'sz3': clean split, 8 x 70560000 B, no ragged tail
+[VOL stream] *** KEY NOT CONFIRMED *** 'sz3:cuda_stream' status=2 readback=(nil) expected=(nil)
+[VOL stream] GPU event timings (device_ms) are NOT trustworthy, and D2H ordering is not guaranteed.
+[VOL stream] Cross-check with: nsys stats --report cuda_gpu_trace
+[VOL stream] options declared by 'sz3':
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+pressio:rel <double> = <empty>
+sz3:abs_error_bound <double> = 1e-06
+sz3:algorithm <uint8> = 1
+sz3:algorithm_str <char*> = <empty>
+sz3:error_bound_mode <uint8> = 0
+sz3:error_bound_mode_str <char*> = <empty>
+sz3:interp_algo <uint8> = 1
+sz3:interp_direction <uint8> = 0
+sz3:intrep_algo_str <char*> = <empty>
+sz3:l2_norm_error_bound <double> = 0
+sz3:lorenzo <bool> = true
+sz3:lorenzo2 <bool> = false
+sz3:metric <char*> = "noop"
+sz3:openmp <bool> = false
+sz3:pred_dim <uint8> = 1
+sz3:psnr_error_bound <double> = 0
+sz3:quant_bin_size <int32> = 65536
+sz3:regression <bool> = true
+sz3:regression2 <bool> = false
+sz3:rel_error_bound <double> = 0
+
+[chunk-out] 'sz3' 70560000 -> 18406455 B (3.83x), cap 79445536 B
+[chunk-out] 'sz3' 70560000 -> 17630081 B (4.00x), cap 79445536 B
+[chunk-out] 'sz3' 70560000 -> 17791436 B (3.97x), cap 79445536 B
+[chunk-out] 'sz3' 70560000 -> 17805968 B (3.96x), cap 79445536 B
+[chunk-out] 'sz3' 70560000 -> 17044512 B (4.14x), cap 79445536 B
+[chunk-out] 'sz3' 70560000 -> 15611936 B (4.52x), cap 79445536 B
+[chunk-out] 'sz3' 70560000 -> 15768963 B (4.47x), cap 79445536 B
+[chunk-out] 'sz3' 70560000 -> 20876761 B (3.38x), cap 79445536 B
+[VOL stream] *** KEY NOT CONFIRMED *** 'sz3:cuda_stream' status=2 readback=(nil) expected=(nil)
+[VOL stream] GPU event timings (device_ms) are NOT trustworthy, and D2H ordering is not guaranteed.
+[VOL stream] Cross-check with: nsys stats --report cuda_gpu_trace
+[VOL stream] options declared by 'sz3':
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+pressio:rel <double> = <empty>
+sz3:abs_error_bound <double> = 1e-06
+sz3:algorithm <uint8> = 1
+sz3:algorithm_str <char*> = <empty>
+sz3:error_bound_mode <uint8> = 0
+sz3:error_bound_mode_str <char*> = <empty>
+sz3:interp_algo <uint8> = 1
+sz3:interp_direction <uint8> = 0
+sz3:intrep_algo_str <char*> = <empty>
+sz3:l2_norm_error_bound <double> = 0
+sz3:lorenzo <bool> = true
+sz3:lorenzo2 <bool> = false
+sz3:metric <char*> = "noop"
+sz3:openmp <bool> = false
+sz3:pred_dim <uint8> = 1
+sz3:psnr_error_bound <double> = 0
+sz3:quant_bin_size <int32> = 65536
+sz3:regression <bool> = true
+sz3:regression2 <bool> = false
+sz3:rel_error_bound <double> = 0
+
+
+=== scale-T (538.3 MiB, float, raw, transformed) ===
+Info: 0x5593e76ae5c0
+  scale-T_sz3_1e6              C=   1.22 W=  6197.43 F=  158.83 X=    0.29 | O=   0.44 R=  5531.90 ms  ratio=  3.99x  RMSE=6.060e-07 maxae=9.537e-07 (log-space)
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.22 write=6197.43 flush=158.83 close=0.29 => write_total=6357.76 ms | open=0.44 read=5531.90 => read_total=5532.33 ms | ratio=3.99x ===
+
+=== VOL timing [scale-T_sz3_1e6_vol_N16] : scale-T (chunking: vol, N=16) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_scale-T_sz3_1e6_vol_N16.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_vol_scale-T_sz3_1e6_vol_N16.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_scale-T_sz3_1e6_vol_N16.csv only=scale-T comp=sz3_1e6 verify=0 keep_h5=0 debug=0
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 960.6 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE scale-T        min=5.209023e+00 max=5.754571e+00 range=5.455480e-01 xform=log1p
+[chunk] sz3        N=16  -> 16 chunks x 35280000 B (33.646 MiB, 8820000 elems) total=564480000 B
+[VOL RAGGED] dataset 0 'sz3': clean split, 16 x 35280000 B, no ragged tail
+[VOL stream] *** KEY NOT CONFIRMED *** 'sz3:cuda_stream' status=2 readback=(nil) expected=(nil)
+[VOL stream] GPU event timings (device_ms) are NOT trustworthy, and D2H ordering is not guaranteed.
+[VOL stream] Cross-check with: nsys stats --report cuda_gpu_trace
+[VOL stream] options declared by 'sz3':
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+pressio:rel <double> = <empty>
+sz3:abs_error_bound <double> = 1e-06
+sz3:algorithm <uint8> = 1
+sz3:algorithm_str <char*> = <empty>
+sz3:error_bound_mode <uint8> = 0
+sz3:error_bound_mode_str <char*> = <empty>
+sz3:interp_algo <uint8> = 1
+sz3:interp_direction <uint8> = 0
+sz3:intrep_algo_str <char*> = <empty>
+sz3:l2_norm_error_bound <double> = 0
+sz3:lorenzo <bool> = true
+sz3:lorenzo2 <bool> = false
+sz3:metric <char*> = "noop"
+sz3:openmp <bool> = false
+sz3:pred_dim <uint8> = 1
+sz3:psnr_error_bound <double> = 0
+sz3:quant_bin_size <int32> = 65536
+sz3:regression <bool> = true
+sz3:regression2 <bool> = false
+sz3:rel_error_bound <double> = 0
+
+[chunk-out] 'sz3' 35280000 -> 9567216 B (3.69x), cap 39755536 B
+[chunk-out] 'sz3' 35280000 -> 8831292 B (3.99x), cap 39755536 B
+[chunk-out] 'sz3' 35280000 -> 8834654 B (3.99x), cap 39755536 B
+[chunk-out] 'sz3' 35280000 -> 8839032 B (3.99x), cap 39755536 B
+[chunk-out] 'sz3' 35280000 -> 8901784 B (3.96x), cap 39755536 B
+[chunk-out] 'sz3' 35280000 -> 8939244 B (3.95x), cap 39755536 B
+[chunk-out] 'sz3' 35280000 -> 8942289 B (3.95x), cap 39755536 B
+[chunk-out] 'sz3' 35280000 -> 8917408 B (3.96x), cap 39755536 B
+[chunk-out] 'sz3' 35280000 -> 8699347 B (4.06x), cap 39755536 B
+[chunk-out] 'sz3' 35280000 -> 8381283 B (4.21x), cap 39755536 B
+[chunk-out] 'sz3' 35280000 -> 8080852 B (4.37x), cap 39755536 B
+[chunk-out] 'sz3' 35280000 -> 7519599 B (4.69x), cap 39755536 B
+[chunk-out] 'sz3' 35280000 -> 7476021 B (4.72x), cap 39755536 B
+[chunk-out] 'sz3' 35280000 -> 8247492 B (4.28x), cap 39755536 B
+[chunk-out] 'sz3' 35280000 -> 9551866 B (3.69x), cap 39755536 B
+[chunk-out] 'sz3' 35280000 -> 11189883 B (3.15x), cap 39755536 B
+[VOL stream] *** KEY NOT CONFIRMED *** 'sz3:cuda_stream' status=2 readback=(nil) expected=(nil)
+[VOL stream] GPU event timings (device_ms) are NOT trustworthy, and D2H ordering is not guaranteed.
+[VOL stream] Cross-check with: nsys stats --report cuda_gpu_trace
+[VOL stream] options declared by 'sz3':
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+pressio:rel <double> = <empty>
+sz3:abs_error_bound <double> = 1e-06
+sz3:algorithm <uint8> = 1
+sz3:algorithm_str <char*> = <empty>
+sz3:error_bound_mode <uint8> = 0
+sz3:error_bound_mode_str <char*> = <empty>
+sz3:interp_algo <uint8> = 1
+sz3:interp_direction <uint8> = 0
+sz3:intrep_algo_str <char*> = <empty>
+sz3:l2_norm_error_bound <double> = 0
+sz3:lorenzo <bool> = true
+sz3:lorenzo2 <bool> = false
+sz3:metric <char*> = "noop"
+sz3:openmp <bool> = false
+sz3:pred_dim <uint8> = 1
+sz3:psnr_error_bound <double> = 0
+sz3:quant_bin_size <int32> = 65536
+sz3:regression <bool> = true
+sz3:regression2 <bool> = false
+sz3:rel_error_bound <double> = 0
+
+
+=== scale-T (538.3 MiB, float, raw, transformed) ===
+Info: 0x563abf8ff5c0
+  scale-T_sz3_1e6              C=   1.22 W=  6456.03 F=  207.69 X=    0.30 | O=   0.43 R=  5283.20 ms  ratio=  3.99x  RMSE=6.060e-07 maxae=9.537e-07 (log-space)
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.22 write=6456.03 flush=207.69 close=0.30 => write_total=6665.23 ms | open=0.43 read=5283.20 => read_total=5283.63 ms | ratio=3.99x ===
+
+=== VOL timing [s3d_sz3_1e6_vol_N8] : s3d (chunking: vol, N=8) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_s3d_sz3_1e6_vol_N8.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_vol_s3d_sz3_1e6_vol_N8.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_s3d_sz3_1e6_vol_N8.csv only=s3d comp=sz3_1e6 verify=0 keep_h5=0 debug=0
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 960.6 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE s3d            min=-6.362436e-15 max=3.920002e-02 range=3.920002e-02 xform=none
+[chunk] sz3        N=8   -> 8 chunks x 125000000 B (119.209 MiB, 15625000 elems) total=1000000000 B
+[VOL RAGGED] dataset 0 'sz3': clean split, 8 x 125000000 B, no ragged tail
+[VOL stream] *** KEY NOT CONFIRMED *** 'sz3:cuda_stream' status=2 readback=(nil) expected=(nil)
+[VOL stream] GPU event timings (device_ms) are NOT trustworthy, and D2H ordering is not guaranteed.
+[VOL stream] Cross-check with: nsys stats --report cuda_gpu_trace
+[VOL stream] options declared by 'sz3':
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+pressio:rel <double> = <empty>
+sz3:abs_error_bound <double> = 1e-06
+sz3:algorithm <uint8> = 1
+sz3:algorithm_str <char*> = <empty>
+sz3:error_bound_mode <uint8> = 0
+sz3:error_bound_mode_str <char*> = <empty>
+sz3:interp_algo <uint8> = 1
+sz3:interp_direction <uint8> = 0
+sz3:intrep_algo_str <char*> = <empty>
+sz3:l2_norm_error_bound <double> = 0
+sz3:lorenzo <bool> = true
+sz3:lorenzo2 <bool> = false
+sz3:metric <char*> = "noop"
+sz3:openmp <bool> = false
+sz3:pred_dim <uint8> = 1
+sz3:psnr_error_bound <double> = 0
+sz3:quant_bin_size <int32> = 65536
+sz3:regression <bool> = true
+sz3:regression2 <bool> = false
+sz3:rel_error_bound <double> = 0
+
+[chunk-out] 'sz3' 125000000 -> 3769786 B (33.16x), cap 140690536 B
+[chunk-out] 'sz3' 125000000 -> 3845586 B (32.50x), cap 140690536 B
+[chunk-out] 'sz3' 125000000 -> 3853149 B (32.44x), cap 140690536 B
+[chunk-out] 'sz3' 125000000 -> 3978977 B (31.42x), cap 140690536 B
+[chunk-out] 'sz3' 125000000 -> 4020654 B (31.09x), cap 140690536 B
+[chunk-out] 'sz3' 125000000 -> 4060516 B (30.78x), cap 140690536 B
+[chunk-out] 'sz3' 125000000 -> 3882529 B (32.20x), cap 140690536 B
+[chunk-out] 'sz3' 125000000 -> 3885665 B (32.17x), cap 140690536 B
+[VOL stream] *** KEY NOT CONFIRMED *** 'sz3:cuda_stream' status=2 readback=(nil) expected=(nil)
+[VOL stream] GPU event timings (device_ms) are NOT trustworthy, and D2H ordering is not guaranteed.
+[VOL stream] Cross-check with: nsys stats --report cuda_gpu_trace
+[VOL stream] options declared by 'sz3':
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+pressio:rel <double> = <empty>
+sz3:abs_error_bound <double> = 1e-06
+sz3:algorithm <uint8> = 1
+sz3:algorithm_str <char*> = <empty>
+sz3:error_bound_mode <uint8> = 0
+sz3:error_bound_mode_str <char*> = <empty>
+sz3:interp_algo <uint8> = 1
+sz3:interp_direction <uint8> = 0
+sz3:intrep_algo_str <char*> = <empty>
+sz3:l2_norm_error_bound <double> = 0
+sz3:lorenzo <bool> = true
+sz3:lorenzo2 <bool> = false
+sz3:metric <char*> = "noop"
+sz3:openmp <bool> = false
+sz3:pred_dim <uint8> = 1
+sz3:psnr_error_bound <double> = 0
+sz3:quant_bin_size <int32> = 65536
+sz3:regression <bool> = true
+sz3:regression2 <bool> = false
+sz3:rel_error_bound <double> = 0
+
+
+=== s3d (953.7 MiB, double, raw) ===
+Info: 0x55d3bf1d45c0
+  s3d_sz3_1e6                  C=   1.25 W=  5225.82 F=    0.31 X=    0.29 | O=   0.44 R=  3791.92 ms  ratio= 31.79x  RMSE=3.421e-07 maxae=1.000e-06
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.25 write=5225.82 flush=0.31 close=0.29 => write_total=5227.67 ms | open=0.44 read=3791.92 => read_total=3792.36 ms | ratio=31.79x ===
+
+=== VOL timing [s3d_sz3_1e6_vol_N16] : s3d (chunking: vol, N=16) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_s3d_sz3_1e6_vol_N16.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_vol_s3d_sz3_1e6_vol_N16.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_s3d_sz3_1e6_vol_N16.csv only=s3d comp=sz3_1e6 verify=0 keep_h5=0 debug=0
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 960.6 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE s3d            min=-6.362436e-15 max=3.920002e-02 range=3.920002e-02 xform=none
+[chunk] sz3        N=16  -> 16 chunks x 62500000 B (59.605 MiB, 7812500 elems) total=1000000000 B
+[VOL RAGGED] dataset 0 'sz3': clean split, 16 x 62500000 B, no ragged tail
+[VOL stream] *** KEY NOT CONFIRMED *** 'sz3:cuda_stream' status=2 readback=(nil) expected=(nil)
+[VOL stream] GPU event timings (device_ms) are NOT trustworthy, and D2H ordering is not guaranteed.
+[VOL stream] Cross-check with: nsys stats --report cuda_gpu_trace
+[VOL stream] options declared by 'sz3':
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+pressio:rel <double> = <empty>
+sz3:abs_error_bound <double> = 1e-06
+sz3:algorithm <uint8> = 1
+sz3:algorithm_str <char*> = <empty>
+sz3:error_bound_mode <uint8> = 0
+sz3:error_bound_mode_str <char*> = <empty>
+sz3:interp_algo <uint8> = 1
+sz3:interp_direction <uint8> = 0
+sz3:intrep_algo_str <char*> = <empty>
+sz3:l2_norm_error_bound <double> = 0
+sz3:lorenzo <bool> = true
+sz3:lorenzo2 <bool> = false
+sz3:metric <char*> = "noop"
+sz3:openmp <bool> = false
+sz3:pred_dim <uint8> = 1
+sz3:psnr_error_bound <double> = 0
+sz3:quant_bin_size <int32> = 65536
+sz3:regression <bool> = true
+sz3:regression2 <bool> = false
+sz3:rel_error_bound <double> = 0
+
+[chunk-out] 'sz3' 62500000 -> 1855939 B (33.68x), cap 70378036 B
+[chunk-out] 'sz3' 62500000 -> 1927549 B (32.42x), cap 70378036 B
+[chunk-out] 'sz3' 62500000 -> 1946286 B (32.11x), cap 70378036 B
+[chunk-out] 'sz3' 62500000 -> 1910464 B (32.71x), cap 70378036 B
+[chunk-out] 'sz3' 62500000 -> 1924848 B (32.47x), cap 70378036 B
+[chunk-out] 'sz3' 62500000 -> 1922262 B (32.51x), cap 70378036 B
+[chunk-out] 'sz3' 62500000 -> 1977207 B (31.61x), cap 70378036 B
+[chunk-out] 'sz3' 62500000 -> 2012169 B (31.06x), cap 70378036 B
+[chunk-out] 'sz3' 62500000 -> 2002956 B (31.20x), cap 70378036 B
+[chunk-out] 'sz3' 62500000 -> 2012882 B (31.05x), cap 70378036 B
+[chunk-out] 'sz3' 62500000 -> 2060574 B (30.33x), cap 70378036 B
+[chunk-out] 'sz3' 62500000 -> 2012857 B (31.05x), cap 70378036 B
+[chunk-out] 'sz3' 62500000 -> 1945226 B (32.13x), cap 70378036 B
+[chunk-out] 'sz3' 62500000 -> 1948528 B (32.08x), cap 70378036 B
+[chunk-out] 'sz3' 62500000 -> 1978979 B (31.58x), cap 70378036 B
+[chunk-out] 'sz3' 62500000 -> 1919495 B (32.56x), cap 70378036 B
+[VOL stream] *** KEY NOT CONFIRMED *** 'sz3:cuda_stream' status=2 readback=(nil) expected=(nil)
+[VOL stream] GPU event timings (device_ms) are NOT trustworthy, and D2H ordering is not guaranteed.
+[VOL stream] Cross-check with: nsys stats --report cuda_gpu_trace
+[VOL stream] options declared by 'sz3':
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+pressio:rel <double> = <empty>
+sz3:abs_error_bound <double> = 1e-06
+sz3:algorithm <uint8> = 1
+sz3:algorithm_str <char*> = <empty>
+sz3:error_bound_mode <uint8> = 0
+sz3:error_bound_mode_str <char*> = <empty>
+sz3:interp_algo <uint8> = 1
+sz3:interp_direction <uint8> = 0
+sz3:intrep_algo_str <char*> = <empty>
+sz3:l2_norm_error_bound <double> = 0
+sz3:lorenzo <bool> = true
+sz3:lorenzo2 <bool> = false
+sz3:metric <char*> = "noop"
+sz3:openmp <bool> = false
+sz3:pred_dim <uint8> = 1
+sz3:psnr_error_bound <double> = 0
+sz3:quant_bin_size <int32> = 65536
+sz3:regression <bool> = true
+sz3:regression2 <bool> = false
+sz3:rel_error_bound <double> = 0
+
+
+=== s3d (953.7 MiB, double, raw) ===
+Info: 0x55e7a92ff5c0
+  s3d_sz3_1e6                  C=   1.26 W=  4987.62 F=    0.30 X=    0.31 | O=   0.63 R=  3288.85 ms  ratio= 31.79x  RMSE=3.421e-07 maxae=1.000e-06
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.26 write=4987.62 flush=0.30 close=0.31 => write_total=4989.50 ms | open=0.63 read=3288.85 => read_total=3289.49 ms | ratio=31.79x ===
+
+=== VOL timing [nyx_baryon_sz3_1e6_vol_N8] : nyx_baryon (chunking: vol, N=8) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_nyx_baryon_sz3_1e6_vol_N8.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_vol_nyx_baryon_sz3_1e6_vol_N8.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_nyx_baryon_sz3_1e6_vol_N8.csv only=nyx_baryon comp=sz3_1e6 verify=0 keep_h5=0 debug=0
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 960.6 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE nyx_baryon     min=5.637747e-02 max=1.166017e+01 range=1.160379e+01 xform=log1p
+[chunk] sz3        N=8   -> 8 chunks x 67108864 B (64.000 MiB, 16777216 elems) total=536870912 B
+[VOL RAGGED] dataset 0 'sz3': clean split, 8 x 67108864 B, no ragged tail
+[VOL stream] *** KEY NOT CONFIRMED *** 'sz3:cuda_stream' status=2 readback=(nil) expected=(nil)
+[VOL stream] GPU event timings (device_ms) are NOT trustworthy, and D2H ordering is not guaranteed.
+[VOL stream] Cross-check with: nsys stats --report cuda_gpu_trace
+[VOL stream] options declared by 'sz3':
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+pressio:rel <double> = <empty>
+sz3:abs_error_bound <double> = 1e-06
+sz3:algorithm <uint8> = 1
+sz3:algorithm_str <char*> = <empty>
+sz3:error_bound_mode <uint8> = 0
+sz3:error_bound_mode_str <char*> = <empty>
+sz3:interp_algo <uint8> = 1
+sz3:interp_direction <uint8> = 0
+sz3:intrep_algo_str <char*> = <empty>
+sz3:l2_norm_error_bound <double> = 0
+sz3:lorenzo <bool> = true
+sz3:lorenzo2 <bool> = false
+sz3:metric <char*> = "noop"
+sz3:openmp <bool> = false
+sz3:pred_dim <uint8> = 1
+sz3:psnr_error_bound <double> = 0
+sz3:quant_bin_size <int32> = 65536
+sz3:regression <bool> = true
+sz3:regression2 <bool> = false
+sz3:rel_error_bound <double> = 0
+
+[chunk-out] 'sz3' 67108864 -> 37878883 B (1.77x), cap 75563008 B
+[chunk-out] 'sz3' 67108864 -> 37101351 B (1.81x), cap 75563008 B
+[chunk-out] 'sz3' 67108864 -> 38400029 B (1.75x), cap 75563008 B
+[chunk-out] 'sz3' 67108864 -> 37852052 B (1.77x), cap 75563008 B
+[chunk-out] 'sz3' 67108864 -> 37629110 B (1.78x), cap 75563008 B
+[chunk-out] 'sz3' 67108864 -> 35952516 B (1.87x), cap 75563008 B
+[chunk-out] 'sz3' 67108864 -> 37199630 B (1.80x), cap 75563008 B
+[chunk-out] 'sz3' 67108864 -> 37508155 B (1.79x), cap 75563008 B
+[VOL stream] *** KEY NOT CONFIRMED *** 'sz3:cuda_stream' status=2 readback=(nil) expected=(nil)
+[VOL stream] GPU event timings (device_ms) are NOT trustworthy, and D2H ordering is not guaranteed.
+[VOL stream] Cross-check with: nsys stats --report cuda_gpu_trace
+[VOL stream] options declared by 'sz3':
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+pressio:rel <double> = <empty>
+sz3:abs_error_bound <double> = 1e-06
+sz3:algorithm <uint8> = 1
+sz3:algorithm_str <char*> = <empty>
+sz3:error_bound_mode <uint8> = 0
+sz3:error_bound_mode_str <char*> = <empty>
+sz3:interp_algo <uint8> = 1
+sz3:interp_direction <uint8> = 0
+sz3:intrep_algo_str <char*> = <empty>
+sz3:l2_norm_error_bound <double> = 0
+sz3:lorenzo <bool> = true
+sz3:lorenzo2 <bool> = false
+sz3:metric <char*> = "noop"
+sz3:openmp <bool> = false
+sz3:pred_dim <uint8> = 1
+sz3:psnr_error_bound <double> = 0
+sz3:quant_bin_size <int32> = 65536
+sz3:regression <bool> = true
+sz3:regression2 <bool> = false
+sz3:rel_error_bound <double> = 0
+
+
+=== nyx_baryon (512.0 MiB, float, hdf5, transformed) ===
+Info: 0x5607fa43f8d0
+  nyx_baryon_sz3_1e6           C=   1.22 W=  8548.38 F=  138.16 X=    0.21 | O=   0.53 R=  9272.53 ms  ratio=  1.79x  RMSE=4.867e-07 maxae=1.669e-06 (log-space)
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.22 write=8548.38 flush=138.16 close=0.21 => write_total=8687.96 ms | open=0.53 read=9272.53 => read_total=9273.06 ms | ratio=1.79x ===
+
+=== VOL timing [nyx_baryon_sz3_1e6_vol_N16] : nyx_baryon (chunking: vol, N=16) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_nyx_baryon_sz3_1e6_vol_N16.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_vol_nyx_baryon_sz3_1e6_vol_N16.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_nyx_baryon_sz3_1e6_vol_N16.csv only=nyx_baryon comp=sz3_1e6 verify=0 keep_h5=0 debug=0
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 960.6 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE nyx_baryon     min=5.637747e-02 max=1.166017e+01 range=1.160379e+01 xform=log1p
+[chunk] sz3        N=16  -> 16 chunks x 33554432 B (32.000 MiB, 8388608 elems) total=536870912 B
+[VOL RAGGED] dataset 0 'sz3': clean split, 16 x 33554432 B, no ragged tail
+[VOL stream] *** KEY NOT CONFIRMED *** 'sz3:cuda_stream' status=2 readback=(nil) expected=(nil)
+[VOL stream] GPU event timings (device_ms) are NOT trustworthy, and D2H ordering is not guaranteed.
+[VOL stream] Cross-check with: nsys stats --report cuda_gpu_trace
+[VOL stream] options declared by 'sz3':
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+pressio:rel <double> = <empty>
+sz3:abs_error_bound <double> = 1e-06
+sz3:algorithm <uint8> = 1
+sz3:algorithm_str <char*> = <empty>
+sz3:error_bound_mode <uint8> = 0
+sz3:error_bound_mode_str <char*> = <empty>
+sz3:interp_algo <uint8> = 1
+sz3:interp_direction <uint8> = 0
+sz3:intrep_algo_str <char*> = <empty>
+sz3:l2_norm_error_bound <double> = 0
+sz3:lorenzo <bool> = true
+sz3:lorenzo2 <bool> = false
+sz3:metric <char*> = "noop"
+sz3:openmp <bool> = false
+sz3:pred_dim <uint8> = 1
+sz3:psnr_error_bound <double> = 0
+sz3:quant_bin_size <int32> = 65536
+sz3:regression <bool> = true
+sz3:regression2 <bool> = false
+sz3:rel_error_bound <double> = 0
+
+[chunk-out] 'sz3' 33554432 -> 19193006 B (1.75x), cap 37814272 B
+[chunk-out] 'sz3' 33554432 -> 19269461 B (1.74x), cap 37814272 B
+[chunk-out] 'sz3' 33554432 -> 19477981 B (1.72x), cap 37814272 B
+[chunk-out] 'sz3' 33554432 -> 19489567 B (1.72x), cap 37814272 B
+[chunk-out] 'sz3' 33554432 -> 19458376 B (1.72x), cap 37814272 B
+[chunk-out] 'sz3' 33554432 -> 19523392 B (1.72x), cap 37814272 B
+[chunk-out] 'sz3' 33554432 -> 19232982 B (1.74x), cap 37814272 B
+[chunk-out] 'sz3' 33554432 -> 19199962 B (1.75x), cap 37814272 B
+[chunk-out] 'sz3' 33554432 -> 19167503 B (1.75x), cap 37814272 B
+[chunk-out] 'sz3' 33554432 -> 18960605 B (1.77x), cap 37814272 B
+[chunk-out] 'sz3' 33554432 -> 18862375 B (1.78x), cap 37814272 B
+[chunk-out] 'sz3' 33554432 -> 18884856 B (1.78x), cap 37814272 B
+[chunk-out] 'sz3' 33554432 -> 18904368 B (1.77x), cap 37814272 B
+[chunk-out] 'sz3' 33554432 -> 18876974 B (1.78x), cap 37814272 B
+[chunk-out] 'sz3' 33554432 -> 18964350 B (1.77x), cap 37814272 B
+[chunk-out] 'sz3' 33554432 -> 19214182 B (1.75x), cap 37814272 B
+[VOL stream] *** KEY NOT CONFIRMED *** 'sz3:cuda_stream' status=2 readback=(nil) expected=(nil)
+[VOL stream] GPU event timings (device_ms) are NOT trustworthy, and D2H ordering is not guaranteed.
+[VOL stream] Cross-check with: nsys stats --report cuda_gpu_trace
+[VOL stream] options declared by 'sz3':
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+pressio:rel <double> = <empty>
+sz3:abs_error_bound <double> = 1e-06
+sz3:algorithm <uint8> = 1
+sz3:algorithm_str <char*> = <empty>
+sz3:error_bound_mode <uint8> = 0
+sz3:error_bound_mode_str <char*> = <empty>
+sz3:interp_algo <uint8> = 1
+sz3:interp_direction <uint8> = 0
+sz3:intrep_algo_str <char*> = <empty>
+sz3:l2_norm_error_bound <double> = 0
+sz3:lorenzo <bool> = true
+sz3:lorenzo2 <bool> = false
+sz3:metric <char*> = "noop"
+sz3:openmp <bool> = false
+sz3:pred_dim <uint8> = 1
+sz3:psnr_error_bound <double> = 0
+sz3:quant_bin_size <int32> = 65536
+sz3:regression <bool> = true
+sz3:regression2 <bool> = false
+sz3:rel_error_bound <double> = 0
+
+
+=== nyx_baryon (512.0 MiB, float, hdf5, transformed) ===
+Info: 0x55fce2b588d0
+  nyx_baryon_sz3_1e6           C=   1.02 W=  9322.41 F=  170.23 X=    0.19 | O=   0.52 R=  9059.39 ms  ratio=  1.75x  RMSE=4.710e-07 maxae=1.669e-06 (log-space)
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.02 write=9322.41 flush=170.23 close=0.19 => write_total=9493.85 ms | open=0.52 read=9059.39 => read_total=9059.91 ms | ratio=1.75x ===
+
+=== VOL timing [ocean_temp_sz3_1e6_vol_N8] : ocean_temp (chunking: vol, N=8) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_ocean_temp_sz3_1e6_vol_N8.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_vol_ocean_temp_sz3_1e6_vol_N8.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_ocean_temp_sz3_1e6_vol_N8.csv only=ocean_temp comp=sz3_1e6 verify=0 keep_h5=0 debug=0
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 960.6 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE ocean_temp     min=4.445019e+00 max=1.072704e+01 range=6.282023e+00 xform=none
+[chunk] sz3        N=8   -> 8 chunks x 16140480 B (15.393 MiB, 4035120 elems) total=129123840 B
+[VOL RAGGED] dataset 0 'sz3': clean split, 8 x 16140480 B, no ragged tail
+[VOL stream] *** KEY NOT CONFIRMED *** 'sz3:cuda_stream' status=2 readback=(nil) expected=(nil)
+[VOL stream] GPU event timings (device_ms) are NOT trustworthy, and D2H ordering is not guaranteed.
+[VOL stream] Cross-check with: nsys stats --report cuda_gpu_trace
+[VOL stream] options declared by 'sz3':
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+pressio:rel <double> = <empty>
+sz3:abs_error_bound <double> = 1e-06
+sz3:algorithm <uint8> = 1
+sz3:algorithm_str <char*> = <empty>
+sz3:error_bound_mode <uint8> = 0
+sz3:error_bound_mode_str <char*> = <empty>
+sz3:interp_algo <uint8> = 1
+sz3:interp_direction <uint8> = 0
+sz3:intrep_algo_str <char*> = <empty>
+sz3:l2_norm_error_bound <double> = 0
+sz3:lorenzo <bool> = true
+sz3:lorenzo2 <bool> = false
+sz3:metric <char*> = "noop"
+sz3:openmp <bool> = false
+sz3:pred_dim <uint8> = 1
+sz3:psnr_error_bound <double> = 0
+sz3:quant_bin_size <int32> = 65536
+sz3:regression <bool> = true
+sz3:regression2 <bool> = false
+sz3:rel_error_bound <double> = 0
+
+[chunk-out] 'sz3' 16140480 -> 10426397 B (1.55x), cap 18223576 B
+[chunk-out] 'sz3' 16140480 -> 10404559 B (1.55x), cap 18223576 B
+[chunk-out] 'sz3' 16140480 -> 10435667 B (1.55x), cap 18223576 B
+[chunk-out] 'sz3' 16140480 -> 10517484 B (1.53x), cap 18223576 B
+[chunk-out] 'sz3' 16140480 -> 10530702 B (1.53x), cap 18223576 B
+[chunk-out] 'sz3' 16140480 -> 10539900 B (1.53x), cap 18223576 B
+[chunk-out] 'sz3' 16140480 -> 10572647 B (1.53x), cap 18223576 B
+[chunk-out] 'sz3' 16140480 -> 10602083 B (1.52x), cap 18223576 B
+[VOL stream] *** KEY NOT CONFIRMED *** 'sz3:cuda_stream' status=2 readback=(nil) expected=(nil)
+[VOL stream] GPU event timings (device_ms) are NOT trustworthy, and D2H ordering is not guaranteed.
+[VOL stream] Cross-check with: nsys stats --report cuda_gpu_trace
+[VOL stream] options declared by 'sz3':
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+pressio:rel <double> = <empty>
+sz3:abs_error_bound <double> = 1e-06
+sz3:algorithm <uint8> = 1
+sz3:algorithm_str <char*> = <empty>
+sz3:error_bound_mode <uint8> = 0
+sz3:error_bound_mode_str <char*> = <empty>
+sz3:interp_algo <uint8> = 1
+sz3:interp_direction <uint8> = 0
+sz3:intrep_algo_str <char*> = <empty>
+sz3:l2_norm_error_bound <double> = 0
+sz3:lorenzo <bool> = true
+sz3:lorenzo2 <bool> = false
+sz3:metric <char*> = "noop"
+sz3:openmp <bool> = false
+sz3:pred_dim <uint8> = 1
+sz3:psnr_error_bound <double> = 0
+sz3:quant_bin_size <int32> = 65536
+sz3:regression <bool> = true
+sz3:regression2 <bool> = false
+sz3:rel_error_bound <double> = 0
+
+[FAIL] ocean_temp_sz3_1e6           maxae=4.768372e-06 exceeds 2x configured bound 1.000000e-06
+
+=== ocean_temp (123.1 MiB, float, hdf5) ===
+Info: 0x559b1ed4c870
+  ocean_temp_sz3_1e6           C=   1.05 W=  3533.48 F=  200.98 X=    0.24 | O=   0.53 R=  1960.68 ms  ratio=  1.52x  RMSE=4.751e-07 maxae=4.768e-06
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.05 write=3533.48 flush=200.98 close=0.24 => write_total=3735.74 ms | open=0.53 read=1960.68 => read_total=1961.21 ms | ratio=1.52x ===
+
+=== VOL timing [ocean_temp_sz3_1e6_vol_N16] : ocean_temp (chunking: vol, N=16) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_ocean_temp_sz3_1e6_vol_N16.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_vol_ocean_temp_sz3_1e6_vol_N16.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_ocean_temp_sz3_1e6_vol_N16.csv only=ocean_temp comp=sz3_1e6 verify=0 keep_h5=0 debug=0
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 960.6 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE ocean_temp     min=4.445019e+00 max=1.072704e+01 range=6.282023e+00 xform=none
+[chunk] sz3        N=16  -> 16 chunks x 8070240 B (7.696 MiB, 2017560 elems) total=129123840 B
+[VOL RAGGED] dataset 0 'sz3': clean split, 16 x 8070240 B, no ragged tail
+[VOL stream] *** KEY NOT CONFIRMED *** 'sz3:cuda_stream' status=2 readback=(nil) expected=(nil)
+[VOL stream] GPU event timings (device_ms) are NOT trustworthy, and D2H ordering is not guaranteed.
+[VOL stream] Cross-check with: nsys stats --report cuda_gpu_trace
+[VOL stream] options declared by 'sz3':
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+pressio:rel <double> = <empty>
+sz3:abs_error_bound <double> = 1e-06
+sz3:algorithm <uint8> = 1
+sz3:algorithm_str <char*> = <empty>
+sz3:error_bound_mode <uint8> = 0
+sz3:error_bound_mode_str <char*> = <empty>
+sz3:interp_algo <uint8> = 1
+sz3:interp_direction <uint8> = 0
+sz3:intrep_algo_str <char*> = <empty>
+sz3:l2_norm_error_bound <double> = 0
+sz3:lorenzo <bool> = true
+sz3:lorenzo2 <bool> = false
+sz3:metric <char*> = "noop"
+sz3:openmp <bool> = false
+sz3:pred_dim <uint8> = 1
+sz3:psnr_error_bound <double> = 0
+sz3:quant_bin_size <int32> = 65536
+sz3:regression <bool> = true
+sz3:regression2 <bool> = false
+sz3:rel_error_bound <double> = 0
+
+[chunk-out] 'sz3' 8070240 -> 5481465 B (1.47x), cap 9144556 B
+[chunk-out] 'sz3' 8070240 -> 5523824 B (1.46x), cap 9144556 B
+[chunk-out] 'sz3' 8070240 -> 5510463 B (1.46x), cap 9144556 B
+[chunk-out] 'sz3' 8070240 -> 5536886 B (1.46x), cap 9144556 B
+[chunk-out] 'sz3' 8070240 -> 5530902 B (1.46x), cap 9144556 B
+[chunk-out] 'sz3' 8070240 -> 5541536 B (1.46x), cap 9144556 B
+[chunk-out] 'sz3' 8070240 -> 5515945 B (1.46x), cap 9144556 B
+[chunk-out] 'sz3' 8070240 -> 5551861 B (1.45x), cap 9144556 B
+[chunk-out] 'sz3' 8070240 -> 5520139 B (1.46x), cap 9144556 B
+[chunk-out] 'sz3' 8070240 -> 5558393 B (1.45x), cap 9144556 B
+[chunk-out] 'sz3' 8070240 -> 5552842 B (1.45x), cap 9144556 B
+[chunk-out] 'sz3' 8070240 -> 5565009 B (1.45x), cap 9144556 B
+[chunk-out] 'sz3' 8070240 -> 5575397 B (1.45x), cap 9144556 B
+[chunk-out] 'sz3' 8070240 -> 5577629 B (1.45x), cap 9144556 B
+[chunk-out] 'sz3' 8070240 -> 5570441 B (1.45x), cap 9144556 B
+[chunk-out] 'sz3' 8070240 -> 5580978 B (1.45x), cap 9144556 B
+[VOL stream] *** KEY NOT CONFIRMED *** 'sz3:cuda_stream' status=2 readback=(nil) expected=(nil)
+[VOL stream] GPU event timings (device_ms) are NOT trustworthy, and D2H ordering is not guaranteed.
+[VOL stream] Cross-check with: nsys stats --report cuda_gpu_trace
+[VOL stream] options declared by 'sz3':
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+pressio:rel <double> = <empty>
+sz3:abs_error_bound <double> = 1e-06
+sz3:algorithm <uint8> = 1
+sz3:algorithm_str <char*> = <empty>
+sz3:error_bound_mode <uint8> = 0
+sz3:error_bound_mode_str <char*> = <empty>
+sz3:interp_algo <uint8> = 1
+sz3:interp_direction <uint8> = 0
+sz3:intrep_algo_str <char*> = <empty>
+sz3:l2_norm_error_bound <double> = 0
+sz3:lorenzo <bool> = true
+sz3:lorenzo2 <bool> = false
+sz3:metric <char*> = "noop"
+sz3:openmp <bool> = false
+sz3:pred_dim <uint8> = 1
+sz3:psnr_error_bound <double> = 0
+sz3:quant_bin_size <int32> = 65536
+sz3:regression <bool> = true
+sz3:regression2 <bool> = false
+sz3:rel_error_bound <double> = 0
+
+[FAIL] ocean_temp_sz3_1e6           maxae=4.768372e-06 exceeds 2x configured bound 1.000000e-06
+
+=== ocean_temp (123.1 MiB, float, hdf5) ===
+Info: 0x56552340d870
+  ocean_temp_sz3_1e6           C=   1.01 W=  3933.32 F=  163.77 X=    0.26 | O=   0.52 R=  2009.72 ms  ratio=  1.45x  RMSE=4.761e-07 maxae=4.768e-06
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.01 write=3933.32 flush=163.77 close=0.26 => write_total=4098.37 ms | open=0.52 read=2009.72 => read_total=2010.24 ms | ratio=1.45x ===
+
+=== VOL timing [qmc_sz3_1e6_vol_N8] : einspline37 (chunking: vol, N=8) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_qmc_sz3_1e6_vol_N8.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_vol_qmc_sz3_1e6_vol_N8.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_qmc_sz3_1e6_vol_N8.csv only=einspline37 comp=sz3_1e6 verify=0 keep_h5=0 debug=0
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 960.6 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE einspline37    min=-2.125822e+01 max=2.036857e+01 range=4.162679e+01 xform=none
+[chunk] sz3        N=8   -> 8 chunks x 1695106440 B (1616.579 MiB, 423776610 elems) total=13560851520 B
+[VOL RAGGED] dataset 0 'sz3': clean split, 8 x 1695106440 B, no ragged tail
+[VOL stream] *** KEY NOT CONFIRMED *** 'sz3:cuda_stream' status=2 readback=(nil) expected=(nil)
+[VOL stream] GPU event timings (device_ms) are NOT trustworthy, and D2H ordering is not guaranteed.
+[VOL stream] Cross-check with: nsys stats --report cuda_gpu_trace
+[VOL stream] options declared by 'sz3':
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+pressio:rel <double> = <empty>
+sz3:abs_error_bound <double> = 1e-06
+sz3:algorithm <uint8> = 1
+sz3:algorithm_str <char*> = <empty>
+sz3:error_bound_mode <uint8> = 0
+sz3:error_bound_mode_str <char*> = <empty>
+sz3:interp_algo <uint8> = 1
+sz3:interp_direction <uint8> = 0
+sz3:intrep_algo_str <char*> = <empty>
+sz3:l2_norm_error_bound <double> = 0
+sz3:lorenzo <bool> = true
+sz3:lorenzo2 <bool> = false
+sz3:metric <char*> = "noop"
+sz3:openmp <bool> = false
+sz3:pred_dim <uint8> = 1
+sz3:psnr_error_bound <double> = 0
+sz3:quant_bin_size <int32> = 65536
+sz3:regression <bool> = true
+sz3:regression2 <bool> = false
+sz3:rel_error_bound <double> = 0
+
+[chunk-out] 'sz3' 1695106440 -> 1333197646 B (1.27x), cap 1907060281 B
+[chunk-out] 'sz3' 1695106440 -> 1324098101 B (1.28x), cap 1907060281 B
+[chunk-out] 'sz3' 1695106440 -> 1323987123 B (1.28x), cap 1907060281 B
+[chunk-out] 'sz3' 1695106440 -> 1337459525 B (1.27x), cap 1907060281 B
+[chunk-out] 'sz3' 1695106440 -> 1337954477 B (1.27x), cap 1907060281 B
+[chunk-out] 'sz3' 1695106440 -> 1323965092 B (1.28x), cap 1907060281 B
+[chunk-out] 'sz3' 1695106440 -> 1324874985 B (1.28x), cap 1907060281 B
+[chunk-out] 'sz3' 1695106440 -> 1332029692 B (1.27x), cap 1907060281 B
+[VOL stream] *** KEY NOT CONFIRMED *** 'sz3:cuda_stream' status=2 readback=(nil) expected=(nil)
+[VOL stream] GPU event timings (device_ms) are NOT trustworthy, and D2H ordering is not guaranteed.
+[VOL stream] Cross-check with: nsys stats --report cuda_gpu_trace
+[VOL stream] options declared by 'sz3':
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+pressio:rel <double> = <empty>
+sz3:abs_error_bound <double> = 1e-06
+sz3:algorithm <uint8> = 1
+sz3:algorithm_str <char*> = <empty>
+sz3:error_bound_mode <uint8> = 0
+sz3:error_bound_mode_str <char*> = <empty>
+sz3:interp_algo <uint8> = 1
+sz3:interp_direction <uint8> = 0
+sz3:intrep_algo_str <char*> = <empty>
+sz3:l2_norm_error_bound <double> = 0
+sz3:lorenzo <bool> = true
+sz3:lorenzo2 <bool> = false
+sz3:metric <char*> = "noop"
+sz3:openmp <bool> = false
+sz3:pred_dim <uint8> = 1
+sz3:psnr_error_bound <double> = 0
+sz3:quant_bin_size <int32> = 65536
+sz3:regression <bool> = true
+sz3:regression2 <bool> = false
+sz3:rel_error_bound <double> = 0
+
+
+=== einspline37 (12932.6 MiB, float, raw) ===
+Info: 0x55a8ce0ed5a0
+  einspline37_sz3_1e6          C=   1.24 W=196767.64 F=  717.66 X=    0.39 | O=   0.44 R=152813.02 ms  ratio=  1.27x  RMSE=2.849e-07 maxae=1.000e-06
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.24 write=196767.64 flush=717.66 close=0.39 => write_total=197486.93 ms | open=0.44 read=152813.02 => read_total=152813.46 ms | ratio=1.27x ===
+
+=== VOL timing [qmc_sz3_1e6_vol_N16] : einspline37 (chunking: vol, N=16) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_qmc_sz3_1e6_vol_N16.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_vol_qmc_sz3_1e6_vol_N16.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_qmc_sz3_1e6_vol_N16.csv only=einspline37 comp=sz3_1e6 verify=0 keep_h5=0 debug=0
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 960.6 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE einspline37    min=-2.125822e+01 max=2.036857e+01 range=4.162679e+01 xform=none
+[chunk] sz3        N=16  -> 16 chunks x 847553220 B (808.290 MiB, 211888305 elems) total=13560851520 B
+[VOL RAGGED] dataset 0 'sz3': clean split, 16 x 847553220 B, no ragged tail
+[VOL stream] *** KEY NOT CONFIRMED *** 'sz3:cuda_stream' status=2 readback=(nil) expected=(nil)
+[VOL stream] GPU event timings (device_ms) are NOT trustworthy, and D2H ordering is not guaranteed.
+[VOL stream] Cross-check with: nsys stats --report cuda_gpu_trace
+[VOL stream] options declared by 'sz3':
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+pressio:rel <double> = <empty>
+sz3:abs_error_bound <double> = 1e-06
+sz3:algorithm <uint8> = 1
+sz3:algorithm_str <char*> = <empty>
+sz3:error_bound_mode <uint8> = 0
+sz3:error_bound_mode_str <char*> = <empty>
+sz3:interp_algo <uint8> = 1
+sz3:interp_direction <uint8> = 0
+sz3:intrep_algo_str <char*> = <empty>
+sz3:l2_norm_error_bound <double> = 0
+sz3:lorenzo <bool> = true
+sz3:lorenzo2 <bool> = false
+sz3:metric <char*> = "noop"
+sz3:openmp <bool> = false
+sz3:pred_dim <uint8> = 1
+sz3:psnr_error_bound <double> = 0
+sz3:quant_bin_size <int32> = 65536
+sz3:regression <bool> = true
+sz3:regression2 <bool> = false
+sz3:rel_error_bound <double> = 0
+
+[chunk-out] 'sz3' 847553220 -> 665950317 B (1.27x), cap 953562908 B
+[chunk-out] 'sz3' 847553220 -> 667548251 B (1.27x), cap 953562908 B
+[chunk-out] 'sz3' 847553220 -> 664971911 B (1.27x), cap 953562908 B
+[chunk-out] 'sz3' 847553220 -> 659793162 B (1.28x), cap 953562908 B
+[chunk-out] 'sz3' 847553220 -> 658752689 B (1.29x), cap 953562908 B
+[chunk-out] 'sz3' 847553220 -> 665370950 B (1.27x), cap 953562908 B
+[chunk-out] 'sz3' 847553220 -> 669194344 B (1.27x), cap 953562908 B
+[chunk-out] 'sz3' 847553220 -> 668963167 B (1.27x), cap 953562908 B
+[chunk-out] 'sz3' 847553220 -> 668887669 B (1.27x), cap 953562908 B
+[chunk-out] 'sz3' 847553220 -> 669336209 B (1.27x), cap 953562908 B
+[chunk-out] 'sz3' 847553220 -> 665458134 B (1.27x), cap 953562908 B
+[chunk-out] 'sz3' 847553220 -> 659280962 B (1.29x), cap 953562908 B
+[chunk-out] 'sz3' 847553220 -> 659740887 B (1.28x), cap 953562908 B
+[chunk-out] 'sz3' 847553220 -> 665195929 B (1.27x), cap 953562908 B
+[chunk-out] 'sz3' 847553220 -> 666985036 B (1.27x), cap 953562908 B
+[chunk-out] 'sz3' 847553220 -> 665417580 B (1.27x), cap 953562908 B
+[VOL stream] *** KEY NOT CONFIRMED *** 'sz3:cuda_stream' status=2 readback=(nil) expected=(nil)
+[VOL stream] GPU event timings (device_ms) are NOT trustworthy, and D2H ordering is not guaranteed.
+[VOL stream] Cross-check with: nsys stats --report cuda_gpu_trace
+[VOL stream] options declared by 'sz3':
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 1e-06
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+pressio:rel <double> = <empty>
+sz3:abs_error_bound <double> = 1e-06
+sz3:algorithm <uint8> = 1
+sz3:algorithm_str <char*> = <empty>
+sz3:error_bound_mode <uint8> = 0
+sz3:error_bound_mode_str <char*> = <empty>
+sz3:interp_algo <uint8> = 1
+sz3:interp_direction <uint8> = 0
+sz3:intrep_algo_str <char*> = <empty>
+sz3:l2_norm_error_bound <double> = 0
+sz3:lorenzo <bool> = true
+sz3:lorenzo2 <bool> = false
+sz3:metric <char*> = "noop"
+sz3:openmp <bool> = false
+sz3:pred_dim <uint8> = 1
+sz3:psnr_error_bound <double> = 0
+sz3:quant_bin_size <int32> = 65536
+sz3:regression <bool> = true
+sz3:regression2 <bool> = false
+sz3:rel_error_bound <double> = 0
+
+
+=== einspline37 (12932.6 MiB, float, raw) ===
+Info: 0x5648269f85a0
+  einspline37_sz3_1e6          C=   1.76 W=197354.67 F=  179.35 X=   13.71 | O=   0.44 R=149990.35 ms  ratio=  1.27x  RMSE=2.848e-07 maxae=1.000e-06
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.76 write=197354.67 flush=179.35 close=13.71 => write_total=197549.49 ms | open=0.44 read=149990.35 => read_total=149990.79 ms | ratio=1.27x ===
+
+=== VOL timing [miranda_sz3_1e6_pressio_N8] : miranda (chunking: pressio, N=8) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_miranda_sz3_1e6_pressio_N8.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_vol_miranda_sz3_1e6_pressio_N8.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_miranda_sz3_1e6_pressio_N8.csv only=miranda comp=sz3_1e6 verify=0 keep_h5=0 debug=0
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 960.6 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE miranda        min=9.999878e-01 max=3.000046e+00 range=2.000058e+00 xform=none
+[chunk] sz3        N=8   -> 8 chunks x 37748736 B (36.000 MiB, 4718592 elems) total=301989888 B
+
+=== miranda (288.0 MiB, double, raw) ===
+Info: 0x56543213d5c0
+  miranda_sz3_1e6              C=   1.62 W=  1735.74 F=    0.31 X=    0.26 | O=   0.43 R=  1251.85 ms  ratio= 13.09x  RMSE=2.968e-07 maxae=1.000e-06
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.62 write=1735.74 flush=0.31 close=0.26 => write_total=1737.93 ms | open=0.43 read=1251.85 => read_total=1252.27 ms | ratio=13.09x ===
+
+=== VOL timing [miranda_sz3_1e6_pressio_N16] : miranda (chunking: pressio, N=16) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_miranda_sz3_1e6_pressio_N16.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_vol_miranda_sz3_1e6_pressio_N16.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_miranda_sz3_1e6_pressio_N16.csv only=miranda comp=sz3_1e6 verify=0 keep_h5=0 debug=0
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 960.6 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE miranda        min=9.999878e-01 max=3.000046e+00 range=2.000058e+00 xform=none
+[chunk] sz3        N=16  -> 16 chunks x 18874368 B (18.000 MiB, 2359296 elems) total=301989888 B
+
+=== miranda (288.0 MiB, double, raw) ===
+Info: 0x5581ca4be5c0
+  miranda_sz3_1e6              C=   1.17 W=  1943.87 F=    0.31 X=    0.30 | O=   0.44 R=  1111.74 ms  ratio= 12.00x  RMSE=2.767e-07 maxae=1.000e-06
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.17 write=1943.87 flush=0.31 close=0.30 => write_total=1945.66 ms | open=0.44 read=1111.74 => read_total=1112.18 ms | ratio=12.00x ===
+
+=== VOL timing [scale-T_sz3_1e6_pressio_N8] : scale-T (chunking: pressio, N=8) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_scale-T_sz3_1e6_pressio_N8.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_vol_scale-T_sz3_1e6_pressio_N8.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_scale-T_sz3_1e6_pressio_N8.csv only=scale-T comp=sz3_1e6 verify=0 keep_h5=0 debug=0
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 960.6 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE scale-T        min=5.209023e+00 max=5.754571e+00 range=5.455480e-01 xform=log1p
+[chunk] sz3        N=8   -> 8 chunks x 70560000 B (67.291 MiB, 17640000 elems) total=564480000 B
+
+=== scale-T (538.3 MiB, float, raw, transformed) ===
+Info: 0x55dc437305c0
+  scale-T_sz3_1e6              C=   1.21 W=  6322.82 F=  172.28 X=    0.29 | O=   0.44 R=  5857.16 ms  ratio=  3.99x  RMSE=6.060e-07 maxae=9.537e-07 (log-space)
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.21 write=6322.82 flush=172.28 close=0.29 => write_total=6496.60 ms | open=0.44 read=5857.16 => read_total=5857.61 ms | ratio=3.99x ===
+
+=== VOL timing [scale-T_sz3_1e6_pressio_N16] : scale-T (chunking: pressio, N=16) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_scale-T_sz3_1e6_pressio_N16.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_vol_scale-T_sz3_1e6_pressio_N16.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_scale-T_sz3_1e6_pressio_N16.csv only=scale-T comp=sz3_1e6 verify=0 keep_h5=0 debug=0
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 960.6 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE scale-T        min=5.209023e+00 max=5.754571e+00 range=5.455480e-01 xform=log1p
+[chunk] sz3        N=16  -> 16 chunks x 35280000 B (33.646 MiB, 8820000 elems) total=564480000 B
+
+=== scale-T (538.3 MiB, float, raw, transformed) ===
+Info: 0x55c352ed85c0
+  scale-T_sz3_1e6              C=   1.21 W=  6616.20 F=  140.23 X=    0.30 | O=   0.45 R=  5805.77 ms  ratio=  3.99x  RMSE=6.060e-07 maxae=9.537e-07 (log-space)
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.21 write=6616.20 flush=140.23 close=0.30 => write_total=6757.94 ms | open=0.45 read=5805.77 => read_total=5806.22 ms | ratio=3.99x ===
+
+=== VOL timing [s3d_sz3_1e6_pressio_N8] : s3d (chunking: pressio, N=8) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_s3d_sz3_1e6_pressio_N8.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_vol_s3d_sz3_1e6_pressio_N8.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_s3d_sz3_1e6_pressio_N8.csv only=s3d comp=sz3_1e6 verify=0 keep_h5=0 debug=0
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 960.6 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE s3d            min=-6.362436e-15 max=3.920002e-02 range=3.920002e-02 xform=none
+[chunk] sz3        N=8   -> 8 chunks x 125000000 B (119.209 MiB, 15625000 elems) total=1000000000 B
+
+=== s3d (953.7 MiB, double, raw) ===
+Info: 0x5561a2bcb5c0
+  s3d_sz3_1e6                  C=   1.20 W=  5347.67 F=    0.31 X=    0.28 | O=   0.64 R=  4143.30 ms  ratio= 31.79x  RMSE=3.421e-07 maxae=1.000e-06
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.20 write=5347.67 flush=0.31 close=0.28 => write_total=5349.46 ms | open=0.64 read=4143.30 => read_total=4143.94 ms | ratio=31.79x ===
+
+=== VOL timing [s3d_sz3_1e6_pressio_N16] : s3d (chunking: pressio, N=16) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_s3d_sz3_1e6_pressio_N16.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_vol_s3d_sz3_1e6_pressio_N16.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_s3d_sz3_1e6_pressio_N16.csv only=s3d comp=sz3_1e6 verify=0 keep_h5=0 debug=0
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 960.6 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE s3d            min=-6.362436e-15 max=3.920002e-02 range=3.920002e-02 xform=none
+[chunk] sz3        N=16  -> 16 chunks x 62500000 B (59.605 MiB, 7812500 elems) total=1000000000 B
+
+=== s3d (953.7 MiB, double, raw) ===
+Info: 0x56137ba685c0
+  s3d_sz3_1e6                  C=   1.25 W=  5032.45 F=    0.30 X=    0.28 | O=   0.63 R=  3963.41 ms  ratio= 31.79x  RMSE=3.421e-07 maxae=1.000e-06
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.25 write=5032.45 flush=0.30 close=0.28 => write_total=5034.28 ms | open=0.63 read=3963.41 => read_total=3964.04 ms | ratio=31.79x ===
+
+=== VOL timing [nyx_baryon_sz3_1e6_pressio_N8] : nyx_baryon (chunking: pressio, N=8) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_nyx_baryon_sz3_1e6_pressio_N8.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_vol_nyx_baryon_sz3_1e6_pressio_N8.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_nyx_baryon_sz3_1e6_pressio_N8.csv only=nyx_baryon comp=sz3_1e6 verify=0 keep_h5=0 debug=0
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 960.6 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE nyx_baryon     min=5.637747e-02 max=1.166017e+01 range=1.160379e+01 xform=log1p
+[chunk] sz3        N=8   -> 8 chunks x 67108864 B (64.000 MiB, 16777216 elems) total=536870912 B
+
+=== nyx_baryon (512.0 MiB, float, hdf5, transformed) ===
+Info: 0x5616e9d638d0
+  nyx_baryon_sz3_1e6           C=   1.05 W=  8851.67 F=  210.32 X=    0.19 | O=   0.52 R=  9435.84 ms  ratio=  1.79x  RMSE=4.867e-07 maxae=1.669e-06 (log-space)
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.05 write=8851.67 flush=210.32 close=0.19 => write_total=9063.23 ms | open=0.52 read=9435.84 => read_total=9436.36 ms | ratio=1.79x ===
+
+=== VOL timing [nyx_baryon_sz3_1e6_pressio_N16] : nyx_baryon (chunking: pressio, N=16) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_nyx_baryon_sz3_1e6_pressio_N16.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_vol_nyx_baryon_sz3_1e6_pressio_N16.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_nyx_baryon_sz3_1e6_pressio_N16.csv only=nyx_baryon comp=sz3_1e6 verify=0 keep_h5=0 debug=0
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 960.6 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE nyx_baryon     min=5.637747e-02 max=1.166017e+01 range=1.160379e+01 xform=log1p
+[chunk] sz3        N=16  -> 16 chunks x 33554432 B (32.000 MiB, 8388608 elems) total=536870912 B
+
+=== nyx_baryon (512.0 MiB, float, hdf5, transformed) ===
+Info: 0x557070f0b8d0
+  nyx_baryon_sz3_1e6           C=   1.07 W=  9400.51 F=  117.38 X=    0.19 | O=   0.52 R=  9375.14 ms  ratio=  1.75x  RMSE=4.710e-07 maxae=1.669e-06 (log-space)
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.07 write=9400.51 flush=117.38 close=0.19 => write_total=9519.16 ms | open=0.52 read=9375.14 => read_total=9375.66 ms | ratio=1.75x ===
+
+=== VOL timing [ocean_temp_sz3_1e6_pressio_N8] : ocean_temp (chunking: pressio, N=8) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_ocean_temp_sz3_1e6_pressio_N8.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_vol_ocean_temp_sz3_1e6_pressio_N8.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_ocean_temp_sz3_1e6_pressio_N8.csv only=ocean_temp comp=sz3_1e6 verify=0 keep_h5=0 debug=0
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 960.6 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE ocean_temp     min=4.445019e+00 max=1.072704e+01 range=6.282023e+00 xform=none
+[chunk] sz3        N=8   -> 8 chunks x 16140480 B (15.393 MiB, 4035120 elems) total=129123840 B
+[FAIL] ocean_temp_sz3_1e6           maxae=4.768372e-06 exceeds 2x configured bound 1.000000e-06
+
+=== ocean_temp (123.1 MiB, float, hdf5) ===
+Info: 0x558ac2a0d870
+  ocean_temp_sz3_1e6           C=   1.05 W=  3853.22 F=  162.78 X=    0.20 | O=   0.52 R=  2239.66 ms  ratio=  1.52x  RMSE=4.751e-07 maxae=4.768e-06
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.05 write=3853.22 flush=162.78 close=0.20 => write_total=4017.25 ms | open=0.52 read=2239.66 => read_total=2240.19 ms | ratio=1.52x ===
+
+=== VOL timing [ocean_temp_sz3_1e6_pressio_N16] : ocean_temp (chunking: pressio, N=16) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_ocean_temp_sz3_1e6_pressio_N16.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_vol_ocean_temp_sz3_1e6_pressio_N16.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_ocean_temp_sz3_1e6_pressio_N16.csv only=ocean_temp comp=sz3_1e6 verify=0 keep_h5=0 debug=0
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 960.6 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE ocean_temp     min=4.445019e+00 max=1.072704e+01 range=6.282023e+00 xform=none
+[chunk] sz3        N=16  -> 16 chunks x 8070240 B (7.696 MiB, 2017560 elems) total=129123840 B
+[FAIL] ocean_temp_sz3_1e6           maxae=4.768372e-06 exceeds 2x configured bound 1.000000e-06
+
+=== ocean_temp (123.1 MiB, float, hdf5) ===
+Info: 0x55d0989b9870
+  ocean_temp_sz3_1e6           C=   0.99 W=  4049.63 F=  243.66 X=    0.25 | O=   0.53 R=  2169.81 ms  ratio=  1.45x  RMSE=4.761e-07 maxae=4.768e-06
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=0.99 write=4049.63 flush=243.66 close=0.25 => write_total=4294.54 ms | open=0.53 read=2169.81 => read_total=2170.33 ms | ratio=1.45x ===
+
+=== VOL timing [qmc_sz3_1e6_pressio_N8] : einspline37 (chunking: pressio, N=8) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_qmc_sz3_1e6_pressio_N8.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_vol_qmc_sz3_1e6_pressio_N8.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_qmc_sz3_1e6_pressio_N8.csv only=einspline37 comp=sz3_1e6 verify=0 keep_h5=0 debug=0
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 960.6 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE einspline37    min=-2.125822e+01 max=2.036857e+01 range=4.162679e+01 xform=none
+[chunk] sz3        N=8   -> 8 chunks x 1695106440 B (1616.579 MiB, 423776610 elems) total=13560851520 B
+
+=== einspline37 (12932.6 MiB, float, raw) ===
+Info: 0x55bedfc3c5a0
+  einspline37_sz3_1e6          C=   1.24 W=204195.85 F=  364.97 X=    0.50 | O=   0.67 R=157969.01 ms  ratio=  1.27x  RMSE=2.849e-07 maxae=1.000e-06
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.24 write=204195.85 flush=364.97 close=0.50 => write_total=204562.56 ms | open=0.67 read=157969.01 => read_total=157969.68 ms | ratio=1.27x ===
+
+=== VOL timing [qmc_sz3_1e6_pressio_N16] : einspline37 (chunking: pressio, N=16) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_qmc_sz3_1e6_pressio_N16.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_vol_qmc_sz3_1e6_pressio_N16.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_qmc_sz3_1e6_pressio_N16.csv only=einspline37 comp=sz3_1e6 verify=0 keep_h5=0 debug=0
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 960.6 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE einspline37    min=-2.125822e+01 max=2.036857e+01 range=4.162679e+01 xform=none
+[chunk] sz3        N=16  -> 16 chunks x 847553220 B (808.290 MiB, 211888305 elems) total=13560851520 B
+
+=== einspline37 (12932.6 MiB, float, raw) ===
+Info: 0x55dba238f5a0
+  einspline37_sz3_1e6          C=   1.78 W=205337.93 F=  331.56 X=   24.88 | O=   0.45 R=161900.68 ms  ratio=  1.27x  RMSE=2.848e-07 maxae=1.000e-06
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.78 write=205337.93 flush=331.56 close=24.88 => write_total=205696.16 ms | open=0.45 read=161900.68 => read_total=161901.13 ms | ratio=1.27x ===
+
+=== [4] JSON-path chunking selection (no VOL_COMP_* env set) ===
+
+=== VOL timing [miranda_sz3_1e3_vjson_native] : miranda (chunking: native) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_miranda_sz3_1e3_vjson_native.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_vol_miranda_sz3_1e3_vjson_native.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_miranda_sz3_1e3_vjson_native.csv only=miranda comp=sz3_1e3_vjson verify=0 keep_h5=0 debug=0
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 962.9 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE miranda        min=9.999878e-01 max=3.000046e+00 range=2.000058e+00 xform=none
+[chunk] sz3        N=1   -> 1 chunks x 301989888 B (288.000 MiB, 37748736 elems) total=301989888 B
+[VOL RAGGED] dataset 0 'sz3': clean split, 1 x 301989888 B, no ragged tail
+[VOL stream] *** KEY NOT CONFIRMED *** 'sz3:cuda_stream' status=2 readback=(nil) expected=(nil)
+[VOL stream] GPU event timings (device_ms) are NOT trustworthy, and D2H ordering is not guaranteed.
+[VOL stream] Cross-check with: nsys stats --report cuda_gpu_trace
+[VOL stream] options declared by 'sz3':
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 0.001
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+pressio:rel <double> = <empty>
+sz3:abs_error_bound <double> = 0.001
+sz3:algorithm <uint8> = 1
+sz3:algorithm_str <char*> = <empty>
+sz3:error_bound_mode <uint8> = 0
+sz3:error_bound_mode_str <char*> = <empty>
+sz3:interp_algo <uint8> = 1
+sz3:interp_direction <uint8> = 0
+sz3:intrep_algo_str <char*> = <empty>
+sz3:l2_norm_error_bound <double> = 0
+sz3:lorenzo <bool> = true
+sz3:lorenzo2 <bool> = false
+sz3:metric <char*> = "noop"
+sz3:openmp <bool> = false
+sz3:pred_dim <uint8> = 1
+sz3:psnr_error_bound <double> = 0
+sz3:quant_bin_size <int32> = 65536
+sz3:regression <bool> = true
+sz3:regression2 <bool> = false
+sz3:rel_error_bound <double> = 0
+
+[chunk-out] 'sz3' 301989888 -> 4740461 B (63.70x), cap 339804160 B
+[VOL stream] *** KEY NOT CONFIRMED *** 'sz3:cuda_stream' status=2 readback=(nil) expected=(nil)
+[VOL stream] GPU event timings (device_ms) are NOT trustworthy, and D2H ordering is not guaranteed.
+[VOL stream] Cross-check with: nsys stats --report cuda_gpu_trace
+[VOL stream] options declared by 'sz3':
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 0.001
+pressio:metric <char*> = "noop"
+pressio:nthreads <uint32> = 1
+pressio:rel <double> = <empty>
+sz3:abs_error_bound <double> = 0.001
+sz3:algorithm <uint8> = 1
+sz3:algorithm_str <char*> = <empty>
+sz3:error_bound_mode <uint8> = 0
+sz3:error_bound_mode_str <char*> = <empty>
+sz3:interp_algo <uint8> = 1
+sz3:interp_direction <uint8> = 0
+sz3:intrep_algo_str <char*> = <empty>
+sz3:l2_norm_error_bound <double> = 0
+sz3:lorenzo <bool> = true
+sz3:lorenzo2 <bool> = false
+sz3:metric <char*> = "noop"
+sz3:openmp <bool> = false
+sz3:pred_dim <uint8> = 1
+sz3:psnr_error_bound <double> = 0
+sz3:quant_bin_size <int32> = 65536
+sz3:regression <bool> = true
+sz3:regression2 <bool> = false
+sz3:rel_error_bound <double> = 0
+
+
+=== miranda (288.0 MiB, double, raw) ===
+Info: 0x55a5c265a5c0
+  miranda_sz3_1e3_vjson        C=   1.57 W=  1370.29 F=    0.35 X=    0.29 | O=   0.44 R=   823.18 ms  ratio= 57.60x  RMSE=2.786e-04 maxae=1.000e-03
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.57 write=1370.29 flush=0.35 close=0.29 => write_total=1372.51 ms | open=0.44 read=823.18 => read_total=823.62 ms | ratio=57.60x ===
+
+=== VOL timing [miranda_sz3_1e3_pjson_native] : miranda (chunking: native) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_miranda_sz3_1e3_pjson_native.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_vol_miranda_sz3_1e3_pjson_native.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_miranda_sz3_1e3_pjson_native.csv only=miranda comp=sz3_1e3_pjson verify=0 keep_h5=0 debug=0
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 962.9 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE miranda        min=9.999878e-01 max=3.000046e+00 range=2.000058e+00 xform=none
+[chunk] sz3        N=1   -> 1 chunks x 301989888 B (288.000 MiB, 37748736 elems) total=301989888 B
+
+=== miranda (288.0 MiB, double, raw) ===
+Info: 0x5652c69975c0
+  miranda_sz3_1e3_pjson        C=   1.26 W=  1373.94 F=    0.36 X=    0.30 | O=   0.44 R=   795.15 ms  ratio= 57.60x  RMSE=2.786e-04 maxae=1.000e-03
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.26 write=1373.94 flush=0.36 close=0.30 => write_total=1375.86 ms | open=0.44 read=795.15 => read_total=795.58 ms | ratio=57.60x ===
+
+=== VOL timing [miranda_cuszp_1e3_vjson_native] : miranda (chunking: native) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_miranda_cuszp_1e3_vjson_native.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_vol_miranda_cuszp_1e3_vjson_native.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_miranda_cuszp_1e3_vjson_native.csv only=miranda comp=cuszp_1e3_vjson verify=0 keep_h5=0 debug=0
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 962.9 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE miranda        min=9.999878e-01 max=3.000046e+00 range=2.000058e+00 xform=none
+[chunk] cuszp      N=1   -> 1 chunks x 301989888 B (288.000 MiB, 37748736 elems) total=301989888 B
+[VOL RAGGED] dataset 0 'cuszp': clean split, 1 x 301989888 B, no ragged tail
+[VOL stream] *** KEY NOT CONFIRMED *** 'cuszp:cuda_stream' status=2 readback=(nil) expected=(nil)
+[VOL stream] GPU event timings (device_ms) are NOT trustworthy, and D2H ordering is not guaranteed.
+[VOL stream] Cross-check with: nsys stats --report cuda_gpu_trace
+[VOL stream] options declared by 'cuszp':
+cuszp:metric <char*> = "noop"
+cuszp:mode <int32> = 1
+cuszp:mode_str <char*> = "outlier"
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 0.001
+pressio:metric <char*> = "noop"
+
+[VOL] *** D2H ORDERING NOT GUARANTEED *** the 'cuszp:cuda_stream' option was not confirmed, so the codec may be running on a stream we do not synchronise. Results may be read before the kernel finishes. Fix the option key; do not mask this with a device barrier.
+[chunk-out] 'cuszp' 301989888 -> 14338684 B (21.06x), cap 339804160 B
+[VOL stream] *** KEY NOT CONFIRMED *** 'cuszp:cuda_stream' status=2 readback=(nil) expected=(nil)
+[VOL stream] GPU event timings (device_ms) are NOT trustworthy, and D2H ordering is not guaranteed.
+[VOL stream] Cross-check with: nsys stats --report cuda_gpu_trace
+[VOL stream] options declared by 'cuszp':
+cuszp:metric <char*> = "noop"
+cuszp:mode <int32> = 1
+cuszp:mode_str <char*> = "outlier"
+metrics:copy_compressor_results <int32> = 1
+metrics:errors_fatal <int32> = 1
+pressio:abs <double> = 0.001
+pressio:metric <char*> = "noop"
+
+[VOL] *** D2H ORDERING NOT GUARANTEED *** the 'cuszp:cuda_stream' option was not confirmed, so the codec may be running on a stream we do not synchronise. Results may be read before the kernel finishes. Fix the option key; do not mask this with a device barrier.
+
+=== miranda (288.0 MiB, double, raw) ===
+Info: 0x55acb45885c0
+  miranda_cuszp_1e3_vjson      C=   1.19 W=   674.65 F=    0.38 X=    0.26 | O=   0.43 R=   199.43 ms  ratio= 20.57x  RMSE=2.720e-04 maxae=1.000e-03
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.19 write=674.65 flush=0.38 close=0.26 => write_total=676.48 ms | open=0.43 read=199.43 => read_total=199.87 ms | ratio=20.57x ===
+
+=== VOL timing [miranda_cuszp_1e3_pjson_native] : miranda (chunking: native) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_miranda_cuszp_1e3_pjson_native.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_vol_miranda_cuszp_1e3_pjson_native.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/results_ext_miranda_cuszp_1e3_pjson_native.csv only=miranda comp=cuszp_1e3_pjson verify=0 keep_h5=0 debug=0
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 962.9 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE miranda        min=9.999878e-01 max=3.000046e+00 range=2.000058e+00 xform=none
+[chunk] cuszp      N=1   -> 1 chunks x 301989888 B (288.000 MiB, 37748736 elems) total=301989888 B
+
+=== miranda (288.0 MiB, double, raw) ===
+Info: 0x55bb1860b5c0
+  miranda_cuszp_1e3_pjson      C=   1.19 W=   514.02 F=    0.37 X=    0.28 | O=   0.44 R=   375.45 ms  ratio= 20.57x  RMSE=2.720e-04 maxae=1.000e-03
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.19 write=514.02 flush=0.37 close=0.28 => write_total=515.87 ms | open=0.44 read=375.45 => read_total=375.89 ms | ratio=20.57x ===
+
+=== [6] Filter (deflate) timing ===
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 962.9 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+miranda/deflate                file=137.5 MiB (raw 288.0 MiB)
+HDF5-DIAG: Error detected in HDF5 (1.14.6):
+  #000: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Pdcpl.c line 1923 in H5Pset_chunk(): chunk dimensionality must be positive
+    major: Invalid arguments to routine
+    minor: Out of range
+ocean_temp/deflate             file=0.0 MiB (raw 0.0 MiB)
