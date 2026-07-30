@@ -1,0 +1,214 @@
+#!/bin/bash
+#PBS -N filter_test_swing
+#PBS -l select=1:ncpus=16:ngpus=1:mpiprocs=1
+#PBS -l walltime=04:00:00
+#PBS -j oe
+#PBS -A SDR
+#PBS -q gpu
+
+cd $PBS_O_WORKDIR/..
+WORK="$(pwd)/tests"
+RESULTS="$WORK/filter_results"
+mkdir -p "$RESULTS"
+
+echo "Job started on $(date)"
+echo "Running on: $(hostname)"
+echo "Results   : $RESULTS"
+
+module load gcc/11.4.0
+module load hpcx/2.26-gcc
+module load cuda/12.6.0
+
+SYSTEM_MPICC=$(which mpicc)
+SYSTEM_MPICXX=$(which mpicxx)
+GCC_LIB=$(gcc --print-file-name=libstdc++.so | xargs dirname 2>/dev/null)
+[ "$GCC_LIB" = "." ] && GCC_LIB=/usr/lib/gcc/x86_64-linux-gnu/11
+
+LP_VIEW=/home/kdougherty/libpressio_cuda/.spack-env/view
+
+LP_CMAKE_DIR=""
+for candidate in \
+    "${LP_VIEW}/lib64/cmake/LibPressio" \
+    "${LP_VIEW}/lib/cmake/LibPressio" \
+    "${LP_VIEW}/lib64/cmake/libpressio" \
+    "${LP_VIEW}/lib/cmake/libpressio"
+do
+    if [ -f "${candidate}/LibPressioConfig.cmake" ] || \
+       [ -f "${candidate}/libpressio-config.cmake" ]; then
+        LP_CMAKE_DIR="$candidate"; break
+    fi
+done
+[ -z "$LP_CMAKE_DIR" ] && { echo "ERROR: no LibPressioConfig.cmake under $LP_VIEW"; exit 1; }
+
+CLEAN_PATH=$(echo "$PATH" | tr ':' '\n' | grep -v spack-env | tr '\n' ':')
+
+echo ""
+echo "=== Building ==="
+env PATH="$CLEAN_PATH" LD_LIBRARY_PATH="$GCC_LIB" \
+cmake -S . -B build \
+    -DCMAKE_C_COMPILER="$SYSTEM_MPICC" \
+    -DCMAKE_CXX_COMPILER="$SYSTEM_MPICXX" \
+    -DUSE_CUDA=ON \
+    -DCMAKE_PREFIX_PATH="$LP_VIEW" \
+    -DLibPressio_DIR="$LP_CMAKE_DIR" \
+    -Wno-dev
+env PATH="$CLEAN_PATH" LD_LIBRARY_PATH="$GCC_LIB" \
+cmake --build build -j16
+
+ls build/tests/bench_filter_timing >/dev/null 2>&1 || {
+    echo "ERROR: bench_filter_timing not built"; exit 1; }
+
+export LD_LIBRARY_PATH=${GCC_LIB}:${LP_VIEW}/lib64:${LP_VIEW}/lib
+export HDF5_USE_FILE_LOCKING=FALSE
+
+H5DIR="${VOL_H5DIR:-/lcrc/project/SDR/$USER/vol_bench_h5}"
+mkdir -p "$H5DIR" || { echo "cannot create $H5DIR"; exit 1; }
+
+# ---------------------------------------------------------------------------
+# run_filter TAG DATASET BACKEND CHUNK_N [LEVEL]
+#   BACKEND: deflate | libpressio
+# ---------------------------------------------------------------------------
+run_filter () {
+    local tag="$1"; local ds="$2"; local backend="$3"
+    local nchunks="$4"; local level="${5:-6}"
+    local label="${tag}_${backend}_N${nchunks}"
+    [ "$backend" = "deflate" ] && label="${tag}_deflate_L${level}_N${nchunks}"
+
+    local h5="$H5DIR/filter_${label}.h5"
+    local rcsv="$RESULTS/results_filter_${label}.csv"
+    local xcsv="$RESULTS/results_filter_ext_${label}.csv"
+
+    rm -f "$h5"
+    echo ""
+    echo "=== filter [$label] : $ds (chunks=$nchunks) ==="
+
+    # -u HDF5_VOL_CONNECTOR is the important part: without it the filter path
+    # would run through the passthrough VOL as well.
+    env -u HDF5_VOL_CONNECTOR -u HDF5_PLUGIN_PATH \
+        timeout --signal=KILL "${FILTER_TIMEOUT:-1800}" \
+        ./build/tests/bench_filter_timing \
+            --${backend} \
+            --only "$ds" \
+            --chunk-n "$nchunks" \
+            --level "$level" \
+            --h5  "$h5" \
+            --out "$rcsv" \
+            --ext "$xcsv"
+    local rc=$?
+    rm -f "$h5"
+
+    if [ $rc -ne 0 ]; then
+        [ -f "$xcsv" ] || printf '%s\n' \
+"dataset,compressor,codec_kind,chunk_n,rep,logical_bytes,stored_bytes,ratio,create_ms,write_ms,flush_ms,close_ms,open_ms,read_ms,rmse,abs_thresh,maxae,bound_ok" > "$xcsv"
+        printf '%s,%s,NA,%s,-1,0,0,0,-1,-1,-1,-1,-1,-1,-1,-1,-1,0\n' \
+               "$ds" "$backend" "$nchunks" >> "$xcsv"
+        if [ $rc -eq 137 ]; then
+            echo "  [FAIL] $label KILLED BY TIMEOUT — recorded as rep=-1"
+        else
+            echo "  [FAIL] $label exited rc=$rc — recorded as rep=-1"
+        fi
+    fi
+    return 0
+}
+
+SMALL_DS="miranda s3d scale-T nyx_baryon ocean_temp"
+BIG_DS="einspline37"
+CHUNK_COUNTS="1 8 16"
+
+echo ""
+echo "############ deflate (always available) ############"
+for ds in $SMALL_DS; do
+    for N in $CHUNK_COUNTS; do
+        run_filter "$ds" "$ds" deflate "$N" 6
+    done
+done
+
+# qmc: N=1 exceeds the 4 GiB chunk limit on purpose, to document it.
+for N in 1 8 16; do
+    run_filter qmc "$BIG_DS" deflate "$N" 6
+done
+
+# Deflate level sweep on one dataset, for the ratio/time tradeoff curve.
+echo ""
+echo "############ deflate level sweep (miranda) ############"
+for L in 1 4 9; do
+    run_filter miranda miranda deflate 8 "$L"
+done
+
+if [ -n "${FILTER_LIBPRESSIO:-}" ]; then
+    echo ""
+    echo "############ libpressio H5Z filter ############"
+    echo "NOTE: verify LIBPRESSIO_H5Z_FILTER_ID and that make_dcpl() passes the"
+    echo "      codec + options through, or these rows are not comparable."
+    for ds in $SMALL_DS; do
+        for comp in sz3_1e3 sz3_1e6 bzip2; do
+            for N in 8 16; do
+                label="${ds}_lp_${comp}_N${N}"
+                h5="$H5DIR/filter_${label}.h5"
+                rm -f "$h5"
+                echo ""
+                echo "=== filter [$label] ==="
+                env -u HDF5_VOL_CONNECTOR \
+                    HDF5_PLUGIN_PATH="${LIBPRESSIO_H5Z_PLUGIN_PATH:-$LP_VIEW/lib64/hdf5/plugin}" \
+                    LIBPRESSIO_H5Z_FILTER_ID="${LIBPRESSIO_H5Z_FILTER_ID:-32026}" \
+                    timeout --signal=KILL "${FILTER_TIMEOUT:-1800}" \
+                    ./build/tests/bench_filter_timing \
+                        --libpressio --only "$ds" --comp "$comp" \
+                        --chunk-n "$N" --h5 "$h5" \
+                        --out "$RESULTS/results_filter_${label}.csv" \
+                        --ext "$RESULTS/results_filter_ext_${label}.csv"
+                rm -f "$h5"
+            done
+        done
+    done
+else
+    echo ""
+    echo "############ libpressio H5Z filter: SKIPPED ############"
+    echo "Set FILTER_LIBPRESSIO=1 to run it. Until make_dcpl() passes the codec"
+    echo "and options to the plugin, deflate is the only trustworthy filter"
+    echo "comparator -- and it is a different codec, so use it for the OVERHEAD"
+    echo "claim only, never for ratio or fidelity."
+fi
+
+# ===========================================================================
+# SUMMARIES
+# ===========================================================================
+echo ""
+echo "=== per-run detail ==="
+for f in "$RESULTS"/results_filter_ext_*.csv; do
+    [ -f "$f" ] || continue
+    echo ""
+    echo "--- $(basename "$f") ---"
+    column -t -s, "$f"
+done
+
+echo ""
+echo "=== ratio and timing summary (successful runs) ==="
+printf "%-14s %-12s %-5s %10s %12s %12s %12s %10s\n" \
+       dataset codec N ratio write_ms flush_ms close_ms read_ms
+awk -F, 'FNR>1 && $5!="-1" {
+    printf "%-14s %-12s %-5s %10.2f %12.2f %12.2f %12.2f %10.2f\n",
+           $1,$2,$4,$8,$10,$11,$12,$14 }' \
+    "$RESULTS"/results_filter_ext_*.csv 2>/dev/null | sort
+
+echo ""
+echo "=== runs that FAILED or TIMED OUT (rep=-1) ==="
+awk -F, 'FNR>1 && $5=="-1" {print FILENAME": "$1" "$2" N="$4}' \
+    "$RESULTS"/results_filter_ext_*.csv 2>/dev/null || echo "(none)"
+
+echo ""
+echo "=== fidelity check: deflate is LOSSLESS, maxae MUST be 0 ==="
+awk -F, 'FNR>1 && $5!="-1" && $2=="deflate" && $17+0 != 0 {
+    print "  [FAIL] "$1" deflate maxae="$17 }' \
+    "$RESULTS"/results_filter_ext_*.csv 2>/dev/null || true
+awk -F, 'FNR>1 && $5!="-1" && $18=="0" {
+    print "  [FAIL] "$1" "$2" bound_ok=0 maxae="$17" thr="$16 }' \
+    "$RESULTS"/results_filter_ext_*.csv 2>/dev/null || true
+
+echo ""
+echo "=== chunk-count effect on ratio (per dataset) ==="
+awk -F, 'FNR>1 && $5!="-1" {printf "%s %s N=%s ratio=%.3f\n", $1,$2,$4,$8}' \
+    "$RESULTS"/results_filter_ext_*.csv 2>/dev/null | sort
+
+echo ""
+echo "Job finished on $(date)"
