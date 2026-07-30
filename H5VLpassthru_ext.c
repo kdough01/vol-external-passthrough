@@ -2521,7 +2521,8 @@ H5VL_pass_through_ext_dataset_write(
             uint64_t clen        = 0;
             uint64_t chunk_elems = 0;
             herr_t   cret;
-            const size_t hdr_bytes = VOL_PRESSIO_HDR_WORDS * sizeof(uint64_t);
+            uint64_t phdr[VOL_PRESSIO_HDR_WORDS];
+            const size_t hdr_bytes = sizeof(phdr);            /* 24 */
             const size_t chunk_bytes_req =
                 H5VL_pass_through_ext_chunk_bytes(ctx, total_bytes, dsize);
 
@@ -2530,9 +2531,9 @@ H5VL_pass_through_ext_dataset_write(
 
             double _c0 = bench_now_ms();
             cret = H5VL_pass_through_ext_compress_pressio(
-                       ctx, comp_src, total_bytes, chunk_bytes_req, hdr_bytes,
+                       ctx, comp_src, total_bytes, chunk_bytes_req,
                        &blob, &clen, &chunk_elems);
-            t.compress_ms     = bench_now_ms() - _c0;
+            t.compress_ms     = bench_now_ms() - _c0;   /* ALWAYS wall clock */
             t.pressio_call_ms = ctx->pressio_call_ms;
             t.device_ms       = ctx->device_ms;
 
@@ -2556,15 +2557,6 @@ H5VL_pass_through_ext_dataset_write(
 
             const hsize_t total = (hsize_t)(hdr_bytes + clen);
 
-            {
-                double _h0 = bench_now_ms();
-                uint64_t *phdr = (uint64_t *)blob;
-                phdr[0] = VOL_PRESSIO_MAGIC;
-                phdr[1] = clen;
-                phdr[2] = chunk_elems;
-                t.container_ms += bench_now_ms() - _h0;
-            }
-
             herr_t werr = 0;
             {
                 hsize_t new_size[H5S_MAX_RANK] = {0};
@@ -2587,20 +2579,66 @@ H5VL_pass_through_ext_dataset_write(
                 }
             }
 
+            /* Header [magic][csize][chunk_elems] at offset 0. */
             if (werr >= 0) {
-                const void *wbufs[] = { blob };
-                hid_t mspace = H5S_ALL, fspace = H5S_ALL;
+                double _h0 = bench_now_ms();
+                phdr[0] = VOL_PRESSIO_MAGIC;
+                phdr[1] = clen;
+                phdr[2] = chunk_elems;
 
+                hsize_t zero = 0;
+                hsize_t hb   = (hsize_t)hdr_bytes;
+                hid_t mspace_hdr = H5Screate_simple(1, &hb, NULL);
+                hid_t fspace_hdr = H5Screate_simple(1, (hsize_t[]){total}, NULL);
+                H5Sselect_hyperslab(fspace_hdr, H5S_SELECT_SET, &zero, NULL, &hb, NULL);
+                t.container_ms += bench_now_ms() - _h0;
+
+                const void *hbufs[] = { phdr };
+                double _io0 = bench_now_ms();
+                herr_t hret = H5VLdataset_write(
+                    1, &under, d->under_vol_id, (hid_t[]){H5T_NATIVE_UCHAR},
+                    &mspace_hdr, &fspace_hdr, plist_id, hbufs, NULL);
+                t.io_ms += bench_now_ms() - _io0;
+
+                double _h1 = bench_now_ms();
+                H5Sclose(mspace_hdr);
+                H5Sclose(fspace_hdr);
+                t.container_ms += bench_now_ms() - _h1;
+
+                if (hret < 0) {
+                    H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                            vol_err_class, maj_compression, min_compress_failed,
+                            "pressio-chunked header write failed for dataset %zu", u);
+                    werr = -1;
+                }
+            }
+
+            /* Payload at offset hdr_bytes. */
+            if (werr >= 0 && clen > 0) {
+                double _p0 = bench_now_ms();
+                hsize_t ps   = (hsize_t)clen;
+                hsize_t poff = (hsize_t)hdr_bytes;
+                hid_t mspace_payload = H5Screate_simple(1, &ps, NULL);
+                hid_t fspace_payload = H5Screate_simple(1, (hsize_t[]){total}, NULL);
+                H5Sselect_hyperslab(fspace_payload, H5S_SELECT_SET, &poff, NULL, &ps, NULL);
+                t.container_ms += bench_now_ms() - _p0;
+
+                const void *cbufs[] = { blob };
                 double _io0 = bench_now_ms();
                 herr_t wret = H5VLdataset_write(
                     1, &under, d->under_vol_id, (hid_t[]){H5T_NATIVE_UCHAR},
-                    &mspace, &fspace, plist_id, wbufs, NULL);
+                    &mspace_payload, &fspace_payload, plist_id, cbufs, NULL);
                 t.io_ms += bench_now_ms() - _io0;
+
+                double _p1 = bench_now_ms();
+                H5Sclose(mspace_payload);
+                H5Sclose(fspace_payload);
+                t.container_ms += bench_now_ms() - _p1;
 
                 if (wret < 0) {
                     H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
                             vol_err_class, maj_compression, min_compress_failed,
-                            "pressio-chunked container write failed for dataset %zu", u);
+                            "pressio-chunked payload write failed for dataset %zu", u);
                     werr = -1;
                 }
             }
