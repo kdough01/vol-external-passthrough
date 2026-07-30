@@ -6,10 +6,10 @@
 #endif
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>   /* access */
+#include <string.h>
+#include <math.h>
+#include <unistd.h>
 
-/* Clock headers must be included OUTSIDE extern "C": wrapping <chrono> in
- * extern "C" gives its templates C linkage and fails to compile. */
 #ifdef __cplusplus
 #include <chrono>
 #else
@@ -19,6 +19,19 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+typedef struct {
+    double stage_ms;       /* host memcpy into ctx->stage_buf (partial writes)  */
+    double compress_ms;    /* wall clock around the compress entry point        */
+    double container_ms;   /* SET_EXTENT + dataspace mgmt + header assembly     */
+    double io_ms;          /* H5VLdataset_write / _read calls                   */
+
+    double pressio_call_ms;/* wall around pressio_compressor_compress()         */
+    double device_ms;      /* CUDA event window (0.0 for CPU codecs)            */
+
+    double total_ms;       /* wall clock, whole per-dataset loop body           */
+    double residual_ms;    /* total - (stage+compress+container+io); want ~0    */
+} vol_write_timing_t;
 
 static inline double bench_now_ms(void) {
 #ifdef __cplusplus
@@ -31,7 +44,6 @@ static inline double bench_now_ms(void) {
 #endif
 }
 
-/* Opened once, appended thereafter. Header written only if the file is new. */
 static inline FILE *vol_timing_csv(void) {
     static FILE *f = NULL;
     static int   tried = 0;
@@ -42,26 +54,66 @@ static inline FILE *vol_timing_csv(void) {
         int existed = (access(path, F_OK) == 0);
         f = fopen(path, "a");
         if (f && !existed)
-            fprintf(f, "dataset,compressor,op,total_ms,compress_ms,io_ms,"
-                       "overhead_ms,overhead_pct\n");
+            fprintf(f,
+                "dataset,compressor,op,total_ms,"
+                "stage_ms,compress_ms,container_ms,io_ms,"
+                "pressio_call_ms,device_ms,vol_compress_ms,pressio_host_ms,"
+                "residual_ms,residual_frac\n");
     }
     return f;
 }
 
-/* Emit one phase-breakdown row. overhead = total - compress - io (clamped). */
+static inline void vol_timing_finalize(vol_write_timing_t *t,
+                                       const char *dataset, const char *compressor,
+                                       double tol_frac) {
+    if (!t) return;
+    t->residual_ms = t->total_ms - (t->stage_ms + t->compress_ms
+                                  + t->container_ms + t->io_ms);
+    if (getenv("VOL_TIMING_STRICT") && t->total_ms > 0.0 &&
+        fabs(t->residual_ms) > tol_frac * t->total_ms) {
+        fprintf(stderr,
+            "[VOL timing] UNACCOUNTED %.3f ms of %.3f ms (%.1f%%) "
+            "dset=%s comp=%s -- a timer is missing\n",
+            t->residual_ms, t->total_ms,
+            100.0 * t->residual_ms / t->total_ms,
+            dataset ? dataset : "?", compressor ? compressor : "?");
+    }
+}
+
+/* Emit one fully-resolved row. */
+static inline void vol_timing_emit_ex(const char *dataset, const char *compressor,
+                                      const char *op,
+                                      const vol_write_timing_t *t) {
+    FILE *f = vol_timing_csv();
+    if (!f || !t) return;
+
+    /* compress - pressio_call : the VOL's own buffer management.
+     * pressio_call - device   : libpressio host-side + off-stream work. */
+    double vol_compress = t->compress_ms     - t->pressio_call_ms;
+    double pressio_host = t->pressio_call_ms - t->device_ms;
+    double residual_frac = (t->total_ms > 0.0) ? t->residual_ms / t->total_ms : 0.0;
+
+    fprintf(f, "%s,%s,%s,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.6f\n",
+            dataset ? dataset : "?",
+            compressor ? compressor : "none",
+            op ? op : "?",
+            t->total_ms,
+            t->stage_ms, t->compress_ms, t->container_ms, t->io_ms,
+            t->pressio_call_ms, t->device_ms, vol_compress, pressio_host,
+            t->residual_ms, residual_frac);
+    fflush(f);   /* survive a mid-run crash */
+}
+
 static inline void vol_timing_emit(const char *dataset, const char *compressor,
                                    const char *op, double total_ms,
                                    double compress_ms, double io_ms) {
-    FILE *f = vol_timing_csv();
-    if (!f) return;
-    double oh = total_ms - compress_ms - io_ms;
-    if (oh < 0.0) oh = 0.0;
-    fprintf(f, "%s,%s,%s,%.4f,%.4f,%.4f,%.4f,%.2f\n",
-            dataset ? dataset : "?",
-            compressor ? compressor : "none",
-            op, total_ms, compress_ms, io_ms, oh,
-            total_ms > 0.0 ? 100.0 * oh / total_ms : 0.0);
-    fflush(f);   /* survive a mid-run crash */
+    vol_write_timing_t t;
+    memset(&t, 0, sizeof(t));
+    t.total_ms    = total_ms;
+    t.compress_ms = compress_ms;
+    t.io_ms       = io_ms;
+    vol_timing_finalize(&t, dataset, compressor, 1.0);  /* never warn here */
+    vol_timing_emit_ex(dataset, compressor, op, &t);
 }
 
 #ifdef __cplusplus

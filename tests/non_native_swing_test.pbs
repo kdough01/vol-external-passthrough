@@ -138,7 +138,7 @@ run_vol_group () {
     env HDF5_VOL_CONNECTOR="pass_through_ext under_vol=0;under_info={}" \
         HDF5_PLUGIN_PATH="$PLUGIN_DIR" \
         VOL_COMP_CHUNK_LOG=1 \
-        VOL_PHASES_CSV="$pcsv" \
+        BENCH_CSV="$pcsv" \
         VOL_TIMING_STRICT="${VOL_TIMING_STRICT:-1}" \
         ${VOL_COMP_GPU_EVENTS:+VOL_COMP_GPU_EVENTS="$VOL_COMP_GPU_EVENTS"} \
         ${mode:+VOL_COMP_CHUNKING="$mode"} \
@@ -190,12 +190,14 @@ GATE_CSV="$RESULTS/connector_phases_gate_noop_native.csv"
 if [ -f "$GATE_CSV" ]; then
     echo "--- gate phases ---"
     column -t -s, "$GATE_CSV"
-    # device_ms is column 10, residual_frac is column 14 in VOL_PHASES_CSV_HEADER
+    # Column order from vol_timing_csv(): 1 dataset 2 compressor 3 op 4 total
+    # 5 stage 6 compress 7 container 8 io 9 pressio_call 10 device
+    # 11 vol_compress 12 pressio_host 13 residual_ms 14 residual_frac
     awk -F, 'NR>1 && $10+0 != 0 { print "  [FAIL] noop reported device_ms="$10 }' "$GATE_CSV"
     awk -F, 'NR>1 && ($14+0 > 0.03 || $14+0 < -0.03) \
              { printf "  [FAIL] residual %.1f%% of total\n", $14*100 }' "$GATE_CSV"
 else
-    echo "  [FAIL] no phases CSV produced — is vol_timing_phases.c in the build?"
+    echo "  [FAIL] no connector CSV produced — is BENCH_CSV reaching the connector?"
 fi
 
 # ===========================================================================
@@ -229,7 +231,7 @@ done
 # ===========================================================================
 CHUNK_COUNTS="8 16"
 SWEEP_COMPS="noop cuszp_1e3 cuszp_1e6 sz3_1e3 sz3_1e6"
-SWEEP_GROUPS="miranda scale-T s3d nyx_baryon qmc"
+SWEEP_GROUPS="miranda scale-T s3d nyx_baryon ocean_temp qmc"
 
 echo ""
 echo "=== [3] full sweep ==="

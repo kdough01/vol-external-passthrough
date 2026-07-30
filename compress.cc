@@ -50,16 +50,267 @@ vol_is_gpu_codec(const char *id)
            strncmp(id, "nvcomp", 6) == 0;
 }
 
+/* ------------------------------------------------------------------------
+ * Domain helpers.
+ * --------------------------------------------------------------------- */
+static int
+vol_domain_is_host_accessible(const char *dom)
+{
+    if (!dom) return 0;
+    return strcmp(dom, "malloc")            == 0 ||
+           strcmp(dom, "cudamallochost")    == 0 ||
+           strcmp(dom, "cudahostalloc")     == 0 ||
+           strcmp(dom, "cudamallocmanaged") == 0;
+}
+
 static void
 vol_make_host_resident(struct pressio_data *data)
 {
     if (!data) return;
 
-    if (strcmp(pressio_data_domain_id(data), "malloc") != 0) {
+    if (!vol_domain_is_host_accessible(pressio_data_domain_id(data))) {
         pressio_data *d = data;
         *d = domain_manager().make_readable(
             libpressio::domain_plugins().build("malloc"), std::move(*d));
     }
+}
+
+#ifdef USE_CUDA
+
+static void
+vol_make_device_resident(struct pressio_data *data)
+{
+    if (!data) return;
+    if (strcmp(pressio_data_domain_id(data), "cudamalloc") != 0) {
+        pressio_data *d = data;
+        *d = domain_manager().make_writeable(
+            libpressio::domain_plugins().build("cudamalloc"), std::move(*d));
+    }
+}
+#endif
+
+/* Allocate a codec output buffer in the domain where the codec will actually
+ * write it.
+ */
+static struct pressio_data *
+vol_new_output(enum pressio_dtype dt, size_t ndims, size_t *dims, int is_gpu)
+{
+#ifdef USE_CUDA
+    if (is_gpu) {
+        struct pressio_data *d = pressio_data_new_empty(dt, ndims, dims);
+        if (d) vol_make_device_resident(d);
+        return d;
+    }
+#else
+    (void)is_gpu;
+#endif
+    return pressio_data_new_owning(dt, ndims, dims);
+}
+
+static int
+vol_gpu_events_enabled(void)
+{
+    static int v = -1;
+    if (v < 0) {
+        const char *e = getenv("VOL_COMP_GPU_EVENTS");
+        v = (e && *e == '0') ? 0 : 1;
+    }
+    return v;
+}
+
+#ifdef USE_CUDA
+/* Events are created once per ctx and cached. */
+static int
+vol_ev_begin(compression_ctx *ctx, int gpu)
+{
+    if (!gpu || !vol_gpu_events_enabled()) return 0;
+
+    if (!ctx->ev_start || !ctx->ev_stop) {
+        cudaEvent_t a = NULL, b = NULL;
+        if (cudaEventCreate(&a) != cudaSuccess) return 0;
+        if (cudaEventCreate(&b) != cudaSuccess) { cudaEventDestroy(a); return 0; }
+        ctx->ev_start = (void *)a;
+        ctx->ev_stop  = (void *)b;
+    }
+    cudaEventRecord((cudaEvent_t)ctx->ev_start, (cudaStream_t)ctx->stream);
+    return 1;
+}
+
+static void
+vol_ev_end(compression_ctx *ctx, int active)
+{
+    float ms = 0.0f;
+    if (!active) return;
+    cudaEventRecord((cudaEvent_t)ctx->ev_stop, (cudaStream_t)ctx->stream);
+    cudaEventSynchronize((cudaEvent_t)ctx->ev_stop);
+    cudaEventElapsedTime(&ms, (cudaEvent_t)ctx->ev_start, (cudaEvent_t)ctx->ev_stop);
+    ctx->device_ms += (double)ms;
+}
+
+/* Hand the codec our CUDA stream. */
+static void
+vol_set_cuda_stream(compression_ctx *ctx)
+{
+    char skey[128];
+    int  serr;
+
+    if (ctx->cuda_stream_set) return;
+
+    snprintf(skey, sizeof(skey), "%s:cuda_stream", ctx->compressor_id);
+
+    {
+        struct pressio_options *sopt = pressio_options_new();
+        pressio_options_set_userptr(sopt, skey, ctx->stream);
+        serr = pressio_compressor_set_options(ctx->compressor, sopt);
+        pressio_options_free(sopt);
+    }
+
+    if (serr) {
+        fprintf(stderr, "[VOL stream] set_options('%s') returned %d: %s\n",
+                skey, serr, pressio_compressor_error_msg(ctx->compressor));
+    }
+
+    {
+        struct pressio_options *o = pressio_compressor_get_options(ctx->compressor);
+        void *rb = NULL;
+        enum pressio_options_key_status st = pressio_options_get_userptr(o, skey, &rb);
+
+        if (st != pressio_options_key_set || rb != ctx->stream) {
+            ctx->cuda_stream_ok = 0;
+            fprintf(stderr,
+                "[VOL stream] *** KEY NOT CONFIRMED *** '%s' status=%d "
+                "readback=%p expected=%p\n"
+                "[VOL stream] GPU event timings (device_ms) are NOT trustworthy, "
+                "and D2H ordering is not guaranteed.\n"
+                "[VOL stream] Cross-check with: nsys stats --report cuda_gpu_trace\n",
+                skey, (int)st, rb, (void *)ctx->stream);
+
+            char *dump = pressio_options_to_string(o);
+            fprintf(stderr, "[VOL stream] options declared by '%s':\n%s\n",
+                    ctx->compressor_id, dump ? dump : "(null)");
+            free(dump);
+        } else {
+            ctx->cuda_stream_ok = 1;
+            if (getenv("VOL_COMP_COPY_LOG"))
+                fprintf(stderr, "[VOL stream] confirmed '%s' = %p\n",
+                        skey, (void *)ctx->stream);
+        }
+        pressio_options_free(o);
+    }
+
+    ctx->cuda_stream_set = 1;
+}
+#endif /* USE_CUDA */
+
+#ifdef USE_CUDA
+/* Order our D2H against the codec's work WITHOUT a device-wide barrier.
+ *
+ * A stream sync only orders against work on ctx->stream, so this is correct
+ * exactly when the codec honoured cuszp:cuda_stream. vol_set_cuda_stream()
+ * verifies that by read-back and records it in ctx->cuda_stream_ok; if it did
+ * not take, we say so once, loudly, rather than silently copying device memory
+ * that may still be being written. Do not paper over an unconfirmed stream with
+ * cudaDeviceSynchronize -- that serialises every operation and hides the real
+ * problem, which is the option key. */
+static cudaError_t
+vol_stream_barrier(compression_ctx *ctx)
+{
+    cudaError_t cerr = cudaGetLastError();      /* surface prior async faults */
+    if (cerr != cudaSuccess) {
+        fprintf(stderr, "[VOL] pending CUDA error before D2H: %s\n",
+                cudaGetErrorString(cerr));
+        return cerr;
+    }
+
+    if (!ctx->cuda_stream_ok && !ctx->stream_warn_done) {
+        fprintf(stderr,
+            "[VOL] *** D2H ORDERING NOT GUARANTEED *** the '%s:cuda_stream' "
+            "option was not confirmed, so the codec may be running on a stream "
+            "we do not synchronise. Results may be read before the kernel "
+            "finishes. Fix the option key; do not mask this with a device "
+            "barrier.\n", ctx->compressor_id);
+        ctx->stream_warn_done = 1;
+    }
+
+    return cudaStreamSynchronize((cudaStream_t)ctx->stream);
+}
+#endif
+
+/* One explicit, correctly sized copy of the compressed result into a host
+ * buffer */
+static int
+vol_fetch_result(compression_ctx *ctx, struct pressio_data *result,
+                 size_t hdr_reserve, void **out_base, size_t *out_size)
+{
+    size_t sz  = 0;
+    void  *src = pressio_data_ptr(result, &sz);
+    void  *dst = NULL;
+
+    *out_base = NULL;
+    *out_size = 0;
+
+    if (!src || sz == 0) return -1;
+
+    dst = malloc(hdr_reserve + sz);
+    if (!dst) return -2;
+
+#ifdef USE_CUDA
+    if (H5VL_pass_through_ext_buf_is_device(src)) {
+        cudaError_t cerr = cudaMemcpyAsync((char *)dst + hdr_reserve, src, sz,
+                                           cudaMemcpyDeviceToHost,
+                                           (cudaStream_t)ctx->stream);
+        if (cerr == cudaSuccess)
+            cerr = vol_stream_barrier(ctx);
+        if (cerr != cudaSuccess) {
+            fprintf(stderr, "[VOL] D2H of %zu compressed bytes failed: %s\n",
+                    sz, cudaGetErrorString(cerr));
+            free(dst);
+            return -3;
+        }
+    } else {
+        memcpy((char *)dst + hdr_reserve, src, sz);
+    }
+#else
+    (void)ctx;
+    memcpy((char *)dst + hdr_reserve, src, sz);
+#endif
+
+    *out_base = dst;
+    *out_size = sz;
+    return 0;
+}
+
+/* Copy a decompressed result into the caller's buffer with a single transfer,
+ * instead of letting libpressio stage it through a host buffer and then
+ * memcpy'ing the full logical size again. */
+static int
+vol_fetch_into(compression_ctx *ctx, struct pressio_data *result,
+               void *dst, size_t want)
+{
+    size_t sz  = 0;
+    void  *src = pressio_data_ptr(result, &sz);
+
+    if (!src || sz == 0) return -1;
+    if (sz != want)      return -2;
+
+#ifdef USE_CUDA
+    if (H5VL_pass_through_ext_buf_is_device(src)) {
+        cudaError_t cerr = cudaMemcpyAsync(dst, src, want, cudaMemcpyDeviceToHost,
+                                           (cudaStream_t)ctx->stream);
+        if (cerr == cudaSuccess)
+            cerr = vol_stream_barrier(ctx);
+        if (cerr != cudaSuccess) {
+            fprintf(stderr, "[VOL] D2H of %zu decompressed bytes failed: %s\n",
+                    want, cudaGetErrorString(cerr));
+            return -3;
+        }
+        return 0;
+    }
+#else
+    (void)ctx;
+#endif
+    memcpy(dst, src, want);
+    return 0;
 }
 
 static struct pressio_compressor *
@@ -85,9 +336,6 @@ vol_get_chunk_wrapper(compression_ctx *ctx, uint64_t chunk_elems)
         return NULL;
     }
 
-    /* Assemble chunking -> many_independent_threaded -> vol_host_output ->
-     * codec, then verify by round-tripping the options: meta/custom plugins
-     * don't reliably appear in pressio_supported_compressors(). */
     {
         struct pressio_options *nest = pressio_options_new();
         pressio_options_set_string(nest, "chunking:compressor",
@@ -221,7 +469,7 @@ struct vol_host_output_plugin final : public libpressio_compressor_plugin {
     int compress_impl(const pressio_data* input, pressio_data* output) override {
         int rc = child->compress(input, output);
         if (rc) return set_error(child->error_code(), child->error_msg());
-        vol_make_host_resident(output);      /* device -> host, no-op on CPU */
+        vol_make_host_resident(output);      /* no-op if already host-accessible */
         return 0;
     }
     int decompress_impl(const pressio_data* input, pressio_data* output) override {
@@ -252,32 +500,6 @@ pressio_register vol_host_output_registration(
     [] { return std::make_shared<vol_host_output_plugin>(); });
 
 } } } /* namespace */
-
-#ifdef USE_CUDA
-/* Hand the codec our CUDA stream. Idempotent. */
-static void
-vol_set_cuda_stream(compression_ctx *ctx)
-{
-    if (!ctx->stream) return;
-    struct pressio_options *sopt = pressio_options_new();
-    char skey[128];
-    snprintf(skey, sizeof(skey), "%s:cuda_stream", ctx->compressor_id);
-    pressio_options_set_userptr(sopt, skey, ctx->stream);
-    (void)pressio_compressor_set_options(ctx->compressor, sopt);
-    pressio_options_free(sopt);
-}
-#endif
-
-/* ========================================================================
- * EXCEPTION BOUNDARY
- *
- * libpressio's C++ internals (domain manager, CUDA domains, some plugins)
- * can throw. These entry points are called from HDF5's C stack, and a C++
- * exception unwinding through C frames is undefined behavior (it's what
- * produced the "infinite loop closing library" crash). Each public entry
- * point below is a thin wrapper that catches everything and converts it to
- * an H5Epush + -1. The *_impl functions hold the real logic.
- * ======================================================================== */
 
 extern "C" {
 
@@ -338,6 +560,7 @@ H5VL_pass_through_ext_buf_is_device(const void *p)
 static herr_t
 vol_compress_native_impl(compression_ctx *ctx,
                          const void *data, size_t nbytes,
+                         size_t hdr_reserve,
                          void **out_cbuf, uint64_t *out_csize)
 {
     herr_t ret_val = 0;
@@ -348,6 +571,14 @@ vol_compress_native_impl(compression_ctx *ctx,
     size_t *in_dims;
     size_t  byte_dims[1];
     size_t  out_dims[1];
+    size_t  logical;
+    int     is_gpu = 0;
+    int     ev     = 0;
+    int     cerr   = 0;
+    int     frc    = 0;
+    void   *base   = NULL;
+    size_t  csize  = 0;
+    double  t0     = 0.0;
 
     if (!ctx || !ctx->compressor || !out_cbuf || !out_csize || !data) {
         H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
@@ -374,7 +605,7 @@ vol_compress_native_impl(compression_ctx *ctx,
 
         /* libpressio sizes the copy from the declared shape, not nbytes.
          * A mismatch would run off the end of the buffer; fail cleanly. */
-        size_t logical = vol_logical_nbytes(ctx);
+        logical = vol_logical_nbytes(ctx);
         if (logical != nbytes) {
             H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
                     vol_err_class, maj_compression, min_compress_failed,
@@ -384,12 +615,12 @@ vol_compress_native_impl(compression_ctx *ctx,
             return -1;
         }
 
-        /* Full multi-D shape: lets shape-aware codecs (sz3, zfp, cusz)
-         * exploit dimensionality instead of a flattened 1-D view. */
         in_dtype = ctx->dtype;
         in_ndims = ctx->ndims;
         in_dims  = ctx->dims;
     }
+
+    is_gpu = vol_is_gpu_codec(ctx->compressor_id);
 
 #ifdef ENABLE_EXT_PASSTHRU_LOGGING
     printf("------- COMPRESS NATIVE: id=%s nbytes=%zu ndims=%zu dtype=%d "
@@ -403,8 +634,8 @@ vol_compress_native_impl(compression_ctx *ctx,
                                               in_ndims, in_dims,
                                               vol_ptr_domain(data));
 
-    out_dims[0] = nbytes + 4096;
-    output = pressio_data_new_owning(pressio_byte_dtype, 1, out_dims);
+    out_dims[0] = nbytes + nbytes / 8 + (1u << 16);
+    output = vol_new_output(pressio_byte_dtype, 1, out_dims, is_gpu);
 
     if (!input || !output) {
         H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
@@ -416,40 +647,19 @@ vol_compress_native_impl(compression_ctx *ctx,
 
 #ifdef USE_CUDA
     vol_set_cuda_stream(ctx);
-    {
-        int _gpu = vol_is_gpu_codec(ctx->compressor_id);
-        cudaEvent_t _ev0 = NULL, _ev1 = NULL;
-        cudaStream_t _stream = (cudaStream_t)ctx->stream;   /* 0 => default */
-        if (_gpu) {
-            cudaEventCreate(&_ev0);
-            cudaEventCreate(&_ev1);
-            cudaEventRecord(_ev0, _stream);
-        }
+#endif
 
-        int _cerr = pressio_compressor_compress(ctx->compressor, input, output);
+#ifdef USE_CUDA
+    ev = vol_ev_begin(ctx, is_gpu);
+#endif
+    t0   = bench_now_ms();
+    cerr = pressio_compressor_compress(ctx->compressor, input, output);
+    ctx->pressio_call_ms += bench_now_ms() - t0;
+#ifdef USE_CUDA
+    vol_ev_end(ctx, ev);
+#endif
 
-        if (_gpu) {
-            cudaEventRecord(_ev1, _stream);
-            cudaEventSynchronize(_ev1);
-            float _ms = 0.f;
-            cudaEventElapsedTime(&_ms, _ev0, _ev1);
-            ctx->compress_ms += (double)_ms;
-            cudaEventDestroy(_ev0);
-            cudaEventDestroy(_ev1);
-        }
-
-        if (_cerr) {
-            H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
-                    vol_err_class, maj_compression, min_compress_failed,
-                    "native compress failed for '%s' (%zu B): %s",
-                    ctx->compressor_id, nbytes,
-                    pressio_compressor_error_msg(ctx->compressor));
-            ret_val = -1;
-            goto done;
-        }
-    }
-#else
-    if (pressio_compressor_compress(ctx->compressor, input, output)) {
+    if (cerr) {
         H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
                 vol_err_class, maj_compression, min_compress_failed,
                 "native compress failed for '%s' (%zu B): %s",
@@ -458,42 +668,46 @@ vol_compress_native_impl(compression_ctx *ctx,
         ret_val = -1;
         goto done;
     }
-#endif
 
-    /* Result may be device-resident for GPU compressors. */
-    vol_make_host_resident(output);
+    frc = vol_fetch_result(ctx, output, hdr_reserve, &base, &csize);
+    if (frc != 0) {
+        H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                vol_err_class, maj_compression, min_compress_failed,
+                "native compress of '%s' produced no usable output for %zu B "
+                "(fetch rc=%d)", ctx->compressor_id, nbytes, frc);
+        ret_val = -1;
+        goto done;
+    }
 
-    {
-        size_t comp_size = 0;
-        void  *comp_ptr  = pressio_data_ptr(output, &comp_size);
+    if (csize >= (size_t)out_dims[0]) {
+        H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                vol_err_class, maj_compression, min_compress_failed,
+                "compressor '%s' filled the entire %zu byte output buffer for "
+                "%zu bytes of input -- the result is truncated and would decode "
+                "to garbage", ctx->compressor_id, (size_t)out_dims[0], nbytes);
+        free(base);
+        ret_val = -1;
+        goto done;
+    }
+    if (csize >= nbytes)
+        fprintf(stderr,
+            "[VOL WARN] '%s' EXPANDED %zu bytes to %zu bytes (%.4f%% of input). "
+            "Headroom was %zu bytes.\n",
+            ctx->compressor_id, nbytes, csize,
+            100.0 * (double)csize / (double)nbytes, (size_t)out_dims[0] - nbytes);
+    else if (getenv("VOL_COMP_COPY_LOG"))
+        fprintf(stderr, "[copy] native id=%-10s domain=%-12s payload=%zu B "
+                        "declared_cap=%zu B reserve=%zu B\n",
+                ctx->compressor_id, pressio_data_domain_id(output),
+                csize, (size_t)out_dims[0], hdr_reserve);
 
-        if (comp_size == 0 || comp_ptr == NULL) {
-            H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
-                    vol_err_class, maj_compression, min_compress_failed,
-                    "native compress of '%s' produced 0 bytes for %zu B",
-                    ctx->compressor_id, nbytes);
-            ret_val = -1;
-            goto done;
-        }
-
-        void *cb = malloc(comp_size);
-        if (!cb) {
-            H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
-                    vol_err_class, maj_compression, min_compress_failed,
-                    "out of memory copying %zu compressed bytes", comp_size);
-            ret_val = -1;
-            goto done;
-        }
-
-        memcpy(cb, comp_ptr, comp_size);
-        *out_cbuf  = cb;
-        *out_csize = (uint64_t)comp_size;
+    *out_cbuf  = base;
+    *out_csize = (uint64_t)csize;
 
 #ifdef ENABLE_EXT_PASSTHRU_LOGGING
-        printf("COMPRESS NATIVE OK: id=%s comp_size=%zu original_nbytes=%zu\n",
-               ctx->compressor_id, comp_size, nbytes);
+    printf("COMPRESS NATIVE OK: id=%s comp_size=%zu original_nbytes=%zu\n",
+           ctx->compressor_id, csize, nbytes);
 #endif
-    }
 
     if (getenv("HDF5_VOL_PRESSIO_METRICS")) {
         struct pressio_options *results =
@@ -513,10 +727,12 @@ done:
 herr_t
 H5VL_pass_through_ext_compress_native(compression_ctx *ctx,
                                       const void *data, size_t nbytes,
+                                      size_t hdr_reserve,
                                       void **out_cbuf, uint64_t *out_csize)
 {
     try {
-        return vol_compress_native_impl(ctx, data, nbytes, out_cbuf, out_csize);
+        return vol_compress_native_impl(ctx, data, nbytes, hdr_reserve,
+                                        out_cbuf, out_csize);
     } catch (const std::exception &e) {
         H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
                 vol_err_class, maj_compression, min_compress_failed,
@@ -545,6 +761,12 @@ vol_decompress_native_impl(compression_ctx *ctx,
     size_t *out_dims;
     size_t  byte_dims[1];
     size_t  comp_dims[1];
+    size_t  logical;
+    int     is_gpu = 0;
+    int     ev     = 0;
+    int     derr   = 0;
+    int     frc    = 0;
+    double  t0     = 0.0;
 
     if (!ctx || !ctx->compressor || !cbuf || !out) {
         H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
@@ -573,7 +795,7 @@ vol_decompress_native_impl(compression_ctx *ctx,
                     ctx->compressor_id);
             return -1;
         }
-        size_t logical = vol_logical_nbytes(ctx);
+        logical = vol_logical_nbytes(ctx);
         if (logical != out_bytes) {
             H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
                     vol_err_class, maj_compression, min_decompress_failed,
@@ -587,6 +809,8 @@ vol_decompress_native_impl(compression_ctx *ctx,
         out_dims  = ctx->dims;
     }
 
+    is_gpu = vol_is_gpu_codec(ctx->compressor_id);
+
 #ifdef ENABLE_EXT_PASSTHRU_LOGGING
     printf("------- DECOMPRESS NATIVE: id=%s csize=%zu out_bytes=%zu ndims=%zu\n",
            ctx->compressor_id, csize, out_bytes, out_ndims);
@@ -596,9 +820,7 @@ vol_decompress_native_impl(compression_ctx *ctx,
     input = pressio_data_new_nonowning_domain(pressio_byte_dtype, (void *)cbuf,
                                               1, comp_dims, "malloc");
 
-    /* Owning output so GPU codecs can place it device-side; we pull it home
-     * after the call (same reasoning as transfer_decompress). */
-    output = pressio_data_new_owning(out_dtype, out_ndims, out_dims);
+    output = vol_new_output(out_dtype, out_ndims, out_dims, is_gpu);
     if (!input || !output) {
         H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
                 vol_err_class, maj_compression, min_decompress_failed,
@@ -610,40 +832,16 @@ vol_decompress_native_impl(compression_ctx *ctx,
 
 #ifdef USE_CUDA
     vol_set_cuda_stream(ctx);
-    {
-        int _gpu = vol_is_gpu_codec(ctx->compressor_id);
-        cudaEvent_t _ev0 = NULL, _ev1 = NULL;
-        cudaStream_t _stream = (cudaStream_t)ctx->stream;   /* 0 => default */
-        if (_gpu) {
-            cudaEventCreate(&_ev0);
-            cudaEventCreate(&_ev1);
-            cudaEventRecord(_ev0, _stream);
-        }
+    ev = vol_ev_begin(ctx, is_gpu);
+#endif
+    t0   = bench_now_ms();
+    derr = pressio_compressor_decompress(ctx->compressor, input, output);
+    ctx->pressio_call_ms += bench_now_ms() - t0;
+#ifdef USE_CUDA
+    vol_ev_end(ctx, ev);
+#endif
 
-        int _derr = pressio_compressor_decompress(ctx->compressor, input, output);
-
-        if (_gpu) {
-            cudaEventRecord(_ev1, _stream);
-            cudaEventSynchronize(_ev1);
-            float _ms = 0.f;
-            cudaEventElapsedTime(&_ms, _ev0, _ev1);
-            ctx->compress_ms += (double)_ms;
-            cudaEventDestroy(_ev0);
-            cudaEventDestroy(_ev1);
-        }
-
-        if (_derr) {
-            H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
-                    vol_err_class, maj_compression, min_decompress_failed,
-                    "native decompress failed for '%s' (%zu B): %s",
-                    ctx->compressor_id, csize,
-                    pressio_compressor_error_msg(ctx->compressor));
-            ret_val = -1;
-            goto done;
-        }
-    }
-#else
-    if (pressio_compressor_decompress(ctx->compressor, input, output)) {
+    if (derr) {
         H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
                 vol_err_class, maj_compression, min_decompress_failed,
                 "native decompress failed for '%s' (%zu B): %s",
@@ -652,39 +850,23 @@ vol_decompress_native_impl(compression_ctx *ctx,
         ret_val = -1;
         goto done;
     }
-#endif
 
-    /* device -> host for GPU compressors, no-op for CPU. */
-    vol_make_host_resident(output);
-
-    {
-        size_t actual_bytes = 0;
-        void  *out_ptr = pressio_data_ptr(output, &actual_bytes);
-
-        if (!out_ptr || actual_bytes == 0) {
-            H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
-                    vol_err_class, maj_compression, min_decompress_failed,
-                    "native decompress of '%s' produced no host output",
-                    ctx->compressor_id);
-            ret_val = -1;
-            goto done;
-        }
-        if (actual_bytes != out_bytes) {
-            H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
-                    vol_err_class, maj_compression, min_decompress_failed,
-                    "native decompress of '%s' produced %zu bytes, expected %zu",
-                    ctx->compressor_id, actual_bytes, out_bytes);
-            ret_val = -1;
-            goto done;
-        }
-
-        memcpy(out, out_ptr, out_bytes);
+    /* One transfer, straight into the caller's buffer. */
+    frc = vol_fetch_into(ctx, output, out, out_bytes);
+    if (frc != 0) {
+        H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                vol_err_class, maj_compression, min_decompress_failed,
+                "native decompress of '%s' produced the wrong output "
+                "(expected %zu bytes, fetch rc=%d)",
+                ctx->compressor_id, out_bytes, frc);
+        ret_val = -1;
+        goto done;
+    }
 
 #ifdef ENABLE_EXT_PASSTHRU_LOGGING
-        printf("DECOMPRESS NATIVE OK: id=%s actual_bytes=%zu\n",
-               ctx->compressor_id, actual_bytes);
+    printf("DECOMPRESS NATIVE OK: id=%s out_bytes=%zu\n",
+           ctx->compressor_id, out_bytes);
 #endif
-    }
 
     if (getenv("HDF5_VOL_PRESSIO_METRICS")) {
         struct pressio_options *results =
@@ -724,9 +906,9 @@ H5VL_pass_through_ext_decompress_native(compression_ctx *ctx,
 }
 
 /* ========================================================================
- * VOL-LEVEL CHUNKED PATH: the write loop
- * slices the buffer and calls these once per chunk. Each chunk is an
- * independent compressed blob recorded in the v2 container header.
+ * VOL-LEVEL CHUNKED PATH: the write loop slices the buffer and calls these
+ * once per chunk. Each chunk is an independent compressed blob recorded in
+ * the v2 container header.
  * ======================================================================== */
 
 static herr_t
@@ -740,6 +922,14 @@ vol_transfer_compress_chunk_impl(compression_ctx *ctx,
     enum pressio_dtype in_dtype;
     size_t chunk_dims[1];
     size_t out_dims[1];
+    size_t dsize;
+    int    is_gpu = 0;
+    int    ev     = 0;
+    int    cerr   = 0;
+    int    frc    = 0;
+    void  *base   = NULL;
+    size_t csize  = 0;
+    double t0     = 0.0;
 
     if (!ctx || !ctx->compressor || !out_cbuf || !out_csize || !data) {
         H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
@@ -754,7 +944,7 @@ vol_transfer_compress_chunk_impl(compression_ctx *ctx,
         in_dtype      = pressio_byte_dtype;
         chunk_dims[0] = nbytes;
     } else {
-        const size_t dsize = pressio_dtype_size(ctx->dtype);
+        dsize = pressio_dtype_size(ctx->dtype);
         if (nbytes == 0 || nbytes % dsize != 0) {
             H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
                     vol_err_class, maj_compression, min_compress_failed,
@@ -766,18 +956,19 @@ vol_transfer_compress_chunk_impl(compression_ctx *ctx,
         chunk_dims[0] = nbytes / dsize;
     }
 
+    is_gpu = vol_is_gpu_codec(ctx->compressor_id);
+
 #ifdef ENABLE_EXT_PASSTHRU_LOGGING
     printf("------- COMPRESS CHUNK: id=%s nbytes=%zu nelem=%zu dtype=%d\n",
            ctx->compressor_id, nbytes, chunk_dims[0], (int)in_dtype);
 #endif
 
-    /* Host memory in; GPU compressors migrate via the domain manager. */
     input = pressio_data_new_nonowning_domain(in_dtype, (void *)data,
                                               1, chunk_dims,
                                               vol_ptr_domain(data));
 
-    out_dims[0] = nbytes + 4096;
-    output = pressio_data_new_owning(pressio_byte_dtype, 1, out_dims);
+    out_dims[0] = nbytes + nbytes / 8 + (1u << 16);
+    output = vol_new_output(pressio_byte_dtype, 1, out_dims, is_gpu);
 
     if (!input || !output) {
         H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
@@ -789,40 +980,16 @@ vol_transfer_compress_chunk_impl(compression_ctx *ctx,
 
 #ifdef USE_CUDA
     vol_set_cuda_stream(ctx);
-    {
-        int _gpu = vol_is_gpu_codec(ctx->compressor_id);
-        cudaEvent_t _ev0 = NULL, _ev1 = NULL;
-        cudaStream_t _stream = (cudaStream_t)ctx->stream;   /* 0 => default stream */
-        if (_gpu) {
-            cudaEventCreate(&_ev0);
-            cudaEventCreate(&_ev1);
-            cudaEventRecord(_ev0, _stream);
-        }
+    ev = vol_ev_begin(ctx, is_gpu);
+#endif
+    t0   = bench_now_ms();
+    cerr = pressio_compressor_compress(ctx->compressor, input, output);
+    ctx->pressio_call_ms += bench_now_ms() - t0;   /* ACCUMULATE across chunks */
+#ifdef USE_CUDA
+    vol_ev_end(ctx, ev);
+#endif
 
-        int _cerr = pressio_compressor_compress(ctx->compressor, input, output);
-
-        if (_gpu) {
-            cudaEventRecord(_ev1, _stream);
-            cudaEventSynchronize(_ev1);
-            float _ms = 0.f;
-            cudaEventElapsedTime(&_ms, _ev0, _ev1);
-            ctx->compress_ms += (double)_ms;      /* ACCUMULATE across chunks */
-            cudaEventDestroy(_ev0);
-            cudaEventDestroy(_ev1);
-        }
-
-        if (_cerr) {
-            H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
-                    vol_err_class, maj_compression, min_compress_failed,
-                    "pressio_compressor_compress failed for '%s' (chunk of %zu B): %s",
-                    ctx->compressor_id, nbytes,
-                    pressio_compressor_error_msg(ctx->compressor));
-            ret_val = -1;
-            goto done;
-        }
-    }
-#else
-    if (pressio_compressor_compress(ctx->compressor, input, output)) {
+    if (cerr) {
         H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
                 vol_err_class, maj_compression, min_compress_failed,
                 "pressio_compressor_compress failed for '%s' (chunk of %zu B): %s",
@@ -831,43 +998,49 @@ vol_transfer_compress_chunk_impl(compression_ctx *ctx,
         ret_val = -1;
         goto done;
     }
-#endif
 
-    /* The result may be device-resident (GPU compressors). */
-    vol_make_host_resident(output);
+    frc = vol_fetch_result(ctx, output, 0, &base, &csize);
+    if (frc != 0) {
+        H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                vol_err_class, maj_compression, min_compress_failed,
+                "compressor '%s' produced no usable output for a %zu byte chunk "
+                "(fetch rc=%d)", ctx->compressor_id, nbytes, frc);
+        ret_val = -1;
+        goto done;
+    }
 
-    {
-        size_t comp_size = 0;
-        void  *comp_ptr  = pressio_data_ptr(output, &comp_size);
+    /* A chunk that did not compress is the signature of the overflow above.
+     * Refuse to store it rather than write a container that decodes to garbage:
+     * silent corruption at read time is far worse than a loud failure here. */
+    if (csize >= (size_t)out_dims[0]) {
+        H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                vol_err_class, maj_compression, min_compress_failed,
+                "compressor '%s' filled the entire %zu byte output buffer for a "
+                "%zu byte chunk -- the result is truncated and would decode to "
+                "garbage. Increase the headroom in vol_transfer_compress_chunk_impl",
+                ctx->compressor_id, (size_t)out_dims[0], nbytes);
+        free(base);
+        ret_val = -1;
+        goto done;
+    }
+    if (csize >= nbytes)
+        fprintf(stderr,
+            "[VOL WARN] '%s' EXPANDED a %zu byte chunk to %zu bytes (%.4f%% of "
+            "input). Headroom was %zu bytes.\n",
+            ctx->compressor_id, nbytes, csize,
+            100.0 * (double)csize / (double)nbytes, (size_t)out_dims[0] - nbytes);
+    else if (getenv("VOL_COMP_CHUNK_LOG"))
+        fprintf(stderr, "[chunk-out] '%s' %zu -> %zu B (%.2fx), cap %zu B\n",
+                ctx->compressor_id, nbytes, csize,
+                (double)nbytes / (double)csize, (size_t)out_dims[0]);
 
-        if (comp_size == 0 || comp_ptr == NULL) {
-            H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
-                    vol_err_class, maj_compression, min_compress_failed,
-                    "compressor '%s' produced 0 bytes for a %zu byte chunk",
-                    ctx->compressor_id, nbytes);
-            ret_val = -1;
-            goto done;
-        }
-
-        void *cb = malloc(comp_size);
-        if (!cb) {
-            H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
-                    vol_err_class, maj_compression, min_compress_failed,
-                    "out of memory allocating %zu bytes for compressed chunk",
-                    comp_size);
-            ret_val = -1;
-            goto done;
-        }
-
-        memcpy(cb, comp_ptr, comp_size);
-        *out_cbuf  = cb;
-        *out_csize = (uint64_t)comp_size;
+    *out_cbuf  = base;
+    *out_csize = (uint64_t)csize;
 
 #ifdef ENABLE_EXT_PASSTHRU_LOGGING
-        printf("COMPRESS CHUNK OK: id=%s comp_size=%zu original_nbytes=%zu\n",
-               ctx->compressor_id, comp_size, nbytes);
+    printf("COMPRESS CHUNK OK: id=%s comp_size=%zu original_nbytes=%zu\n",
+           ctx->compressor_id, csize, nbytes);
 #endif
-    }
 
     if (getenv("HDF5_VOL_PRESSIO_METRICS")) {
         struct pressio_options *results =
@@ -918,6 +1091,12 @@ vol_transfer_decompress_chunk_impl(compression_ctx *ctx,
     enum pressio_dtype out_dtype;
     size_t comp_dims[1];
     size_t out_dims[1];
+    size_t dsize;
+    int    is_gpu = 0;
+    int    ev     = 0;
+    int    derr   = 0;
+    int    frc    = 0;
+    double t0     = 0.0;
 
     if (!ctx || !ctx->compressor || !cbuf || !out) {
         H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
@@ -937,7 +1116,7 @@ vol_transfer_decompress_chunk_impl(compression_ctx *ctx,
         out_dtype   = pressio_byte_dtype;
         out_dims[0] = out_bytes;
     } else {
-        const size_t dsize = pressio_dtype_size(ctx->dtype);
+        dsize = pressio_dtype_size(ctx->dtype);
         if (out_bytes == 0 || out_bytes % dsize != 0) {
             H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
                     vol_err_class, maj_compression, min_decompress_failed,
@@ -949,6 +1128,8 @@ vol_transfer_decompress_chunk_impl(compression_ctx *ctx,
         out_dims[0] = out_bytes / dsize;
     }
 
+    is_gpu = vol_is_gpu_codec(ctx->compressor_id);
+
 #ifdef ENABLE_EXT_PASSTHRU_LOGGING
     printf("------- DECOMPRESS CHUNK: id=%s csize=%zu out_bytes=%zu nelem=%zu\n",
            ctx->compressor_id, csize, out_bytes, out_dims[0]);
@@ -958,7 +1139,7 @@ vol_transfer_decompress_chunk_impl(compression_ctx *ctx,
     input = pressio_data_new_nonowning_domain(pressio_byte_dtype, (void *)cbuf,
                                               1, comp_dims, "malloc");
 
-    output = pressio_data_new_owning(out_dtype, 1, out_dims);
+    output = vol_new_output(out_dtype, 1, out_dims, is_gpu);
     if (!input || !output) {
         H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
                 vol_err_class, maj_compression, min_decompress_failed,
@@ -970,40 +1151,16 @@ vol_transfer_decompress_chunk_impl(compression_ctx *ctx,
 
 #ifdef USE_CUDA
     vol_set_cuda_stream(ctx);
-    {
-        int _gpu = vol_is_gpu_codec(ctx->compressor_id);
-        cudaEvent_t _ev0 = NULL, _ev1 = NULL;
-        cudaStream_t _stream = (cudaStream_t)ctx->stream;   /* 0 => default stream */
-        if (_gpu) {
-            cudaEventCreate(&_ev0);
-            cudaEventCreate(&_ev1);
-            cudaEventRecord(_ev0, _stream);
-        }
+    ev = vol_ev_begin(ctx, is_gpu);
+#endif
+    t0   = bench_now_ms();
+    derr = pressio_compressor_decompress(ctx->compressor, input, output);
+    ctx->pressio_call_ms += bench_now_ms() - t0;   /* ACCUMULATE across chunks */
+#ifdef USE_CUDA
+    vol_ev_end(ctx, ev);
+#endif
 
-        int _derr = pressio_compressor_decompress(ctx->compressor, input, output);
-
-        if (_gpu) {
-            cudaEventRecord(_ev1, _stream);
-            cudaEventSynchronize(_ev1);
-            float _ms = 0.f;
-            cudaEventElapsedTime(&_ms, _ev0, _ev1);
-            ctx->compress_ms += (double)_ms;      /* ACCUMULATE across chunks */
-            cudaEventDestroy(_ev0);
-            cudaEventDestroy(_ev1);
-        }
-
-        if (_derr) {
-            H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
-                    vol_err_class, maj_compression, min_decompress_failed,
-                    "pressio_compressor_decompress failed for '%s' (chunk of %zu B): %s",
-                    ctx->compressor_id, csize,
-                    pressio_compressor_error_msg(ctx->compressor));
-            ret_val = -1;
-            goto done;
-        }
-    }
-#else
-    if (pressio_compressor_decompress(ctx->compressor, input, output)) {
+    if (derr) {
         H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
                 vol_err_class, maj_compression, min_decompress_failed,
                 "pressio_compressor_decompress failed for '%s' (chunk of %zu B): %s",
@@ -1012,39 +1169,22 @@ vol_transfer_decompress_chunk_impl(compression_ctx *ctx,
         ret_val = -1;
         goto done;
     }
-#endif
 
-    /* device -> host for GPU compressors, no-op for CPU. */
-    vol_make_host_resident(output);
-
-    {
-        size_t actual_bytes = 0;
-        void  *out_ptr = pressio_data_ptr(output, &actual_bytes);
-
-        if (!out_ptr || actual_bytes == 0) {
-            H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
-                    vol_err_class, maj_compression, min_decompress_failed,
-                    "chunk decompress of '%s' produced no host-resident output",
-                    ctx->compressor_id);
-            ret_val = -1;
-            goto done;
-        }
-        if (actual_bytes != out_bytes) {
-            H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
-                    vol_err_class, maj_compression, min_decompress_failed,
-                    "chunk decompress of '%s' produced %zu bytes, expected %zu",
-                    ctx->compressor_id, actual_bytes, out_bytes);
-            ret_val = -1;
-            goto done;
-        }
-
-        memcpy(out, out_ptr, out_bytes);
+    frc = vol_fetch_into(ctx, output, out, out_bytes);
+    if (frc != 0) {
+        H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                vol_err_class, maj_compression, min_decompress_failed,
+                "chunk decompress of '%s' produced the wrong output "
+                "(expected %zu bytes, fetch rc=%d)",
+                ctx->compressor_id, out_bytes, frc);
+        ret_val = -1;
+        goto done;
+    }
 
 #ifdef ENABLE_EXT_PASSTHRU_LOGGING
-        printf("DECOMPRESS CHUNK OK: id=%s actual_bytes=%zu\n",
-               ctx->compressor_id, actual_bytes);
+    printf("DECOMPRESS CHUNK OK: id=%s out_bytes=%zu\n",
+           ctx->compressor_id, out_bytes);
 #endif
-    }
 
 done:
     if (input)  pressio_data_free(input);
@@ -1088,8 +1228,9 @@ H5VL_pass_through_ext_transfer_compress(compression_ctx *ctx, const void *data, 
     void    *cb  = NULL;
     uint64_t len = 0;
 
-    ctx->compress_ms = 0.0;
-    if (H5VL_pass_through_ext_compress_native(ctx, data, nbytes, &cb, &len) < 0)
+    ctx->device_ms       = 0.0;
+    ctx->pressio_call_ms = 0.0;
+    if (H5VL_pass_through_ext_compress_native(ctx, data, nbytes, 0, &cb, &len) < 0)
         return -1;
 
     ctx->compressed_buf        = cb;
@@ -1138,7 +1279,7 @@ H5VL_pass_through_ext_chunking_mode(const compression_ctx *ctx)
     return VOL_CHUNKING_NONE;
 }
 
-/* N-based: the knob is now "number of equal chunks", not MiB.
+/* N-based: the knob is "number of equal chunks", not MiB.
  * Needs total_bytes (to split) and elem_size (to stay element-aligned). */
 size_t
 H5VL_pass_through_ext_chunk_bytes(const compression_ctx *ctx,
@@ -1152,7 +1293,7 @@ H5VL_pass_through_ext_chunk_bytes(const compression_ctx *ctx,
         unsigned long long v = strtoull(env, &end, 10);
         if (end != env) n = (uint64_t)v;
     }
-    if (n == 0 && ctx) n = ctx->chunk_n;     /* was ctx->chunk_n */
+    if (n == 0 && ctx) n = ctx->chunk_n;
     if (n == 0) n = 1;                        /* default: single chunk */
 
     if (elem_size == 0)   elem_size = 1;
@@ -1221,10 +1362,15 @@ H5VL_pass_through_ext_parse_chunking_opts(compression_ctx *ctx,
     }
 }
 
+/* ========================================================================
+ * PRESSIO CHUNKED PATH
+ * ======================================================================== */
+
 static herr_t
 vol_compress_pressio_impl(compression_ctx *ctx,
                           const void *data, size_t nbytes,
                           size_t chunk_bytes_req,
+                          size_t hdr_reserve,
                           void **out_cbuf, uint64_t *out_csize,
                           uint64_t *out_chunk_elems)
 {
@@ -1236,7 +1382,13 @@ vol_compress_pressio_impl(compression_ctx *ctx,
     size_t elem_size, total_elems, nch;
     uint64_t chunk_elems;
     size_t in_dims[1];
-    size_t out_dims[1];
+    int    is_gpu = 0;
+    int    ev     = 0;
+    int    cerr   = 0;
+    int    frc    = 0;
+    void  *base   = NULL;
+    size_t csize  = 0;
+    double t0     = 0.0;
 
     if (!ctx || !ctx->compressor || !out_cbuf || !out_csize ||
         !out_chunk_elems || !data || nbytes == 0) {
@@ -1259,8 +1411,6 @@ vol_compress_pressio_impl(compression_ctx *ctx,
         return -1;
     }
 
-    /* Same 1-D view convention as the VOL chunked path: shape-aware codecs
-     * get typed elements, byte-stream codecs get raw bytes. */
     if (vol_is_byte_stream(ctx->compressor_id)) {
         in_dtype    = pressio_byte_dtype;
         elem_size   = 1;
@@ -1295,11 +1445,15 @@ vol_compress_pressio_impl(compression_ctx *ctx,
         return -1;
     }
 
+    is_gpu = vol_is_gpu_codec(ctx->compressor_id);
+
 #ifdef ENABLE_EXT_PASSTHRU_LOGGING
     printf("------- COMPRESS PRESSIO: id=%s nbytes=%zu total_elems=%zu "
            "chunk_elems=%llu nchunks=%zu\n",
            ctx->compressor_id, nbytes, total_elems,
            (unsigned long long)chunk_elems, nch);
+#else
+    (void)nch;
 #endif
 
     w = vol_get_chunk_wrapper(ctx, chunk_elems);
@@ -1311,11 +1465,6 @@ vol_compress_pressio_impl(compression_ctx *ctx,
                                               1, in_dims,
                                               vol_ptr_domain(data));
 
-    /* Headroom for per-chunk overhead plus the wrapper's own framing. */
-    /* Empty output: the chunking pipeline allocates and sizes the result
-     * itself. A preallocated buffer is kept at full capacity (ratio 1.0x)
-     * and its layout doesn't round-trip. This matches the old working code,
-     * which had the preallocation commented out for exactly this reason. */
     output = pressio_data_new_empty(pressio_byte_dtype, 0, NULL);
 
     if (!input || !output) {
@@ -1327,42 +1476,16 @@ vol_compress_pressio_impl(compression_ctx *ctx,
     }
 
 #ifdef USE_CUDA
-    {
-        int _gpu = vol_is_gpu_codec(ctx->compressor_id);
-        cudaEvent_t _ev0 = NULL, _ev1 = NULL;
-        cudaStream_t _stream = (cudaStream_t)ctx->stream;   /* 0 => default */
-        if (_gpu) {
-            cudaEventCreate(&_ev0);
-            cudaEventCreate(&_ev1);
-            cudaEventRecord(_ev0, _stream);
-        }
+    ev = vol_ev_begin(ctx, is_gpu);
+#endif
+    t0   = bench_now_ms();
+    cerr = pressio_compressor_compress(w, input, output);
+    ctx->pressio_call_ms += bench_now_ms() - t0;
+#ifdef USE_CUDA
+    vol_ev_end(ctx, ev);
+#endif
 
-        int _cerr = pressio_compressor_compress(w, input, output);
-
-        if (_gpu) {
-            cudaEventRecord(_ev1, _stream);
-            cudaEventSynchronize(_ev1);
-            float _ms = 0.f;
-            cudaEventElapsedTime(&_ms, _ev0, _ev1);
-            ctx->compress_ms += (double)_ms;
-            cudaEventDestroy(_ev0);
-            cudaEventDestroy(_ev1);
-        }
-
-        if (_cerr) {
-            H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
-                    vol_err_class, maj_compression, min_compress_failed,
-                    "pressio-chunked compress failed for '%s' (%zu B, "
-                    "chunk_elems=%llu): %s",
-                    ctx->compressor_id, nbytes,
-                    (unsigned long long)chunk_elems,
-                    pressio_compressor_error_msg(w));
-            ret_val = -1;
-            goto done;
-        }
-    }
-#else
-    if (pressio_compressor_compress(w, input, output)) {
+    if (cerr) {
         H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
                 vol_err_class, maj_compression, min_compress_failed,
                 "pressio-chunked compress failed for '%s' (%zu B, "
@@ -1373,44 +1496,27 @@ vol_compress_pressio_impl(compression_ctx *ctx,
         ret_val = -1;
         goto done;
     }
-#endif
 
-    vol_make_host_resident(output);
+    frc = vol_fetch_result(ctx, output, hdr_reserve, &base, &csize);
+    if (frc != 0) {
+        H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                vol_err_class, maj_compression, min_compress_failed,
+                "pressio-chunked compress of '%s' produced no usable output "
+                "for %zu B (fetch rc=%d)", ctx->compressor_id, nbytes, frc);
+        ret_val = -1;
+        goto done;
+    }
 
-    {
-        size_t comp_size = 0;
-        void  *comp_ptr  = pressio_data_ptr(output, &comp_size);
-
-        if (comp_size == 0 || comp_ptr == NULL) {
-            H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
-                    vol_err_class, maj_compression, min_compress_failed,
-                    "pressio-chunked compress of '%s' produced 0 bytes for %zu B",
-                    ctx->compressor_id, nbytes);
-            ret_val = -1;
-            goto done;
-        }
-
-        void *cb = malloc(comp_size);
-        if (!cb) {
-            H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
-                    vol_err_class, maj_compression, min_compress_failed,
-                    "out of memory copying %zu compressed bytes", comp_size);
-            ret_val = -1;
-            goto done;
-        }
-
-        memcpy(cb, comp_ptr, comp_size);
-        *out_cbuf        = cb;
-        *out_csize       = (uint64_t)comp_size;
-        *out_chunk_elems = chunk_elems;
+    *out_cbuf        = base;
+    *out_csize       = (uint64_t)csize;
+    *out_chunk_elems = chunk_elems;
 
 #ifdef ENABLE_EXT_PASSTHRU_LOGGING
-        printf("COMPRESS PRESSIO OK: id=%s comp_size=%zu original_nbytes=%zu "
-               "chunk_elems=%llu\n",
-               ctx->compressor_id, comp_size, nbytes,
-               (unsigned long long)chunk_elems);
+    printf("COMPRESS PRESSIO OK: id=%s comp_size=%zu original_nbytes=%zu "
+           "chunk_elems=%llu\n",
+           ctx->compressor_id, csize, nbytes,
+           (unsigned long long)chunk_elems);
 #endif
-    }
 
     if (getenv("HDF5_VOL_PRESSIO_METRICS")) {
         struct pressio_options *results = pressio_compressor_get_metrics_results(w);
@@ -1431,12 +1537,14 @@ herr_t
 H5VL_pass_through_ext_compress_pressio(compression_ctx *ctx,
                                        const void *data, size_t nbytes,
                                        size_t chunk_bytes_req,
+                                       size_t hdr_reserve,
                                        void **out_cbuf, uint64_t *out_csize,
                                        uint64_t *out_chunk_elems)
 {
     try {
         return vol_compress_pressio_impl(ctx, data, nbytes, chunk_bytes_req,
-                                         out_cbuf, out_csize, out_chunk_elems);
+                                         hdr_reserve, out_cbuf, out_csize,
+                                         out_chunk_elems);
     } catch (const std::exception &e) {
         H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
                 vol_err_class, maj_compression, min_compress_failed,
@@ -1466,6 +1574,11 @@ vol_decompress_pressio_impl(compression_ctx *ctx,
     size_t elem_size, total_elems;
     size_t comp_dims[1];
     size_t out_dims[1];
+    int    is_gpu = 0;
+    int    ev     = 0;
+    int    derr   = 0;
+    int    frc    = 0;
+    double t0     = 0.0;
 
     if (!ctx || !ctx->compressor || !cbuf || !out || csize == 0 || out_bytes == 0) {
         H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
@@ -1506,6 +1619,8 @@ vol_decompress_pressio_impl(compression_ctx *ctx,
     if (chunk_elems > (uint64_t)total_elems)
         chunk_elems = (uint64_t)total_elems;
 
+    is_gpu = vol_is_gpu_codec(ctx->compressor_id);
+
 #ifdef ENABLE_EXT_PASSTHRU_LOGGING
     printf("------- DECOMPRESS PRESSIO: id=%s csize=%zu out_bytes=%zu "
            "chunk_elems=%llu\n",
@@ -1522,7 +1637,7 @@ vol_decompress_pressio_impl(compression_ctx *ctx,
                                               1, comp_dims, "malloc");
 
     out_dims[0] = total_elems;
-    output = pressio_data_new_owning(out_dtype, 1, out_dims);
+    output = vol_new_output(out_dtype, 1, out_dims, is_gpu);
     if (!input || !output) {
         H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
                 vol_err_class, maj_compression, min_decompress_failed,
@@ -1533,41 +1648,20 @@ vol_decompress_pressio_impl(compression_ctx *ctx,
     }
 
 #ifdef USE_CUDA
-    {
-        int _gpu = vol_is_gpu_codec(ctx->compressor_id);
-        cudaEvent_t _ev0 = NULL, _ev1 = NULL;
-        cudaStream_t _stream = (cudaStream_t)ctx->stream;   /* 0 => default */
-        if (_gpu) {
-            cudaEventCreate(&_ev0);
-            cudaEventCreate(&_ev1);
-            cudaEventRecord(_ev0, _stream);
-        }
+    /* The pressio path previously recorded events WITHOUT offering the stream to
+     * ctx->compressor at all, so device_ms here was timing a stream the codec
+     * may never have been told about. */
+    vol_set_cuda_stream(ctx);
+    ev = vol_ev_begin(ctx, is_gpu);
+#endif
+    t0   = bench_now_ms();
+    derr = pressio_compressor_decompress(w, input, output);
+    ctx->pressio_call_ms += bench_now_ms() - t0;
+#ifdef USE_CUDA
+    vol_ev_end(ctx, ev);
+#endif
 
-        int _derr = pressio_compressor_decompress(w, input, output);
-
-        if (_gpu) {
-            cudaEventRecord(_ev1, _stream);
-            cudaEventSynchronize(_ev1);
-            float _ms = 0.f;
-            cudaEventElapsedTime(&_ms, _ev0, _ev1);
-            ctx->compress_ms += (double)_ms;
-            cudaEventDestroy(_ev0);
-            cudaEventDestroy(_ev1);
-        }
-
-        if (_derr) {
-            H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
-                    vol_err_class, maj_compression, min_decompress_failed,
-                    "pressio-chunked decompress failed for '%s' (%zu B): %s "
-                    "(container may be corrupt or written with different options)",
-                    ctx->compressor_id, csize,
-                    pressio_compressor_error_msg(w));
-            ret_val = -1;
-            goto done;
-        }
-    }
-#else
-    if (pressio_compressor_decompress(w, input, output)) {
+    if (derr) {
         H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
                 vol_err_class, maj_compression, min_decompress_failed,
                 "pressio-chunked decompress failed for '%s' (%zu B): %s "
@@ -1577,39 +1671,22 @@ vol_decompress_pressio_impl(compression_ctx *ctx,
         ret_val = -1;
         goto done;
     }
-#endif
 
-    vol_make_host_resident(output);
-
-    {
-        size_t actual_bytes = 0;
-        void  *out_ptr = pressio_data_ptr(output, &actual_bytes);
-
-        if (!out_ptr || actual_bytes == 0) {
-            H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
-                    vol_err_class, maj_compression, min_decompress_failed,
-                    "pressio-chunked decompress of '%s' produced no host output",
-                    ctx->compressor_id);
-            ret_val = -1;
-            goto done;
-        }
-        if (actual_bytes != out_bytes) {
-            H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
-                    vol_err_class, maj_compression, min_decompress_failed,
-                    "pressio-chunked decompress of '%s' produced %zu bytes, "
-                    "expected %zu (container corrupt?)",
-                    ctx->compressor_id, actual_bytes, out_bytes);
-            ret_val = -1;
-            goto done;
-        }
-
-        memcpy(out, out_ptr, out_bytes);
+    frc = vol_fetch_into(ctx, output, out, out_bytes);
+    if (frc != 0) {
+        H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                vol_err_class, maj_compression, min_decompress_failed,
+                "pressio-chunked decompress of '%s' produced the wrong output "
+                "(expected %zu bytes, fetch rc=%d; container corrupt?)",
+                ctx->compressor_id, out_bytes, frc);
+        ret_val = -1;
+        goto done;
+    }
 
 #ifdef ENABLE_EXT_PASSTHRU_LOGGING
-        printf("DECOMPRESS PRESSIO OK: id=%s actual_bytes=%zu\n",
-               ctx->compressor_id, actual_bytes);
+    printf("DECOMPRESS PRESSIO OK: id=%s out_bytes=%zu\n",
+           ctx->compressor_id, out_bytes);
 #endif
-    }
 
     if (getenv("HDF5_VOL_PRESSIO_METRICS")) {
         struct pressio_options *results = pressio_compressor_get_metrics_results(w);

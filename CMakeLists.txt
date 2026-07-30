@@ -29,7 +29,9 @@ set(VOL_SRCS
     ${CMAKE_CURRENT_SOURCE_DIR}/compress.cc
 )
 
-add_library(hdf5_vol_passthrough SHARED ${VOL_SRCS} vol_errors.h)
+add_library(hdf5_vol_passthrough SHARED ${VOL_SRCS} vol_errors.h
+  vol_timing_phases.h
+  vol_timing_phases.c)
 
 find_package(MPI)
 if(MPI_FOUND)

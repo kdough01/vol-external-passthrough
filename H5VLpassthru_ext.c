@@ -203,14 +203,15 @@ herr_t H5VL_pass_through_ext_transfer_compress(compression_ctx *ctx, const void 
 herr_t H5VL_pass_through_ext_transfer_decompress(compression_ctx *ctx, const void *compressed_data, size_t compressed_size, void *output_buf);
 herr_t H5VL_pass_through_ext_transfer_compress_chunk(compression_ctx *ctx, const void *buf, size_t nbytes, void **out_cbuf, uint64_t *out_csize);
 herr_t H5VL_pass_through_ext_transfer_decompress_chunk(compression_ctx *ctx, const void *cbuf, size_t csize, void *out, size_t out_bytes);
-herr_t H5VL_pass_through_ext_compress_native(compression_ctx *ctx, const void *data, size_t nbytes, void **out_cbuf, uint64_t *out_csize);
+herr_t H5VL_pass_through_ext_compress_native(compression_ctx *ctx, const void *data, size_t nbytes, size_t hdr_reserve, void **out_cbuf, uint64_t *out_csize);
 herr_t H5VL_pass_through_ext_decompress_native(compression_ctx *ctx, const void *cbuf, size_t csize, void *out, size_t out_bytes);
 
 int    H5VL_pass_through_ext_chunking_mode(const compression_ctx *ctx);
 size_t H5VL_pass_through_ext_chunk_bytes(const compression_ctx *ctx, size_t total_bytes, size_t dsize);
 void   H5VL_pass_through_ext_parse_chunking_opts(compression_ctx *ctx, struct pressio_options *opts);
-herr_t H5VL_pass_through_ext_compress_pressio(compression_ctx *ctx, const void *data, size_t nbytes, size_t chunk_bytes_req, void **out_cbuf, uint64_t *out_csize, uint64_t *out_chunk_elems);
+herr_t H5VL_pass_through_ext_compress_pressio(compression_ctx *ctx, const void *data, size_t nbytes, size_t chunk_bytes_req, size_t hdr_reserve, void **out_cbuf, uint64_t *out_csize, uint64_t *out_chunk_elems);
 herr_t H5VL_pass_through_ext_decompress_pressio(compression_ctx *ctx, const void *cbuf, size_t csize, uint64_t chunk_elems, void *out, size_t out_bytes);
+
 
 int H5VL_pass_through_ext_compressor_available(const char *compressor_id);
 int H5VL_pass_through_ext_buf_is_device(const void *p);
@@ -2243,9 +2244,10 @@ H5VL_pass_through_ext_dataset_write(
     herr_t ret_val = 0;
 
     for (size_t u = 0; u < count; u++) {
+        vol_write_timing_t t;
         double _d0 = bench_now_ms();
-        double io_ms = 0.0;
-        double compress_ms = 0.0;
+
+        memset(&t, 0, sizeof(t));
 
         H5VL_pass_through_ext_t *d = (H5VL_pass_through_ext_t *)dset[u];
         void *under = d->under_object;
@@ -2267,14 +2269,16 @@ H5VL_pass_through_ext_dataset_write(
             herr_t r = H5VLdataset_write(
                 1, &under, d->under_vol_id, &mem_type_id[u],
                 &mem_space_id[u], &file_space_id[u], plist_id, wbufs, NULL);
-            io_ms += bench_now_ms() - _io0;
+            t.io_ms += bench_now_ms() - _io0;
             if (r < 0) {
                 H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
                         vol_err_class, maj_compression, min_compress_failed,
                         "passthrough dataset_write failed for dataset %zu", u);
                 ret_val = -1;
             }
-            vol_timing_emit(dset_name, "none", "write", bench_now_ms() - _d0, 0.0, io_ms);
+            t.total_ms      = bench_now_ms() - _d0;
+            vol_timing_finalize(&t, dset_name, "none", 0.03);
+            vol_timing_emit_ex(dset_name, "none", "write", &t);
             continue;
         }
 
@@ -2284,7 +2288,8 @@ H5VL_pass_through_ext_dataset_write(
         for (int i = 0; i < (int)ctx->ndims; i++) total_elems *= ctx->dims[i];
         const size_t total_bytes = total_elems * dsize;
 
-        /* ---- Locate THIS write within the logical array (unchanged) ---- */
+
+        /* ---- Locate THIS write within the logical array ---- */
         size_t off_bytes, len_bytes;
 
         if (file_space_id[u] == H5S_ALL || ctx->ndims == 0) {
@@ -2340,10 +2345,9 @@ H5VL_pass_through_ext_dataset_write(
         }
 
         /*
-         * Pick the compression source: whole-write compresses
-         * directly from the caller buffer (host or device); strip writes
-         * stage on the host first.
-        */
+         * Pick the compression source: whole-write compresses directly from the
+         * caller buffer (host or device); strip writes stage on the host first.
+         */
         const void *comp_src = NULL;
         const int is_whole_write = (off_bytes == 0 && len_bytes == total_bytes);
 
@@ -2377,7 +2381,11 @@ H5VL_pass_through_ext_dataset_write(
                 ctx->stage_filled = 0;
             }
 
-            memcpy((char *)ctx->stage_buf + off_bytes, buf[u], len_bytes);
+            {
+                double _s0 = bench_now_ms();
+                memcpy((char *)ctx->stage_buf + off_bytes, buf[u], len_bytes);
+                t.stage_ms += bench_now_ms() - _s0;
+            }
             ctx->stage_filled += len_bytes;
 
 #ifdef ENABLE_EXT_PASSTHRU_LOGGING
@@ -2386,8 +2394,10 @@ H5VL_pass_through_ext_dataset_write(
 #endif
 
             if (ctx->stage_filled < ctx->stage_total) {
-                vol_timing_emit(dset_name, ctx->compressor_id, "write",
-                                bench_now_ms() - _d0, 0.0, 0.0);
+                /* Partial strip accepted; nothing compressed or written yet. */
+                t.total_ms = bench_now_ms() - _d0;
+                vol_timing_finalize(&t, dset_name, ctx->compressor_id, 0.03);
+                vol_timing_emit_ex(dset_name, ctx->compressor_id, "write_strip", &t);
                 continue;
             }
             comp_src = ctx->stage_buf;
@@ -2395,28 +2405,30 @@ H5VL_pass_through_ext_dataset_write(
 
         /*
          * Path selection. Chunking is strictly opt-in: the default is the
-         * NATIVE path (one compress call, codec-internal blocking). The user
-         * selects 'vol' or 'pressio' chunking via opts_json
-         * ("vol:chunking_mode", "vol:chunk_n") or globally via env
-         * (VOL_COMP_CHUNKING).
-        */
+         * NATIVE path (one compress call, codec-internal blocking).
+         */
         const int chunk_mode = H5VL_pass_through_ext_chunking_mode(ctx);
 
-        /*
+        /* ====================================================================
          * NATIVE path (default): one compress into a single self-describing
-         * blob, then write [VOL_NATIVE_MAGIC][csize][payload].
-        */
+         * blob, then ONE write of [VOL_NATIVE_MAGIC][csize][payload].
+         * ================================================================= */
         if (chunk_mode == VOL_CHUNKING_NONE) {
-            void    *blob = NULL;
+            void    *blob = NULL;          /* base; payload at +hdr_bytes */
             uint64_t clen = 0;
             herr_t   cret;
+            const size_t hdr_bytes = 2 * sizeof(uint64_t);   /* magic + csize */
 
-            ctx->compress_ms = 0.0;
+
+            ctx->device_ms       = 0.0;
+            ctx->pressio_call_ms = 0.0;
+
             double _c0 = bench_now_ms();
             cret = H5VL_pass_through_ext_compress_native(
-                       ctx, comp_src, total_bytes, &blob, &clen);
-            compress_ms = (ctx->compress_ms > 0.0) ? ctx->compress_ms
-                                                   : (bench_now_ms() - _c0);
+                       ctx, comp_src, total_bytes, hdr_bytes, &blob, &clen);
+            t.compress_ms     = bench_now_ms() - _c0;   /* ALWAYS wall clock */
+            t.pressio_call_ms = ctx->pressio_call_ms;
+            t.device_ms       = ctx->device_ms;
 
             /* Staging no longer needed (NULL on the whole-write path). */
             free(ctx->stage_buf);
@@ -2430,77 +2442,62 @@ H5VL_pass_through_ext_dataset_write(
                         "native compression failed for dataset %zu compressor='%s'",
                         u, ctx->compressor_id);
                 free(blob);
-                ret_val = -1; continue;
+                ret_val = -1;
+                t.total_ms = bench_now_ms() - _d0;
+                vol_timing_finalize(&t, dset_name, ctx->compressor_id, 0.03);
+                vol_timing_emit_ex(dset_name, ctx->compressor_id, "write_failed", &t);
+                continue;
             }
 
-            /* Container geometry: [magic][csize][payload] */
-            uint64_t nhdr[2];
-            nhdr[0] = VOL_NATIVE_MAGIC;
-            nhdr[1] = clen;
-            const size_t  hdr_bytes = sizeof(nhdr);            /* 16 */
-            const hsize_t total     = (hsize_t)(hdr_bytes + clen);
+            const hsize_t total = (hsize_t)(hdr_bytes + clen);
 
-            hsize_t new_size[H5S_MAX_RANK] = {0};
-            new_size[0] = total;
-            H5VL_dataset_specific_args_t sargs;
-            sargs.op_type = H5VL_DATASET_SET_EXTENT;
-            sargs.args.set_extent.size = new_size;
+            /* Header written into the reserved slack: one contiguous buffer. */
+            {
+                double _h0 = bench_now_ms();
+                uint64_t *nhdr = (uint64_t *)blob;
+                nhdr[0] = VOL_NATIVE_MAGIC;
+                nhdr[1] = clen;
+                t.container_ms += bench_now_ms() - _h0;
+            }
 
             herr_t werr = 0;
-            if (H5VLdataset_specific(under, d->under_vol_id, &sargs, plist_id, NULL) < 0) {
-                H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
-                        vol_err_class, maj_compression, min_compress_failed,
-                        "failed to resize dataset %zu to %llu bytes",
-                        u, (unsigned long long)total);
-                werr = -1;
-            }
+            {
+                hsize_t new_size[H5S_MAX_RANK] = {0};
+                new_size[0] = total;
+                H5VL_dataset_specific_args_t sargs;
+                sargs.op_type = H5VL_DATASET_SET_EXTENT;
+                sargs.args.set_extent.size = new_size;
 
-            /* Write header [magic][csize] at offset 0. */
-            if (werr >= 0) {
-                hsize_t zero = 0;
-                hsize_t hb   = (hsize_t)hdr_bytes;
-                hid_t mspace_hdr = H5Screate_simple(1, &hb, NULL);
-                hid_t fspace_hdr = H5Screate_simple(1, (hsize_t[]){total}, NULL);
-                H5Sselect_hyperslab(fspace_hdr, H5S_SELECT_SET, &zero, NULL, &hb, NULL);
+                double _x0 = bench_now_ms();
+                herr_t xerr = H5VLdataset_specific(under, d->under_vol_id, &sargs,
+                                                   plist_id, NULL);
+                t.container_ms += bench_now_ms() - _x0;
 
-                const void *hbufs[] = { nhdr };
-                double _io0 = bench_now_ms();
-                herr_t hret = H5VLdataset_write(
-                    1, &under, d->under_vol_id, (hid_t[]){H5T_NATIVE_UCHAR},
-                    &mspace_hdr, &fspace_hdr, plist_id, hbufs, NULL);
-                io_ms += bench_now_ms() - _io0;
-                H5Sclose(mspace_hdr);
-                H5Sclose(fspace_hdr);
-
-                if (hret < 0) {
+                if (xerr < 0) {
                     H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
                             vol_err_class, maj_compression, min_compress_failed,
-                            "native header write failed for dataset %zu", u);
+                            "failed to resize dataset %zu to %llu bytes",
+                            u, (unsigned long long)total);
                     werr = -1;
                 }
             }
 
-            /* Write payload at offset hdr_bytes. */
-            if (werr >= 0 && clen > 0) {
-                hsize_t ps   = (hsize_t)clen;
-                hsize_t poff = (hsize_t)hdr_bytes;
-                hid_t mspace_payload = H5Screate_simple(1, &ps, NULL);
-                hid_t fspace_payload = H5Screate_simple(1, (hsize_t[]){total}, NULL);
-                H5Sselect_hyperslab(fspace_payload, H5S_SELECT_SET, &poff, NULL, &ps, NULL);
+            /* ONE write covering the whole resized extent -> H5S_ALL is exact,
+             * so no dataspace objects are needed at all. */
+            if (werr >= 0) {
+                const void *wbufs[] = { blob };
+                hid_t mspace = H5S_ALL, fspace = H5S_ALL;
 
-                const void *cbufs[] = { blob };
                 double _io0 = bench_now_ms();
                 herr_t wret = H5VLdataset_write(
                     1, &under, d->under_vol_id, (hid_t[]){H5T_NATIVE_UCHAR},
-                    &mspace_payload, &fspace_payload, plist_id, cbufs, NULL);
-                io_ms += bench_now_ms() - _io0;
-                H5Sclose(mspace_payload);
-                H5Sclose(fspace_payload);
+                    &mspace, &fspace, plist_id, wbufs, NULL);
+                t.io_ms += bench_now_ms() - _io0;
 
                 if (wret < 0) {
                     H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
                             vol_err_class, maj_compression, min_compress_failed,
-                            "native payload write failed for dataset %zu", u);
+                            "native container write failed for dataset %zu", u);
                     werr = -1;
                 }
             }
@@ -2508,31 +2505,36 @@ H5VL_pass_through_ext_dataset_write(
             free(blob);
             if (werr < 0) ret_val = -1;
 
-            vol_timing_emit(dset_name, ctx->compressor_id, "write",
-                            bench_now_ms() - _d0, compress_ms, io_ms);
-            continue;   /* done with this dataset */
+            t.total_ms = bench_now_ms() - _d0;
+            vol_timing_finalize(&t, dset_name, ctx->compressor_id, 0.03);
+            vol_timing_emit_ex(dset_name, ctx->compressor_id, "write", &t);
+            continue;
         }
 
-        /*
-         * PRESSIO path (chunking_mode == "pressio"): one compress through
-         * libpressio's 'chunking' meta-compressor (one self-framed blob),
-         * then write [VOL_PRESSIO_MAGIC][csize][chunk_elems][payload].
-        */
+        /* ====================================================================
+         * PRESSIO path: one compress through libpressio's 'chunking'
+         * meta-compressor, then ONE write of
+         * [VOL_PRESSIO_MAGIC][csize][chunk_elems][payload].
+         * ================================================================= */
         if (chunk_mode == VOL_CHUNKING_PRESSIO) {
             void    *blob        = NULL;
             uint64_t clen        = 0;
             uint64_t chunk_elems = 0;
             herr_t   cret;
+            const size_t hdr_bytes = VOL_PRESSIO_HDR_WORDS * sizeof(uint64_t);
             const size_t chunk_bytes_req =
-            H5VL_pass_through_ext_chunk_bytes(ctx, total_bytes, dsize);
+                H5VL_pass_through_ext_chunk_bytes(ctx, total_bytes, dsize);
 
-            ctx->compress_ms = 0.0;
+            ctx->device_ms       = 0.0;
+            ctx->pressio_call_ms = 0.0;
+
             double _c0 = bench_now_ms();
             cret = H5VL_pass_through_ext_compress_pressio(
-                       ctx, comp_src, total_bytes, chunk_bytes_req,
+                       ctx, comp_src, total_bytes, chunk_bytes_req, hdr_bytes,
                        &blob, &clen, &chunk_elems);
-            compress_ms = (ctx->compress_ms > 0.0) ? ctx->compress_ms
-                                                   : (bench_now_ms() - _c0);
+            t.compress_ms     = bench_now_ms() - _c0;
+            t.pressio_call_ms = ctx->pressio_call_ms;
+            t.device_ms       = ctx->device_ms;
 
             free(ctx->stage_buf);
             ctx->stage_buf    = NULL;
@@ -2545,78 +2547,60 @@ H5VL_pass_through_ext_dataset_write(
                         "pressio-chunked compression failed for dataset %zu "
                         "compressor='%s'", u, ctx->compressor_id);
                 free(blob);
-                ret_val = -1; continue;
+                ret_val = -1;
+                t.total_ms = bench_now_ms() - _d0;
+                vol_timing_finalize(&t, dset_name, ctx->compressor_id, 0.03);
+                vol_timing_emit_ex(dset_name, ctx->compressor_id, "write_failed", &t);
+                continue;
             }
 
-            /* Container geometry: [magic][csize][chunk_elems][payload] */
-            uint64_t phdr[VOL_PRESSIO_HDR_WORDS];
-            phdr[0] = VOL_PRESSIO_MAGIC;
-            phdr[1] = clen;
-            phdr[2] = chunk_elems;
-            const size_t  hdr_bytes = sizeof(phdr);            /* 24 */
-            const hsize_t total     = (hsize_t)(hdr_bytes + clen);
+            const hsize_t total = (hsize_t)(hdr_bytes + clen);
 
-            hsize_t new_size[H5S_MAX_RANK] = {0};
-            new_size[0] = total;
-            H5VL_dataset_specific_args_t sargs;
-            sargs.op_type = H5VL_DATASET_SET_EXTENT;
-            sargs.args.set_extent.size = new_size;
+            {
+                double _h0 = bench_now_ms();
+                uint64_t *phdr = (uint64_t *)blob;
+                phdr[0] = VOL_PRESSIO_MAGIC;
+                phdr[1] = clen;
+                phdr[2] = chunk_elems;
+                t.container_ms += bench_now_ms() - _h0;
+            }
 
             herr_t werr = 0;
-            if (H5VLdataset_specific(under, d->under_vol_id, &sargs, plist_id, NULL) < 0) {
-                H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
-                        vol_err_class, maj_compression, min_compress_failed,
-                        "failed to resize dataset %zu to %llu bytes",
-                        u, (unsigned long long)total);
-                werr = -1;
-            }
+            {
+                hsize_t new_size[H5S_MAX_RANK] = {0};
+                new_size[0] = total;
+                H5VL_dataset_specific_args_t sargs;
+                sargs.op_type = H5VL_DATASET_SET_EXTENT;
+                sargs.args.set_extent.size = new_size;
 
-            /* Write header [magic][csize][chunk_elems] at offset 0. */
-            if (werr >= 0) {
-                hsize_t zero = 0;
-                hsize_t hb   = (hsize_t)hdr_bytes;
-                hid_t mspace_hdr = H5Screate_simple(1, &hb, NULL);
-                hid_t fspace_hdr = H5Screate_simple(1, (hsize_t[]){total}, NULL);
-                H5Sselect_hyperslab(fspace_hdr, H5S_SELECT_SET, &zero, NULL, &hb, NULL);
+                double _x0 = bench_now_ms();
+                herr_t xerr = H5VLdataset_specific(under, d->under_vol_id, &sargs,
+                                                   plist_id, NULL);
+                t.container_ms += bench_now_ms() - _x0;
 
-                const void *hbufs[] = { phdr };
-                double _io0 = bench_now_ms();
-                herr_t hret = H5VLdataset_write(
-                    1, &under, d->under_vol_id, (hid_t[]){H5T_NATIVE_UCHAR},
-                    &mspace_hdr, &fspace_hdr, plist_id, hbufs, NULL);
-                io_ms += bench_now_ms() - _io0;
-                H5Sclose(mspace_hdr);
-                H5Sclose(fspace_hdr);
-
-                if (hret < 0) {
+                if (xerr < 0) {
                     H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
                             vol_err_class, maj_compression, min_compress_failed,
-                            "pressio-chunked header write failed for dataset %zu", u);
+                            "failed to resize dataset %zu to %llu bytes",
+                            u, (unsigned long long)total);
                     werr = -1;
                 }
             }
 
-            /* Write payload at offset hdr_bytes. */
-            if (werr >= 0 && clen > 0) {
-                hsize_t ps   = (hsize_t)clen;
-                hsize_t poff = (hsize_t)hdr_bytes;
-                hid_t mspace_payload = H5Screate_simple(1, &ps, NULL);
-                hid_t fspace_payload = H5Screate_simple(1, (hsize_t[]){total}, NULL);
-                H5Sselect_hyperslab(fspace_payload, H5S_SELECT_SET, &poff, NULL, &ps, NULL);
+            if (werr >= 0) {
+                const void *wbufs[] = { blob };
+                hid_t mspace = H5S_ALL, fspace = H5S_ALL;
 
-                const void *cbufs[] = { blob };
                 double _io0 = bench_now_ms();
                 herr_t wret = H5VLdataset_write(
                     1, &under, d->under_vol_id, (hid_t[]){H5T_NATIVE_UCHAR},
-                    &mspace_payload, &fspace_payload, plist_id, cbufs, NULL);
-                io_ms += bench_now_ms() - _io0;
-                H5Sclose(mspace_payload);
-                H5Sclose(fspace_payload);
+                    &mspace, &fspace, plist_id, wbufs, NULL);
+                t.io_ms += bench_now_ms() - _io0;
 
                 if (wret < 0) {
                     H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
                             vol_err_class, maj_compression, min_compress_failed,
-                            "pressio-chunked payload write failed for dataset %zu", u);
+                            "pressio-chunked container write failed for dataset %zu", u);
                     werr = -1;
                 }
             }
@@ -2624,17 +2608,49 @@ H5VL_pass_through_ext_dataset_write(
             free(blob);
             if (werr < 0) ret_val = -1;
 
-            vol_timing_emit(dset_name, ctx->compressor_id, "write",
-                            bench_now_ms() - _d0, compress_ms, io_ms);
-            continue;   /* done with this dataset */
+            t.total_ms = bench_now_ms() - _d0;
+            vol_timing_finalize(&t, dset_name, ctx->compressor_id, 0.03);
+            vol_timing_emit_ex(dset_name, ctx->compressor_id, "write", &t);
+            continue;
         }
 
-        /*
-         * VOL path (chunking_mode == "vol"): compress in VOL-sliced chunks,
-         * then write [magic][nchunks][chunk_bytes][csize table][payloads].
-        */
+        /* ====================================================================
+         * VOL path: compress in VOL-sliced chunks, then write
+         * [magic][nchunks][chunk_bytes][csize table][payloads].
+         *
+         * The header cannot be fused with the payloads here: the csize table
+         * isn't known until every chunk has been compressed. It stays a
+         * separate write followed by N payload writes.
+         * ================================================================= */
         const size_t chunk_bytes = H5VL_pass_through_ext_chunk_bytes(ctx, total_bytes, dsize);
         const size_t nchunks = (total_bytes + chunk_bytes - 1) / chunk_bytes;
+        const size_t tail_bytes = total_bytes - (nchunks - 1) * chunk_bytes;
+
+
+        /* RAGGED TAIL IS ALWAYS REPORTED.
+         *
+         * H5VL_pass_through_ext_chunk_bytes() FLOORS chunk_elems, so a request
+         * for N chunks can produce N+1 with a short final chunk. That final
+         * chunk is a different length from every other one and is handed to the
+         * codec as a differently shaped buffer -- exactly the shape of a bug
+         * that corrupts only the last chunk. It must never be silent, because
+         * "only the last chunk is wrong" is otherwise indistinguishable from a
+         * codec fault. Datasets whose element count does not factor by N (any
+         * dataset whose dims come from the file) hit this routinely. */
+        if (tail_bytes != chunk_bytes) {
+            fprintf(stderr,
+                "[VOL RAGGED] dataset %zu '%s': %zu chunks of %zu B + a FINAL "
+                "chunk of %zu B (%.1f%% of a full chunk). total=%zu elem=%zu. "
+                "The last chunk has a different length from the rest -- rule it "
+                "out before blaming the codec.\n",
+                u, ctx->compressor_id, nchunks - 1, chunk_bytes, tail_bytes,
+                100.0 * (double)tail_bytes / (double)chunk_bytes,
+                total_bytes, dsize);
+        } else if (getenv("VOL_COMP_CHUNK_LOG")) {
+            fprintf(stderr,
+                "[VOL RAGGED] dataset %zu '%s': clean split, %zu x %zu B, "
+                "no ragged tail\n", u, ctx->compressor_id, nchunks, chunk_bytes);
+        }
 
         void    **chunk_bufs = (void **)calloc(nchunks, sizeof(void *));
         uint64_t *csizes     = (uint64_t *)malloc(nchunks * sizeof(uint64_t));
@@ -2651,7 +2667,9 @@ H5VL_pass_through_ext_dataset_write(
             ret_val = -1; continue;
         }
 
-        ctx->compress_ms = 0.0;   /* chunk helpers ACCUMULATE device ms here */
+        ctx->device_ms       = 0.0;   /* chunk helpers ACCUMULATE into these */
+        ctx->pressio_call_ms = 0.0;
+
         double _c0 = bench_now_ms();
         for (size_t k = 0; k < nchunks && cret >= 0; k++) {
             size_t coff = k * chunk_bytes;
@@ -2661,8 +2679,9 @@ H5VL_pass_through_ext_dataset_write(
                        ctx, (const char *)comp_src + coff, clen,
                        &chunk_bufs[k], &csizes[k]);
         }
-        compress_ms = (ctx->compress_ms > 0.0) ? ctx->compress_ms
-                                               : (bench_now_ms() - _c0);
+        t.compress_ms     = bench_now_ms() - _c0;
+        t.pressio_call_ms = ctx->pressio_call_ms;
+        t.device_ms       = ctx->device_ms;
 
         free(ctx->stage_buf);
         ctx->stage_buf    = NULL;
@@ -2676,7 +2695,11 @@ H5VL_pass_through_ext_dataset_write(
                     u, ctx->compressor_id);
             for (size_t k = 0; k < nchunks; k++) free(chunk_bufs[k]);
             free(chunk_bufs); free(csizes);
-            ret_val = -1; continue;
+            ret_val = -1;
+            t.total_ms = bench_now_ms() - _d0;
+            vol_timing_finalize(&t, dset_name, ctx->compressor_id, 0.03);
+            vol_timing_emit_ex(dset_name, ctx->compressor_id, "write_failed", &t);
+            continue;
         }
 
         const size_t hdr_words = VOL_CHUNK_HDR_WORDS + nchunks;
@@ -2685,24 +2708,34 @@ H5VL_pass_through_ext_dataset_write(
         for (size_t k = 0; k < nchunks; k++) payload_bytes += csizes[k];
         const hsize_t total = (hsize_t)(hdr_bytes + payload_bytes);
 
-        hsize_t new_size[H5S_MAX_RANK] = {0};
-        new_size[0] = total;
-        H5VL_dataset_specific_args_t sargs;
-        sargs.op_type = H5VL_DATASET_SET_EXTENT;
-        sargs.args.set_extent.size = new_size;
 
         herr_t werr = 0;
-        if (H5VLdataset_specific(under, d->under_vol_id, &sargs, plist_id, NULL) < 0) {
-            H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
-                    vol_err_class, maj_compression, min_compress_failed,
-                    "failed to resize dataset %zu to %llu bytes",
-                    u, (unsigned long long)total);
-            werr = -1;
+        {
+            hsize_t new_size[H5S_MAX_RANK] = {0};
+            new_size[0] = total;
+            H5VL_dataset_specific_args_t sargs;
+            sargs.op_type = H5VL_DATASET_SET_EXTENT;
+            sargs.args.set_extent.size = new_size;
+
+            double _x0 = bench_now_ms();
+            herr_t xerr = H5VLdataset_specific(under, d->under_vol_id, &sargs,
+                                               plist_id, NULL);
+            t.container_ms += bench_now_ms() - _x0;
+
+            if (xerr < 0) {
+                H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                        vol_err_class, maj_compression, min_compress_failed,
+                        "failed to resize dataset %zu to %llu bytes",
+                        u, (unsigned long long)total);
+                werr = -1;
+            }
         }
 
         if (werr >= 0) {
+            double _h0 = bench_now_ms();
             uint64_t *hdr = (uint64_t *)malloc(hdr_bytes);
             if (!hdr) {
+                t.container_ms += bench_now_ms() - _h0;
                 H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
                         vol_err_class, maj_compression, min_compress_failed,
                         "out of memory for %zu byte header, dataset %zu", hdr_bytes, u);
@@ -2718,16 +2751,20 @@ H5VL_pass_through_ext_dataset_write(
                 hid_t mspace_hdr = H5Screate_simple(1, &hb, NULL);
                 hid_t fspace_hdr = H5Screate_simple(1, (hsize_t[]){total}, NULL);
                 H5Sselect_hyperslab(fspace_hdr, H5S_SELECT_SET, &zero, NULL, &hb, NULL);
+                t.container_ms += bench_now_ms() - _h0;
 
                 const void *hbufs[] = { hdr };
                 double _io0 = bench_now_ms();
                 herr_t hret = H5VLdataset_write(
                     1, &under, d->under_vol_id, (hid_t[]){H5T_NATIVE_UCHAR},
                     &mspace_hdr, &fspace_hdr, plist_id, hbufs, NULL);
-                io_ms += bench_now_ms() - _io0;
+                t.io_ms += bench_now_ms() - _io0;
+
+                double _h1 = bench_now_ms();
                 H5Sclose(mspace_hdr);
                 H5Sclose(fspace_hdr);
                 free(hdr);
+                t.container_ms += bench_now_ms() - _h1;
 
                 if (hret < 0) {
                     H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
@@ -2742,21 +2779,26 @@ H5VL_pass_through_ext_dataset_write(
             hsize_t poff = (hsize_t)hdr_bytes;
             for (size_t k = 0; k < nchunks; k++) {
                 hsize_t ps = (hsize_t)csizes[k];
+
+                double _p0 = bench_now_ms();
                 hid_t mspace_payload = H5Screate_simple(1, &ps, NULL);
                 hid_t fspace_payload = H5Screate_simple(1, (hsize_t[]){total}, NULL);
                 H5Sselect_hyperslab(fspace_payload, H5S_SELECT_SET, &poff, NULL, &ps, NULL);
+                t.container_ms += bench_now_ms() - _p0;
 
                 const void *cbufs[] = { chunk_bufs[k] };
                 double _io0 = bench_now_ms();
                 herr_t wret = H5VLdataset_write(
                     1, &under, d->under_vol_id, (hid_t[]){H5T_NATIVE_UCHAR},
                     &mspace_payload, &fspace_payload, plist_id, cbufs, NULL);
-                io_ms += bench_now_ms() - _io0;
+                t.io_ms += bench_now_ms() - _io0;
+
+                double _p1 = bench_now_ms();
                 H5Sclose(mspace_payload);
                 H5Sclose(fspace_payload);
-
                 free(chunk_bufs[k]);
                 chunk_bufs[k] = NULL;
+                t.container_ms += bench_now_ms() - _p1;
 
                 if (wret < 0) {
                     H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
@@ -2775,8 +2817,9 @@ H5VL_pass_through_ext_dataset_write(
 
         if (werr < 0) ret_val = -1;
 
-        vol_timing_emit(dset_name, ctx->compressor_id, "write",
-                        bench_now_ms() - _d0, compress_ms, io_ms);
+        t.total_ms = bench_now_ms() - _d0;
+        vol_timing_finalize(&t, dset_name, ctx->compressor_id, 0.03);
+        vol_timing_emit_ex(dset_name, ctx->compressor_id, "write", &t);
     }
 
     return ret_val;

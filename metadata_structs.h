@@ -38,6 +38,15 @@ typedef struct compression_ctx {
     uint64_t chunk_n;            /* "vol:chunk_n", 0 = default   */
     struct pressio_compressor *chunk_wrapper;       /* cached 'chunking' meta        */
     uint64_t                   chunk_wrapper_elems; /* chunk size wrapper was built with */
+    double pressio_call_ms;
+    double device_ms;        /* CUDA event time; was named compress_ms      */
+
+    void  *ev_start;         /* cudaEvent_t, created once, opaque here      */
+    void  *ev_stop;          /* cudaEvent_t                                 */
+    int    cuda_stream_set;  /* 1 once the stream option has been offered   */
+
+    int    cuda_stream_ok;   /* 1 if the codec confirmed our cuda_stream option */
+    int    stream_warn_done; /* one-shot guard for the D2H-ordering warning     */
 } compression_ctx;
 
 #ifdef __cplusplus
