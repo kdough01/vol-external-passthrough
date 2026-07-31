@@ -1,0 +1,3 @@
+dataset,compressor,path,op,phase,ms,ratio,rmse
+ocean_temp,deflate,filter,write,total,3897.1068,1.2761,
+ocean_temp,deflate,filter,read,total,535.9835,,0.000000e+00

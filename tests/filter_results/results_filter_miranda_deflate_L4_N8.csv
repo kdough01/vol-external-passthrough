@@ -1,0 +1,3 @@
+dataset,compressor,path,op,phase,ms,ratio,rmse
+miranda,deflate,filter,write,total,5216.3940,2.0832,
+miranda,deflate,filter,read,total,888.1780,,0.000000e+00

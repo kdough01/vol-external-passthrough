@@ -1,0 +1,3 @@
+dataset,compressor,path,op,phase,ms,ratio,rmse
+miranda,sz3_1e6,filter,write,total,2022.5171,21.2094,
+miranda,sz3_1e6,filter,read,total,762.8426,,3.062181e-07

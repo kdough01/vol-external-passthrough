@@ -1,0 +1,653 @@
+Job started on Fri Jul 31 14:14:40 CDT 2026
+Running on: gpu4
+Results   : /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results
+
+=== Building ===
+Consolidate compiler generated dependencies of target dump_cuszp_opts
+[  9%] Built target dump_cuszp_opts
+Consolidate compiler generated dependencies of target hdf5_vol_passthrough
+[ 23%] Built target hdf5_vol_passthrough
+Consolidate compiler generated dependencies of target test_ci
+Consolidate compiler generated dependencies of target bench_pressio_timing
+Consolidate compiler generated dependencies of target test_cpu_write
+Consolidate compiler generated dependencies of target test_time_hurricane
+Consolidate compiler generated dependencies of target bench_vol_timing
+Consolidate compiler generated dependencies of target test_error_miranda
+Consolidate compiler generated dependencies of target test_time_miranda
+[ 52%] Built target test_cpu_write
+[ 52%] Built target test_ci
+[ 52%] Built target bench_pressio_timing
+[ 61%] Built target test_time_hurricane
+Consolidate compiler generated dependencies of target bench_filter_timing
+[ 71%] Built target bench_vol_timing
+[ 80%] Built target test_error_miranda
+[ 90%] Built target test_time_miranda
+[ 95%] Building CXX object tests/CMakeFiles/bench_filter_timing.dir/bench_filter_timing.cc.o
+[100%] Linking CXX executable bench_filter_timing
+[100%] Built target bench_filter_timing
+filter plugins: libh5zzfp.so libhdf5sz3.so 
+h5 scratch: /lcrc/project/SDR/kdougherty/vol_bench_h5
+
+=== [0b] filter availability ===
+  sz3: ok
+  zfp: ok
+  deflate: ok
+  bzip2: NOT AVAILABLE
+usable backends: sz3 zfp deflate
+
+############ [1] SZ3 cd_values gate (miranda, abs 1e-6) ############
+
+=== filter [gate_sz3_sz3_1e6_N8] : miranda ===
+[filter] backend=sz3 id=32024 chunk_n=8
+  miranda        sz3_1e6    N=8   C=  3.17 W=  1272.77 F=    0.16 X=   0.32 | O=  0.39 R=   670.27 ms  ratio= 21.44x  file=13.4 MiB  RMSE=3.197e-07 maxae=1.000e-06
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_gate_sz3_sz3_1e6_N8.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_gate_sz3_sz3_1e6_N8.csv (0 failed configuration(s) recorded)
+  PASS maxae=1e-06 thr=1e-06
+
+############ [2] sz3 — PRIMARY, same codec as the VOL ############
+
+=== filter [miranda_sz3_sz3_1e3_N1] : miranda ===
+[filter] backend=sz3 id=32024 chunk_n=1
+  miranda        sz3_1e3    N=1   C=  1.81 W=  1875.03 F=    0.10 X=   0.84 | O=  0.41 R=   467.48 ms  ratio=164.57x  file=1.8 MiB  RMSE=3.127e-04 maxae=1.000e-03
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_miranda_sz3_sz3_1e3_N1.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_miranda_sz3_sz3_1e3_N1.csv (0 failed configuration(s) recorded)
+
+=== filter [miranda_sz3_sz3_1e3_N8] : miranda ===
+[filter] backend=sz3 id=32024 chunk_n=8
+  miranda        sz3_1e3    N=8   C=  1.72 W=  1123.93 F=    0.11 X=   0.27 | O=  0.41 R=   402.06 ms  ratio=159.59x  file=1.8 MiB  RMSE=2.790e-04 maxae=1.000e-03
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_miranda_sz3_sz3_1e3_N8.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_miranda_sz3_sz3_1e3_N8.csv (0 failed configuration(s) recorded)
+
+=== filter [miranda_sz3_sz3_1e3_N16] : miranda ===
+[filter] backend=sz3 id=32024 chunk_n=16
+  miranda        sz3_1e3    N=16  C=  1.16 W=   806.07 F=    0.11 X=   0.27 | O=  0.38 R=   240.06 ms  ratio=147.12x  file=2.0 MiB  RMSE=2.709e-04 maxae=1.000e-03
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_miranda_sz3_sz3_1e3_N16.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_miranda_sz3_sz3_1e3_N16.csv (0 failed configuration(s) recorded)
+
+=== filter [miranda_sz3_sz3_1e6_N1] : miranda ===
+[filter] backend=sz3 id=32024 chunk_n=1
+  miranda        sz3_1e6    N=1   C=  1.12 W=  2022.52 F=    0.13 X=   0.30 | O=  0.38 R=   762.84 ms  ratio= 21.21x  file=13.6 MiB  RMSE=3.062e-07 maxae=1.000e-06
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_miranda_sz3_sz3_1e6_N1.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_miranda_sz3_sz3_1e6_N1.csv (0 failed configuration(s) recorded)
+
+=== filter [miranda_sz3_sz3_1e6_N8] : miranda ===
+[filter] backend=sz3 id=32024 chunk_n=8
+  miranda        sz3_1e6    N=8   C=  1.14 W=  1272.80 F=    0.11 X=   0.28 | O=  0.40 R=   665.55 ms  ratio= 21.44x  file=13.4 MiB  RMSE=3.197e-07 maxae=1.000e-06
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_miranda_sz3_sz3_1e6_N8.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_miranda_sz3_sz3_1e6_N8.csv (0 failed configuration(s) recorded)
+
+=== filter [miranda_sz3_sz3_1e6_N16] : miranda ===
+[filter] backend=sz3 id=32024 chunk_n=16
+  miranda        sz3_1e6    N=16  C=  1.18 W=   989.69 F=    0.11 X=   0.28 | O=  0.39 R=   486.02 ms  ratio= 20.27x  file=14.2 MiB  RMSE=2.955e-07 maxae=1.000e-06
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_miranda_sz3_sz3_1e6_N16.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_miranda_sz3_sz3_1e6_N16.csv (0 failed configuration(s) recorded)
+
+=== filter [s3d_sz3_sz3_1e3_N1] : s3d ===
+[filter] backend=sz3 id=32024 chunk_n=1
+  s3d            sz3_1e3    N=1   C=  1.13 W=  5849.71 F=    0.09 X=   0.33 | O=  0.38 R=  1330.31 ms  ratio=19201.23x  file=0.1 MiB  RMSE=1.247e-04 maxae=1.000e-03
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_s3d_sz3_sz3_1e3_N1.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_s3d_sz3_sz3_1e3_N1.csv (0 failed configuration(s) recorded)
+
+=== filter [s3d_sz3_sz3_1e3_N8] : s3d ===
+[filter] backend=sz3 id=32024 chunk_n=8
+  s3d            sz3_1e3    N=8   C=  1.14 W=  3542.01 F=    0.11 X=   0.35 | O=  0.40 R=  1374.49 ms  ratio=8470.63x  file=0.1 MiB  RMSE=1.328e-04 maxae=1.000e-03
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_s3d_sz3_sz3_1e3_N8.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_s3d_sz3_sz3_1e3_N8.csv (0 failed configuration(s) recorded)
+
+=== filter [s3d_sz3_sz3_1e3_N16] : s3d ===
+[filter] backend=sz3 id=32024 chunk_n=16
+  s3d            sz3_1e3    N=16  C=  1.15 W=  3102.85 F=    0.11 X=   0.30 | O=  0.38 R=  1168.01 ms  ratio=4752.81x  file=0.2 MiB  RMSE=1.883e-04 maxae=1.000e-03
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_s3d_sz3_sz3_1e3_N16.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_s3d_sz3_sz3_1e3_N16.csv (0 failed configuration(s) recorded)
+
+=== filter [s3d_sz3_sz3_1e6_N1] : s3d ===
+[filter] backend=sz3 id=32024 chunk_n=1
+  s3d            sz3_1e6    N=1   C=  1.13 W=  6098.32 F=    0.10 X=   0.28 | O=  0.41 R=  1418.58 ms  ratio=244.44x  file=3.9 MiB  RMSE=2.617e-07 maxae=1.000e-06
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_s3d_sz3_sz3_1e6_N1.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_s3d_sz3_sz3_1e6_N1.csv (0 failed configuration(s) recorded)
+
+=== filter [s3d_sz3_sz3_1e6_N8] : s3d ===
+[filter] backend=sz3 id=32024 chunk_n=8
+  s3d            sz3_1e6    N=8   C=  1.13 W=  3880.52 F=    0.11 X=   0.32 | O=  0.39 R=  1505.48 ms  ratio=195.81x  file=4.9 MiB  RMSE=2.869e-07 maxae=1.000e-06
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_s3d_sz3_sz3_1e6_N8.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_s3d_sz3_sz3_1e6_N8.csv (0 failed configuration(s) recorded)
+
+=== filter [s3d_sz3_sz3_1e6_N16] : s3d ===
+[filter] backend=sz3 id=32024 chunk_n=16
+  s3d            sz3_1e6    N=16  C=  1.11 W=  3506.01 F=    0.11 X=   0.26 | O=  0.40 R=  1298.15 ms  ratio=168.25x  file=5.7 MiB  RMSE=3.124e-07 maxae=1.000e-06
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_s3d_sz3_sz3_1e6_N16.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_s3d_sz3_sz3_1e6_N16.csv (0 failed configuration(s) recorded)
+
+=== filter [scale-T_sz3_sz3_1e3_N1] : scale-T ===
+[filter] backend=sz3 id=32024 chunk_n=1
+  scale-T        sz3_1e3    N=1   C=  1.32 W=  6067.89 F=    0.10 X=   0.36 | O=  0.39 R=  1194.61 ms  ratio=254.03x  file=2.1 MiB  RMSE=3.689e-04 maxae=9.999e-04
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_scale-T_sz3_sz3_1e3_N1.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_scale-T_sz3_sz3_1e3_N1.csv (0 failed configuration(s) recorded)
+
+=== filter [scale-T_sz3_sz3_1e3_N8] : scale-T ===
+[filter] backend=sz3 id=32024 chunk_n=8
+  scale-T        sz3_1e3    N=8   C=  1.18 W=  4041.55 F=    0.11 X=   0.31 | O=  0.39 R=  1231.13 ms  ratio=191.72x  file=2.8 MiB  RMSE=4.053e-04 maxae=1.001e-03
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_scale-T_sz3_sz3_1e3_N8.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_scale-T_sz3_sz3_1e3_N8.csv (0 failed configuration(s) recorded)
+
+=== filter [scale-T_sz3_sz3_1e3_N16] : scale-T ===
+[filter] backend=sz3 id=32024 chunk_n=16
+  scale-T        sz3_1e3    N=16  C=  1.23 W=  3711.18 F=    0.11 X=   0.29 | O=  0.37 R=  1281.63 ms  ratio=178.47x  file=3.0 MiB  RMSE=3.717e-04 maxae=1.002e-03
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_scale-T_sz3_sz3_1e3_N16.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_scale-T_sz3_sz3_1e3_N16.csv (0 failed configuration(s) recorded)
+
+=== filter [scale-T_sz3_sz3_1e6_N1] : scale-T ===
+[filter] backend=sz3 id=32024 chunk_n=1
+[FAIL] scale-T/sz3_1e6 maxae=6.198883e-06 exceeds 2x bound 1.000000e-06
+  scale-T        sz3_1e6    N=1   C=  1.18 W=  7489.53 F=    0.15 X=   0.25 | O=  0.41 R=  3896.12 ms  ratio=  4.39x  file=122.5 MiB  RMSE=6.673e-07 maxae=6.199e-06
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_scale-T_sz3_sz3_1e6_N1.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_scale-T_sz3_sz3_1e6_N1.csv (0 failed configuration(s) recorded)
+
+=== filter [scale-T_sz3_sz3_1e6_N8] : scale-T ===
+[filter] backend=sz3 id=32024 chunk_n=8
+[FAIL] scale-T/sz3_1e6 maxae=4.768372e-06 exceeds 2x bound 1.000000e-06
+  scale-T        sz3_1e6    N=8   C=  1.22 W=  5571.87 F=    0.15 X=   0.25 | O=  0.39 R=  3976.45 ms  ratio=  4.34x  file=124.0 MiB  RMSE=6.436e-07 maxae=4.768e-06
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_scale-T_sz3_sz3_1e6_N8.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_scale-T_sz3_sz3_1e6_N8.csv (0 failed configuration(s) recorded)
+
+=== filter [scale-T_sz3_sz3_1e6_N16] : scale-T ===
+[filter] backend=sz3 id=32024 chunk_n=16
+[FAIL] scale-T/sz3_1e6 maxae=5.245209e-06 exceeds 2x bound 1.000000e-06
+  scale-T        sz3_1e6    N=16  C=  1.26 W=  5025.89 F=    0.15 X=   0.24 | O=  0.41 R=  3972.94 ms  ratio=  4.15x  file=129.8 MiB  RMSE=6.088e-07 maxae=5.245e-06
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_scale-T_sz3_sz3_1e6_N16.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_scale-T_sz3_sz3_1e6_N16.csv (0 failed configuration(s) recorded)
+
+=== filter [nyx_baryon_sz3_sz3_1e3_N1] : nyx_baryon ===
+[filter] backend=sz3 id=32024 chunk_n=1
+  nyx_baryon     sz3_1e3    N=1   C=  1.22 W=  6961.18 F=    0.13 X=   0.12 | O=  0.35 R=  3109.96 ms  ratio=  7.85x  file=65.3 MiB  RMSE=5.766e-04 maxae=1.000e-03
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_nyx_baryon_sz3_sz3_1e3_N1.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_nyx_baryon_sz3_sz3_1e3_N1.csv (0 failed configuration(s) recorded)
+
+=== filter [nyx_baryon_sz3_sz3_1e3_N8] : nyx_baryon ===
+[filter] backend=sz3 id=32024 chunk_n=8
+  nyx_baryon     sz3_1e3    N=8   C=  1.33 W=  4704.58 F=    0.14 X=   0.20 | O=  0.35 R=  2998.86 ms  ratio=  7.87x  file=65.1 MiB  RMSE=5.765e-04 maxae=1.000e-03
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_nyx_baryon_sz3_sz3_1e3_N8.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_nyx_baryon_sz3_sz3_1e3_N8.csv (0 failed configuration(s) recorded)
+
+=== filter [nyx_baryon_sz3_sz3_1e3_N16] : nyx_baryon ===
+[filter] backend=sz3 id=32024 chunk_n=16
+  nyx_baryon     sz3_1e3    N=16  C=  1.04 W=  4634.71 F=    0.12 X=   0.16 | O=  0.36 R=  3011.74 ms  ratio=  7.91x  file=64.7 MiB  RMSE=5.764e-04 maxae=1.000e-03
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_nyx_baryon_sz3_sz3_1e3_N16.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_nyx_baryon_sz3_sz3_1e3_N16.csv (0 failed configuration(s) recorded)
+
+=== filter [nyx_baryon_sz3_sz3_1e6_N1] : nyx_baryon ===
+[filter] backend=sz3 id=32024 chunk_n=1
+  nyx_baryon     sz3_1e6    N=1   C=  1.03 W=  9388.93 F=    0.13 X=   0.14 | O=  0.36 R=  8742.47 ms  ratio=  2.20x  file=233.0 MiB  RMSE=5.531e-07 maxae=1.431e-06
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_nyx_baryon_sz3_sz3_1e6_N1.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_nyx_baryon_sz3_sz3_1e6_N1.csv (0 failed configuration(s) recorded)
+
+=== filter [nyx_baryon_sz3_sz3_1e6_N8] : nyx_baryon ===
+[filter] backend=sz3 id=32024 chunk_n=8
+  nyx_baryon     sz3_1e6    N=8   C=  1.01 W=  7714.36 F=    0.15 X=   0.15 | O=  0.36 R=  8504.54 ms  ratio=  2.17x  file=235.9 MiB  RMSE=5.565e-07 maxae=1.431e-06
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_nyx_baryon_sz3_sz3_1e6_N8.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_nyx_baryon_sz3_sz3_1e6_N8.csv (0 failed configuration(s) recorded)
+
+=== filter [nyx_baryon_sz3_sz3_1e6_N16] : nyx_baryon ===
+[filter] backend=sz3 id=32024 chunk_n=16
+  nyx_baryon     sz3_1e6    N=16  C=  0.89 W=  7622.43 F=    0.15 X=   0.15 | O=  0.36 R=  8352.29 ms  ratio=  2.13x  file=240.4 MiB  RMSE=5.531e-07 maxae=1.431e-06
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_nyx_baryon_sz3_sz3_1e6_N16.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_nyx_baryon_sz3_sz3_1e6_N16.csv (0 failed configuration(s) recorded)
+
+=== filter [ocean_temp_sz3_sz3_1e3_N1] : ocean_temp ===
+[filter] backend=sz3 id=32024 chunk_n=1
+  ocean_temp     sz3_1e3    N=1   C=  0.98 W=  1677.46 F=    0.15 X=   0.16 | O=  0.35 R=   705.09 ms  ratio=  6.49x  file=19.0 MiB  RMSE=5.701e-04 maxae=9.999e-04
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ocean_temp_sz3_sz3_1e3_N1.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_ocean_temp_sz3_sz3_1e3_N1.csv (0 failed configuration(s) recorded)
+
+=== filter [ocean_temp_sz3_sz3_1e3_N8] : ocean_temp ===
+[filter] backend=sz3 id=32024 chunk_n=8
+  ocean_temp     sz3_1e3    N=8   C=  0.91 W=  1225.11 F=    0.13 X=   0.16 | O=  0.38 R=   669.17 ms  ratio=  5.85x  file=21.1 MiB  RMSE=5.495e-04 maxae=1.003e-03
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ocean_temp_sz3_sz3_1e3_N8.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_ocean_temp_sz3_sz3_1e3_N8.csv (0 failed configuration(s) recorded)
+
+=== filter [ocean_temp_sz3_sz3_1e3_N16] : ocean_temp ===
+[filter] backend=sz3 id=32024 chunk_n=16
+  ocean_temp     sz3_1e3    N=16  C=  1.06 W=  1219.97 F=    0.13 X=   0.17 | O=  0.39 R=   691.16 ms  ratio=  5.75x  file=21.4 MiB  RMSE=5.537e-04 maxae=1.003e-03
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ocean_temp_sz3_sz3_1e3_N16.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_ocean_temp_sz3_sz3_1e3_N16.csv (0 failed configuration(s) recorded)
+
+=== filter [ocean_temp_sz3_sz3_1e6_N1] : ocean_temp ===
+[filter] backend=sz3 id=32024 chunk_n=1
+[FAIL] ocean_temp/sz3_1e6 maxae=6.675720e-06 exceeds 2x bound 1.000000e-06
+  ocean_temp     sz3_1e6    N=1   C=  1.00 W=  3094.07 F=    0.13 X=   0.14 | O=  0.36 R=  2330.50 ms  ratio=  1.95x  file=63.2 MiB  RMSE=6.689e-07 maxae=6.676e-06
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ocean_temp_sz3_sz3_1e6_N1.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_ocean_temp_sz3_sz3_1e6_N1.csv (0 failed configuration(s) recorded)
+
+=== filter [ocean_temp_sz3_sz3_1e6_N8] : ocean_temp ===
+[filter] backend=sz3 id=32024 chunk_n=8
+[FAIL] ocean_temp/sz3_1e6 maxae=4.768372e-06 exceeds 2x bound 1.000000e-06
+  ocean_temp     sz3_1e6    N=8   C=  0.93 W=  2479.93 F=    0.14 X=   0.18 | O=  0.37 R=  2018.07 ms  ratio=  1.80x  file=68.3 MiB  RMSE=6.353e-07 maxae=4.768e-06
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ocean_temp_sz3_sz3_1e6_N8.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_ocean_temp_sz3_sz3_1e6_N8.csv (0 failed configuration(s) recorded)
+
+=== filter [ocean_temp_sz3_sz3_1e6_N16] : ocean_temp ===
+[filter] backend=sz3 id=32024 chunk_n=16
+[FAIL] ocean_temp/sz3_1e6 maxae=4.768372e-06 exceeds 2x bound 1.000000e-06
+  ocean_temp     sz3_1e6    N=16  C=  0.95 W=  2709.26 F=    0.14 X=   0.18 | O=  0.38 R=  2098.51 ms  ratio=  1.76x  file=70.0 MiB  RMSE=6.515e-07 maxae=4.768e-06
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ocean_temp_sz3_sz3_1e6_N16.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_ocean_temp_sz3_sz3_1e6_N16.csv (0 failed configuration(s) recorded)
+
+=== filter [qmc_sz3_sz3_1e3_N1] : einspline37 ===
+[filter] backend=sz3 id=32024 chunk_n=1
+HDF5-DIAG: Error detected in HDF5 (1.14.6):
+  #000: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5D.c line 186 in H5Dcreate2(): unable to synchronously create dataset
+    major: Dataset
+    minor: Unable to create file
+  #001: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5D.c line 135 in H5D__create_api_common(): unable to create dataset
+    major: Dataset
+    minor: Unable to create file
+  #002: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5VLcallback.c line 1865 in H5VL_dataset_create(): dataset create failed
+    major: Virtual Object Layer
+    minor: Unable to create file
+  #003: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5VLcallback.c line 1830 in H5VL__dataset_create(): dataset create failed
+    major: Virtual Object Layer
+    minor: Unable to create file
+  #004: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5VLnative_dataset.c line 282 in H5VL__native_dataset_create(): unable to create dataset
+    major: Dataset
+    minor: Unable to initialize object
+  #005: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Dint.c line 351 in H5D__create_named(): unable to create and link to dataset
+    major: Dataset
+    minor: Unable to initialize object
+  #006: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Lint.c line 492 in H5L_link_object(): unable to create new link to object
+    major: Links
+    minor: Unable to initialize object
+  #007: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Lint.c line 732 in H5L__create_real(): can't insert link
+    major: Links
+    minor: Unable to insert object
+  #008: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Gtraverse.c line 824 in H5G_traverse(): internal path traversal failed
+    major: Symbol table
+    minor: Object not found
+  #009: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Gtraverse.c line 596 in H5G__traverse_real(): traversal operator failed
+    major: Symbol table
+    minor: Callback failed
+  #010: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Lint.c line 537 in H5L__link_cb(): unable to create object
+    major: Links
+    minor: Unable to initialize object
+  #011: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Oint.c line 2346 in H5O_obj_create(): unable to open object
+    major: Object header
+    minor: Can't open object
+  #012: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Doh.c line 273 in H5O__dset_create(): unable to create dataset
+    major: Dataset
+    minor: Unable to initialize object
+  #013: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Dint.c line 1304 in H5D__create(): unable to construct layout information
+    major: Dataset
+    minor: Unable to initialize object
+  #014: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Dchunk.c line 835 in H5D__chunk_construct(): unable to set chunk sizes
+    major: Dataset
+    minor: Bad value
+  #015: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Dchunk.c line 798 in H5D__chunk_set_sizes(): chunk size must be < 4GB
+    major: Dataset
+    minor: Unable to initialize object
+[ERR] H5Dcreate2 einspline37 N=1 -- chunk >4GiB, or filter 32024 unavailable?
+[RECORDED FAILURE] einspline37/sz3_1e3 N=1
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_qmc_sz3_sz3_1e3_N1.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_qmc_sz3_sz3_1e3_N1.csv (1 failed configuration(s) recorded)
+  [note] qmc_sz3_sz3_1e3_N1 exited rc=2 (failures recorded in the CSV)
+
+=== filter [qmc_sz3_sz3_1e3_N8] : einspline37 ===
+[filter] backend=sz3 id=32024 chunk_n=8
+  einspline37    sz3_1e3    N=8   C=  1.28 W=123231.50 F=    0.23 X=   0.37 | O=  4.04 R=117296.61 ms  ratio=  3.37x  file=3832.6 MiB  RMSE=5.742e-04 maxae=1.000e-03
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_qmc_sz3_sz3_1e3_N8.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_qmc_sz3_sz3_1e3_N8.csv (0 failed configuration(s) recorded)
+
+=== filter [qmc_sz3_sz3_1e3_N16] : einspline37 ===
+[filter] backend=sz3 id=32024 chunk_n=16
+  einspline37    sz3_1e3    N=16  C=  2.20 W=119845.77 F=    0.22 X=   0.34 | O= 58.48 R=120258.46 ms  ratio=  3.38x  file=3827.1 MiB  RMSE=5.742e-04 maxae=1.000e-03
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_qmc_sz3_sz3_1e3_N16.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_qmc_sz3_sz3_1e3_N16.csv (0 failed configuration(s) recorded)
+
+############ [3] zfp ############
+NOTE: make_dcpl() does not encode zfp cd_values -- include
+      H5Zzfp_props.h and use H5Pset_zfp_accuracy_cdata first.
+
+=== filter [miranda_zfp_zfp_1e3_N8] : miranda ===
+[filter] backend=zfp id=32013 chunk_n=8
+  miranda        zfp_1e3    N=8   C=  2.06 W=   941.57 F=    0.11 X=   0.31 | O=  0.61 R=   421.70 ms  ratio= 35.57x  file=8.2 MiB  RMSE=1.840e-05 maxae=2.409e-04
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_miranda_zfp_zfp_1e3_N8.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_miranda_zfp_zfp_1e3_N8.csv (0 failed configuration(s) recorded)
+
+=== filter [miranda_zfp_zfp_1e3_N16] : miranda ===
+[filter] backend=zfp id=32013 chunk_n=16
+  miranda        zfp_1e3    N=16  C=  1.54 W=   789.31 F=    0.12 X=   0.42 | O=  0.40 R=   338.02 ms  ratio= 35.57x  file=8.2 MiB  RMSE=1.840e-05 maxae=2.409e-04
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_miranda_zfp_zfp_1e3_N16.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_miranda_zfp_zfp_1e3_N16.csv (0 failed configuration(s) recorded)
+
+=== filter [s3d_zfp_zfp_1e3_N8] : s3d ===
+[filter] backend=zfp id=32013 chunk_n=8
+  s3d            zfp_1e3    N=8   C=  1.18 W=  1595.79 F=    0.11 X=   0.77 | O=  0.61 R=   936.41 ms  ratio=153.65x  file=6.4 MiB  RMSE=8.820e-06 maxae=1.362e-04
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_s3d_zfp_zfp_1e3_N8.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_s3d_zfp_zfp_1e3_N8.csv (0 failed configuration(s) recorded)
+
+=== filter [s3d_zfp_zfp_1e3_N16] : s3d ===
+[filter] backend=zfp id=32013 chunk_n=16
+  s3d            zfp_1e3    N=16  C=  1.17 W=  1523.91 F=    0.10 X=   0.27 | O=  0.59 R=   927.57 ms  ratio=164.07x  file=5.8 MiB  RMSE=8.765e-06 maxae=1.367e-04
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_s3d_zfp_zfp_1e3_N16.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_s3d_zfp_zfp_1e3_N16.csv (0 failed configuration(s) recorded)
+
+=== filter [scale-T_zfp_zfp_1e3_N8] : scale-T ===
+[filter] backend=zfp id=32013 chunk_n=8
+  scale-T        zfp_1e3    N=8   C=  1.21 W=  4201.77 F=    0.13 X=   0.27 | O=  3.47 R=  1511.24 ms  ratio=  9.55x  file=56.7 MiB  RMSE=2.831e-05 maxae=2.699e-04
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_scale-T_zfp_zfp_1e3_N8.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_scale-T_zfp_zfp_1e3_N8.csv (0 failed configuration(s) recorded)
+
+=== filter [scale-T_zfp_zfp_1e3_N16] : scale-T ===
+[filter] backend=zfp id=32013 chunk_n=16
+  scale-T        zfp_1e3    N=16  C=  2.60 W=  4087.90 F=    0.14 X=   0.28 | O=  2.24 R=  1520.19 ms  ratio=  8.17x  file=66.2 MiB  RMSE=2.847e-05 maxae=2.756e-04
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_scale-T_zfp_zfp_1e3_N16.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_scale-T_zfp_zfp_1e3_N16.csv (0 failed configuration(s) recorded)
+
+=== filter [nyx_baryon_zfp_zfp_1e3_N8] : nyx_baryon ===
+[filter] backend=zfp id=32013 chunk_n=8
+  nyx_baryon     zfp_1e3    N=8   C=  4.74 W=  3575.85 F=    0.14 X=   0.18 | O=  2.09 R=  2274.47 ms  ratio=  3.67x  file=139.7 MiB  RMSE=4.265e-05 maxae=2.918e-04
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_nyx_baryon_zfp_zfp_1e3_N8.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_nyx_baryon_zfp_zfp_1e3_N8.csv (0 failed configuration(s) recorded)
+
+=== filter [nyx_baryon_zfp_zfp_1e3_N16] : nyx_baryon ===
+[filter] backend=zfp id=32013 chunk_n=16
+  nyx_baryon     zfp_1e3    N=16  C=  5.17 W=  3535.31 F=    0.15 X=   0.17 | O=  1.52 R=  2273.66 ms  ratio=  3.67x  file=139.7 MiB  RMSE=4.265e-05 maxae=2.918e-04
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_nyx_baryon_zfp_zfp_1e3_N16.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_nyx_baryon_zfp_zfp_1e3_N16.csv (0 failed configuration(s) recorded)
+
+=== filter [ocean_temp_zfp_zfp_1e3_N8] : ocean_temp ===
+[filter] backend=zfp id=32013 chunk_n=8
+  ocean_temp     zfp_1e3    N=8   C=  2.27 W=  1441.47 F=    0.12 X=   0.17 | O=  0.37 R=   666.34 ms  ratio=  2.37x  file=52.0 MiB  RMSE=4.201e-05 maxae=2.756e-04
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ocean_temp_zfp_zfp_1e3_N8.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_ocean_temp_zfp_zfp_1e3_N8.csv (0 failed configuration(s) recorded)
+
+=== filter [ocean_temp_zfp_zfp_1e3_N16] : ocean_temp ===
+[filter] backend=zfp id=32013 chunk_n=16
+  ocean_temp     zfp_1e3    N=16  C=  1.46 W=  2042.33 F=    0.14 X=   0.16 | O=  1.08 R=   905.03 ms  ratio=  1.75x  file=70.4 MiB  RMSE=2.890e-05 maxae=1.783e-04
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ocean_temp_zfp_zfp_1e3_N16.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_ocean_temp_zfp_zfp_1e3_N16.csv (0 failed configuration(s) recorded)
+
+############ [4] deflate — baseline, DIFFERENT codec ############
+
+=== filter [miranda_deflate_L6_N1] : miranda ===
+[filter] backend=deflate id=1 chunk_n=1
+NOTE: deflate is a DIFFERENT codec from the VOL entries. Use for the overhead claim only, never ratio or fidelity.
+  miranda        deflate    N=1   C=  1.16 W=  7228.27 F=    0.14 X=   0.25 | O=  1.34 R=   855.91 ms  ratio=  2.09x  file=137.5 MiB  RMSE=0.000e+00 maxae=0.000e+00
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_miranda_deflate_L6_N1.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_miranda_deflate_L6_N1.csv (0 failed configuration(s) recorded)
+
+=== filter [miranda_deflate_L6_N8] : miranda ===
+[filter] backend=deflate id=1 chunk_n=8
+NOTE: deflate is a DIFFERENT codec from the VOL entries. Use for the overhead claim only, never ratio or fidelity.
+  miranda        deflate    N=8   C=  1.15 W=  7539.33 F=    0.12 X=   0.26 | O=  1.27 R=   873.68 ms  ratio=  2.09x  file=137.8 MiB  RMSE=0.000e+00 maxae=0.000e+00
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_miranda_deflate_L6_N8.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_miranda_deflate_L6_N8.csv (0 failed configuration(s) recorded)
+
+=== filter [miranda_deflate_L6_N16] : miranda ===
+[filter] backend=deflate id=1 chunk_n=16
+NOTE: deflate is a DIFFERENT codec from the VOL entries. Use for the overhead claim only, never ratio or fidelity.
+  miranda        deflate    N=16  C=  1.23 W=  6986.19 F=    0.16 X=   0.31 | O=  1.74 R=   645.52 ms  ratio=  2.09x  file=137.8 MiB  RMSE=0.000e+00 maxae=0.000e+00
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_miranda_deflate_L6_N16.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_miranda_deflate_L6_N16.csv (0 failed configuration(s) recorded)
+
+=== filter [s3d_deflate_L6_N1] : s3d ===
+[filter] backend=deflate id=1 chunk_n=1
+NOTE: deflate is a DIFFERENT codec from the VOL entries. Use for the overhead claim only, never ratio or fidelity.
+  s3d            deflate    N=1   C=  1.83 W= 31279.18 F=    0.19 X=   0.27 | O=  2.23 R=  4426.25 ms  ratio=  1.12x  file=851.9 MiB  RMSE=0.000e+00 maxae=0.000e+00
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_s3d_deflate_L6_N1.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_s3d_deflate_L6_N1.csv (0 failed configuration(s) recorded)
+
+=== filter [s3d_deflate_L6_N8] : s3d ===
+[filter] backend=deflate id=1 chunk_n=8
+NOTE: deflate is a DIFFERENT codec from the VOL entries. Use for the overhead claim only, never ratio or fidelity.
+  s3d            deflate    N=8   C=  1.95 W= 30704.07 F=    0.15 X=  84.47 | O=  2.32 R=  4467.69 ms  ratio=  1.12x  file=852.9 MiB  RMSE=0.000e+00 maxae=0.000e+00
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_s3d_deflate_L6_N8.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_s3d_deflate_L6_N8.csv (0 failed configuration(s) recorded)
+
+=== filter [s3d_deflate_L6_N16] : s3d ===
+[filter] backend=deflate id=1 chunk_n=16
+NOTE: deflate is a DIFFERENT codec from the VOL entries. Use for the overhead claim only, never ratio or fidelity.
+  s3d            deflate    N=16  C=  1.74 W= 30850.31 F=    0.14 X=   0.29 | O=  2.97 R=  4503.21 ms  ratio=  1.12x  file=852.9 MiB  RMSE=0.000e+00 maxae=0.000e+00
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_s3d_deflate_L6_N16.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_s3d_deflate_L6_N16.csv (0 failed configuration(s) recorded)
+
+=== filter [scale-T_deflate_L6_N1] : scale-T ===
+[filter] backend=deflate id=1 chunk_n=1
+NOTE: deflate is a DIFFERENT codec from the VOL entries. Use for the overhead claim only, never ratio or fidelity.
+  scale-T        deflate    N=1   C=  3.05 W= 14266.31 F=    0.15 X=   0.25 | O=  1.99 R=  2388.42 ms  ratio=  1.58x  file=339.9 MiB  RMSE=0.000e+00 maxae=0.000e+00
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_scale-T_deflate_L6_N1.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_scale-T_deflate_L6_N1.csv (0 failed configuration(s) recorded)
+
+=== filter [scale-T_deflate_L6_N8] : scale-T ===
+[filter] backend=deflate id=1 chunk_n=8
+NOTE: deflate is a DIFFERENT codec from the VOL entries. Use for the overhead claim only, never ratio or fidelity.
+  scale-T        deflate    N=8   C=  5.08 W= 14154.93 F=    0.14 X=   0.90 | O=  1.69 R=  2446.29 ms  ratio=  1.58x  file=340.5 MiB  RMSE=0.000e+00 maxae=0.000e+00
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_scale-T_deflate_L6_N8.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_scale-T_deflate_L6_N8.csv (0 failed configuration(s) recorded)
+
+=== filter [scale-T_deflate_L6_N16] : scale-T ===
+[filter] backend=deflate id=1 chunk_n=16
+NOTE: deflate is a DIFFERENT codec from the VOL entries. Use for the overhead claim only, never ratio or fidelity.
+  scale-T        deflate    N=16  C=  1.76 W= 14238.53 F=    0.16 X=   0.25 | O=  1.83 R=  2290.54 ms  ratio=  1.58x  file=340.5 MiB  RMSE=0.000e+00 maxae=0.000e+00
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_scale-T_deflate_L6_N16.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_scale-T_deflate_L6_N16.csv (0 failed configuration(s) recorded)
+
+=== filter [nyx_baryon_deflate_L6_N1] : nyx_baryon ===
+[filter] backend=deflate id=1 chunk_n=1
+NOTE: deflate is a DIFFERENT codec from the VOL entries. Use for the overhead claim only, never ratio or fidelity.
+  nyx_baryon     deflate    N=1   C=  2.24 W= 16706.38 F=    0.15 X=   0.19 | O=  1.53 R=  2379.55 ms  ratio=  1.13x  file=452.4 MiB  RMSE=0.000e+00 maxae=0.000e+00
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_nyx_baryon_deflate_L6_N1.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_nyx_baryon_deflate_L6_N1.csv (0 failed configuration(s) recorded)
+
+=== filter [nyx_baryon_deflate_L6_N8] : nyx_baryon ===
+[filter] backend=deflate id=1 chunk_n=8
+NOTE: deflate is a DIFFERENT codec from the VOL entries. Use for the overhead claim only, never ratio or fidelity.
+  nyx_baryon     deflate    N=8   C=  1.73 W= 16629.18 F=    0.15 X=   0.20 | O=  2.14 R=  2411.36 ms  ratio=  1.13x  file=452.9 MiB  RMSE=0.000e+00 maxae=0.000e+00
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_nyx_baryon_deflate_L6_N8.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_nyx_baryon_deflate_L6_N8.csv (0 failed configuration(s) recorded)
+
+=== filter [nyx_baryon_deflate_L6_N16] : nyx_baryon ===
+[filter] backend=deflate id=1 chunk_n=16
+NOTE: deflate is a DIFFERENT codec from the VOL entries. Use for the overhead claim only, never ratio or fidelity.
+  nyx_baryon     deflate    N=16  C=  1.40 W= 16489.83 F=    0.15 X=   0.17 | O=  1.40 R=  2438.95 ms  ratio=  1.13x  file=452.9 MiB  RMSE=0.000e+00 maxae=0.000e+00
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_nyx_baryon_deflate_L6_N16.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_nyx_baryon_deflate_L6_N16.csv (0 failed configuration(s) recorded)
+
+=== filter [ocean_temp_deflate_L6_N1] : ocean_temp ===
+[filter] backend=deflate id=1 chunk_n=1
+NOTE: deflate is a DIFFERENT codec from the VOL entries. Use for the overhead claim only, never ratio or fidelity.
+  ocean_temp     deflate    N=1   C=  1.66 W=  4026.34 F=    0.12 X=   0.18 | O=  1.47 R=   628.22 ms  ratio=  1.28x  file=96.5 MiB  RMSE=0.000e+00 maxae=0.000e+00
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ocean_temp_deflate_L6_N1.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_ocean_temp_deflate_L6_N1.csv (0 failed configuration(s) recorded)
+
+=== filter [ocean_temp_deflate_L6_N8] : ocean_temp ===
+[filter] backend=deflate id=1 chunk_n=8
+NOTE: deflate is a DIFFERENT codec from the VOL entries. Use for the overhead claim only, never ratio or fidelity.
+  ocean_temp     deflate    N=8   C=  1.86 W=  3897.11 F=    0.12 X=   0.22 | O=  1.18 R=   535.98 ms  ratio=  1.28x  file=96.6 MiB  RMSE=0.000e+00 maxae=0.000e+00
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ocean_temp_deflate_L6_N8.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_ocean_temp_deflate_L6_N8.csv (0 failed configuration(s) recorded)
+
+=== filter [ocean_temp_deflate_L6_N16] : ocean_temp ===
+[filter] backend=deflate id=1 chunk_n=16
+NOTE: deflate is a DIFFERENT codec from the VOL entries. Use for the overhead claim only, never ratio or fidelity.
+  ocean_temp     deflate    N=16  C=  2.03 W=  4048.62 F=    0.13 X=   0.21 | O=  1.41 R=   551.20 ms  ratio=  1.28x  file=96.6 MiB  RMSE=0.000e+00 maxae=0.000e+00
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ocean_temp_deflate_L6_N16.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_ocean_temp_deflate_L6_N16.csv (0 failed configuration(s) recorded)
+
+=== filter [qmc_deflate_L6_N1] : einspline37 ===
+[filter] backend=deflate id=1 chunk_n=1
+NOTE: deflate is a DIFFERENT codec from the VOL entries. Use for the overhead claim only, never ratio or fidelity.
+HDF5-DIAG: Error detected in HDF5 (1.14.6):
+  #000: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5D.c line 186 in H5Dcreate2(): unable to synchronously create dataset
+    major: Dataset
+    minor: Unable to create file
+  #001: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5D.c line 135 in H5D__create_api_common(): unable to create dataset
+    major: Dataset
+    minor: Unable to create file
+  #002: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5VLcallback.c line 1865 in H5VL_dataset_create(): dataset create failed
+    major: Virtual Object Layer
+    minor: Unable to create file
+  #003: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5VLcallback.c line 1830 in H5VL__dataset_create(): dataset create failed
+    major: Virtual Object Layer
+    minor: Unable to create file
+  #004: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5VLnative_dataset.c line 282 in H5VL__native_dataset_create(): unable to create dataset
+    major: Dataset
+    minor: Unable to initialize object
+  #005: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Dint.c line 351 in H5D__create_named(): unable to create and link to dataset
+    major: Dataset
+    minor: Unable to initialize object
+  #006: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Lint.c line 492 in H5L_link_object(): unable to create new link to object
+    major: Links
+    minor: Unable to initialize object
+  #007: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Lint.c line 732 in H5L__create_real(): can't insert link
+    major: Links
+    minor: Unable to insert object
+  #008: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Gtraverse.c line 824 in H5G_traverse(): internal path traversal failed
+    major: Symbol table
+    minor: Object not found
+  #009: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Gtraverse.c line 596 in H5G__traverse_real(): traversal operator failed
+    major: Symbol table
+    minor: Callback failed
+  #010: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Lint.c line 537 in H5L__link_cb(): unable to create object
+    major: Links
+    minor: Unable to initialize object
+  #011: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Oint.c line 2346 in H5O_obj_create(): unable to open object
+    major: Object header
+    minor: Can't open object
+  #012: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Doh.c line 273 in H5O__dset_create(): unable to create dataset
+    major: Dataset
+    minor: Unable to initialize object
+  #013: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Dint.c line 1304 in H5D__create(): unable to construct layout information
+    major: Dataset
+    minor: Unable to initialize object
+  #014: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Dchunk.c line 835 in H5D__chunk_construct(): unable to set chunk sizes
+    major: Dataset
+    minor: Bad value
+  #015: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Dchunk.c line 798 in H5D__chunk_set_sizes(): chunk size must be < 4GB
+    major: Dataset
+    minor: Unable to initialize object
+[ERR] H5Dcreate2 einspline37 N=1 -- chunk >4GiB, or filter 1 unavailable?
+[RECORDED FAILURE] einspline37/deflate N=1
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_qmc_deflate_L6_N1.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_qmc_deflate_L6_N1.csv (1 failed configuration(s) recorded)
+  [note] qmc_deflate_L6_N1 exited rc=2 (failures recorded in the CSV)
+
+=== filter [qmc_deflate_L6_N8] : einspline37 ===
+[filter] backend=deflate id=1 chunk_n=8
+NOTE: deflate is a DIFFERENT codec from the VOL entries. Use for the overhead claim only, never ratio or fidelity.
+  einspline37    deflate    N=8   C=  5.60 W=418010.81 F=    0.22 X=   0.45 | O=  5.56 R= 60750.54 ms  ratio=  1.06x  file=12232.8 MiB  RMSE=0.000e+00 maxae=0.000e+00
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_qmc_deflate_L6_N8.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_qmc_deflate_L6_N8.csv (0 failed configuration(s) recorded)
+
+=== filter [qmc_deflate_L6_N16] : einspline37 ===
+[filter] backend=deflate id=1 chunk_n=16
+NOTE: deflate is a DIFFERENT codec from the VOL entries. Use for the overhead claim only, never ratio or fidelity.
+  einspline37    deflate    N=16  C=  3.55 W=419862.01 F=   13.09 X=  49.99 | O=  0.47 R= 61078.97 ms  ratio=  1.06x  file=12232.8 MiB  RMSE=0.000e+00 maxae=0.000e+00
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_qmc_deflate_L6_N16.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_qmc_deflate_L6_N16.csv (0 failed configuration(s) recorded)
+
+=== filter [miranda_deflate_L1_N8] : miranda ===
+[filter] backend=deflate id=1 chunk_n=8
+NOTE: deflate is a DIFFERENT codec from the VOL entries. Use for the overhead claim only, never ratio or fidelity.
+  miranda        deflate    N=8   C=  1.16 W=  2171.85 F=    0.16 X=   0.25 | O=  0.49 R=   891.31 ms  ratio=  1.70x  file=172.7 MiB  RMSE=0.000e+00 maxae=0.000e+00
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_miranda_deflate_L1_N8.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_miranda_deflate_L1_N8.csv (0 failed configuration(s) recorded)
+
+=== filter [miranda_deflate_L4_N8] : miranda ===
+[filter] backend=deflate id=1 chunk_n=8
+NOTE: deflate is a DIFFERENT codec from the VOL entries. Use for the overhead claim only, never ratio or fidelity.
+  miranda        deflate    N=8   C=  1.21 W=  5216.39 F=    0.16 X=   0.44 | O=  0.50 R=   888.18 ms  ratio=  2.08x  file=138.5 MiB  RMSE=0.000e+00 maxae=0.000e+00
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_miranda_deflate_L4_N8.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_miranda_deflate_L4_N8.csv (0 failed configuration(s) recorded)
+
+=== filter [miranda_deflate_L9_N8] : miranda ===
+[filter] backend=deflate id=1 chunk_n=8
+NOTE: deflate is a DIFFERENT codec from the VOL entries. Use for the overhead claim only, never ratio or fidelity.
+  miranda        deflate    N=8   C=  1.17 W= 17722.59 F=    0.13 X=   0.25 | O=  0.50 R=   886.72 ms  ratio=  2.13x  file=135.5 MiB  RMSE=0.000e+00 maxae=0.000e+00
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_miranda_deflate_L9_N8.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_miranda_deflate_L9_N8.csv (0 failed configuration(s) recorded)
+
+############ [5] bzip2: no filter installed ############
+py-hdf5plugin failed to build (mpi.h missing, HDF5 is +mpi). If you
+want it:  pip install --user hdf5plugin   # prebuilt wheel
+then re-run with FILTER_PLUGIN_PATH including its plugins dir.
+
+=== timing + ratio (successful runs) ===
+dataset        codec        N       ratio    write_ms   flush_ms   close_ms     read_ms
+einspline37    deflate      16       1.06   419862.01      13.09      49.99    61078.97
+einspline37    deflate      8        1.06   418010.81       0.22       0.45    60750.54
+einspline37    sz3_1e3      16       3.38   119845.77       0.22       0.34   120258.46
+einspline37    sz3_1e3      8        3.37   123231.50       0.23       0.37   117296.61
+miranda        deflate      1        2.09     7228.27       0.14       0.25      855.91
+miranda        deflate      16       2.09     6986.19       0.16       0.31      645.52
+miranda        deflate      8        1.70     2171.85       0.16       0.25      891.31
+miranda        deflate      8        2.08     5216.39       0.16       0.44      888.18
+miranda        deflate      8        2.09     7539.33       0.12       0.26      873.68
+miranda        deflate      8        2.13    17722.59       0.13       0.25      886.72
+miranda        sz3_1e3      1      164.57     1875.03       0.10       0.83      467.48
+miranda        sz3_1e3      16     147.12      806.07       0.11       0.27      240.06
+miranda        sz3_1e3      8      159.59     1123.93       0.11       0.27      402.06
+miranda        sz3_1e6      1       21.21     2022.52       0.13       0.30      762.84
+miranda        sz3_1e6      16      20.27      989.69       0.11       0.28      486.02
+miranda        sz3_1e6      8       21.44     1272.77       0.16       0.32      670.27
+miranda        sz3_1e6      8       21.44     1272.80       0.11       0.28      665.55
+miranda        zfp_1e3      16      35.57      789.31       0.12       0.42      338.02
+miranda        zfp_1e3      8       35.57      941.57       0.11       0.31      421.70
+nyx_baryon     deflate      1        1.13    16706.38       0.15       0.19     2379.55
+nyx_baryon     deflate      16       1.13    16489.83       0.15       0.17     2438.95
+nyx_baryon     deflate      8        1.13    16629.18       0.15       0.20     2411.36
+nyx_baryon     sz3_1e3      1        7.85     6961.18       0.13       0.12     3109.96
+nyx_baryon     sz3_1e3      16       7.91     4634.71       0.12       0.16     3011.74
+nyx_baryon     sz3_1e3      8        7.87     4704.58       0.14       0.20     2998.86
+nyx_baryon     sz3_1e6      1        2.20     9388.93       0.13       0.14     8742.47
+nyx_baryon     sz3_1e6      16       2.13     7622.43       0.15       0.15     8352.29
+nyx_baryon     sz3_1e6      8        2.17     7714.36       0.15       0.15     8504.54
+nyx_baryon     zfp_1e3      16       3.67     3535.31       0.15       0.17     2273.66
+nyx_baryon     zfp_1e3      8        3.67     3575.85       0.14       0.18     2274.47
+ocean_temp     deflate      1        1.28     4026.34       0.12       0.18      628.22
+ocean_temp     deflate      16       1.28     4048.62       0.13       0.21      551.20
+ocean_temp     deflate      8        1.28     3897.11       0.12       0.22      535.98
+ocean_temp     sz3_1e3      1        6.49     1677.46       0.15       0.16      705.09
+ocean_temp     sz3_1e3      16       5.75     1219.97       0.13       0.17      691.16
+ocean_temp     sz3_1e3      8        5.85     1225.11       0.14       0.16      669.17
+ocean_temp     sz3_1e6      1        1.95     3094.07       0.13       0.14     2330.50
+ocean_temp     sz3_1e6      16       1.76     2709.26       0.14       0.18     2098.51
+ocean_temp     sz3_1e6      8        1.80     2479.93       0.14       0.18     2018.07
+ocean_temp     zfp_1e3      16       1.75     2042.33       0.14       0.16      905.03
+ocean_temp     zfp_1e3      8        2.37     1441.47       0.12       0.17      666.34
+s3d            deflate      1        1.12    31279.18       0.19       0.27     4426.25
+s3d            deflate      16       1.12    30850.31       0.14       0.29     4503.21
+s3d            deflate      8        1.12    30704.07       0.15      84.47     4467.69
+s3d            sz3_1e3      1    19201.23     5849.71       0.09       0.33     1330.31
+s3d            sz3_1e3      16    4752.81     3102.85       0.11       0.30     1168.01
+s3d            sz3_1e3      8     8470.63     3542.01       0.11       0.35     1374.49
+s3d            sz3_1e6      1      244.44     6098.32       0.10       0.28     1418.58
+s3d            sz3_1e6      16     168.25     3506.01       0.11       0.26     1298.15
+s3d            sz3_1e6      8      195.81     3880.52       0.11       0.32     1505.48
+s3d            zfp_1e3      16     164.07     1523.91       0.10       0.27      927.57
+s3d            zfp_1e3      8      153.65     1595.79       0.11       0.77      936.41
+scale-T        deflate      1        1.58    14266.31       0.15       0.25     2388.42
+scale-T        deflate      16       1.58    14238.53       0.16       0.25     2290.54
+scale-T        deflate      8        1.58    14154.93       0.14       0.90     2446.29
+scale-T        sz3_1e3      1      254.03     6067.89       0.10       0.36     1194.61
+scale-T        sz3_1e3      16     178.47     3711.18       0.11       0.29     1281.63
+scale-T        sz3_1e3      8      191.72     4041.55       0.11       0.31     1231.13
+scale-T        sz3_1e6      1        4.39     7489.53       0.15       0.25     3896.12
+scale-T        sz3_1e6      16       4.15     5025.89       0.15       0.24     3972.94
+scale-T        sz3_1e6      8        4.34     5571.87       0.15       0.25     3976.45
+scale-T        zfp_1e3      16       8.17     4087.90       0.14       0.28     1520.19
+scale-T        zfp_1e3      8        9.55     4201.77       0.13       0.27     1511.24
+
+=== unsupported configurations (rep=-1) — capability-matrix data ===
+  einspline37 deflate N=1   (/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_qmc_deflate_L6_N1.csv)
+  einspline37 sz3_1e3 N=1   (/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_qmc_sz3_sz3_1e3_N1.csv)
+
+=== fidelity ===
+-- deflate/bzip2 are LOSSLESS, maxae MUST be 0 --
+-- lossy: maxae must be within 2x the configured bound --
+  [FAIL] ocean_temp sz3_1e6 N=1 maxae=6.675720e-06 thr=1.000000e-06
+  [FAIL] ocean_temp sz3_1e6 N=16 maxae=4.768372e-06 thr=1.000000e-06
+  [FAIL] ocean_temp sz3_1e6 N=8 maxae=4.768372e-06 thr=1.000000e-06
+  [FAIL] scale-T sz3_1e6 N=1 maxae=6.198883e-06 thr=1.000000e-06
+  [FAIL] scale-T sz3_1e6 N=16 maxae=5.245209e-06 thr=1.000000e-06
+  [FAIL] scale-T sz3_1e6 N=8 maxae=4.768372e-06 thr=1.000000e-06
+
+=== chunk-count effect on ratio ===
+einspline37    deflate      N=16   ratio=1.058
+einspline37    deflate      N=8    ratio=1.058
+einspline37    sz3_1e3      N=16   ratio=3.379
+einspline37    sz3_1e3      N=8    ratio=3.374
+miranda        deflate      N=1    ratio=2.095
+miranda        deflate      N=16   ratio=2.095
+miranda        deflate      N=8    ratio=1.695
+miranda        deflate      N=8    ratio=2.083
+miranda        deflate      N=8    ratio=2.095
+miranda        deflate      N=8    ratio=2.130
+miranda        sz3_1e3      N=1    ratio=164.571
+miranda        sz3_1e3      N=16   ratio=147.119
+miranda        sz3_1e3      N=8    ratio=159.594
+miranda        sz3_1e6      N=1    ratio=21.209
+miranda        sz3_1e6      N=16   ratio=20.273
+miranda        sz3_1e6      N=8    ratio=21.442
+miranda        sz3_1e6      N=8    ratio=21.442
+miranda        zfp_1e3      N=16   ratio=35.569
+miranda        zfp_1e3      N=8    ratio=35.569
+nyx_baryon     deflate      N=1    ratio=1.132
+nyx_baryon     deflate      N=16   ratio=1.132
+nyx_baryon     deflate      N=8    ratio=1.132
+nyx_baryon     sz3_1e3      N=1    ratio=7.847
+nyx_baryon     sz3_1e3      N=16   ratio=7.910
+nyx_baryon     sz3_1e3      N=8    ratio=7.868
+nyx_baryon     sz3_1e6      N=1    ratio=2.198
+nyx_baryon     sz3_1e6      N=16   ratio=2.129
+nyx_baryon     sz3_1e6      N=8    ratio=2.171
+nyx_baryon     zfp_1e3      N=16   ratio=3.672
+nyx_baryon     zfp_1e3      N=8    ratio=3.672
+ocean_temp     deflate      N=1    ratio=1.276
+ocean_temp     deflate      N=16   ratio=1.276
+ocean_temp     deflate      N=8    ratio=1.276
+ocean_temp     sz3_1e3      N=1    ratio=6.494
+ocean_temp     sz3_1e3      N=16   ratio=5.751
+ocean_temp     sz3_1e3      N=8    ratio=5.850
+ocean_temp     sz3_1e6      N=1    ratio=1.949
+ocean_temp     sz3_1e6      N=16   ratio=1.759
+ocean_temp     sz3_1e6      N=8    ratio=1.802
+ocean_temp     zfp_1e3      N=16   ratio=1.753
+ocean_temp     zfp_1e3      N=8    ratio=2.373
+s3d            deflate      N=1    ratio=1.119
+s3d            deflate      N=16   ratio=1.119
+s3d            deflate      N=8    ratio=1.119
+s3d            sz3_1e3      N=1    ratio=19201.229
+s3d            sz3_1e3      N=16   ratio=4752.806
+s3d            sz3_1e3      N=8    ratio=8470.628
+s3d            sz3_1e6      N=1    ratio=244.436
+s3d            sz3_1e6      N=16   ratio=168.251
+s3d            sz3_1e6      N=8    ratio=195.807
+s3d            zfp_1e3      N=16   ratio=164.072
+s3d            zfp_1e3      N=8    ratio=153.646
+scale-T        deflate      N=1    ratio=1.584
+scale-T        deflate      N=16   ratio=1.584
+scale-T        deflate      N=8    ratio=1.583
+scale-T        sz3_1e3      N=1    ratio=254.025
+scale-T        sz3_1e3      N=16   ratio=178.466
+scale-T        sz3_1e3      N=8    ratio=191.715
+scale-T        sz3_1e6      N=1    ratio=4.395
+scale-T        sz3_1e6      N=16   ratio=4.148
+scale-T        sz3_1e6      N=8    ratio=4.340
+scale-T        zfp_1e3      N=16   ratio=8.169
+scale-T        zfp_1e3      N=8    ratio=9.549
+
+Job finished on Fri Jul 31 14:53:04 CDT 2026
