@@ -1182,6 +1182,29 @@ done:
     if (output) pressio_data_free(output);
     return ret_val;
 }
+
+herr_t
+H5VL_pass_through_ext_transfer_compress_chunk(compression_ctx *ctx,
+                                              const void *data, size_t nbytes,
+                                              void **out_cbuf, uint64_t *out_csize)
+{
+    try {
+        return vol_transfer_compress_chunk_impl(ctx, data, nbytes,
+                                                out_cbuf, out_csize);
+    } catch (const std::exception &e) {
+        H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                vol_err_class, maj_compression, min_compress_failed,
+                "chunk compress for '%s' threw: %s",
+                ctx ? ctx->compressor_id : "?", e.what());
+        return -1;
+    } catch (...) {
+        H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                vol_err_class, maj_compression, min_compress_failed,
+                "chunk compress for '%s' threw a non-standard exception",
+                ctx ? ctx->compressor_id : "?");
+        return -1;
+    }
+}
  
  
 /* ========================================================================
@@ -1434,7 +1457,7 @@ H5VL_pass_through_ext_chunk_bytes(const compression_ctx *ctx,
         if (n > total_slices) n = total_slices;   /* at most 1 slice/chunk */
         if (n == 0)           n = 1;
  
-        slices_per_chunk = total_slices / n;
+        slices_per_chunk = (total_slices + n - 1) / n;
         if (slices_per_chunk == 0) slices_per_chunk = 1;
  
         chunk_elems = slices_per_chunk * plane;
