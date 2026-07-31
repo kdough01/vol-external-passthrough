@@ -1,0 +1,2 @@
+dataset,compressor,codec_kind,chunk_n,rep,logical_bytes,stored_bytes,ratio,create_ms,write_ms,flush_ms,close_ms,open_ms,read_ms,rmse,abs_thresh,maxae,bound_ok
+miranda,deflate,cpu,1,0,301989888,144158438,2.0948,3.3807,7370.2011,0.2346,0.2632,0.5206,872.4053,0.000000e+00,0.000000e+00,0.000000e+00,1

@@ -1,0 +1,2 @@
+dataset,compressor,codec_kind,chunk_n,rep,logical_bytes,stored_bytes,ratio,create_ms,write_ms,flush_ms,close_ms,open_ms,read_ms,rmse,abs_thresh,maxae,bound_ok
+scale-T,deflate,cpu,8,0,564480000,356490197,1.5834,1.2828,14126.7396,0.1331,0.2329,0.4375,2458.9354,0.000000e+00,0.000000e+00,0.000000e+00,1

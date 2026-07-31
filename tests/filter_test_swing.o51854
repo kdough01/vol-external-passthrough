@@ -1,0 +1,1020 @@
+Job started on Fri Jul 31 13:32:40 CDT 2026
+Running on: gpu4
+Results   : /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results
+
+=== Building ===
+-- Found HDF5: hdf5-shared (found version "1.14.6")  
+-- Found OpenMP_C: -fopenmp (found version "4.5") 
+-- Found OpenMP_CXX: -fopenmp (found version "4.5") 
+-- Found OpenMP_C: -fopenmp (found version "4.5") 
+-- Found OpenMP_CXX: -fopenmp (found version "4.5") 
+-- Found ZLIB: /home/kdougherty/libpressio_cuda/.spack-env/view/lib/libz.so (found version "1.3.1") 
+-- Found nvcomp: /home/kdougherty/libpressio_cuda/.spack-env/view/lib/cmake/nvcomp/nvcomp-config.cmake  
+-- Checking for one of the modules 'protobuf>=3.0.0'
+-- Found OpenMP_C: -fopenmp (found version "4.5") 
+-- Found OpenMP_CXX: -fopenmp (found version "4.5") 
+-- Found mgard: /home/kdougherty/libpressio_cuda/.spack-env/view/lib/cmake/mgard/mgard-config.cmake (found version "1.5.2") 
+-- Found HDF5: hdf5-shared (found version "1.14.6") found components: C 
+-- Found OpenMP_C: -fopenmp (found version "4.5") 
+-- Found OpenMP_CXX: -fopenmp (found version "4.5") 
+-- Found fpzip: /home/kdougherty/libpressio_cuda/.spack-env/view/lib/cmake/fpzip/fpzip-config.cmake (found version "1.3.0") 
+-- Found MPI: TRUE (found version "3.1") found components: CXX 
+-- Found MPI: TRUE (found version "3.1")  
+-- Configuring done
+CMake Warning at CMakeLists.txt:32 (add_library):
+  Cannot generate a safe runtime search path for target hdf5_vol_passthrough
+  because files in some directories may conflict with libraries in implicit
+  directories:
+
+    runtime library [libgomp.so.1] in /usr/lib/gcc/x86_64-linux-gnu/11 may be hidden by files in:
+      /home/kdougherty/libpressio_cuda/.spack-env/view/lib
+
+  Some of these libraries may not be found correctly.
+
+
+CMake Warning at CMakeLists.txt:32 (add_library):
+  Cannot generate a safe dependent library path for target
+  hdf5_vol_passthrough because files in some directories may conflict with
+  libraries in implicit directories:
+
+    runtime library [libgomp.so.1] in /usr/lib/gcc/x86_64-linux-gnu/11 may be hidden by files in:
+      /home/kdougherty/libpressio_cuda/.spack-env/view/lib
+
+  Some of these libraries may not be found correctly.
+
+
+CMake Warning at tests/CMakeLists.txt:7 (add_executable):
+  Cannot generate a safe runtime search path for target test_cpu_write
+  because files in some directories may conflict with libraries in implicit
+  directories:
+
+    runtime library [libgomp.so.1] in /usr/lib/gcc/x86_64-linux-gnu/11 may be hidden by files in:
+      /home/kdougherty/libpressio_cuda/.spack-env/view/lib
+
+  Some of these libraries may not be found correctly.
+
+
+CMake Warning at tests/CMakeLists.txt:7 (add_executable):
+  Cannot generate a safe dependent library path for target test_cpu_write
+  because files in some directories may conflict with libraries in implicit
+  directories:
+
+    runtime library [libgomp.so.1] in /usr/lib/gcc/x86_64-linux-gnu/11 may be hidden by files in:
+      /home/kdougherty/libpressio_cuda/.spack-env/view/lib
+
+  Some of these libraries may not be found correctly.
+
+
+CMake Warning at tests/CMakeLists.txt:7 (add_executable):
+  Cannot generate a safe runtime search path for target test_time_hurricane
+  because files in some directories may conflict with libraries in implicit
+  directories:
+
+    runtime library [libgomp.so.1] in /usr/lib/gcc/x86_64-linux-gnu/11 may be hidden by files in:
+      /home/kdougherty/libpressio_cuda/.spack-env/view/lib
+
+  Some of these libraries may not be found correctly.
+
+
+CMake Warning at tests/CMakeLists.txt:7 (add_executable):
+  Cannot generate a safe dependent library path for target
+  test_time_hurricane because files in some directories may conflict with
+  libraries in implicit directories:
+
+    runtime library [libgomp.so.1] in /usr/lib/gcc/x86_64-linux-gnu/11 may be hidden by files in:
+      /home/kdougherty/libpressio_cuda/.spack-env/view/lib
+
+  Some of these libraries may not be found correctly.
+
+
+CMake Warning at tests/CMakeLists.txt:7 (add_executable):
+  Cannot generate a safe runtime search path for target test_time_miranda
+  because files in some directories may conflict with libraries in implicit
+  directories:
+
+    runtime library [libgomp.so.1] in /usr/lib/gcc/x86_64-linux-gnu/11 may be hidden by files in:
+      /home/kdougherty/libpressio_cuda/.spack-env/view/lib
+
+  Some of these libraries may not be found correctly.
+
+
+CMake Warning at tests/CMakeLists.txt:7 (add_executable):
+  Cannot generate a safe dependent library path for target test_time_miranda
+  because files in some directories may conflict with libraries in implicit
+  directories:
+
+    runtime library [libgomp.so.1] in /usr/lib/gcc/x86_64-linux-gnu/11 may be hidden by files in:
+      /home/kdougherty/libpressio_cuda/.spack-env/view/lib
+
+  Some of these libraries may not be found correctly.
+
+
+CMake Warning at tests/CMakeLists.txt:7 (add_executable):
+  Cannot generate a safe runtime search path for target test_ci because files
+  in some directories may conflict with libraries in implicit directories:
+
+    runtime library [libgomp.so.1] in /usr/lib/gcc/x86_64-linux-gnu/11 may be hidden by files in:
+      /home/kdougherty/libpressio_cuda/.spack-env/view/lib
+
+  Some of these libraries may not be found correctly.
+
+
+CMake Warning at tests/CMakeLists.txt:7 (add_executable):
+  Cannot generate a safe dependent library path for target test_ci because
+  files in some directories may conflict with libraries in implicit
+  directories:
+
+    runtime library [libgomp.so.1] in /usr/lib/gcc/x86_64-linux-gnu/11 may be hidden by files in:
+      /home/kdougherty/libpressio_cuda/.spack-env/view/lib
+
+  Some of these libraries may not be found correctly.
+
+
+CMake Warning at tests/CMakeLists.txt:7 (add_executable):
+  Cannot generate a safe runtime search path for target test_error_miranda
+  because files in some directories may conflict with libraries in implicit
+  directories:
+
+    runtime library [libgomp.so.1] in /usr/lib/gcc/x86_64-linux-gnu/11 may be hidden by files in:
+      /home/kdougherty/libpressio_cuda/.spack-env/view/lib
+
+  Some of these libraries may not be found correctly.
+
+
+CMake Warning at tests/CMakeLists.txt:7 (add_executable):
+  Cannot generate a safe dependent library path for target test_error_miranda
+  because files in some directories may conflict with libraries in implicit
+  directories:
+
+    runtime library [libgomp.so.1] in /usr/lib/gcc/x86_64-linux-gnu/11 may be hidden by files in:
+      /home/kdougherty/libpressio_cuda/.spack-env/view/lib
+
+  Some of these libraries may not be found correctly.
+
+
+CMake Warning at tests/CMakeLists.txt:7 (add_executable):
+  Cannot generate a safe runtime search path for target bench_vol_timing
+  because files in some directories may conflict with libraries in implicit
+  directories:
+
+    runtime library [libgomp.so.1] in /usr/lib/gcc/x86_64-linux-gnu/11 may be hidden by files in:
+      /home/kdougherty/libpressio_cuda/.spack-env/view/lib
+
+  Some of these libraries may not be found correctly.
+
+
+CMake Warning at tests/CMakeLists.txt:7 (add_executable):
+  Cannot generate a safe dependent library path for target bench_vol_timing
+  because files in some directories may conflict with libraries in implicit
+  directories:
+
+    runtime library [libgomp.so.1] in /usr/lib/gcc/x86_64-linux-gnu/11 may be hidden by files in:
+      /home/kdougherty/libpressio_cuda/.spack-env/view/lib
+
+  Some of these libraries may not be found correctly.
+
+
+CMake Warning at tests/CMakeLists.txt:7 (add_executable):
+  Cannot generate a safe runtime search path for target bench_pressio_timing
+  because files in some directories may conflict with libraries in implicit
+  directories:
+
+    runtime library [libgomp.so.1] in /usr/lib/gcc/x86_64-linux-gnu/11 may be hidden by files in:
+      /home/kdougherty/libpressio_cuda/.spack-env/view/lib
+
+  Some of these libraries may not be found correctly.
+
+
+CMake Warning at tests/CMakeLists.txt:7 (add_executable):
+  Cannot generate a safe dependent library path for target
+  bench_pressio_timing because files in some directories may conflict with
+  libraries in implicit directories:
+
+    runtime library [libgomp.so.1] in /usr/lib/gcc/x86_64-linux-gnu/11 may be hidden by files in:
+      /home/kdougherty/libpressio_cuda/.spack-env/view/lib
+
+  Some of these libraries may not be found correctly.
+
+
+CMake Warning at tests/CMakeLists.txt:7 (add_executable):
+  Cannot generate a safe runtime search path for target bench_filter_timing
+  because files in some directories may conflict with libraries in implicit
+  directories:
+
+    runtime library [libgomp.so.1] in /usr/lib/gcc/x86_64-linux-gnu/11 may be hidden by files in:
+      /home/kdougherty/libpressio_cuda/.spack-env/view/lib
+
+  Some of these libraries may not be found correctly.
+
+
+CMake Warning at tests/CMakeLists.txt:7 (add_executable):
+  Cannot generate a safe dependent library path for target
+  bench_filter_timing because files in some directories may conflict with
+  libraries in implicit directories:
+
+    runtime library [libgomp.so.1] in /usr/lib/gcc/x86_64-linux-gnu/11 may be hidden by files in:
+      /home/kdougherty/libpressio_cuda/.spack-env/view/lib
+
+  Some of these libraries may not be found correctly.
+
+
+CMake Warning at tests/CMakeLists.txt:31 (add_executable):
+  Cannot generate a safe runtime search path for target dump_cuszp_opts
+  because files in some directories may conflict with libraries in implicit
+  directories:
+
+    runtime library [libgomp.so.1] in /usr/lib/gcc/x86_64-linux-gnu/11 may be hidden by files in:
+      /home/kdougherty/libpressio_cuda/.spack-env/view/lib
+
+  Some of these libraries may not be found correctly.
+
+
+CMake Warning at tests/CMakeLists.txt:31 (add_executable):
+  Cannot generate a safe dependent library path for target dump_cuszp_opts
+  because files in some directories may conflict with libraries in implicit
+  directories:
+
+    runtime library [libgomp.so.1] in /usr/lib/gcc/x86_64-linux-gnu/11 may be hidden by files in:
+      /home/kdougherty/libpressio_cuda/.spack-env/view/lib
+
+  Some of these libraries may not be found correctly.
+
+
+-- Generating done
+-- Build files have been written to: /home/kdougherty/hdf5_projs/vol-external-passthrough/build
+Consolidate compiler generated dependencies of target dump_cuszp_opts
+Consolidate compiler generated dependencies of target hdf5_vol_passthrough
+[  4%] Building CXX object tests/CMakeFiles/dump_cuszp_opts.dir/dump_cuszp_opts.cc.o
+[  9%] Building C object CMakeFiles/hdf5_vol_passthrough.dir/H5VLpassthru_ext.c.o
+[ 14%] Building CXX object CMakeFiles/hdf5_vol_passthrough.dir/compress.cc.o
+[ 19%] Linking CXX executable dump_cuszp_opts
+[ 19%] Built target dump_cuszp_opts
+[ 23%] Linking CXX shared library libhdf5_vol_passthrough.so
+[ 23%] Built target hdf5_vol_passthrough
+Consolidate compiler generated dependencies of target test_cpu_write
+Consolidate compiler generated dependencies of target test_time_hurricane
+Consolidate compiler generated dependencies of target test_error_miranda
+[ 28%] Linking C executable test_cpu_write
+[ 33%] Building C object tests/CMakeFiles/test_time_hurricane.dir/test_time_hurricane.c.o
+Consolidate compiler generated dependencies of target bench_filter_timing
+Consolidate compiler generated dependencies of target test_ci
+Consolidate compiler generated dependencies of target test_time_miranda
+Consolidate compiler generated dependencies of target bench_pressio_timing
+[ 38%] Linking C executable test_error_miranda
+Consolidate compiler generated dependencies of target bench_vol_timing
+[ 42%] Linking C executable test_ci
+[ 47%] Building CXX object tests/CMakeFiles/bench_filter_timing.dir/bench_filter_timing.cc.o
+[ 52%] Linking C executable test_time_miranda
+[ 57%] Building CXX object tests/CMakeFiles/bench_pressio_timing.dir/bench_pressio_timing.cc.o
+[ 61%] Building CXX object tests/CMakeFiles/bench_vol_timing.dir/bench_vol_timing.cc.o
+[ 66%] Built target test_cpu_write
+[ 71%] Built target test_ci
+[ 76%] Built target test_error_miranda
+[ 80%] Built target test_time_miranda
+[ 85%] Linking C executable test_time_hurricane
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_filter_timing.cc:312:84: error: stray '`' in program
+  312 |      * exceeds HDF5's 4 GiB limit, which the VOL container has no equivalent of. */`
+      |                                                                                    ^
+[ 85%] Built target test_time_hurricane
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_filter_timing.cc: In function 'hid_t make_dcpl(const bench_dataset_t*, filter_backend_t, const bench_compressor_t*, int, int, double)':
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_filter_timing.cc:138:46: error: 'cd_nelmts' was not declared in this scope
+  138 |         H5Pset_zfp_accuracy_cdata(abs_bound, cd_nelmts, cd_values);
+      |                                              ^~~~~~~~~
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_filter_timing.cc:138:57: error: 'cd_values' was not declared in this scope
+  138 |         H5Pset_zfp_accuracy_cdata(abs_bound, cd_nelmts, cd_values);
+      |                                                         ^~~~~~~~~
+/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/bench_filter_timing.cc:138:9: error: 'H5Pset_zfp_accuracy_cdata' was not declared in this scope; did you mean 'H5Pset_zfp_accuracy_cdata_f'?
+  138 |         H5Pset_zfp_accuracy_cdata(abs_bound, cd_nelmts, cd_values);
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~
+      |         H5Pset_zfp_accuracy_cdata_f
+gmake[2]: *** [tests/CMakeFiles/bench_filter_timing.dir/build.make:76: tests/CMakeFiles/bench_filter_timing.dir/bench_filter_timing.cc.o] Error 1
+gmake[1]: *** [CMakeFiles/Makefile2:324: tests/CMakeFiles/bench_filter_timing.dir/all] Error 2
+gmake[1]: *** Waiting for unfinished jobs....
+[ 90%] Linking CXX executable bench_pressio_timing
+[ 95%] Linking CXX executable bench_vol_timing
+[ 95%] Built target bench_pressio_timing
+[ 95%] Built target bench_vol_timing
+gmake: *** [Makefile:136: all] Error 2
+
+=== [0a] locating H5Z filter plugins ===
+FILTER_PLUGIN_PATH=/home/kdougherty/libpressio_cuda/.spack-env/view/lib:/home/kdougherty/libpressio_cuda/.spack-env/view/lib/python3.14/site-packages/h5py:/home/kdougherty/libpressio_cuda/.spack-env/view/plugin
+  /home/kdougherty/libpressio_cuda/.spack-env/view/lib:
+    adios2-evpath-modules-2_10
+    catalyst
+    classlist
+    cmake
+    ct.sym
+    gettext
+    graphviz
+    jexec
+    jfr
+    jli
+    jrt-fs.jar
+    jspawnhelper
+    jvm.cfg
+    krb5
+    libParaViewADIOSInSituEngine.so
+    libSZ.so
+    libSZ3c.so
+    libSZx.so
+    libadios2_atl.so
+    libadios2_atl.so.2.10
+    libadios2_atl.so.2.10.2
+    libadios2_c.so
+    libadios2_c.so.2.10
+    libadios2_c.so.2.10.2
+    libadios2_c_mpi.so
+    libadios2_c_mpi.so.2.10
+    libadios2_c_mpi.so.2.10.2
+    libadios2_core.so
+    libadios2_core.so.2.10
+    libadios2_core.so.2.10.2
+    libadios2_core_cuda.so
+    libadios2_core_mpi.so
+    libadios2_core_mpi.so.2.10
+    libadios2_core_mpi.so.2.10.2
+    libadios2_cxx11.so
+    libadios2_cxx11.so.2.10
+    libadios2_cxx11.so.2.10.2
+    libadios2_cxx11_mpi.so
+    libadios2_cxx11_mpi.so.2.10
+    libadios2_cxx11_mpi.so.2.10.2
+    libadios2_dill.so
+    libadios2_dill.so.2.10
+    libadios2_dill.so.2.10.2
+    libadios2_enet.so
+    libadios2_enet.so.2.10
+    libadios2_enet.so.2.10.2
+    libadios2_evpath.so
+    libadios2_evpath.so.2.10
+    libadios2_evpath.so.2.10.2
+    libadios2_ffs.so
+    libadios2_ffs.so.2.10
+    libadios2_ffs.so.2.10.2
+    libadios2_fortran.so
+    libadios2_fortran.so.2.10
+    libadios2_fortran.so.2.10.2
+    libadios2_fortran_mpi.so
+    libadios2_fortran_mpi.so.2.10
+    libadios2_fortran_mpi.so.2.10.2
+    libadios2_perfstubs.so
+    libadios2_perfstubs.so.2.10
+    libadios2_perfstubs.so.2.10.2
+    libarchive.a
+    libarchive.so
+    libarchive.so.13
+    libarchive.so.13.8.5
+    libasan.so.6
+    libasprintf.a
+    libasprintf.so
+    libasprintf.so.0
+    libasprintf.so.0.0.0
+    libatomic.so.1
+    libattach.so
+    libawt.so
+    libawt_headless.so
+    libawt_xawt.so
+    libbil.a
+    libblosc.a
+    libblosc.so
+    libblosc.so.1
+    libblosc.so.1.21.6
+    libblosc2.a
+    libblosc2.so
+    libblosc2.so.2.15.1
+    libblosc2.so.4
+    libbsd-ctor.a
+    libbsd.a
+    libbsd.so
+    libbsd.so.0
+    libbsd.so.0.12.2
+    libbz2.a
+    libbz2.so
+    libbz2.so.1
+    libbz2.so.1.0
+    libbz2.so.1.0.8
+    libcatalyst.so
+    libcatalyst.so.3
+    libcdt.so
+    libcdt.so.6
+    libcdt.so.6.0.0
+    libcgraph.so
+    libcgraph.so.8
+    libcgraph.so.8.0.1
+    libcharset.a
+    libcharset.so
+    libcharset.so.1
+    libcharset.so.1.0.0
+    libcom_err.so
+    libcom_err.so.3
+    libcom_err.so.3.0
+    libconduit.so
+    libconduit_blueprint.so
+    libconduit_blueprint_mpi.so
+    libconduit_relay.so
+    libconduit_relay_mpi.so
+    libconduit_relay_mpi_io.so
+    libcrypt.a
+    libcrypt.so
+    libcrypt.so.2
+    libcrypt.so.2.0.0
+    libcuSZp.a
+    libcuSZp.so
+    libcurl.a
+    libcurl.so
+    libcurl.so.4
+    libcurl.so.4.8.0
+    libcurses.so
+    libcusz.so
+    libdt_socket.so
+    libedit.a
+    libedit.so
+    libedit.so.0
+    libedit.so.0.0.76
+    libevent-2.1.so.7
+    libevent-2.1.so.7.0.1
+    libevent.a
+    libevent.so
+    libevent_core-2.1.so.7
+    libevent_core-2.1.so.7.0.1
+    libevent_core.a
+    libevent_core.so
+    libevent_extra-2.1.so.7
+    libevent_extra-2.1.so.7.0.1
+    libevent_extra.a
+    libevent_extra.so
+    libevent_openssl-2.1.so.7
+    libevent_openssl-2.1.so.7.0.1
+    libevent_openssl.a
+    libevent_openssl.so
+    libevent_pthreads-2.1.so.7
+    libevent_pthreads-2.1.so.7.0.1
+    libevent_pthreads.a
+    libevent_pthreads.so
+    libexpat.a
+    libexpat.so
+    libexpat.so.1
+    libexpat.so.1.12.1
+    libextnet.so
+    libfabric.a
+    libfabric.so
+    libfabric.so.1
+    libfabric.so.1.31.1
+    libffi.a
+    libffi.so
+    libffi.so.8
+    libffi.so.8.2.0
+    libfmt.a
+    libfontmanager.so
+    libform.a
+    libform.so
+    libform.so.6
+    libform.so.6.6
+    libform_g.a
+    libformw.a
+    libformw.so
+    libformw.so.6
+    libformw.so.6.6
+    libformw_g.a
+    libfpzip.so
+    libfpzip.so.1
+    libfpzip.so.1.3.0
+    libgcc_s.so.1
+    libgdbm.a
+    libgdbm.so
+    libgdbm.so.6
+    libgdbm.so.6.0.0
+    libgdbm_compat.a
+    libgdbm_compat.so
+    libgdbm_compat.so.4
+    libgdbm_compat.so.4.0.0
+    libgettextlib-1.0.so
+    libgettextlib.a
+    libgettextlib.so
+    libgettextpo.a
+    libgettextpo.so
+    libgettextpo.so.0
+    libgettextpo.so.0.6.0
+    libgettextsrc-1.0.so
+    libgettextsrc.a
+    libgettextsrc.so
+    libgfortran.so.5
+    libgomp.so.1
+    libgsl.a
+    libgsl.so
+    libgsl.so.28
+    libgsl.so.28.0.0
+    libgslcblas.a
+    libgslcblas.so
+    libgslcblas.so.0
+    libgslcblas.so.0.0.0
+    libgssapi_krb5.so
+    libgssapi_krb5.so.2
+    libgssapi_krb5.so.2.2
+    libgssrpc.so
+    libgssrpc.so.4
+    libgssrpc.so.4.2
+    libgvc.so
+    libgvc.so.7
+    libgvc.so.7.0.1
+    libgvpr.so
+    libgvpr.so.2
+    libgvpr.so.2.0.1
+    libh5zzfp.a
+    libhdf5.a
+    libhdf5.settings
+    libhdf5.so
+    libhdf5.so.310
+    libhdf5.so.310.5.1
+    libhdf5_hl.a
+    libhdf5_hl.so
+    libhdf5_hl.so.310
+    libhdf5_hl.so.310.0.6
+    libhdf5_mpi.so
+    libhdf5_mpi_hl.so
+    libhdf5_tools.a
+    libhdf5_tools.so
+    libhdf5_tools.so.310
+    libhdf5_tools.so.310.0.6
+    libhdf5sz3.so
+    libhistory.a
+    libhistory.so
+    libhistory.so.8
+    libhistory.so.8.3
+    libhwloc.a
+    libhwloc.so
+    libhwloc.so.15
+    libhwloc.so.15.10.2
+    libiconv.a
+    libiconv.so
+    libiconv.so.2
+    libiconv.so.2.7.0
+    libinstrument.so
+    libitm.so.1
+    libj2gss.so
+    libj2pcsc.so
+    libj2pkcs11.so
+    libjaas.so
+    libjava.so
+    libjavajpeg.so
+    libjawt.so
+    libjdwp.so
+    libjimage.so
+    libjsig.so
+    libjsound.so
+    libk5crypto.so
+    libk5crypto.so.3
+    libk5crypto.so.3.1
+    libkadm5clnt.so
+    libkadm5clnt_mit.so
+    libkadm5clnt_mit.so.12
+    libkadm5clnt_mit.so.12.0
+    libkadm5srv.so
+    libkadm5srv_mit.so
+    libkadm5srv_mit.so.12
+    libkadm5srv_mit.so.12.0
+    libkdb5.so
+    libkdb5.so.10
+    libkdb5.so.10.0
+    libkrad.so
+    libkrad.so.0
+    libkrad.so.0.0
+    libkrb5.so
+    libkrb5.so.3
+    libkrb5.so.3.3
+    libkrb5support.so
+    libkrb5support.so.0
+    libkrb5support.so.0.1
+    liblcms.so
+    liblibftk.so
+    liblibpressio.so
+    liblibpressio_meta.so
+    liblibpressio_tools_utils.so
+    liblizard.a
+    liblizard.so
+    liblizard.so.2
+    liblizard.so.2.1.0
+    liblsan.so.0
+    liblua-5.4.so
+    liblua-54.so
+    liblua.a
+    liblua.so
+    liblua.so.5.4
+    liblua.so.5.4.8
+    liblua5.4.so
+    liblua54.so
+    liblz4.a
+    liblz4.so
+    liblz4.so.1
+    liblz4.so.1.10.0
+    liblzma.a
+    liblzma.so
+    liblzma.so.5
+    liblzma.so.5.8.3
+    liblzo2.a
+    liblzo2.so
+    liblzo2.so.2
+    liblzo2.so.2.0.0
+    libmanagement.so
+    libmanagement_agent.so
+    libmanagement_ext.so
+    libmd.a
+    libmd.so
+    libmd.so.0
+    libmd.so.0.1.0
+    libmenu.a
+    libmenu.so
+    libmenu.so.6
+    libmenu.so.6.6
+    libmenu_g.a
+    libmenuw.a
+    libmenuw.so
+    libmenuw.so.6
+    libmenuw.so.6.6
+    libmenuw_g.a
+    libmetis.so
+    libmgard.so
+    libmgard.so.1
+    libmgard.so.1.5.2
+    libmlib_image.so
+    libmpi.so
+    libmpi.so.40
+    libmpi.so.40.40.7
+    libmpi_mpifh.so
+    libmpi_mpifh.so.40
+    libmpi_mpifh.so.40.40.1
+    libmpi_usempi_ignore_tkr.so
+    libmpi_usempi_ignore_tkr.so.40
+    libmpi_usempi_ignore_tkr.so.40.40.1
+    libmpi_usempif08.so
+    libmpi_usempif08.so.40
+    libmpi_usempif08.so.40.40.3
+    libncurses++.a
+    libncurses++.so
+    libncurses++.so.6
+    libncurses++.so.6.6
+    libncurses++_g.a
+    libncurses++w.a
+    libncurses++w.so
+    libncurses++w.so.6
+    libncurses++w.so.6.6
+    libncurses++w_g.a
+    libncurses.a
+    libncurses.so
+    libncurses.so.6
+    libncurses.so.6.6
+    libncurses_g.a
+    libncursesw.a
+    libncursesw.so
+    libncursesw.so.6
+    libncursesw.so.6.6
+    libncursesw_g.a
+    libnet.so
+    libnghttp2.a
+    libnghttp2.so
+    libnghttp2.so.14
+    libnghttp2.so.14.29.1
+    libnio.so
+    libnuma.a
+    libnuma.so
+    libnuma.so.1
+    libnuma.so.1.0.0
+    libnvcomp.so
+    libopen-pal.so
+    libopen-pal.so.80
+    libopen-pal.so.80.0.5
+    libopenblas-r0.3.33.a
+    libopenblas-r0.3.33.so
+    libopenblas.a
+    libopenblas.so
+    libopenblas.so.0
+    libpanel.a
+    libpanel.so
+    libpanel.so.6
+    libpanel.so.6.6
+    libpanel_g.a
+    libpanelw.a
+    libpanelw.so
+    libpanelw.so.6
+    libpanelw.so.6.6
+    libpanelw_g.a
+    libparmetis.so
+    libpathplan.so
+    libpathplan.so.4
+    libpathplan.so.4.0.1
+    libpciaccess.a
+    libpciaccess.so
+    libpciaccess.so.0
+    libpciaccess.so.0.11.1
+    libpcre2-16.a
+    libpcre2-16.so
+    libpcre2-16.so.0
+    libpcre2-16.so.0.13.0
+    libpcre2-32.a
+    libpcre2-32.so
+    libpcre2-32.so.0
+    libpcre2-32.so.0.13.0
+    libpcre2-8.a
+    libpcre2-8.so
+    libpcre2-8.so.0
+    libpcre2-8.so.0.13.0
+    libpcre2-posix.a
+    libpcre2-posix.so
+    libpcre2-posix.so.3
+    libpcre2-posix.so.3.0.5
+    libpkgconf.a
+    libpkgconf.so
+    libpkgconf.so.7
+    libpkgconf.so.7.0.0
+    libpmix.a
+    libpmix.so
+    libpmix.so.2
+    libpmix.so.2.23.0
+    libpng
+    libpng.a
+    libpng.so
+    libpng16.a
+    libpng16.so
+    libpng16.so.16
+    libpng16.so.16.58.0
+    libprefs.so
+    libprotobuf-lite.so
+    libprotobuf-lite.so.3.21.12.0
+    libprotobuf-lite.so.32
+    libprotobuf.so
+    libprotobuf.so.3.21.12.0
+    libprotobuf.so.32
+    libprotoc.so
+    libprotoc.so.3.21.12.0
+    libprotoc.so.32
+    libprrte.a
+    libprrte.so
+    libprrte.so.3
+    libprrte.so.3.1.0
+    libpsz_cu_core.so
+    libpsz_cu_fzg.so
+    libpsz_cu_mem.so
+    libpsz_cu_phf.so
+    libpsz_cu_stat.so
+    libpsz_cu_utils.so
+    libpython3.14.so
+    libpython3.14.so.1.0
+    libpython3.so
+    libquadmath.so.0
+    libreadline.a
+    libreadline.so
+    libreadline.so.8
+    libreadline.so.8.3
+    librmi.so
+    libsaproc.so
+    libsctp.so
+    libsnappy.so
+    libsnappy.so.1
+    libsnappy.so.1.2.1
+    libspdlog.so
+    libspdlog.so.1.16
+    libspdlog.so.1.16.0
+    libsplashscreen.so
+    libsqlite3.a
+    libsqlite3.so
+    libsqlite3.so.0
+    libsqlite3.so.3.53.1
+    libstd_compat.so
+    libstdc++.so.6
+    libsunec.so
+    libtextstyle.a
+    libtextstyle.so
+    libtextstyle.so.0
+    libtextstyle.so.0.2.7
+    libtinfo.a
+    libtinfo.so
+    libtinfo.so.6
+    libtinfo.so.6.6
+    libtinfo_g.a
+    libtinfow.a
+    libtinfow.so
+    libtinfow.so.6
+    libtinfow.so.6.6
+    libtinfow_g.a
+    libtsan.so.0
+    libubsan.so.1
+    libunpack.so
+    libuuid.a
+    libuuid.so
+    libuuid.so.1
+    libuuid.so.1.3.0
+    libverify.so
+    libverto.so
+    libverto.so.0
+    libverto.so.0.0
+    libxdot.so
+    libxdot.so.4
+    libxdot.so.4.0.0
+    libxml2.so
+    libxml2.so.2
+    libxml2.so.2.13.9
+    libyaml-cpp.so
+    libyaml-cpp.so.0.8
+    libyaml-cpp.so.0.8.0
+    libz.a
+    libz.so
+    libz.so.1
+    libz.so.1.3.1.zlib-ng
+    libzfp.so
+    libzfp.so.0
+    libzfp.so.0.5.5
+    libzip.so
+    libzstd.a
+    libzstd.so
+    libzstd.so.1
+    libzstd.so.1.5.7
+    lua
+    modules
+    mpi.mod
+    mpi_ext.mod
+    mpi_f08.mod
+    mpi_f08_callbacks.mod
+    mpi_f08_ext.mod
+    mpi_f08_interfaces.mod
+    mpi_f08_interfaces_callbacks.mod
+    mpi_f08_types.mod
+    mpi_types.mod
+    openmpi
+    pkgconfig
+    pmpi_f08_interfaces.mod
+    preloadable_libintl.so
+    psfont.properties.ja
+    psfontj2d.properties
+    python3.14
+    security
+    server
+    src.zip
+    terminfo
+    tzdb.dat
+  /home/kdougherty/libpressio_cuda/.spack-env/view/lib/python3.14/site-packages/h5py:
+    __init__.py
+    __pycache__
+    _conv.cpython-314-x86_64-linux-gnu.so
+    _errors.cpython-314-x86_64-linux-gnu.so
+    _hl
+    _npystrings.cpython-314-x86_64-linux-gnu.so
+    _objects.cpython-314-x86_64-linux-gnu.so
+    _proxy.cpython-314-x86_64-linux-gnu.so
+    _selector.cpython-314-x86_64-linux-gnu.so
+    defs.cpython-314-x86_64-linux-gnu.so
+    h5.cpython-314-x86_64-linux-gnu.so
+    h5a.cpython-314-x86_64-linux-gnu.so
+    h5ac.cpython-314-x86_64-linux-gnu.so
+    h5d.cpython-314-x86_64-linux-gnu.so
+    h5ds.cpython-314-x86_64-linux-gnu.so
+    h5f.cpython-314-x86_64-linux-gnu.so
+    h5fd.cpython-314-x86_64-linux-gnu.so
+    h5g.cpython-314-x86_64-linux-gnu.so
+    h5i.cpython-314-x86_64-linux-gnu.so
+    h5l.cpython-314-x86_64-linux-gnu.so
+    h5o.cpython-314-x86_64-linux-gnu.so
+    h5p.cpython-314-x86_64-linux-gnu.so
+    h5pl.cpython-314-x86_64-linux-gnu.so
+    h5py_warnings.py
+    h5r.cpython-314-x86_64-linux-gnu.so
+    h5s.cpython-314-x86_64-linux-gnu.so
+    h5t.cpython-314-x86_64-linux-gnu.so
+    h5z.cpython-314-x86_64-linux-gnu.so
+    ipy_completer.py
+    tests
+    utils.cpython-314-x86_64-linux-gnu.so
+    version.py
+  /home/kdougherty/libpressio_cuda/.spack-env/view/plugin:
+    libh5zzfp.so
+filter ids: sz3=32024 zfp=32013 bzip2=307
+
+=== [0b] filter availability ===
+  sz3: ok
+  zfp: ok
+  deflate: ok
+  bzip2: ok
+usable backends: sz3 zfp deflate bzip2
+
+############ [1] SZ3 cd_values gate (miranda, abs 1e-6) ############
+
+=== filter [gate_sz3_sz3_1e6_N8] : miranda ===
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 861.6 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+  miranda                deflate      N=8   C=  5.08 W=  7189.18 F=    0.24 X=   0.26 | O=  0.51 R=   877.42 ms  ratio=  2.09x  file=137.8 MiB  RMSE=0.000e+00 maxae=0.000e+00
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_gate_sz3_sz3_1e6_N8.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_gate_sz3_sz3_1e6_N8.csv
+  *** FAIL maxae=0 thr=0 ***
+  The cd_values layout in make_dcpl() does not match this H5Z-SZ3
+  build. Fix it against the plugin README before trusting any sz3
+  filter numbers. Sweeping anyway so the rows exist, but treat
+  ratio and fidelity as INVALID.
+
+############ [2] sz3 — PRIMARY, same codec as the VOL ############
+
+=== filter [miranda_sz3_sz3_1e3_N1] : miranda ===
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 861.6 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+  miranda                deflate      N=1   C=  1.23 W=  7365.39 F=    0.15 X=   0.22 | O=  0.50 R=   865.46 ms  ratio=  2.09x  file=137.5 MiB  RMSE=0.000e+00 maxae=0.000e+00
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_miranda_sz3_sz3_1e3_N1.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_miranda_sz3_sz3_1e3_N1.csv
+
+=== filter [miranda_sz3_sz3_1e3_N8] : miranda ===
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 861.6 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+  miranda                deflate      N=8   C=  1.11 W=  7195.59 F=    0.14 X=   0.25 | O=  0.47 R=   876.90 ms  ratio=  2.09x  file=137.8 MiB  RMSE=0.000e+00 maxae=0.000e+00
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_miranda_sz3_sz3_1e3_N8.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_miranda_sz3_sz3_1e3_N8.csv
+
+=== filter [miranda_sz3_sz3_1e3_N16] : miranda ===
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 861.6 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+  miranda                deflate      N=16  C=  1.11 W=  7040.51 F=    0.13 X=   2.45 | O=  0.40 R=   644.20 ms  ratio=  2.09x  file=137.8 MiB  RMSE=0.000e+00 maxae=0.000e+00
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_miranda_sz3_sz3_1e3_N16.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_miranda_sz3_sz3_1e3_N16.csv
+
+=== filter [miranda_sz3_sz3_1e6_N1] : miranda ===
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 861.6 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+  miranda                deflate      N=1   C=  1.13 W=  7387.04 F=    0.14 X=   0.22 | O=  0.47 R=   865.76 ms  ratio=  2.09x  file=137.5 MiB  RMSE=0.000e+00 maxae=0.000e+00
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_miranda_sz3_sz3_1e6_N1.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_miranda_sz3_sz3_1e6_N1.csv
+
+=== filter [miranda_sz3_sz3_1e6_N8] : miranda ===
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 861.6 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+  miranda                deflate      N=8   C=  1.11 W=  7278.55 F=    0.15 X=   0.25 | O=  0.49 R=   890.05 ms  ratio=  2.09x  file=137.8 MiB  RMSE=0.000e+00 maxae=0.000e+00
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_miranda_sz3_sz3_1e6_N8.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_miranda_sz3_sz3_1e6_N8.csv
+
+=== filter [miranda_sz3_sz3_1e6_N16] : miranda ===
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 861.6 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+  miranda                deflate      N=16  C=  1.14 W=  6920.68 F=    0.15 X=   0.28 | O=  0.39 R=   646.24 ms  ratio=  2.09x  file=137.8 MiB  RMSE=0.000e+00 maxae=0.000e+00
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_miranda_sz3_sz3_1e6_N16.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_miranda_sz3_sz3_1e6_N16.csv
+
+=== filter [s3d_sz3_sz3_1e3_N1] : s3d ===
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 861.6 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+  s3d                    deflate      N=1   C=  1.19 W= 31331.42 F=    0.18 X=   0.25 | O=  3.26 R=  4417.46 ms  ratio=  1.12x  file=851.9 MiB  RMSE=0.000e+00 maxae=0.000e+00
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_s3d_sz3_sz3_1e3_N1.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_s3d_sz3_sz3_1e3_N1.csv
+
+=== filter [s3d_sz3_sz3_1e3_N8] : s3d ===
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 861.7 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
