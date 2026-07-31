@@ -23,6 +23,18 @@
 #  endif
 #endif
 
+#include <execinfo.h>
+#include <csignal>
+#include <unistd.h>
+
+static void bench_crash_handler(int sig) {
+    void *bt[64];
+    int n = backtrace(bt, 64);
+    fprintf(stderr, "\n*** caught signal %d ***\n", sig);
+    backtrace_symbols_fd(bt, n, STDERR_FILENO);
+    _exit(128 + sig);
+}
+
 typedef enum {
     FILTER_DEFLATE, FILTER_BZIP2, FILTER_ZFP, FILTER_SZ3, FILTER_LIBPRESSIO
 } filter_backend_t;
@@ -347,6 +359,8 @@ cleanup:
 }
 
 int main(int argc, char **argv) {
+    signal(SIGSEGV, bench_crash_handler);
+    signal(SIGABRT, bench_crash_handler);
     const char *h5path   = "bench_filter.h5";
     const char *csvpath  = "results_filter.csv";
     const char *xcsvpath = NULL;
