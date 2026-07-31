@@ -1,3 +1,0 @@
-dataset,compressor,op,total_ms,compress_ms,io_ms,overhead_ms,overhead_pct
-miranda_sz3_1e3_vjson,sz3,write,1551.6104,1547.2667,4.2493,0.0943,0.01
-miranda_sz3_1e3_vjson,sz3,read,748.6540,726.5486,1.7706,20.3348,2.72

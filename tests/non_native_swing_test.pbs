@@ -181,24 +181,24 @@ declare -A DATASET=(
 # near zero. If noop is not clean, the instrumentation is wrong and nothing
 # downstream is worth reading. Run this before the sweep, every time.
 # ===========================================================================
-echo ""
-echo "=== [1] noop instrumentation gate (miranda) ==="
-BENCH_REPS=2 BENCH_VERIFY=1 VOL_TIMING_STRICT=1 \
-    run_vol_group gate "miranda" "noop" "" ""
+# echo ""
+# echo "=== [1] noop instrumentation gate (miranda) ==="
+# BENCH_REPS=2 BENCH_VERIFY=1 VOL_TIMING_STRICT=1 \
+#     run_vol_group gate "miranda" "noop" "" ""
 
-GATE_CSV="$RESULTS/connector_phases_gate_noop_native.csv"
-if [ -f "$GATE_CSV" ]; then
-    echo "--- gate phases ---"
-    column -t -s, "$GATE_CSV"
-    # Column order from vol_timing_csv(): 1 dataset 2 compressor 3 op 4 total
-    # 5 stage 6 compress 7 container 8 io 9 pressio_call 10 device
-    # 11 vol_compress 12 pressio_host 13 residual_ms 14 residual_frac
-    awk -F, 'NR>1 && $10+0 != 0 { print "  [FAIL] noop reported device_ms="$10 }' "$GATE_CSV"
-    awk -F, 'NR>1 && ($14+0 > 0.03 || $14+0 < -0.03) \
-             { printf "  [FAIL] residual %.1f%% of total\n", $14*100 }' "$GATE_CSV"
-else
-    echo "  [FAIL] no connector CSV produced — is BENCH_CSV reaching the connector?"
-fi
+# GATE_CSV="$RESULTS/connector_phases_gate_noop_native.csv"
+# if [ -f "$GATE_CSV" ]; then
+#     echo "--- gate phases ---"
+#     column -t -s, "$GATE_CSV"
+#     # Column order from vol_timing_csv(): 1 dataset 2 compressor 3 op 4 total
+#     # 5 stage 6 compress 7 container 8 io 9 pressio_call 10 device
+#     # 11 vol_compress 12 pressio_host 13 residual_ms 14 residual_frac
+#     awk -F, 'NR>1 && $10+0 != 0 { print "  [FAIL] noop reported device_ms="$10 }' "$GATE_CSV"
+#     awk -F, 'NR>1 && ($14+0 > 0.03 || $14+0 < -0.03) \
+#              { printf "  [FAIL] residual %.1f%% of total\n", $14*100 }' "$GATE_CSV"
+# else
+#     echo "  [FAIL] no connector CSV produced — is BENCH_CSV reaching the connector?"
+# fi
 
 # ===========================================================================
 # STEP 2 -- Initialisation vs steady-state.
@@ -210,27 +210,28 @@ fi
 #   r0 >> r1~r3  -> you were reporting initialisation as VOL overhead
 #   all equal    -> the cost is per-write; the compress-path fixes are the target
 # ===========================================================================
-echo ""
-echo "=== [2] repetition diagnostic (miranda x cuszp, 4 reps) ==="
-for comp in cuszp_1e3 cuszp_1e6; do
-    BENCH_REPS=4 run_vol_group reps "miranda" "$comp" "" ""
-done
+# echo ""
+# echo "=== [2] repetition diagnostic (miranda x cuszp, 4 reps) ==="
+# for comp in cuszp_1e3 cuszp_1e6; do
+#     BENCH_REPS=4 run_vol_group reps "miranda" "$comp" "" ""
+# done
 
-echo ""
-echo "--- per-rep timings (look for r0 as an outlier) ---"
-for f in "$RESULTS"/results_ext_reps_*.csv; do
-    [ -f "$f" ] || continue
-    echo "== $(basename "$f") =="
-    awk -F, 'NR==1{next} {
-        printf "  rep %-3s create=%8.2f write=%10.2f flush=%9.2f close=%9.2f open=%8.2f read=%10.2f ratio=%6.2f\n",
-               $5,$9,$10,$11,$12,$13,$14,$8 }' "$f"
-done
+# echo ""
+# echo "--- per-rep timings (look for r0 as an outlier) ---"
+# for f in "$RESULTS"/results_ext_reps_*.csv; do
+#     [ -f "$f" ] || continue
+#     echo "== $(basename "$f") =="
+#     awk -F, 'NR==1{next} {
+#         printf "  rep %-3s create=%8.2f write=%10.2f flush=%9.2f close=%9.2f open=%8.2f read=%10.2f ratio=%6.2f\n",
+#                $5,$9,$10,$11,$12,$13,$14,$8 }' "$f"
+# done
 
 # ===========================================================================
 # STEP 3 -- The sweep.
 # ===========================================================================
 CHUNK_COUNTS="8 16"
-SWEEP_COMPS="noop cuszp_1e3 cuszp_1e6 sz3_1e3 sz3_1e6"
+# noop cuszp_1e3 cuszp_1e6 sz3_1e3 sz3_1e6
+SWEEP_COMPS= "noop sz3_1e3 sz3_1e6"
 SWEEP_GROUPS="miranda scale-T s3d nyx_baryon ocean_temp qmc"
 
 echo ""

@@ -1,3 +1,0 @@
-dataset,compressor,op,total_ms,compress_ms,io_ms,overhead_ms,overhead_pct
-scale-T_sz3_1e6,sz3,write,6700.8612,6276.4381,424.1687,0.2544,0.00
-scale-T_sz3_1e6,sz3,read,5044.1056,4661.2047,86.7534,296.1475,5.87

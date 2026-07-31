@@ -1,3 +1,0 @@
-dataset,compressor,op,total_ms,compress_ms,io_ms,overhead_ms,overhead_pct
-nyx_baryon_noop,noop,write,1480.5861,1088.2099,344.3091,48.0672,3.25
-nyx_baryon_noop,noop,read,740.7832,269.1646,330.6024,141.0162,19.04

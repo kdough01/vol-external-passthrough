@@ -1,3 +1,0 @@
-dataset,compressor,op,total_ms,compress_ms,io_ms,overhead_ms,overhead_pct
-miranda_cuszp_1e3,cuszp,write,637.3708,56.9580,7.4333,572.9794,89.90
-miranda_cuszp_1e3,cuszp,read,446.9079,386.3894,9.7009,50.8175,11.37

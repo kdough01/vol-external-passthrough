@@ -1,5 +1,0 @@
-dataset,compressor,path,op,phase,ms,ratio,rmse
-s3d,sz3_1e3,vol,write,total,2861.8148,238.4186,
-s3d,sz3_1e3,vol,read,total,1927.3195,,4.879709e-04
-/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_s3d_sz3_1e3_vol_N16.h5,ALL,vol,write,file,2863.2509,238.4186,
-/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_s3d_sz3_1e3_vol_N16.h5,ALL,vol,read,file,1927.3195,,

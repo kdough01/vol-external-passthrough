@@ -1,3 +1,0 @@
-dataset,compressor,op,total_ms,compress_ms,io_ms,overhead_ms,overhead_pct
-s3d_noop,noop,write,2202.8713,1566.3465,551.0691,85.4557,3.88
-s3d_noop,noop,read,1506.9328,509.3183,615.8870,381.7274,25.33

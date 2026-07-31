@@ -1,3 +1,0 @@
-dataset,compressor,op,total_ms,compress_ms,io_ms,overhead_ms,overhead_pct
-einspline37_noop,noop,write,22719.5818,16400.7005,5181.0899,1137.7914,5.01
-einspline37_noop,noop,read,19656.4564,6826.8159,8377.3231,4452.3174,22.65

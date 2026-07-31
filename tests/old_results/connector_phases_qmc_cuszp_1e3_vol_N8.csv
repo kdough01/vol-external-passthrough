@@ -1,3 +1,0 @@
-dataset,compressor,op,total_ms,compress_ms,io_ms,overhead_ms,overhead_pct
-einspline37_cuszp_1e3,cuszp,write,9914.3356,2446.9147,1762.1117,5705.3092,57.55
-einspline37_cuszp_1e3,cuszp,read,20468.0933,15722.1931,2406.8399,2339.0604,11.43

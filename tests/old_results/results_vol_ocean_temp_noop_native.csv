@@ -1,5 +1,0 @@
-dataset,compressor,path,op,phase,ms,ratio,rmse
-ocean_temp,noop,vol,write,total,832.3593,0.9931,
-ocean_temp,noop,vol,read,total,180.0356,,0.000000e+00
-/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_ocean_temp_noop_native.h5,ALL,vol,write,file,833.7098,0.9931,
-/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_ocean_temp_noop_native.h5,ALL,vol,read,file,180.0356,,
