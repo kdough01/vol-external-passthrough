@@ -2939,14 +2939,15 @@ H5VL_pass_through_ext_dataset_get(void *dset, H5VL_dataset_get_args_t *args,
         if (args->op_type == H5VL_DATASET_GET_STORAGE_SIZE) {
             gpu_vol_dataset_t *ds_ctx = (gpu_vol_dataset_t *)o->custom_data;
 
-            if (ds_ctx && ds_ctx->comp_ctx) {
+            if (ds_ctx && ds_ctx->comp_ctx && args->args.get_storage_size.storage_size) {
                 H5VL_dataset_get_args_t sargs;
                 hssize_t npts;
 
                 sargs.op_type = H5VL_DATASET_GET_SPACE;
                 sargs.args.get_space.space_id = H5I_INVALID_HID;
 
-                if (H5VLdataset_get(under, o->under_vol_id, &sargs, dxpl_id, NULL) < 0)
+                if (H5VLdataset_get(o->under_object, o->under_vol_id, &sargs,
+                                    dxpl_id, NULL) < 0)
                     return -1;
 
                 npts = H5Sget_simple_extent_npoints(sargs.args.get_space.space_id);
@@ -2954,7 +2955,7 @@ H5VL_pass_through_ext_dataset_get(void *dset, H5VL_dataset_get_args_t *args,
                 if (npts < 0)
                     return -1;
 
-                args->args.get_storage_size.storage_size = (hsize_t)npts;
+                *args->args.get_storage_size.storage_size = (hsize_t)npts;
                 return 0;
             }
         }
