@@ -321,6 +321,75 @@ vol_fetch_into(compression_ctx *ctx, struct pressio_data *result,
     return 0;
 }
 
+static size_t
+vol_slab_dims(const compression_ctx *ctx, size_t nelem, hid_t minor,
+              size_t *out_dims)
+{
+    size_t plane, nslices, k;
+ 
+    if (!ctx || ctx->ndims == 0 || ctx->dims == NULL) {
+        H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                vol_err_class, maj_compression, minor,
+                "compressor '%s' is shape-aware but no dtype/shape was "
+                "recorded for this dataset",
+                ctx ? ctx->compressor_id : "?");
+        return 0;
+    }
+    if (nelem == 0) {
+        H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                vol_err_class, maj_compression, minor,
+                "empty slab requested for '%s'", ctx->compressor_id);
+        return 0;
+    }
+ 
+    plane = 1;                          /* elements in one slowest-axis slice */
+    for (size_t i = 1; i < ctx->ndims; i++)
+        plane *= ctx->dims[i];
+ 
+    if (plane == 0) {
+        H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                vol_err_class, maj_compression, minor,
+                "degenerate shape recorded for '%s' (a fast dimension is 0)",
+                ctx->compressor_id);
+        return 0;
+    }
+    if (nelem % plane != 0) {
+        H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                vol_err_class, maj_compression, minor,
+                "slab of %zu elements is not a whole number of %zu-element "
+                "slices for '%s'; chunk sizes must be a multiple of one slice",
+                nelem, plane, ctx->compressor_id);
+        return 0;
+    }
+    nslices = nelem / plane;
+ 
+    k = 0;
+    for (size_t i = ctx->ndims; i-- > 1; )
+        out_dims[k++] = ctx->dims[i];
+    out_dims[k++] = nslices;
+ 
+    return k;
+}
+ 
+/* Byte-count form, used by the VOL-chunked path. */
+static size_t
+vol_chunk_dims(const compression_ctx *ctx, size_t nbytes, hid_t minor,
+               size_t *out_dims)
+{
+    size_t dsize;
+
+    if (!ctx) return 0;
+    dsize = pressio_dtype_size(ctx->dtype);
+    if (dsize == 0 || nbytes == 0 || nbytes % dsize != 0) {
+        H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                vol_err_class, maj_compression, minor,
+                "chunk of %zu bytes is not a whole number of %zu-byte "
+                "elements for '%s'", nbytes, dsize, ctx->compressor_id);
+        return 0;
+    }
+    return vol_slab_dims(ctx, nbytes / dsize, minor, out_dims);
+}
+
 static struct pressio_compressor *
 vol_get_chunk_wrapper(compression_ctx *ctx, uint64_t chunk_elems)
 {
@@ -466,116 +535,6 @@ static const char *
 vol_ptr_domain(const void *p)
 {
     return H5VL_pass_through_ext_buf_is_device(p) ? "cudamalloc" : "malloc";
-}
-
-static size_t
-vol_slab_dims(const compression_ctx *ctx, size_t nelem, hid_t minor,
-              size_t *out_dims)
-{
-    size_t plane, nslices, k;
- 
-    if (!ctx || ctx->ndims == 0 || ctx->dims == NULL) {
-        H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
-                vol_err_class, maj_compression, minor,
-                "compressor '%s' is shape-aware but no dtype/shape was "
-                "recorded for this dataset",
-                ctx ? ctx->compressor_id : "?");
-        return 0;
-    }
-    if (nelem == 0) {
-        H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
-                vol_err_class, maj_compression, minor,
-                "empty slab requested for '%s'", ctx->compressor_id);
-        return 0;
-    }
- 
-    plane = 1;                          /* elements in one slowest-axis slice */
-    for (size_t i = 1; i < ctx->ndims; i++)
-        plane *= ctx->dims[i];
- 
-    if (plane == 0) {
-        H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
-                vol_err_class, maj_compression, minor,
-                "degenerate shape recorded for '%s' (a fast dimension is 0)",
-                ctx->compressor_id);
-        return 0;
-    }
-    if (nelem % plane != 0) {
-        H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
-                vol_err_class, maj_compression, minor,
-                "slab of %zu elements is not a whole number of %zu-element "
-                "slices for '%s'; chunk sizes must be a multiple of one slice",
-                nelem, plane, ctx->compressor_id);
-        return 0;
-    }
-    nslices = nelem / plane;
- 
-    k = 0;
-    for (size_t i = ctx->ndims; i-- > 1; )
-        out_dims[k++] = ctx->dims[i];
-    out_dims[k++] = nslices;
- 
-    return k;
-}
- 
-/* Byte-count form, used by the VOL-chunked path. */
-static size_t
-vol_chunk_dims(const compression_ctx *ctx, size_t nbytes, hid_t minor,
-               size_t *out_dims)
-{
-    size_t dsize, nelem, plane, nslices, k;
- 
-    if (!ctx || ctx->ndims == 0 || ctx->dims == NULL) {
-        H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
-                vol_err_class, maj_compression, minor,
-                "compressor '%s' is shape-aware but no dtype/shape was "
-                "recorded for this dataset",
-                ctx ? ctx->compressor_id : "?");
-        return 0;
-    }
- 
-    dsize = pressio_dtype_size(ctx->dtype);
-    if (dsize == 0 || nbytes == 0 || nbytes % dsize != 0) {
-        H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
-                vol_err_class, maj_compression, minor,
-                "chunk of %zu bytes is not a whole number of %zu-byte "
-                "elements for '%s'", nbytes, dsize, ctx->compressor_id);
-        return 0;
-    }
-    nelem = nbytes / dsize;
- 
-    /* elements in one slice of the slowest axis */
-    plane = 1;
-    for (size_t i = 1; i < ctx->ndims; i++)
-        plane *= ctx->dims[i];
- 
-    if (plane == 0) {
-        H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
-                vol_err_class, maj_compression, minor,
-                "degenerate shape recorded for '%s' (a fast dimension is 0)",
-                ctx->compressor_id);
-        return 0;
-    }
- 
-    if (nelem % plane != 0) {
-        H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
-                vol_err_class, maj_compression, minor,
-                "chunk of %zu elements is not a whole number of %zu-element "
-                "slices for '%s' -- a partial slice cannot be described as an "
-                "N-D sub-volume. Chunk sizes must be a multiple of %zu bytes; "
-                "see H5VL_pass_through_ext_chunk_bytes",
-                nelem, plane, ctx->compressor_id, plane * dsize);
-        return 0;
-    }
-    nslices = nelem / plane;
- 
-    /* fastest-varying first: reverse dims[1..ndims-1], then the slice count */
-    k = 0;
-    for (size_t i = ctx->ndims; i-- > 1; )
-        out_dims[k++] = ctx->dims[i];
-    out_dims[k++] = nslices;
- 
-    return k;                       /* == ctx->ndims */
 }
 
 /* Defined inside libpressio's own namespaces so the plugin API names
