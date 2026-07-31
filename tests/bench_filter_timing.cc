@@ -131,13 +131,17 @@ static hid_t make_dcpl(const bench_dataset_t *d, filter_backend_t backend,
     }
 
     case FILTER_SZ3: {
+        std::vector<size_t> cdims;
+        for (int i = 0; i < d->rank; ++i)
+            cdims.push_back((size_t)chunk[i]);
+
         SZ3::Config conf;
+        conf.setDims(cdims.begin(), cdims.end());
         conf.errorBoundMode = SZ3::EB_ABS;
         conf.absErrorBound  = abs_bound;
 
         if (set_SZ3_conf_to_H5(dcpl, conf) < 0)
             std::fprintf(stderr, "WARNING: set_SZ3_conf_to_H5 failed\n");
-
         if (H5Pget_nfilters(dcpl) == 0)
             H5Pset_filter(dcpl, H5Z_FILTER_SZ3, H5Z_FLAG_MANDATORY, 0, NULL);
         break;
