@@ -5,6 +5,7 @@
 #include <cmath>
 #include <cfloat>
 #include <string>
+#include <hdf5_sz3/H5Z_SZ3.hpp>
 
 #define BENCH_CONFIG_ENABLE_HDF5
 #include "bench_config.h"
@@ -130,13 +131,15 @@ static hid_t make_dcpl(const bench_dataset_t *d, filter_backend_t backend,
     }
 
     case FILTER_SZ3: {
-        /* CONFIRM against your H5Z-SZ3 README: this assumes
-         * [mode, hi32(bound), lo32(bound)] with mode 0 == absolute. The layout
-         * differs between H5Z-SZ and H5Z-SZ3. */
-        union { double d; unsigned u[2]; } b;
-        b.d = abs_bound;
-        unsigned cd[3] = { 0u, b.u[0], b.u[1] };
-        H5Pset_filter(dcpl, backend_fid(backend), H5Z_FLAG_MANDATORY, 3, cd);
+        SZ3::Config conf;
+        conf.errorBoundMode = SZ3::EB_ABS;
+        conf.absErrorBound  = abs_bound;
+
+        if (set_SZ3_conf_to_H5(dcpl, conf) < 0)
+            std::fprintf(stderr, "WARNING: set_SZ3_conf_to_H5 failed\n");
+
+        if (H5Pget_nfilters(dcpl) == 0)
+            H5Pset_filter(dcpl, H5Z_FILTER_SZ3, H5Z_FLAG_MANDATORY, 0, NULL);
         break;
     }
 
