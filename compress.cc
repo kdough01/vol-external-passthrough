@@ -685,6 +685,19 @@ vol_compress_native_impl(compression_ctx *ctx,
 
     is_gpu = vol_is_gpu_codec(ctx->compressor_id);
 
+    if (getenv("VOL_COMP_DUMP_CALL")) {                 /* <-- insert */
+        struct pressio_options *o = pressio_compressor_get_options(ctx->compressor);
+        char *s = pressio_options_to_string(o);
+        fprintf(stderr, "[VOL CALL] native id=%s dtype=%d rank=%zu dims=[",
+                ctx->compressor_id, (int)in_dtype, in_ndims);
+        for (size_t i = 0; i < in_ndims; i++)
+            fprintf(stderr, "%zu%s", in_dims[i], (i + 1 < in_ndims) ? "," : "");
+        fprintf(stderr, "] nbytes=%zu\n[VOL CALL] options:\n%s\n",
+                nbytes, s ? s : "(null)");
+        free(s);
+        pressio_options_free(o);
+    }
+
 #ifdef ENABLE_EXT_PASSTHRU_LOGGING
     printf("------- COMPRESS NATIVE: id=%s nbytes=%zu ndims=%zu dtype=%d "
            "(single call, codec-internal chunking)\n",
