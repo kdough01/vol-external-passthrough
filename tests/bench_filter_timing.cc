@@ -152,10 +152,10 @@ static hid_t make_dcpl(const bench_dataset_t *d, filter_backend_t backend,
         conf.errorBoundMode = SZ3::EB_ABS;
         conf.absErrorBound  = abs_bound;
 
+        if (H5Pset_filter(dcpl, H5Z_FILTER_SZ3, H5Z_FLAG_MANDATORY, 0, NULL) < 0)
+            std::fprintf(stderr, "WARNING: H5Pset_filter(SZ3) failed\n");
         if (set_SZ3_conf_to_H5(dcpl, conf) < 0)
             std::fprintf(stderr, "WARNING: set_SZ3_conf_to_H5 failed\n");
-        if (H5Pget_nfilters(dcpl) == 0)
-            H5Pset_filter(dcpl, H5Z_FILTER_SZ3, H5Z_FLAG_MANDATORY, 0, NULL);
         break;
     }
 
