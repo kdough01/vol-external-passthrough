@@ -5,6 +5,7 @@
 #include <cmath>
 #include <cfloat>
 #include <string>
+#include <H5Zzfp_props.h>
 
 #define BENCH_CONFIG_ENABLE_HDF5
 #include "bench_config.h"
@@ -134,13 +135,9 @@ static hid_t make_dcpl(const bench_dataset_t *d, filter_backend_t backend,
     }
 
     case FILTER_ZFP: {
-        /* H5Z-ZFP's cd_values must be built by the helper macros in
-         * H5Zzfp_props.h (H5Pset_zfp_accuracy_cdata etc.). Include that header
-         * and use the macro; do not hand-roll the encoding. */
-        unsigned cd[1] = { 0 };
-        H5Pset_filter(dcpl, backend_fid(backend), H5Z_FLAG_MANDATORY, 0, cd);
-        std::fprintf(stderr, "WARNING: zfp cd_values not encoded -- include "
-                             "H5Zzfp_props.h and use H5Pset_zfp_accuracy_cdata\n");
+        H5Pset_zfp_accuracy_cdata(abs_bound, cd_nelmts, cd_values);
+        H5Pset_filter(dcpl, backend_fid(backend), H5Z_FLAG_MANDATORY,
+                      cd_nelmts, cd_values);
         break;
     }
 

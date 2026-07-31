@@ -426,6 +426,16 @@ static const bench_compressor_t BENCH_COMPRESSORS[] = {
       BENCH_CPU_CODEC, 1, BENCH_BOUND_ABS, 0.0, NULL,
       "CPU lossless, general purpose. CPU comparator." },
 
+    { "zfp_1e3", "zfp",
+      "{\"zfp:accuracy\":1e-3}",
+      BENCH_CPU_CODEC, 0, BENCH_BOUND_ABS, 1e-3, NULL,
+      "ZFP fixed-accuracy 1e-3." },
+
+    { "zfp_1e6", "zfp",
+      "{\"zfp:accuracy\":1e-6}",
+      BENCH_CPU_CODEC, 0, BENCH_BOUND_ABS, 1e-6, NULL,
+      "ZFP fixed-accuracy 1e-6." },
+
     /* --- JSON-path chunking (N chunks via opts_json; do NOT set VOL_COMP_* env).
      *     chunk_n=8 divides every static dataset. noop+pressio is omitted:
      *     rejected by the VOL by design. --- */

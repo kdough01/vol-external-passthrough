@@ -6,6 +6,19 @@
 #PBS -A SDR
 #PBS -q gpu
 
+# ============================================================================
+# APPROACH 3 of 3: HDF5 H5Z filter pipeline.
+#
+# PRIMARY BACKEND IS SZ3 -- same codec and same bound as the VOL's sz3_1e3 /
+# sz3_1e6 entries, so overhead, ratio AND fidelity are all comparable. ZFP is
+# second (and makes the paper's SS II.C ZFP claim real). Deflate is a different
+# algorithm and supports the overhead claim only. bzip2's filter never installed
+# (py-hdf5plugin failed on mpi.h), so it is probed but not required.
+#
+# HDF5_VOL_CONNECTOR MUST NOT BE SET or every H5Dwrite routes through the
+# passthrough VOL *and then* the filter. Every invocation runs under `env -u`.
+# ============================================================================
+
 cd $PBS_O_WORKDIR/..
 WORK="$(pwd)/tests"
 RESULTS="$WORK/filter_results"
@@ -54,19 +67,68 @@ ls build/tests/bench_filter_timing >/dev/null 2>&1 || {
 export LD_LIBRARY_PATH=${GCC_LIB}:${LP_VIEW}/lib64:${LP_VIEW}/lib
 export HDF5_USE_FILE_LOCKING=FALSE
 
-# Where the H5Z filter plugins live. bzip2 / sz3 / zfp plugins must be here.
-FILTER_PLUGIN_PATH="${FILTER_PLUGIN_PATH:-$LP_VIEW/lib64/hdf5/plugin:$LP_VIEW/lib/hdf5/plugin}"
-
 H5DIR="${VOL_H5DIR:-/lcrc/project/SDR/$USER/vol_bench_h5}"
 mkdir -p "$H5DIR" || { echo "cannot create $H5DIR"; exit 1; }
 
+# ---------------------------------------------------------------------------
+# DISCOVER THE FILTER PLUGINS.
+#
+# The old hardcoded $LP_VIEW/lib64/hdf5/plugin does not exist -- H5Z-SZ3 and
+# h5z-zfp install their .so into their own prefixes, not a shared plugin dir.
+# Search for them instead of guessing.
+# ---------------------------------------------------------------------------
+if [ -z "${FILTER_PLUGIN_PATH:-}" ]; then
+    echo ""
+    echo "=== [0a] locating H5Z filter plugins ==="
+    FOUND=$(find -L "$LP_VIEW" -maxdepth 5 -name '*.so*' 2>/dev/null \
+            | grep -iE 'h5z|hdf5.*(sz3|zfp)|(sz3|zfp).*hdf5' \
+            | xargs -r -n1 dirname | sort -u | tr '\n' ':')
+    FILTER_PLUGIN_PATH="${FOUND%:}"
+fi
+if [ -z "$FILTER_PLUGIN_PATH" ]; then
+    echo "WARNING: no filter .so found under $LP_VIEW."
+    echo "  Try:  find \$(spack location -i sz3) -name '*.so*' | grep -i h5"
+    echo "        find \$(spack location -i h5z-zfp) -name '*.so*'"
+    echo "  then re-run with FILTER_PLUGIN_PATH=<dir1>:<dir2>"
+else
+    echo "FILTER_PLUGIN_PATH=$FILTER_PLUGIN_PATH"
+    for d in $(echo "$FILTER_PLUGIN_PATH" | tr ':' ' '); do
+        echo "  $d:"; ls -1 "$d" 2>/dev/null | sed 's/^/    /'
+    done
+fi
+
+# H5Z-SZ3's registered id is not standardised. Try to read it from the headers;
+# override with H5Z_SZ3_ID if this comes up empty.
+if [ -z "${H5Z_SZ3_ID:-}" ]; then
+    GUESS=$(grep -rhoiE 'H5Z_FILTER_SZ3?[[:space:]]+[0-9]{3,5}' \
+            "$LP_VIEW"/include 2>/dev/null | grep -oE '[0-9]{3,5}' | head -1)
+    H5Z_SZ3_ID="${GUESS:-32024}"
+fi
+export H5Z_SZ3_ID
+export H5Z_ZFP_ID="${H5Z_ZFP_ID:-32013}"
+export H5Z_BZIP2_ID="${H5Z_BZIP2_ID:-307}"
+echo "filter ids: sz3=$H5Z_SZ3_ID zfp=$H5Z_ZFP_ID bzip2=$H5Z_BZIP2_ID"
+
+# ---------------------------------------------------------------------------
+# Probe each backend once. AVAILABLE holds the ones that actually loaded.
+# ---------------------------------------------------------------------------
 echo ""
-echo "=== [0] filter availability ==="
-env -u HDF5_VOL_CONNECTOR HDF5_PLUGIN_PATH="$FILTER_PLUGIN_PATH" \
-    ./build/tests/bench_filter_timing --bzip2 --only __none__ \
-        --out /dev/null --ext /dev/null 2>&1 | head -6
-echo "(a 'filter N not available' warning above means the plugin is missing or"
-echo " the id differs -- set H5Z_BZIP2_ID / H5Z_SZ3_ID / H5Z_ZFP_ID)"
+echo "=== [0b] filter availability ==="
+AVAILABLE=""
+for b in sz3 zfp deflate bzip2; do
+    OUT=$(env -u HDF5_VOL_CONNECTOR HDF5_PLUGIN_PATH="$FILTER_PLUGIN_PATH" \
+          ./build/tests/bench_filter_timing --$b --only __none__ \
+              --out /dev/null --ext /dev/null 2>&1)
+    if echo "$OUT" | grep -q "not available"; then
+        echo "  $b: NOT AVAILABLE"
+    else
+        echo "  $b: ok"
+        AVAILABLE="$AVAILABLE $b"
+    fi
+done
+echo "usable backends:$AVAILABLE"
+
+has() { case " $AVAILABLE " in *" $1 "*) return 0;; *) return 1;; esac; }
 
 # ---------------------------------------------------------------------------
 # run_filter TAG DATASET BACKEND CHUNK_N [LEVEL] [COMP]
@@ -86,9 +148,6 @@ run_filter () {
     echo ""
     echo "=== filter [$label] : $ds ==="
     env -u HDF5_VOL_CONNECTOR HDF5_PLUGIN_PATH="$FILTER_PLUGIN_PATH" \
-        H5Z_BZIP2_ID="${H5Z_BZIP2_ID:-307}" \
-        H5Z_ZFP_ID="${H5Z_ZFP_ID:-32013}" \
-        H5Z_SZ3_ID="${H5Z_SZ3_ID:-32024}" \
         timeout --signal=KILL "${FILTER_TIMEOUT:-3600}" \
         ./build/tests/bench_filter_timing \
             --${backend} --only "$ds" --chunk-n "$nchunks" --level "$level" \
@@ -111,61 +170,101 @@ run_filter () {
     return 0
 }
 
+# ===========================================================================
+# [1] SZ3 cd_values GATE.
+#
+# make_dcpl()'s H5Z-SZ3 encoding is [mode, hi32(bound), lo32(bound)] with
+# mode 0 == absolute. That is a GUESS. A wrong layout does not error -- it
+# compresses at a different bound than requested, silently. So verify against
+# a known bound BEFORE sweeping: maxae must land near 1e-6, not near 1e-3.
+# ===========================================================================
+SZ3_TRUSTED=0
+if has sz3; then
+    echo ""
+    echo "############ [1] SZ3 cd_values gate (miranda, abs 1e-6) ############"
+    run_filter gate miranda sz3 8 6 sz3_1e6
+    G="$RESULTS/results_filter_ext_gate_sz3_sz3_1e6_N8.csv"
+    if [ -f "$G" ]; then
+        awk -F, 'FNR>1 && $5!="-1" {
+            thr=$16+0; mx=$17+0;
+            if (thr>0 && mx<=2*thr) { print "  PASS maxae="mx" thr="thr; exit 0 }
+            else { print "  *** FAIL maxae="mx" thr="thr" ***"; exit 1 } }' "$G"
+        [ $? -eq 0 ] && SZ3_TRUSTED=1
+    fi
+    if [ $SZ3_TRUSTED -eq 0 ]; then
+        echo "  The cd_values layout in make_dcpl() does not match this H5Z-SZ3"
+        echo "  build. Fix it against the plugin README before trusting any sz3"
+        echo "  filter numbers. Sweeping anyway so the rows exist, but treat"
+        echo "  ratio and fidelity as INVALID."
+    fi
+fi
+
 # ---------------------------------------------------------------------------
-# HDF5 CHUNK SIZE LIMIT: a chunk cannot exceed 4 GiB (32-bit fields in the chunk
-# record), so einspline37 at 12.63 GiB CANNOT be one chunk here while the VOL
-# container has no such limit. N=1 is run on purpose so the failure is recorded.
+# HDF5 CHUNK SIZE LIMIT: a chunk cannot exceed 4 GiB, so einspline37 at
+# 12.63 GiB CANNOT be one chunk here while the VOL container has no such limit.
+# N=1 is run on purpose so the failure is recorded for the capability matrix.
 # ---------------------------------------------------------------------------
 SMALL_DS="miranda s3d scale-T nyx_baryon ocean_temp"
 BIG_DS="einspline37"
 CHUNK_COUNTS="1 8 16"
 
-echo ""
-echo "############ bzip2 — PRIMARY, same codec as the VOL ############"
-for ds in $SMALL_DS; do
-    for N in $CHUNK_COUNTS; do
-        run_filter "$ds" "$ds" bzip2 "$N" 6 bzip2
-    done
-done
-for N in 1 8 16; do
-    run_filter qmc "$BIG_DS" bzip2 "$N" 6 bzip2
-done
-
-echo ""
-echo "############ sz3 — lossy same-codec (CONFIRM cd_values layout) ############"
-if [ -n "${FILTER_SZ3:-}" ]; then
+if has sz3; then
+    echo ""
+    echo "############ [2] sz3 — PRIMARY, same codec as the VOL ############"
     for ds in $SMALL_DS; do
         for comp in sz3_1e3 sz3_1e6; do
-            for N in 8 16; do
+            for N in $CHUNK_COUNTS; do
                 run_filter "$ds" "$ds" sz3 "$N" 6 "$comp"
             done
         done
     done
-else
-    echo "SKIPPED. Set FILTER_SZ3=1 after confirming the H5Z-SZ3 cd_values layout"
-    echo "in make_dcpl against your plugin's README."
+    for N in 1 8 16; do
+        run_filter qmc "$BIG_DS" sz3 "$N" 6 sz3_1e3
+    done
 fi
 
-echo ""
-echo "############ deflate — sanity baseline, DIFFERENT codec ############"
-for ds in $SMALL_DS; do
-    run_filter "$ds" "$ds" deflate 8 6
-done
-for L in 1 4 9; do
-    run_filter miranda miranda deflate 8 "$L"
-done
-
-echo ""
-echo "############ libpressio filter ############"
-if [ -n "${FILTER_LIBPRESSIO:-}" ]; then
+if has zfp; then
+    echo ""
+    echo "############ [3] zfp ############"
+    echo "NOTE: make_dcpl() does not encode zfp cd_values -- include"
+    echo "      H5Zzfp_props.h and use H5Pset_zfp_accuracy_cdata first."
     for ds in $SMALL_DS; do
-        for comp in sz3_1e3 cuszp_1e3; do
-            run_filter "$ds" "$ds" libpressio 8 6 "$comp"
+        for N in 8 16; do
+            run_filter "$ds" "$ds" zfp "$N" 6 zfp_1e3
+        done
+    done
+fi
+
+if has deflate; then
+    echo ""
+    echo "############ [4] deflate — baseline, DIFFERENT codec ############"
+    for ds in $SMALL_DS; do
+        for N in $CHUNK_COUNTS; do
+            run_filter "$ds" "$ds" deflate "$N" 6
+        done
+    done
+    for N in 1 8 16; do
+        run_filter qmc "$BIG_DS" deflate "$N" 6
+    done
+    for L in 1 4 9; do
+        run_filter miranda miranda deflate 8 "$L"
+    done
+fi
+
+if has bzip2; then
+    echo ""
+    echo "############ [5] bzip2 ############"
+    for ds in $SMALL_DS; do
+        for N in $CHUNK_COUNTS; do
+            run_filter "$ds" "$ds" bzip2 "$N" 6 bzip2
         done
     done
 else
-    echo "SKIPPED. Set FILTER_LIBPRESSIO=1 once make_dcpl passes the codec and"
-    echo "options to the plugin — until then it uses its own default codec."
+    echo ""
+    echo "############ [5] bzip2: no filter installed ############"
+    echo "py-hdf5plugin failed to build (mpi.h missing, HDF5 is +mpi). If you"
+    echo "want it:  pip install --user hdf5plugin   # prebuilt wheel"
+    echo "then re-run with FILTER_PLUGIN_PATH including its plugins dir."
 fi
 
 # ===========================================================================
@@ -186,18 +285,23 @@ awk -F, 'FNR>1 && $5=="-1" {print "  "$1" "$2" N="$4"   ("FILENAME")"}' \
     "$RESULTS"/results_filter_ext_*.csv 2>/dev/null || echo "  (none)"
 
 echo ""
-echo "=== fidelity: bzip2 and deflate are LOSSLESS, maxae MUST be 0 ==="
+echo "=== fidelity ==="
+echo "-- deflate/bzip2 are LOSSLESS, maxae MUST be 0 --"
 awk -F, 'FNR>1 && $5!="-1" && ($2=="deflate" || $2=="bzip2") && $17+0 != 0 {
     print "  [FAIL] "$1" "$2" maxae="$17 }' \
-    "$RESULTS"/results_filter_ext_*.csv 2>/dev/null || true
+    "$RESULTS"/results_filter_ext_*.csv 2>/dev/null
+echo "-- lossy: maxae must be within 2x the configured bound --"
 awk -F, 'FNR>1 && $5!="-1" && $18=="0" {
-    print "  [FAIL] "$1" "$2" bound_ok=0 maxae="$17" thr="$16 }' \
-    "$RESULTS"/results_filter_ext_*.csv 2>/dev/null || true
+    print "  [FAIL] "$1" "$2" N="$4" maxae="$17" thr="$16 }' \
+    "$RESULTS"/results_filter_ext_*.csv 2>/dev/null
 
 echo ""
 echo "=== chunk-count effect on ratio ==="
 awk -F, 'FNR>1 && $5!="-1" {printf "%-14s %-12s N=%-4s ratio=%.3f\n",$1,$2,$4,$8}' \
     "$RESULTS"/results_filter_ext_*.csv 2>/dev/null | sort
+
+[ "${SZ3_TRUSTED:-0}" -eq 0 ] && has sz3 && \
+    echo "" && echo "*** REMINDER: sz3 cd_values gate FAILED — sz3 rows are not usable ***"
 
 echo ""
 echo "Job finished on $(date)"
