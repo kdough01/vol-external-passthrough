@@ -1,2 +1,0 @@
-dataset,compressor,codec_kind,chunk_n,rep,logical_bytes,stored_bytes,ratio,create_ms,write_ms,flush_ms,close_ms,open_ms,read_ms,rmse,abs_thresh,maxae,bound_ok
-ocean_temp,deflate,cpu,8,0,129123840,101190026,1.2761,0.9494,3830.1734,0.1288,0.1656,0.3516,549.9307,0.000000e+00,0.000000e+00,0.000000e+00,1

@@ -1,3 +1,0 @@
-dataset,compressor,path,op,phase,ms,ratio,rmse
-nyx_baryon,deflate,filter,write,total,16719.6169,1.1316,
-nyx_baryon,deflate,filter,read,total,2401.3988,,0.000000e+00
