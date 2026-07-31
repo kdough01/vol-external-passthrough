@@ -58,56 +58,36 @@ env PATH="$CLEAN_PATH" LD_LIBRARY_PATH="$GCC_LIB" \
 cmake -S . -B build \
     -DCMAKE_C_COMPILER="$SYSTEM_MPICC" -DCMAKE_CXX_COMPILER="$SYSTEM_MPICXX" \
     -DUSE_CUDA=ON -DCMAKE_PREFIX_PATH="$LP_VIEW" \
-    -DLibPressio_DIR="$LP_CMAKE_DIR" -Wno-dev
-env PATH="$CLEAN_PATH" LD_LIBRARY_PATH="$GCC_LIB" cmake --build build -j16
+    -DLibPressio_DIR="$LP_CMAKE_DIR" -Wno-dev > build_config.log 2>&1 \
+  || { echo "ERROR: cmake configure failed"; tail -30 build_config.log; exit 1; }
 
-ls build/tests/bench_filter_timing >/dev/null 2>&1 || {
-    echo "ERROR: bench_filter_timing not built"; exit 1; }
+# MUST abort here. Previously a failed build left the OLD binary in place and
+# the whole sweep silently ran it -- every run reported 'deflate' no matter
+# which --backend was requested.
+env PATH="$CLEAN_PATH" LD_LIBRARY_PATH="$GCC_LIB" cmake --build build -j16 \
+  || { echo "ERROR: build failed -- refusing to run a stale binary"; exit 1; }
 
-export LD_LIBRARY_PATH=${GCC_LIB}:${LP_VIEW}/lib64:${LP_VIEW}/lib
-export HDF5_USE_FILE_LOCKING=FALSE
-
-H5DIR="${VOL_H5DIR:-/lcrc/project/SDR/$USER/vol_bench_h5}"
-mkdir -p "$H5DIR" || { echo "cannot create $H5DIR"; exit 1; }
+# Belt and braces: the binary must be newer than its source.
+if [ tests/bench_filter_timing.cc -nt build/tests/bench_filter_timing ]; then
+    echo "ERROR: build/tests/bench_filter_timing is older than its source"; exit 1
+fi
 
 # ---------------------------------------------------------------------------
-# DISCOVER THE FILTER PLUGINS.
+# Collect the filter plugins into one small directory of symlinks.
 #
-# The old hardcoded $LP_VIEW/lib64/hdf5/plugin does not exist -- H5Z-SZ3 and
-# h5z-zfp install their .so into their own prefixes, not a shared plugin dir.
-# Search for them instead of guessing.
+# Pointing HDF5_PLUGIN_PATH at $LP_VIEW/lib would make HDF5 dlopen ~400
+# unrelated libraries on every dataset open. Match filter .so names only.
 # ---------------------------------------------------------------------------
+PLUGDIR="$WORK/h5z_plugins"
 if [ -z "${FILTER_PLUGIN_PATH:-}" ]; then
-    echo ""
-    echo "=== [0a] locating H5Z filter plugins ==="
-    FOUND=$(find -L "$LP_VIEW" -maxdepth 5 -name '*.so*' 2>/dev/null \
-            | grep -iE 'h5z|hdf5.*(sz3|zfp)|(sz3|zfp).*hdf5' \
-            | xargs -r -n1 dirname | sort -u | tr '\n' ':')
-    FILTER_PLUGIN_PATH="${FOUND%:}"
+    rm -rf "$PLUGDIR"; mkdir -p "$PLUGDIR"
+    find -L "$LP_VIEW" -maxdepth 3 \
+         \( -name 'libhdf5sz3*.so*' -o -name 'libh5z*.so*' \
+            -o -name 'libH5Z*.so*'  -o -name 'libhdf5sz*.so*' \) 2>/dev/null \
+      | while read -r so; do ln -sf "$so" "$PLUGDIR/"; done
+    FILTER_PLUGIN_PATH="$PLUGDIR"
 fi
-if [ -z "$FILTER_PLUGIN_PATH" ]; then
-    echo "WARNING: no filter .so found under $LP_VIEW."
-    echo "  Try:  find \$(spack location -i sz3) -name '*.so*' | grep -i h5"
-    echo "        find \$(spack location -i h5z-zfp) -name '*.so*'"
-    echo "  then re-run with FILTER_PLUGIN_PATH=<dir1>:<dir2>"
-else
-    echo "FILTER_PLUGIN_PATH=$FILTER_PLUGIN_PATH"
-    for d in $(echo "$FILTER_PLUGIN_PATH" | tr ':' ' '); do
-        echo "  $d:"; ls -1 "$d" 2>/dev/null | sed 's/^/    /'
-    done
-fi
-
-# H5Z-SZ3's registered id is not standardised. Try to read it from the headers;
-# override with H5Z_SZ3_ID if this comes up empty.
-if [ -z "${H5Z_SZ3_ID:-}" ]; then
-    GUESS=$(grep -rhoiE 'H5Z_FILTER_SZ3?[[:space:]]+[0-9]{3,5}' \
-            "$LP_VIEW"/include 2>/dev/null | grep -oE '[0-9]{3,5}' | head -1)
-    H5Z_SZ3_ID="${GUESS:-32024}"
-fi
-export H5Z_SZ3_ID
-export H5Z_ZFP_ID="${H5Z_ZFP_ID:-32013}"
-export H5Z_BZIP2_ID="${H5Z_BZIP2_ID:-307}"
-echo "filter ids: sz3=$H5Z_SZ3_ID zfp=$H5Z_ZFP_ID bzip2=$H5Z_BZIP2_ID"
+echo "filter plugins: $(ls -1 "$FILTER_PLUGIN_PATH" 2>/dev/null | tr '\n' ' ')"
 
 # ---------------------------------------------------------------------------
 # Probe each backend once. AVAILABLE holds the ones that actually loaded.

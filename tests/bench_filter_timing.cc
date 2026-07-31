@@ -5,7 +5,6 @@
 #include <cmath>
 #include <cfloat>
 #include <string>
-#include <H5Zzfp_props.h>
 
 #define BENCH_CONFIG_ENABLE_HDF5
 #include "bench_config.h"
@@ -15,6 +14,13 @@
 #define FID_ZFP_DEFAULT     32013
 #define FID_SZ3_DEFAULT     32024
 #define FID_LP_DEFAULT      32026
+
+#if defined(__has_include)
+#  if __has_include(<H5Zzfp_plugin.h>)
+#    include <H5Zzfp_plugin.h>
+#    define VOL_HAVE_H5ZZFP 1
+#  endif
+#endif
 
 typedef enum {
     FILTER_DEFLATE, FILTER_BZIP2, FILTER_ZFP, FILTER_SZ3, FILTER_LIBPRESSIO
@@ -135,10 +141,22 @@ static hid_t make_dcpl(const bench_dataset_t *d, filter_backend_t backend,
     }
 
     case FILTER_ZFP: {
+#ifdef VOL_HAVE_H5ZZFP
+        size_t       cd_nelmts = 10;
+        unsigned int cd_values[10] = {0};
         H5Pset_zfp_accuracy_cdata(abs_bound, cd_nelmts, cd_values);
         H5Pset_filter(dcpl, backend_fid(backend), H5Z_FLAG_MANDATORY,
-                      cd_nelmts, cd_values);
+                      (unsigned)cd_nelmts, cd_values);
+#else
+        unsigned int cd[1] = {0};
+        H5Pset_filter(dcpl, backend_fid(backend), H5Z_FLAG_MANDATORY, 0, cd);
+        std::fprintf(stderr,
+            "WARNING: H5Zzfp_plugin.h not found -- zfp runs at DEFAULT settings, "
+            "NOT accuracy=%g. Add $(spack location -i h5z-zfp)/include to the "
+            "include path in tests/CMakeLists.txt.\n", abs_bound);
+#endif
         break;
+    }
     }
 
     default: {
@@ -309,7 +327,7 @@ static int run_one(const bench_dataset_t *din, filter_backend_t backend,
 cleanup:
     /* Record failures as a rep=-1 row rather than leaving a header-only CSV. An
      * unsupported configuration IS a result: einspline37 as a single chunk
-     * exceeds HDF5's 4 GiB limit, which the VOL container has no equivalent of. */`
+     * exceeds HDF5's 4 GiB limit, which the VOL container has no equivalent of. */
     if (rc != 0) {
         std::fprintf(xcsv,
             "%s,%s,%s,%d,-1,%llu,0,0,-1,-1,-1,-1,-1,-1,-1,-1,-1,0\n",
@@ -367,7 +385,7 @@ int main(int argc, char **argv) {
                              "Use for the overhead claim only, never ratio or "
                              "fidelity.\n", backend_name(backend));
 
-    bench_datasets_validate();
+    if (getenv("BENCH_DEBUG")) bench_datasets_validate();
 
     FILE *csv = std::fopen(csvpath, "w");
     if (!csv) { std::perror("csv"); return 1; }
