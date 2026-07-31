@@ -157,7 +157,6 @@ static hid_t make_dcpl(const bench_dataset_t *d, filter_backend_t backend,
 #endif
         break;
     }
-    }
 
     default: {
         unsigned cd[1] = { 0 };
