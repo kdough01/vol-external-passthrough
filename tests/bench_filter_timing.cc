@@ -110,16 +110,54 @@ static hid_t make_dcpl(const bench_dataset_t *d, filter_backend_t backend,
                        const bench_compressor_t *c, int chunk_n,
                        int deflate_level, double abs_bound) {
     hid_t dcpl = H5Pcreate(H5P_DATASET_CREATE);
+
+    hsize_t dims[BENCH_MAX_RANK];
+    bench_dataset_h5dims(d, dims);
+
     hsize_t chunk[BENCH_MAX_RANK];
-    bench_dataset_h5dims(d, chunk);
+    for (int i = 0; i < d->rank; ++i) chunk[i] = dims[i];
+
+    /* Slowest-first multi-dimensional split. `remaining` is how many pieces we
+     * still owe; each dimension absorbs as many as it can (capped by its extent)
+     * before the remainder spills onto the next-faster dimension. */
     if (chunk_n > 1) {
-        hsize_t per = (chunk[0] + (hsize_t)chunk_n - 1) / (hsize_t)chunk_n;
-        chunk[0] = per < 1 ? 1 : per;
+        hsize_t remaining = (hsize_t)chunk_n;
+        for (int i = 0; i < d->rank && remaining > 1; ++i) {
+            hsize_t split = (dims[i] < remaining) ? dims[i] : remaining;
+            if (split < 1) split = 1;
+            chunk[i]  = (dims[i] + split - 1) / split;          /* ceil */
+            if (chunk[i] < 1) chunk[i] = 1;
+            remaining = (remaining + split - 1) / split;        /* ceil */
+        }
     }
     H5Pset_chunk(dcpl, d->rank, chunk);
 
-    /* Match the VOL: no fill-value writes, allocate late. Otherwise the filter
-     * path pays a fill pass the VOL container does not. */
+    /* Report the ACTUAL chunk geometry (bytes are what the plot needs). */
+    {
+        size_t itemsz = (d->dtype == BENCH_F64) ? 8u : 4u;
+        unsigned long long celems = 1ULL, nch = 1ULL;
+        for (int i = 0; i < d->rank; ++i) {
+            celems *= (unsigned long long)chunk[i];
+            nch    *= (unsigned long long)((dims[i] + chunk[i] - 1) / chunk[i]);
+        }
+        unsigned long long cbytes = celems * (unsigned long long)itemsz;
+        std::fprintf(stdout,
+            "CHUNKINFO dataset=%s chunk_n=%d nchunks_actual=%llu "
+            "chunk_elems=%llu chunk_bytes=%llu\n",
+            d->name, chunk_n, nch, celems, cbytes);
+        std::fflush(stdout);
+        const char *cipath = std::getenv("BENCH_CHUNKINFO");
+        if (cipath && *cipath) {
+            FILE *cf = std::fopen(cipath, "a");
+            if (cf) {
+                std::fprintf(cf, "%s,%d,%llu,%llu,%llu\n",
+                             d->name, chunk_n, nch, celems, cbytes);
+                std::fclose(cf);
+            }
+        }
+    }
+
+    /* Match the VOL: no fill-value writes, allocate late. */
     H5Pset_fill_time(dcpl, H5D_FILL_TIME_NEVER);
     H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_LATE);
 
@@ -129,9 +167,6 @@ static hid_t make_dcpl(const bench_dataset_t *d, filter_backend_t backend,
         break;
 
     case FILTER_BZIP2: {
-        /* H5Z-bzip2 takes exactly one cd_value: block size 1..9. That is the
-         * same knob as "bzip2:block_size" in bench_config.h, so this is a true
-         * same-codec same-parameter comparison against the VOL. */
         unsigned cd[1] = { 9 };
         if (c && c->opts_json) {
             const char *p = strstr(c->opts_json, "\"bzip2:block_size\"");
@@ -171,8 +206,7 @@ static hid_t make_dcpl(const bench_dataset_t *d, filter_backend_t backend,
         H5Pset_filter(dcpl, backend_fid(backend), H5Z_FLAG_MANDATORY, 0, cd);
         std::fprintf(stderr,
             "WARNING: H5Zzfp_plugin.h not found -- zfp runs at DEFAULT settings, "
-            "NOT accuracy=%g. Add $(spack location -i h5z-zfp)/include to the "
-            "include path in tests/CMakeLists.txt.\n", abs_bound);
+            "NOT accuracy=%g.\n", abs_bound);
 #endif
         break;
     }

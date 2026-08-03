@@ -1,5 +1,5 @@
 #!/bin/bash
-#PBS -N sz3_einspline_chunks
+#PBS -N sz3_chunks
 #PBS -l select=1:ncpus=16:ngpus=1:mpiprocs=1:mem=256gb
 #PBS -l walltime=08:00:00
 #PBS -j oe
@@ -11,9 +11,17 @@ WORK="$(pwd)/tests"
 RESULTS="$WORK/filter_results"
 mkdir -p "$RESULTS"
 
+BUILD="build_${TAG}"                       # per-job build dir (no build race)
+BIN="$BUILD/tests/bench_filter_timing"
+CIFILE="$RESULTS/chunkinfo_${TAG}.csv"     # actual per-chunk geometry for plots
+printf 'dataset,chunk_n,nchunks_actual,chunk_elems,chunk_bytes\n' > "$CIFILE"
+
 echo "Job started on $(date)"
-echo "Running on: $(hostname)"
-echo "Results   : $RESULTS"
+echo "Running on : $(hostname)"
+echo "Dataset    : $DATASET   (tag=$TAG, comp=$COMP)"
+echo "Chunk ladder: $CHUNK_COUNTS"
+echo "Build dir  : $BUILD"
+echo "Results    : $RESULTS"
 
 module load gcc/11.4.0
 module load hpcx/2.26-gcc
@@ -40,27 +48,27 @@ done
 CLEAN_PATH=$(echo "$PATH" | tr ':' '\n' | grep -v spack-env | tr '\n' ':')
 
 echo ""
-echo "=== Building ==="
+echo "=== Building ($BUILD) ==="
 env PATH="$CLEAN_PATH" LD_LIBRARY_PATH="$GCC_LIB" \
-cmake -S . -B build \
+cmake -S . -B "$BUILD" \
     -DCMAKE_C_COMPILER="$SYSTEM_MPICC" -DCMAKE_CXX_COMPILER="$SYSTEM_MPICXX" \
     -DUSE_CUDA=ON -DCMAKE_PREFIX_PATH="$LP_VIEW" \
-    -DLibPressio_DIR="$LP_CMAKE_DIR" -Wno-dev > build_config.log 2>&1 \
-  || { echo "ERROR: cmake configure failed"; tail -30 build_config.log; exit 1; }
+    -DLibPressio_DIR="$LP_CMAKE_DIR" -Wno-dev > "build_config_${TAG}.log" 2>&1 \
+  || { echo "ERROR: cmake configure failed"; tail -30 "build_config_${TAG}.log"; exit 1; }
 
-# MUST abort here. A failed build previously left the OLD binary in place and
+# MUST abort here. A failed build previously left an OLD binary in place and
 # the whole sweep silently ran it.
-env PATH="$CLEAN_PATH" LD_LIBRARY_PATH="$GCC_LIB" cmake --build build -j16 \
+env PATH="$CLEAN_PATH" LD_LIBRARY_PATH="$GCC_LIB" cmake --build "$BUILD" -j16 \
   || { echo "ERROR: build failed -- refusing to run a stale binary"; exit 1; }
 
-if [ tests/bench_filter_timing.cc -nt build/tests/bench_filter_timing ]; then
-    echo "ERROR: build/tests/bench_filter_timing is older than its source"; exit 1
+if [ tests/bench_filter_timing.cc -nt "$BIN" ]; then
+    echo "ERROR: $BIN is older than its source"; exit 1
 fi
 
 # ---------------------------------------------------------------------------
-# Collect the filter plugins into one small directory of symlinks.
+# Collect the filter plugins into a per-job directory of symlinks.
 # ---------------------------------------------------------------------------
-PLUGDIR="$WORK/h5z_plugins"
+PLUGDIR="$WORK/h5z_plugins_${TAG}"
 if [ -z "${FILTER_PLUGIN_PATH:-}" ]; then
     rm -rf "$PLUGDIR"; mkdir -p "$PLUGDIR"
     find -L "$LP_VIEW" -maxdepth 3 \
@@ -82,21 +90,20 @@ echo "h5 scratch: $H5DIR"
 echo ""
 echo "=== SZ3 availability ==="
 OUT=$(env -u HDF5_VOL_CONNECTOR HDF5_PLUGIN_PATH="$FILTER_PLUGIN_PATH" \
-      ./build/tests/bench_filter_timing --sz3 --only __none__ \
-          --out /dev/null --ext /dev/null 2>&1)
+      "$BIN" --sz3 --only __none__ --out /dev/null --ext /dev/null 2>&1)
 if echo "$OUT" | grep -q "not available"; then
     echo "ERROR: sz3 filter not available -- aborting."; echo "$OUT"; exit 1
 fi
 echo "  sz3: ok"
 
 # ---------------------------------------------------------------------------
-# run_filter TAG DATASET CHUNK_N COMP  -- SZ3-only, with wall-clock timing so
-# you can see how long each chunk count actually takes.
+# run_filter RUNTAG DATASET CHUNK_N COMP  -- SZ3-only, with wall-clock timing.
+# All output files include $TAG via RUNTAG so concurrent jobs never collide.
 # ---------------------------------------------------------------------------
 run_filter () {
     : "${H5DIR:?H5DIR is unset -- cannot place scratch .h5 files}"
-    local tag="$1"; local ds="$2"; local nchunks="$3"; local comp="$4"
-    local label="${tag}_sz3_${comp}_N${nchunks}"
+    local runtag="$1"; local ds="$2"; local nchunks="$3"; local comp="$4"
+    local label="${runtag}_sz3_${comp}_N${nchunks}"
 
     local h5="$H5DIR/filter_${label}.h5"
     local rcsv="$RESULTS/results_filter_${label}.csv"
@@ -107,8 +114,9 @@ run_filter () {
     echo "=== filter [$label] : $ds  (N=$nchunks) ==="
     local t0=$SECONDS
     env -u HDF5_VOL_CONNECTOR HDF5_PLUGIN_PATH="$FILTER_PLUGIN_PATH" \
+        BENCH_CHUNKINFO="$CIFILE" \
         timeout --signal=KILL "${FILTER_TIMEOUT:-3600}" \
-        ./build/tests/bench_filter_timing \
+        "$BIN" \
             --sz3 --only "$ds" --chunk-n "$nchunks" \
             --comp "$comp" \
             --h5 "$h5" --out "$rcsv" --ext "$xcsv"
@@ -124,24 +132,17 @@ run_filter () {
                "$ds" "sz3" "$nchunks" >> "$xcsv"
         echo "  [FAIL] $label KILLED BY TIMEOUT (${FILTER_TIMEOUT:-3600}s) — recorded as rep=-1"
     elif [ $rc -ne 0 ]; then
-        echo "  [note] $label exited rc=$rc (failures, e.g. the >4 GiB chunk, are recorded in the CSV)"
+        echo "  [note] $label exited rc=$rc (failures, e.g. a >4 GiB chunk, are recorded in the CSV)"
     fi
     return 0
 }
 
-# ===========================================================================
-# [1] SZ3 cd_values GATE (miranda, abs 1e-6).
-#
-# make_dcpl()'s H5Z-SZ3 cd_values layout is a GUESS. A wrong layout does not
-# error -- it silently compresses at the wrong bound. Verify against a known
-# bound first so the einspline ratios are trustworthy. Skip with SKIP_GATE=1.
-# ===========================================================================
 SZ3_TRUSTED=0
 if [ "${SKIP_GATE:-0}" != "1" ]; then
     echo ""
     echo "############ [1] SZ3 cd_values gate (miranda, abs 1e-6) ############"
-    run_filter gate miranda 8 sz3_1e6
-    G="$RESULTS/results_filter_ext_gate_sz3_sz3_1e6_N8.csv"
+    run_filter "gate_${TAG}" miranda 8 sz3_1e6
+    G="$RESULTS/results_filter_ext_gate_${TAG}_sz3_sz3_1e6_N8.csv"
     if [ -f "$G" ]; then
         awk -F, 'FNR>1 && $5!="-1" {
             thr=$16+0; mx=$17+0;
@@ -149,53 +150,47 @@ if [ "${SKIP_GATE:-0}" != "1" ]; then
             else { print "  *** FAIL maxae="mx" thr="thr" ***"; exit 1 } }' "$G"
         [ $? -eq 0 ] && SZ3_TRUSTED=1
     fi
-    [ $SZ3_TRUSTED -eq 0 ] && echo "  *** GATE FAILED — treat einspline ratios below as INVALID until the cd_values layout is fixed ***"
+    [ $SZ3_TRUSTED -eq 0 ] && echo "  *** GATE FAILED — treat ratios below as INVALID until the cd_values layout is fixed ***"
 else
     echo "SKIP_GATE=1 — skipping SZ3 correctness gate (ratios unverified)"
 fi
 
 # ===========================================================================
-# [2] einspline37 chunk-count ladder.
-#
-#   N=3   -> ~4.21 GiB/chunk  -> EXPECTED FAIL (exceeds HDF5's 4 GiB limit)
-#   N=4   -> ~3.16 GiB/chunk  -> first feasible count
-#   N=8..16384                -> shrinking chunks; watch the ratio fall.
-#
-# Reminder: dim0-only split caps the real chunk count at einspline37's dim0.
+# [2] chunk-count ladder for $DATASET.
 # ===========================================================================
-BIG_DS="einspline37"
-CHUNK_COUNTS="3 4 8 16 32 64 512 2048 8192 16384"
-
 echo ""
-echo "############ [2] sz3 — einspline37 chunk ladder ############"
+echo "############ [2] sz3 — $DATASET chunk ladder ############"
 for N in $CHUNK_COUNTS; do
-    run_filter qmc "$BIG_DS" "$N" sz3_1e3
+    run_filter "$TAG" "$DATASET" "$N" "$COMP"
 done
 
 # ===========================================================================
-# SUMMARIES
+# SUMMARIES (this job only — scoped to $TAG)
 # ===========================================================================
 echo ""
-echo "=== ratio vs chunk count (successful runs, einspline37) ==="
-printf "%-14s %-10s %-6s %8s %11s %11s\n" dataset codec N ratio write_ms read_ms
-awk -F, 'FNR>1 && $5!="-1" {
-    printf "%-14s %-10s %-6s %8.3f %11.2f %11.2f\n",$1,$2,$4,$8,$10,$14 }' \
-    "$RESULTS"/results_filter_ext_qmc_*.csv 2>/dev/null \
-  | sort -t= -k1 -n -k4
+echo "=== ratio vs chunk SIZE (successful runs, $DATASET) — plot y=ratio, x=chunk_bytes (log) ==="
+printf "%-12s %-10s %-7s %14s %9s %11s %11s\n" dataset codec N chunk_bytes ratio write_ms read_ms
+awk -F, '
+    FNR==NR { if (FNR>1) cb[$1"|"$2]=$5; next }        # chunkinfo: dataset|chunk_n -> chunk_bytes
+    FNR>1 && $5!="-1" {
+        k=$1"|"$4; b=(k in cb)?cb[k]:"?";
+        printf "%-12s %-10s %-7s %14s %9.3f %11.2f %11.2f\n",$1,$2,$4,b,$8,$10,$14 }' \
+    "$CIFILE" "$RESULTS"/results_filter_ext_${TAG}_*.csv 2>/dev/null \
+  | sort -k4 -n
 
 echo ""
 echo "=== unsupported configurations (rep=-1) — the 4 GiB wall ==="
 awk -F, 'FNR>1 && $5=="-1" {print "  "$1" N="$4"   ("FILENAME")"}' \
-    "$RESULTS"/results_filter_ext_qmc_*.csv 2>/dev/null || echo "  (none)"
+    "$RESULTS"/results_filter_ext_${TAG}_*.csv 2>/dev/null || echo "  (none)"
 
 echo ""
 echo "=== fidelity (lossy: maxae must be within 2x the bound) ==="
 awk -F, 'FNR>1 && $5!="-1" && $18=="0" {
     print "  [FAIL] "$1" N="$4" maxae="$17" thr="$16 }' \
-    "$RESULTS"/results_filter_ext_qmc_*.csv 2>/dev/null
+    "$RESULTS"/results_filter_ext_${TAG}_*.csv 2>/dev/null
 
 [ "${SZ3_TRUSTED:-0}" -eq 0 ] && [ "${SKIP_GATE:-0}" != "1" ] && \
-    echo "" && echo "*** REMINDER: sz3 cd_values gate FAILED — einspline rows are not usable ***"
+    echo "" && echo "*** REMINDER: sz3 cd_values gate FAILED — rows are not usable ***"
 
 echo ""
 echo "Job finished on $(date)"
