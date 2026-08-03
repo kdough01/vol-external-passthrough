@@ -1,10 +1,15 @@
 #!/bin/bash
-#PBS -N sz3_chunks
+#PBS -N s3d_sz3_chunks
 #PBS -l select=1:ncpus=16:ngpus=1:mpiprocs=1:mem=256gb
-#PBS -l walltime=08:00:00
+#PBS -l walltime=02:00:00
 #PBS -j oe
 #PBS -A SDR
 #PBS -q gpu
+
+DATASET="${BENCH_DATASET:-s3d}"
+TAG="${BENCH_TAG:-s3d}"
+COMP="${BENCH_COMP:-sz3_1e3}"
+CHUNK_COUNTS="${BENCH_CHUNKS:-1 2 4 8 16 32 64 512 2048 8192 16384}"
 
 cd $PBS_O_WORKDIR/..
 WORK="$(pwd)/tests"
@@ -137,6 +142,11 @@ run_filter () {
     return 0
 }
 
+# ===========================================================================
+# [1] SZ3 cd_values GATE (miranda, abs 1e-6). Verifies make_dcpl()'s cd_values
+# layout against a known bound so the ratios are trustworthy. Gate files are
+# tagged, so it is safe to run in every concurrent job. Skip with SKIP_GATE=1.
+# ===========================================================================
 SZ3_TRUSTED=0
 if [ "${SKIP_GATE:-0}" != "1" ]; then
     echo ""
