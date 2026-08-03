@@ -1,2 +1,2 @@
 dataset,compressor,codec_kind,chunk_n,rep,logical_bytes,stored_bytes,ratio,create_ms,write_ms,flush_ms,close_ms,open_ms,read_ms,rmse,abs_thresh,maxae,bound_ok
-einspline37,sz3_1e3,cpu,16,0,13560851520,4012987924,3.3792,2.2017,119845.7670,0.2191,0.3360,58.4833,120258.4624,5.741811e-04,1.000000e-03,1.000000e-03,1
+einspline37,sz3_1e3,cpu,16,0,13560851520,4012987924,3.3792,2.3573,119182.0007,0.1822,0.3179,3.8960,120715.6185,5.741811e-04,1.000000e-03,1.000000e-03,1

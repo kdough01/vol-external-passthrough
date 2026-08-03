@@ -1,3 +1,3 @@
 dataset,compressor,op,total_ms,stage_ms,compress_ms,container_ms,io_ms,pressio_call_ms,device_ms,vol_compress_ms,pressio_host_ms,residual_ms,residual_frac
-nyx_baryon_noop,noop,write,1318.2298,0.0000,932.6636,49.3706,336.1358,279.6047,0.0000,653.0589,279.6047,0.0598,0.000045
-nyx_baryon_noop,noop,read,730.6255,0.0000,278.3432,0.0000,308.2762,0.0000,0.0000,278.3432,0.0000,144.0061,0.197100
+nyx_baryon_noop,noop,write,897.1193,0.0000,600.1582,50.1867,246.7231,274.4252,0.0000,325.7329,274.4252,0.0513,0.000057
+nyx_baryon_noop,noop,read,680.7091,0.0000,270.7663,0.0000,302.3723,0.0000,0.0000,270.7663,0.0000,107.5706,0.158027

@@ -1,0 +1,4 @@
+dataset,chunk_n,nchunks_actual,chunk_elems,chunk_bytes
+miranda,8,8,4718592,37748736
+s3d,32768,31500,4000,32000
+s3d,65536,62500,2000,16000

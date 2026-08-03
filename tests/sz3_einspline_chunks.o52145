@@ -1,0 +1,180 @@
+Job started on Mon Aug  3 13:59:52 CDT 2026
+Running on: gpu4
+Results   : /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results
+
+=== Building ===
+Consolidate compiler generated dependencies of target dump_cuszp_opts
+[  9%] Built target dump_cuszp_opts
+Consolidate compiler generated dependencies of target hdf5_vol_passthrough
+[ 14%] Building C object CMakeFiles/hdf5_vol_passthrough.dir/H5VLpassthru_ext.c.o
+[ 19%] Building CXX object CMakeFiles/hdf5_vol_passthrough.dir/compress.cc.o
+[ 23%] Linking CXX shared library libhdf5_vol_passthrough.so
+[ 23%] Built target hdf5_vol_passthrough
+Consolidate compiler generated dependencies of target test_error_miranda
+Consolidate compiler generated dependencies of target test_time_miranda
+Consolidate compiler generated dependencies of target bench_pressio_timing
+Consolidate compiler generated dependencies of target test_ci
+Consolidate compiler generated dependencies of target bench_filter_timing
+Consolidate compiler generated dependencies of target test_cpu_write
+Consolidate compiler generated dependencies of target test_time_hurricane
+[ 28%] Linking C executable test_error_miranda
+[ 33%] Linking C executable test_time_miranda
+Consolidate compiler generated dependencies of target bench_vol_timing
+[ 38%] Linking CXX executable bench_pressio_timing
+[ 42%] Linking C executable test_ci
+[ 47%] Linking C executable test_cpu_write
+[ 52%] Linking C executable test_time_hurricane
+[ 57%] Linking CXX executable bench_vol_timing
+[ 61%] Linking CXX executable bench_filter_timing
+[ 66%] Built target test_error_miranda
+[ 71%] Built target test_time_miranda
+[ 76%] Built target test_ci
+[ 80%] Built target test_cpu_write
+[ 85%] Built target bench_vol_timing
+[ 90%] Built target test_time_hurricane
+[ 95%] Built target bench_pressio_timing
+[100%] Built target bench_filter_timing
+filter plugins: libh5zzfp.so libhdf5sz3.so 
+h5 scratch: /lcrc/project/SDR/kdougherty/vol_bench_h5
+
+=== SZ3 availability ===
+  sz3: ok
+
+############ [1] SZ3 cd_values gate (miranda, abs 1e-6) ############
+
+=== filter [gate_sz3_sz3_1e6_N8] : miranda  (N=8) ===
+[filter] backend=sz3 id=32024 chunk_n=8
+  miranda        sz3_1e6    N=8   C=  2.48 W=  1259.77 F=    0.18 X=   0.85 | O=  0.39 R=   662.06 ms  ratio= 21.44x  file=13.4 MiB  RMSE=3.197e-07 maxae=1.000e-06
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_gate_sz3_sz3_1e6_N8.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_gate_sz3_sz3_1e6_N8.csv (0 failed configuration(s) recorded)
+  [time] N=8 took 3s (rc=0)
+  PASS maxae=1e-06 thr=1e-06
+
+############ [2] sz3 — einspline37 chunk ladder ############
+
+=== filter [qmc_sz3_sz3_1e3_N3] : einspline37  (N=3) ===
+[filter] backend=sz3 id=32024 chunk_n=3
+HDF5-DIAG: Error detected in HDF5 (1.14.6):
+  #000: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5D.c line 186 in H5Dcreate2(): unable to synchronously create dataset
+    major: Dataset
+    minor: Unable to create file
+  #001: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5D.c line 135 in H5D__create_api_common(): unable to create dataset
+    major: Dataset
+    minor: Unable to create file
+  #002: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5VLcallback.c line 1865 in H5VL_dataset_create(): dataset create failed
+    major: Virtual Object Layer
+    minor: Unable to create file
+  #003: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5VLcallback.c line 1830 in H5VL__dataset_create(): dataset create failed
+    major: Virtual Object Layer
+    minor: Unable to create file
+  #004: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5VLnative_dataset.c line 282 in H5VL__native_dataset_create(): unable to create dataset
+    major: Dataset
+    minor: Unable to initialize object
+  #005: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Dint.c line 351 in H5D__create_named(): unable to create and link to dataset
+    major: Dataset
+    minor: Unable to initialize object
+  #006: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Lint.c line 492 in H5L_link_object(): unable to create new link to object
+    major: Links
+    minor: Unable to initialize object
+  #007: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Lint.c line 732 in H5L__create_real(): can't insert link
+    major: Links
+    minor: Unable to insert object
+  #008: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Gtraverse.c line 824 in H5G_traverse(): internal path traversal failed
+    major: Symbol table
+    minor: Object not found
+  #009: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Gtraverse.c line 596 in H5G__traverse_real(): traversal operator failed
+    major: Symbol table
+    minor: Callback failed
+  #010: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Lint.c line 537 in H5L__link_cb(): unable to create object
+    major: Links
+    minor: Unable to initialize object
+  #011: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Oint.c line 2346 in H5O_obj_create(): unable to open object
+    major: Object header
+    minor: Can't open object
+  #012: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Doh.c line 273 in H5O__dset_create(): unable to create dataset
+    major: Dataset
+    minor: Unable to initialize object
+  #013: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Dint.c line 1304 in H5D__create(): unable to construct layout information
+    major: Dataset
+    minor: Unable to initialize object
+  #014: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Dchunk.c line 835 in H5D__chunk_construct(): unable to set chunk sizes
+    major: Dataset
+    minor: Bad value
+  #015: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5Dchunk.c line 798 in H5D__chunk_set_sizes(): chunk size must be < 4GB
+    major: Dataset
+    minor: Unable to initialize object
+[ERR] H5Dcreate2 einspline37 N=3 -- chunk >4GiB, or filter 32024 unavailable?
+[RECORDED FAILURE] einspline37/sz3_1e3 N=3
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_qmc_sz3_sz3_1e3_N3.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_qmc_sz3_sz3_1e3_N3.csv (1 failed configuration(s) recorded)
+  [time] N=3 took 16s (rc=2)
+  [note] qmc_sz3_sz3_1e3_N3 exited rc=2 (failures, e.g. the >4 GiB chunk, are recorded in the CSV)
+
+=== filter [qmc_sz3_sz3_1e3_N4] : einspline37  (N=4) ===
+[filter] backend=sz3 id=32024 chunk_n=4
+  einspline37    sz3_1e3    N=4   C=  1.67 W=129765.07 F=    0.20 X=   0.31 | O=  4.06 R=130951.06 ms  ratio=  3.38x  file=3828.2 MiB  RMSE=5.742e-04 maxae=1.000e-03
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_qmc_sz3_sz3_1e3_N4.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_qmc_sz3_sz3_1e3_N4.csv (0 failed configuration(s) recorded)
+  [time] N=4 took 306s (rc=0)
+
+=== filter [qmc_sz3_sz3_1e3_N8] : einspline37  (N=8) ===
+[filter] backend=sz3 id=32024 chunk_n=8
+  einspline37    sz3_1e3    N=16  C=  2.36 W=119182.00 F=    0.18 X=   0.32 | O=  3.90 R=120715.62 ms  ratio=  3.38x  file=3827.1 MiB  RMSE=5.742e-04 maxae=1.000e-03
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_qmc_sz3_sz3_1e3_N16.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_qmc_sz3_sz3_1e3_N16.csv (0 failed configuration(s) recorded)
+  [time] N=16 took 282s (rc=0)
+
+=== filter [qmc_sz3_sz3_1e3_N32] : einspline37  (N=32) ===
+[filter] backend=sz3 id=32024 chunk_n=32
+  einspline37    sz3_1e3    N=32  C=  2.72 W=117748.48 F=    0.14 X= 118.82 | O=  4.12 R=118066.27 ms  ratio=  3.38x  file=3828.2 MiB  RMSE=5.742e-04 maxae=1.000e-03
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_qmc_sz3_sz3_1e3_N32.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_qmc_sz3_sz3_1e3_N32.csv (0 failed configuration(s) recorded)
+  [time] N=32 took 278s (rc=0)
+
+=== filter [qmc_sz3_sz3_1e3_N64] : einspline37  (N=64) ===
+[filter] backend=sz3 id=32024 chunk_n=64
+  einspline37    sz3_1e3    N=64  C=  2.58 W=117117.61 F=    0.14 X=  97.20 | O=  0.35 R=119603.84 ms  ratio=  3.38x  file=3831.5 MiB  RMSE=5.742e-04 maxae=1.000e-03
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_qmc_sz3_sz3_1e3_N64.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_qmc_sz3_sz3_1e3_N64.csv (0 failed configuration(s) recorded)
+  [time] N=64 took 278s (rc=0)
+
+=== filter [qmc_sz3_sz3_1e3_N512] : einspline37  (N=512) ===
+[filter] backend=sz3 id=32024 chunk_n=512
+  einspline37    sz3_1e3    N=512 C=  2.01 W=102659.21 F=    0.19 X=   0.33 | O=  3.82 R=104429.88 ms  ratio=  3.37x  file=3833.4 MiB  RMSE=5.742e-04 maxae=1.000e-03
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_qmc_sz3_sz3_1e3_N512.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_qmc_sz3_sz3_1e3_N512.csv (0 failed configuration(s) recorded)
+  [time] N=512 took 250s (rc=0)
+
+=== filter [qmc_sz3_sz3_1e3_N2048] : einspline37  (N=2048) ===
+[filter] backend=sz3 id=32024 chunk_n=2048
+  einspline37    sz3_1e3    N=2048 C=  3.59 W=118289.54 F=    0.46 X=   0.38 | O=  3.77 R= 97914.83 ms  ratio=  3.32x  file=3891.1 MiB  RMSE=5.742e-04 maxae=1.001e-03
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_qmc_sz3_sz3_1e3_N2048.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_qmc_sz3_sz3_1e3_N2048.csv (0 failed configuration(s) recorded)
+  [time] N=2048 took 258s (rc=0)
+
+=== filter [qmc_sz3_sz3_1e3_N8192] : einspline37  (N=8192) ===
+[filter] backend=sz3 id=32024 chunk_n=8192
+  einspline37    sz3_1e3    N=8192 C=  4.70 W=142439.74 F=    1.81 X=   0.45 | O=  0.51 R= 97539.09 ms  ratio=  3.15x  file=4103.1 MiB  RMSE=5.739e-04 maxae=1.002e-03
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_qmc_sz3_sz3_1e3_N8192.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_qmc_sz3_sz3_1e3_N8192.csv (0 failed configuration(s) recorded)
+  [time] N=8192 took 282s (rc=0)
+
+=== filter [qmc_sz3_sz3_1e3_N16384] : einspline37  (N=16384) ===
+[filter] backend=sz3 id=32024 chunk_n=16384
+  einspline37    sz3_1e3    N=16384 C=  1.18 W=163127.99 F=   19.85 X=   1.77 | O=  1.79 R= 99143.83 ms  ratio=  3.04x  file=4261.0 MiB  RMSE=5.739e-04 maxae=1.001e-03
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_qmc_sz3_sz3_1e3_N16384.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_qmc_sz3_sz3_1e3_N16384.csv (0 failed configuration(s) recorded)
+  [time] N=16384 took 305s (rc=0)
+
+=== ratio vs chunk count (successful runs, einspline37) ===
+dataset        codec      N         ratio    write_ms     read_ms
+einspline37    deflate    16        1.058   419862.01    61078.97
+einspline37    deflate    8         1.058   418010.81    60750.54
+einspline37    sz3_1e3    16        3.379   119182.00   120715.62
+einspline37    sz3_1e3    16384     3.037   163127.99    99143.83
+einspline37    sz3_1e3    2048      3.324   118289.54    97914.83
+einspline37    sz3_1e3    32        3.378   117748.48   118066.27
+einspline37    sz3_1e3    4         3.378   129765.07   130951.06
+einspline37    sz3_1e3    512       3.374   102659.21   104429.88
+einspline37    sz3_1e3    64        3.375   117117.61   119603.84
+einspline37    sz3_1e3    8         3.374   132247.98   122005.39
+einspline37    sz3_1e3    8192      3.153   142439.74    97539.09
+
+=== unsupported configurations (rep=-1) — the 4 GiB wall ===
+  einspline37 N=1   (/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_qmc_deflate_L6_N1.csv)
+  einspline37 N=1   (/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_qmc_sz3_sz3_1e3_N1.csv)
+  einspline37 N=3   (/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/results_filter_ext_qmc_sz3_sz3_1e3_N3.csv)
+
+=== fidelity (lossy: maxae must be within 2x the bound) ===
+
+Job finished on Mon Aug  3 14:42:47 CDT 2026
