@@ -211,15 +211,7 @@ vol_set_cuda_stream(compression_ctx *ctx)
 #endif /* USE_CUDA */
 
 #ifdef USE_CUDA
-/* Order our D2H against the codec's work WITHOUT a device-wide barrier.
- *
- * A stream sync only orders against work on ctx->stream, so this is correct
- * exactly when the codec honoured cuszp:cuda_stream. vol_set_cuda_stream()
- * verifies that by read-back and records it in ctx->cuda_stream_ok; if it did
- * not take, we say so once, loudly, rather than silently copying device memory
- * that may still be being written. Do not paper over an unconfirmed stream with
- * cudaDeviceSynchronize -- that serialises every operation and hides the real
- * problem, which is the option key. */
+
 static cudaError_t
 vol_stream_barrier(compression_ctx *ctx)
 {

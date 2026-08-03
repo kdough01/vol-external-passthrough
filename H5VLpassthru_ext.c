@@ -2419,14 +2419,13 @@ H5VL_pass_through_ext_dataset_write(
             herr_t   cret;
             const size_t hdr_bytes = 2 * sizeof(uint64_t);   /* magic + csize */
 
-
             ctx->device_ms       = 0.0;
             ctx->pressio_call_ms = 0.0;
 
             double _c0 = bench_now_ms();
             cret = H5VL_pass_through_ext_compress_native(
                        ctx, comp_src, total_bytes, hdr_bytes, &blob, &clen);
-            t.compress_ms     = bench_now_ms() - _c0;   /* ALWAYS wall clock */
+            t.compress_ms     = bench_now_ms() - _c0;
             t.pressio_call_ms = ctx->pressio_call_ms;
             t.device_ms       = ctx->device_ms;
 
@@ -2522,7 +2521,7 @@ H5VL_pass_through_ext_dataset_write(
             uint64_t chunk_elems = 0;
             herr_t   cret;
             uint64_t phdr[VOL_PRESSIO_HDR_WORDS];
-            const size_t hdr_bytes = sizeof(phdr);            /* 24 */
+            const size_t hdr_bytes = sizeof(phdr);
             const size_t chunk_bytes_req =
                 H5VL_pass_through_ext_chunk_bytes(ctx, total_bytes, dsize);
 
@@ -2533,7 +2532,7 @@ H5VL_pass_through_ext_dataset_write(
             cret = H5VL_pass_through_ext_compress_pressio(
                        ctx, comp_src, total_bytes, chunk_bytes_req,
                        &blob, &clen, &chunk_elems);
-            t.compress_ms     = bench_now_ms() - _c0;   /* ALWAYS wall clock */
+            t.compress_ms     = bench_now_ms() - _c0;
             t.pressio_call_ms = ctx->pressio_call_ms;
             t.device_ms       = ctx->device_ms;
 
