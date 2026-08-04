@@ -132,6 +132,7 @@ static int
 vol_ev_begin(compression_ctx *ctx, int gpu)
 {
     if (!gpu || !vol_gpu_events_enabled()) return 0;
+    if (!ctx->cuda_stream_ok)              return 0;   /* <-- new */
 
     if (!ctx->ev_start || !ctx->ev_stop) {
         cudaEvent_t a = NULL, b = NULL;
@@ -155,84 +156,127 @@ vol_ev_end(compression_ctx *ctx, int active)
     ctx->device_ms += (double)ms;
 }
 
+/* Does this codec declare a CUDA stream option? Returns 1 if the key exists
+ * in any state, 0 if the codec has never heard of it. */
+static int
+vol_codec_declares_stream(compression_ctx *ctx, char *skey_out, size_t n)
+{
+    snprintf(skey_out, n, "%s:cuda_stream", ctx->compressor_id);
+
+    struct pressio_options *decl = pressio_compressor_get_options(ctx->compressor);
+    if (!decl) return 0;
+
+    void *probe = NULL;
+    enum pressio_options_key_status st =
+        pressio_options_get_userptr(decl, skey_out, &probe);
+    pressio_options_free(decl);
+
+    /* key_set(0) and key_exists(1) both mean "known"; key_does_not_exist(2)
+     * is what cuszp returns -- that is the status=2 in the warning. */
+    return (st != pressio_options_key_does_not_exist);
+}
+
 /* Hand the codec our CUDA stream. */
 static void
 vol_set_cuda_stream(compression_ctx *ctx)
 {
     char skey[128];
-    int  serr;
 
     if (ctx->cuda_stream_set) return;
+    ctx->cuda_stream_set = 1;
+    ctx->cuda_stream_ok  = 0;
 
-    snprintf(skey, sizeof(skey), "%s:cuda_stream", ctx->compressor_id);
+    if (!vol_codec_declares_stream(ctx, skey, sizeof(skey))) {
+        /* Codec owns its stream. NULL is the LEGACY DEFAULT stream, which
+         * implicitly synchronizes with every blocking stream -- so the device
+         * barrier in vol_stream_barrier() is correct, not a workaround. */
+        ctx->stream = NULL;
+        if (getenv("VOL_COMP_COPY_LOG"))
+            fprintf(stderr,
+                "[VOL stream] '%s' declares no '%s' -- codec manages its own "
+                "stream. Using the default stream + device barrier before D2H. "
+                "device_ms is NOT reported for this codec; use pressio_call_ms "
+                "or nsys.\n", ctx->compressor_id, skey);
+        return;
+    }
+
+    /* Codec can take a stream, so give it a real one instead of NULL. */
+    if (!ctx->stream) {
+        cudaStream_t s = NULL;
+        if (cudaStreamCreate(&s) != cudaSuccess) {
+            fprintf(stderr, "[VOL stream] cudaStreamCreate failed for '%s'; "
+                            "falling back to the default stream\n",
+                    ctx->compressor_id);
+            ctx->stream = NULL;
+            return;
+        }
+        ctx->stream = (void *)s;
+    }
 
     {
         struct pressio_options *sopt = pressio_options_new();
         pressio_options_set_userptr(sopt, skey, ctx->stream);
-        serr = pressio_compressor_set_options(ctx->compressor, sopt);
+        int serr = pressio_compressor_set_options(ctx->compressor, sopt);
         pressio_options_free(sopt);
+        if (serr)
+            fprintf(stderr, "[VOL stream] set_options('%s') returned %d: %s\n",
+                    skey, serr, pressio_compressor_error_msg(ctx->compressor));
     }
 
-    if (serr) {
-        fprintf(stderr, "[VOL stream] set_options('%s') returned %d: %s\n",
-                skey, serr, pressio_compressor_error_msg(ctx->compressor));
-    }
-
+    /* A codec MAY declare the key and still ignore the value. That must not be
+     * reported as trustworthy timing. */
     {
         struct pressio_options *o = pressio_compressor_get_options(ctx->compressor);
         void *rb = NULL;
-        enum pressio_options_key_status st = pressio_options_get_userptr(o, skey, &rb);
+        enum pressio_options_key_status st =
+            o ? pressio_options_get_userptr(o, skey, &rb)
+              : pressio_options_key_does_not_exist;
 
-        if (st != pressio_options_key_set || rb != ctx->stream) {
-            ctx->cuda_stream_ok = 0;
-            fprintf(stderr,
-                "[VOL stream] *** KEY NOT CONFIRMED *** '%s' status=%d "
-                "readback=%p expected=%p\n"
-                "[VOL stream] GPU event timings (device_ms) are NOT trustworthy, "
-                "and D2H ordering is not guaranteed.\n"
-                "[VOL stream] Cross-check with: nsys stats --report cuda_gpu_trace\n",
-                skey, (int)st, rb, (void *)ctx->stream);
-
-            char *dump = pressio_options_to_string(o);
-            fprintf(stderr, "[VOL stream] options declared by '%s':\n%s\n",
-                    ctx->compressor_id, dump ? dump : "(null)");
-            free(dump);
-        } else {
+        if (st == pressio_options_key_set && rb == ctx->stream) {
             ctx->cuda_stream_ok = 1;
             if (getenv("VOL_COMP_COPY_LOG"))
                 fprintf(stderr, "[VOL stream] confirmed '%s' = %p\n",
                         skey, (void *)ctx->stream);
+        } else {
+            ctx->cuda_stream_ok = 0;
+            fprintf(stderr,
+                "[VOL stream] '%s' declares '%s' but did not accept our value "
+                "(status=%d readback=%p expected=%p). Falling back to a device "
+                "barrier; device_ms will not be reported.\n",
+                ctx->compressor_id, skey, (int)st, rb, (void *)ctx->stream);
         }
-        pressio_options_free(o);
+        if (o) pressio_options_free(o);
     }
-
-    ctx->cuda_stream_set = 1;
 }
 #endif /* USE_CUDA */
 
 #ifdef USE_CUDA
 
 static cudaError_t
-vol_stream_barrier(compression_ctx *ctx)
+vol_stream_barrier(compression_ctx *ctx, hid_t minor)
 {
-    cudaError_t cerr = cudaGetLastError();      /* surface prior async faults */
+    /* NOTE: async CUDA faults surface at the NEXT sync point, so a bad kernel
+     * inside the codec lands here. Do not describe this as "the copy failed". */
+    cudaError_t cerr = cudaGetLastError();
     if (cerr != cudaSuccess) {
-        fprintf(stderr, "[VOL] pending CUDA error before D2H: %s\n",
-                cudaGetErrorString(cerr));
+        H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                vol_err_class, maj_compression, minor,
+                "CUDA error pending before synchronization for '%s' "
+                "(raised by earlier async work, likely inside the codec): %s",
+                ctx->compressor_id, cudaGetErrorString(cerr));
         return cerr;
     }
 
-    if (!ctx->cuda_stream_ok && !ctx->stream_warn_done) {
-        fprintf(stderr,
-            "[VOL] *** D2H ORDERING NOT GUARANTEED *** the '%s:cuda_stream' "
-            "option was not confirmed, so the codec may be running on a stream "
-            "we do not synchronise. Results may be read before the kernel "
-            "finishes. Fix the option key; do not mask this with a device "
-            "barrier.\n", ctx->compressor_id);
-        ctx->stream_warn_done = 1;
-    }
+    cerr = ctx->cuda_stream_ok
+             ? cudaStreamSynchronize((cudaStream_t)ctx->stream)
+             : cudaDeviceSynchronize();
 
-    return cudaStreamSynchronize((cudaStream_t)ctx->stream);
+    if (cerr != cudaSuccess)
+        H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                vol_err_class, maj_compression, minor,
+                "CUDA synchronization failed for '%s': %s",
+                ctx->compressor_id, cudaGetErrorString(cerr));
+    return cerr;
 }
 #endif
 
@@ -262,8 +306,11 @@ vol_fetch_result(compression_ctx *ctx, struct pressio_data *result,
         if (cerr == cudaSuccess)
             cerr = vol_stream_barrier(ctx);
         if (cerr != cudaSuccess) {
-            fprintf(stderr, "[VOL] D2H of %zu compressed bytes failed: %s\n",
-                    sz, cudaGetErrorString(cerr));
+            H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                    vol_err_class, maj_compression, min_compress_failed,
+                    "device-to-host copy of %zu compressed bytes failed "
+                    "for '%s': %s", sz, ctx->compressor_id,
+                    cudaGetErrorString(cerr));
             free(dst);
             return -3;
         }
@@ -300,8 +347,12 @@ vol_fetch_into(compression_ctx *ctx, struct pressio_data *result,
         if (cerr == cudaSuccess)
             cerr = vol_stream_barrier(ctx);
         if (cerr != cudaSuccess) {
-            fprintf(stderr, "[VOL] D2H of %zu decompressed bytes failed: %s\n",
-                    want, cudaGetErrorString(cerr));
+            H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                    vol_err_class, maj_compression, min_compress_failed,
+                    "device-to-host copy of %zu decompressed bytes failed "
+                    "for '%s': %s", sz, ctx->compressor_id,
+                    cudaGetErrorString(cerr));
+            free(dst);
             return -3;
         }
         return 0;

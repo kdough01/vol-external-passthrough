@@ -476,7 +476,16 @@ chunking_ctx* chunking_ctx_create(hid_t dataset_id)
 
 void compression_ctx_destroy(compression_ctx *comp_ctx) {
     if (!comp_ctx) return;
-    
+
+#ifdef USE_CUDA
+    if (comp_ctx->ev_start) cudaEventDestroy((cudaEvent_t)comp_ctx->ev_start);
+    if (comp_ctx->ev_stop)  cudaEventDestroy((cudaEvent_t)comp_ctx->ev_stop);
+    if (comp_ctx->stream)   cudaStreamDestroy((cudaStream_t)comp_ctx->stream);
+    comp_ctx->ev_start = NULL;
+    comp_ctx->ev_stop  = NULL;
+    comp_ctx->stream   = NULL;
+#endif
+
     if (comp_ctx->compressor_opts) pressio_options_free(comp_ctx->compressor_opts);
     if (comp_ctx->compressor) pressio_compressor_release(comp_ctx->compressor);
     if (comp_ctx->library) pressio_release(comp_ctx->library);
@@ -486,11 +495,12 @@ void compression_ctx_destroy(compression_ctx *comp_ctx) {
         comp_ctx->chunk_wrapper       = NULL;
         comp_ctx->chunk_wrapper_elems = 0;
     }
-    
+
     free(comp_ctx->compressor_id);
     free(comp_ctx->dims);
     free(comp_ctx->compressed_buf);
     free(comp_ctx->decomp_buf);
+    free(comp_ctx->stage_buf);     /* leaks if a dataset is closed mid-strip */
     free(comp_ctx);
 }
 
