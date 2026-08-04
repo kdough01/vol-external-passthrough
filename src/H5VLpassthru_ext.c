@@ -46,6 +46,9 @@
 #include "metadata_structs.h"
 #include "vol_errors.h"
 #include "vol_timing_sink.h"
+#include "vol_shared_meta.h"
+#include "vol_progressive.h"
+#include "vol_container_read.h"
 
 /**********/
 /* Macros */
