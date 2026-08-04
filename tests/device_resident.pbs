@@ -1,7 +1,7 @@
 #!/bin/bash
 #PBS -N g2_device_resident
 #PBS -l select=1:ncpus=16:ngpus=1:mpiprocs=1:mem=128gb
-#PBS -l walltime=00:20:00
+#PBS -l walltime=03:00:00
 #PBS -j oe
 #PBS -A SDR
 #PBS -q gpu
@@ -29,10 +29,28 @@ CLEAN_PATH=$(echo "$PATH" | tr ':' '\n' | grep -v spack-env | tr '\n' ':')
 GCC_LIB=$(gcc --print-file-name=libstdc++.so | xargs dirname 2>/dev/null)
 [ "$GCC_LIB" = "." ] && GCC_LIB=/usr/lib/gcc/x86_64-linux-gnu/11
 
+SYSTEM_MPICC=$(which mpicc)
+SYSTEM_MPICXX=$(which mpicxx)
+[ -x "$SYSTEM_MPICC" ] || { echo "ERROR: mpicc not on PATH -- module load hpcx?"; exit 1; }
+
+LP_CMAKE_DIR=""
+for candidate in \
+    "${LP_VIEW}/lib64/cmake/LibPressio" "${LP_VIEW}/lib/cmake/LibPressio" \
+    "${LP_VIEW}/lib64/cmake/libpressio" "${LP_VIEW}/lib/cmake/libpressio"; do
+    if [ -f "${candidate}/LibPressioConfig.cmake" ] || \
+       [ -f "${candidate}/libpressio-config.cmake" ]; then
+        LP_CMAKE_DIR="$candidate"; break
+    fi
+done
+[ -z "$LP_CMAKE_DIR" ] && { echo "ERROR: no LibPressioConfig.cmake under $LP_VIEW"; exit 1; }
+
 echo ""
 echo "=== building ($BUILD) ==="
 env PATH="$CLEAN_PATH" LD_LIBRARY_PATH="$GCC_LIB" \
-cmake -S . -B "$BUILD" -DUSE_CUDA=ON -DCMAKE_PREFIX_PATH="$LP_VIEW" -Wno-dev \
+cmake -S . -B "$BUILD" \
+    -DCMAKE_C_COMPILER="$SYSTEM_MPICC" -DCMAKE_CXX_COMPILER="$SYSTEM_MPICXX" \
+    -DUSE_CUDA=ON -DCMAKE_PREFIX_PATH="$LP_VIEW" \
+    -DLibPressio_DIR="$LP_CMAKE_DIR" -Wno-dev \
     > build_g2.log 2>&1 || { echo "cmake failed"; tail -30 build_g2.log; exit 1; }
 env PATH="$CLEAN_PATH" LD_LIBRARY_PATH="$GCC_LIB" cmake --build "$BUILD" -j16 \
     || { echo "build failed -- refusing to run a stale binary"; exit 1; }
@@ -67,7 +85,6 @@ run_arm () {
                      --out /dev/null --ext /dev/null 2>&1)
     echo "$OUT"
 
-    # vol_timing_emit_ex prints the per-phase breakdown; pull the write row.
     local w c dv io
     w=$(echo  "$OUT" | grep -m1 -oP 'write[^0-9]*\K[0-9.]+')
     c=$(echo  "$OUT" | grep -m1 -oP 'compress_ms=\K[0-9.]+')
@@ -84,7 +101,6 @@ for r in $(seq 1 "$REPS"); do
     run_arm host   "$r"
 done
 
-# [2] NSIGHT SYSTEMS
 echo ""
 echo "############ [2] nsys profiles ############"
 
