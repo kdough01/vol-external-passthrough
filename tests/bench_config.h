@@ -426,15 +426,20 @@ static const bench_compressor_t BENCH_COMPRESSORS[] = {
       BENCH_CPU_CODEC, 1, BENCH_BOUND_ABS, 0.0, NULL,
       "CPU lossless, general purpose. CPU comparator." },
 
-    { "zfp_1e3", "zfp",
-      "{\"zfp:accuracy\":1e-3}",
-      BENCH_CPU_CODEC, 0, BENCH_BOUND_ABS, 1e-3, NULL,
-      "ZFP fixed-accuracy 1e-3." },
+#define ZFP_RATE_PAIR(RATE, TAG)                                                   \
+    { "zfp_cpu_r" TAG, "zfp",                                                      \
+      "{\"zfp:rate\":" #RATE ",\"zfp:wra\":0,\"zfp:execution_name\":\"serial\"}",  \
+      BENCH_CPU_CODEC, 0, BENCH_BOUND_NONE, 0.0, NULL,                             \
+      "ZFP serial fixed-rate " TAG " bits/value." },                               \
+    { "zfp_gpu_r" TAG, "zfp",                                                      \
+      "{\"zfp:rate\":" #RATE ",\"zfp:wra\":0,\"zfp:execution_name\":\"cuda\"}",    \
+      BENCH_GPU_CODEC, 0, BENCH_BOUND_NONE, 0.0, NULL,                             \
+      "ZFP CUDA fixed-rate " TAG " bits/value." }
 
-    { "zfp_1e6", "zfp",
-      "{\"zfp:accuracy\":1e-6}",
-      BENCH_CPU_CODEC, 0, BENCH_BOUND_ABS, 1e-6, NULL,
-      "ZFP fixed-accuracy 1e-6." },
+    ZFP_RATE_PAIR(4.0,  "4"),
+    ZFP_RATE_PAIR(8.0,  "8"),
+    ZFP_RATE_PAIR(12.0, "12"),
+    ZFP_RATE_PAIR(16.0, "16"),
 
     /* --- JSON-path chunking (N chunks via opts_json; do NOT set VOL_COMP_* env).
      *     chunk_n=8 divides every static dataset. noop+pressio is omitted:

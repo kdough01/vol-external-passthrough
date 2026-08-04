@@ -4,8 +4,13 @@
 #include <cstring>
 #include <cmath>
 #include <cfloat>
+#include <ctime>
+#include <cerrno>
 #include <stdexcept>
 #include <exception>
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/stat.h>
 #ifdef USE_CUDA
 #include <cuda_runtime.h>
 #endif
@@ -18,13 +23,27 @@
 static const char *XCSV_HEADER =
     "dataset,compressor,codec_kind,chunk_n,rep,"
     "logical_bytes,stored_bytes,ratio,"
-    "create_ms,write_ms,flush_ms,close_ms,open_ms,read_ms,"
+    "create_ms,write_ms,flush_ms,sync_ms,close_ms,csync_ms,"
+    "evict_ms,open_ms,read_ms,"
     "rmse,abs_thresh,maxae,bound_ok\n";
 
 typedef struct {
-    double create_ms, write_ms, flush_ms, close_ms, open_ms, read_ms;
+    double create_ms, write_ms, flush_ms, sync_ms, close_ms, csync_ms;
+    double evict_ms, open_ms, read_ms;
     unsigned long long stored;
 } rep_timing;
+
+static inline double bench_wall_now_ms(void) {
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return (double)ts.tv_sec * 1.0e3 + (double)ts.tv_nsec * 1.0e-6;
+}
+
+struct BenchWallTimer {
+    double t0;
+    void   start()   { t0 = bench_wall_now_ms(); }
+    double stop_ms() { return bench_wall_now_ms() - t0; }
+};
 
 static void xcsv_row(FILE *fp, const char *dset, const bench_compressor_t *c,
                      int chunk_n, int rep, unsigned long long logical,
@@ -37,10 +56,13 @@ static void xcsv_row(FILE *fp, const char *dset, const bench_compressor_t *c,
     std::fprintf(fp,
         "%s,%s,%s,%d,%d,%llu,%llu,%.4f,"
         "%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,"
+        "%.4f,%.4f,%.4f,"
         "%.6e,%.6e,%.6e,%d\n",
         dset, c->name, bench_codec_kind_name(c->kind), chunk_n, rep,
         logical, t->stored, ratio,
-        t->create_ms, t->write_ms, t->flush_ms, t->close_ms, t->open_ms, t->read_ms,
+        t->create_ms, t->write_ms, t->flush_ms, t->sync_ms,
+        t->close_ms, t->csync_ms,
+        t->evict_ms, t->open_ms, t->read_ms,
         rmse, abs_thresh, maxae, bound_ok);
     std::fflush(fp);
 }
@@ -176,6 +198,50 @@ static int env_int(const char *name, int dflt) {
 static int bench_verify(void)  { return env_int("BENCH_VERIFY", 0) != 0; }
 static int bench_keep_h5(void) { return env_int("BENCH_KEEP_H5", 0) != 0; }
 
+static int bench_do_fsync(void)      { return env_int("BENCH_FSYNC", 1) != 0; }
+static int bench_do_dropcache(void)  { return env_int("BENCH_DROP_CACHE", 1) != 0; }
+static int bench_do_syncdir(void)    { return env_int("BENCH_SYNC_DIR", 1) != 0; }
+
+static double bench_fsync_path(const char *path, int sync_dir) {
+    BenchWallTimer t; t.start();
+
+    int fd = ::open(path, O_RDONLY);
+    if (fd < 0) {
+        std::fprintf(stderr, "[warn] fsync open failed %s: %s\n",
+                     path, std::strerror(errno));
+        return 0.0;
+    }
+    if (::fsync(fd) != 0)
+        std::fprintf(stderr, "[warn] fsync failed %s: %s\n",
+                     path, std::strerror(errno));
+    ::close(fd);
+
+    if (sync_dir) {
+        char dir[1024];
+        std::snprintf(dir, sizeof(dir), "%s", path);
+        char *slash = std::strrchr(dir, '/');
+        if (slash) { if (slash == dir) dir[1] = '\0'; else *slash = '\0'; }
+        else       { std::snprintf(dir, sizeof(dir), "."); }
+        int dfd = ::open(dir, O_RDONLY | O_DIRECTORY);
+        if (dfd >= 0) { (void)::fsync(dfd); ::close(dfd); }
+    }
+    return t.stop_ms();
+}
+
+static double bench_evict_path(const char *path) {
+    BenchWallTimer t; t.start();
+
+    int fd = ::open(path, O_RDONLY);
+    if (fd < 0) return 0.0;
+    (void)::fsync(fd);
+    if (posix_fadvise(fd, 0, 0, POSIX_FADV_DONTNEED) != 0)
+        std::fprintf(stderr, "[warn] fadvise DONTNEED failed %s: %s\n",
+                     path, std::strerror(errno));
+    ::close(fd);
+
+    return t.stop_ms();
+}
+
 static int name_selected(const char *sel, const char *name) {
     if (!sel || !*sel) return 1;
     size_t nl = std::strlen(name);
@@ -197,7 +263,8 @@ static void derive_path(const char *base, const char *suffix,
 }
 
 typedef struct {
-    double             write_ms, flush_ms, close_ms, create_ms, open_ms, read_ms;
+    double             write_ms, flush_ms, sync_ms, close_ms, csync_ms;
+    double             create_ms, evict_ms, open_ms, read_ms;
     size_t             raw_bytes;
     unsigned long long storage;
     int                n;
@@ -209,6 +276,10 @@ static int run_rep(const char *path, const char *dsname,
                    const void *hbuf, void *rbuf, size_t raw_bytes,
                    rep_timing *t) {
     std::memset(t, 0, sizeof(*t));
+
+    const int do_fsync = bench_do_fsync();
+    const int do_evict = bench_do_dropcache();
+    const int do_sdir  = bench_do_syncdir();
 
     /* ---------------- WRITE PHASE (own file) ---------------- */
     {
@@ -233,19 +304,27 @@ static int run_rep(const char *path, const char *dsname,
         herr_t wret = H5Dwrite(dset, ntype, H5S_ALL, H5S_ALL, H5P_DEFAULT, hbuf);
         t->write_ms = wt.stop_ms();
 
-        /* H5Dwrite only reaches HDF5's cache; time the flush separately so io
-         * means io. H5Fclose below covers whatever the flush did not. */
-        BenchCpuTimer ft; ft.start();
+        /* H5Dwrite only reaches HDF5's cache; H5Fflush only reaches the OS
+         * page cache.  The fsync below is what actually forces the bytes to
+         * the device, and it is the phase that makes io_ms reproducible. */
+        BenchWallTimer ft; ft.start();
         (void)H5Fflush(file, H5F_SCOPE_LOCAL);
         t->flush_ms = ft.stop_ms();
+
+        if (do_fsync) t->sync_ms = bench_fsync_path(path, do_sdir);
 
         t->stored = (unsigned long long)H5Dget_storage_size(dset);
         H5Dclose(dset);
         H5Pclose(dcpl);
 
-        BenchCpuTimer clt; clt.start();
+        BenchWallTimer clt; clt.start();
         H5Fclose(file);
         t->close_ms = clt.stop_ms();
+
+        /* H5Fclose can emit superblock/metadata updates after the flush, so
+         * the file is not durable until this second fsync returns.  It should
+         * be small; if it is not, HDF5 deferred real payload to close. */
+        if (do_fsync) t->csync_ms = bench_fsync_path(path, do_sdir);
 
         if (wret < 0) {
             std::fprintf(stderr, "[ERR] H5Dwrite failed %s\n", dsname);
@@ -253,11 +332,14 @@ static int run_rep(const char *path, const char *dsname,
         }
     }
 
-    /* ---------------- READ PHASE (fresh open) ---------------- */
+    /* ---------------- READ PHASE (fresh open, cold cache) ---------------- */
     {
         std::memset(rbuf, 0, raw_bytes);
 
-        BenchCpuTimer ot; ot.start();
+        /* Not counted in read_total: this is cache teardown, not read cost. */
+        if (do_evict) t->evict_ms = bench_evict_path(path);
+
+        BenchWallTimer ot; ot.start();
         hid_t file = H5Fopen(path, H5F_ACC_RDONLY, H5P_DEFAULT);
         t->open_ms = ot.stop_ms();
         if (file < 0) {
@@ -354,7 +436,10 @@ static void run_pair(const char *h5base,
 
         bench_csv_row(csv, d->name, c->name, "vol", "write", "total", t.write_ms, ratio, -1.0);
         bench_csv_row(csv, d->name, c->name, "vol", "write", "flush", t.flush_ms, -1.0, -1.0);
+        bench_csv_row(csv, d->name, c->name, "vol", "write", "sync",  t.sync_ms,  -1.0, -1.0);
         bench_csv_row(csv, d->name, c->name, "vol", "write", "close", t.close_ms, -1.0, -1.0);
+        bench_csv_row(csv, d->name, c->name, "vol", "write", "csync", t.csync_ms, -1.0, -1.0);
+        bench_csv_row(csv, d->name, c->name, "vol", "read",  "evict", t.evict_ms, -1.0, -1.0);
         bench_csv_row(csv, d->name, c->name, "vol", "read",  "total", t.read_ms, -1.0, st.rmse);
 
         xcsv_row(xcsv, d->name, c, chunk_n, 0,
@@ -362,16 +447,20 @@ static void run_pair(const char *h5base,
 
         if (acc) {
             acc->create_ms += t.create_ms; acc->write_ms += t.write_ms;
-            acc->flush_ms  += t.flush_ms;  acc->close_ms += t.close_ms;
+            acc->flush_ms  += t.flush_ms;  acc->sync_ms  += t.sync_ms;
+            acc->close_ms  += t.close_ms;  acc->csync_ms += t.csync_ms;
+            acc->evict_ms  += t.evict_ms;
             acc->open_ms   += t.open_ms;   acc->read_ms  += t.read_ms;
             acc->raw_bytes += raw_bytes;   acc->storage  += t.stored;
             acc->n         += 1;
         }
 
-        std::printf("  %-28s C=%7.2f W=%9.2f F=%8.2f X=%8.2f | "
-                    "O=%7.2f R=%9.2f ms  ratio=%6.2fx  RMSE=%.3e maxae=%.3e%s\n",
-                    dsname, t.create_ms, t.write_ms, t.flush_ms, t.close_ms,
-                    t.open_ms, t.read_ms, ratio, st.rmse, st.maxae,
+        std::printf("  %-28s C=%7.2f W=%9.2f F=%8.2f S=%9.2f X=%8.2f S2=%7.2f | "
+                    "E=%7.2f O=%7.2f R=%9.2f ms  ratio=%6.2fx  "
+                    "RMSE=%.3e maxae=%.3e%s\n",
+                    dsname, t.create_ms, t.write_ms, t.flush_ms, t.sync_ms,
+                    t.close_ms, t.csync_ms,
+                    t.evict_ms, t.open_ms, t.read_ms, ratio, st.rmse, st.maxae,
                     (d->xform != BENCH_XFORM_NONE) ? " (log-space)" : "");
         std::fflush(stdout);
 
@@ -411,6 +500,10 @@ int main(int argc, char **argv) {
         h5base, csvpath, xcsvpath, only ? only : "(all)",
         only_cmp ? only_cmp : "(all)",
         bench_verify(), bench_keep_h5(), (int)dbg);
+    std::fprintf(stderr,
+        "[dbg main] durability: fsync=%d sync_dir=%d drop_cache=%d "
+        "(BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)\n",
+        bench_do_fsync(), bench_do_syncdir(), bench_do_dropcache());
     std::fprintf(stderr,
         "[dbg main] one measurement per (dataset x compressor), no warmup, "
         "own file at <base>_<comp>.h5\n");
@@ -554,15 +647,18 @@ int main(int argc, char **argv) {
         n_ok++;
     }
 
-    const double file_wtotal = acc.create_ms + acc.write_ms + acc.flush_ms + acc.close_ms;
-    const double file_rtotal = acc.open_ms + acc.read_ms;
+    const double file_wtotal = acc.create_ms + acc.write_ms + acc.flush_ms
+                             + acc.sync_ms  + acc.close_ms + acc.csync_ms;
+    const double file_rtotal = acc.open_ms + acc.read_ms;   /* evict excluded */
     const double file_ratio  = acc.storage ? (double)acc.raw_bytes / (double)acc.storage : 0.0;
 
     std::printf("\n=== TOTALS over %d measurement files: create=%.2f write=%.2f "
-                "flush=%.2f close=%.2f => write_total=%.2f ms | open=%.2f "
-                "read=%.2f => read_total=%.2f ms | ratio=%.2fx ===\n",
-                acc.n, acc.create_ms, acc.write_ms, acc.flush_ms, acc.close_ms,
-                file_wtotal, acc.open_ms, acc.read_ms, file_rtotal, file_ratio);
+                "flush=%.2f sync=%.2f close=%.2f csync=%.2f => write_total=%.2f ms | "
+                "evict=%.2f open=%.2f read=%.2f => read_total=%.2f ms | "
+                "ratio=%.2fx ===\n",
+                acc.n, acc.create_ms, acc.write_ms, acc.flush_ms, acc.sync_ms,
+                acc.close_ms, acc.csync_ms, file_wtotal,
+                acc.evict_ms, acc.open_ms, acc.read_ms, file_rtotal, file_ratio);
 
     bench_csv_row(csv, h5base, "ALL", "vol", "write", "file", file_wtotal, file_ratio, -1.0);
     bench_csv_row(csv, h5base, "ALL", "vol", "read",  "file", file_rtotal, -1.0,       -1.0);
