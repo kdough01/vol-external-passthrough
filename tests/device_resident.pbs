@@ -59,21 +59,31 @@ env PATH="$CLEAN_PATH" LD_LIBRARY_PATH="$GCC_LIB" \
 cmake -S . -B "$BUILD" \
     -DCMAKE_C_COMPILER="$SYSTEM_MPICC" -DCMAKE_CXX_COMPILER="$SYSTEM_MPICXX" \
     -DUSE_CUDA=ON -DCMAKE_PREFIX_PATH="$LP_VIEW" \
-    -DLibPressio_DIR="$LP_CMAKE_DIR" -Wno-dev \
+    -DLibPressio_DIR="$LP_CMAKE_DIR" \
+    -DBUILD_EXAMPLES=OFF -Wno-dev \
     > build_g2.log 2>&1 || { echo "cmake failed"; tail -30 build_g2.log; exit 1; }
 env PATH="$CLEAN_PATH" LD_LIBRARY_PATH="$GCC_LIB" cmake --build "$BUILD" -j16 \
     || { echo "build failed -- refusing to run a stale binary"; exit 1; }
 
-BIN="$BUILD/tests/bench_vol_timing"
-VOL_PLUGIN_PATH="${VOL_PLUGIN_PATH:-$WORK/$BUILD/src}"
+# The root CMakeLists sets CMAKE_RUNTIME_OUTPUT_DIRECTORY=${CMAKE_BINARY_DIR}/bin
+# and LIBRARY_OUTPUT_DIRECTORY=${CMAKE_BINARY_DIR}/lib -- NOT the per-subdir
+# defaults.
+BIN="$BUILD/bin/bench_vol_timing"
+VOL_PLUGIN_PATH="${VOL_PLUGIN_PATH:-$WORK/$BUILD/lib}"
 VOL_CONNECTOR="${VOL_CONNECTOR:-pass_through_ext under_vol=0;under_info={}}"
+[ -x "$BIN" ] || { echo "ERROR: $BIN not found after build"; exit 1; }
 
-if ! "$BIN" --help 2>&1 | grep -qi device && [ -z "${BENCH_DEVICE_INPUT_OK:-}" ]; then
+H5DIR="${VOL_H5DIR:-/lcrc/project/SDR/$USER/vol_bench_h5}"
+mkdir -p "$H5DIR" || { echo "ERROR: cannot create $H5DIR"; exit 1; }
+
+# bench_vol_timing has no --help; probe the binary for the env-var string the
+# device-staging block introduces. Absent => the edit was never applied.
+if ! strings "$BIN" 2>/dev/null | grep -q BENCH_DEVICE_INPUT; then
     echo ""
-    echo ">>> WARNING: could not confirm bench_vol_timing supports device input."
-    echo ">>> If BENCH_DEVICE_INPUT is ignored, BOTH arms run host-staged and"
-    echo ">>> the figure will show no difference -- a null result that looks real."
-    echo ">>> Add the device mode from the header comment first."
+    echo ">>> WARNING: BENCH_DEVICE_INPUT not found in $BIN."
+    echo ">>> Both arms will run host-staged and the figure will show no"
+    echo ">>> difference -- a null result that looks real. Add the device"
+    echo ">>> staging block to bench_vol_timing.cc first."
 fi
 
 run_arm () {
@@ -86,12 +96,12 @@ run_arm () {
     local OUT
     OUT=$(env HDF5_PLUGIN_PATH="$VOL_PLUGIN_PATH" \
               HDF5_VOL_CONNECTOR="$VOL_CONNECTOR" \
+              BENCH_ONLY="$DATASET" BENCH_COMP="$COMP" \
               VOL_COMP_CHUNKING=none \
               VOL_COMP_COPY_LOG=1 VOL_COMP_GPU_EVENTS=1 \
               ${dev:+$dev} \
               timeout --signal=KILL 1800 \
-              "$BIN" --comp "$COMP" --only "$DATASET" \
-                     --out /dev/null --ext /dev/null 2>&1)
+              "$BIN" "$H5DIR/g2_${arm}.h5" /dev/null /dev/null 2>&1)
     echo "$OUT"
 
     local w c dv io
@@ -123,14 +133,15 @@ profile_arm () {
     echo "--- nsys [$arm] ---"
     env HDF5_PLUGIN_PATH="$VOL_PLUGIN_PATH" \
         HDF5_VOL_CONNECTOR="$VOL_CONNECTOR" \
+        BENCH_ONLY="$DATASET" BENCH_COMP="$COMP" \
         VOL_COMP_CHUNKING=none ${dev:+$dev} \
     nsys profile \
         --trace=cuda,nvtx,osrt \
         --cuda-memory-usage=true \
         --force-overwrite=true \
         -o "$out" \
-        "$BIN" --comp "$COMP" --only "$DATASET" \
-               --out /dev/null --ext /dev/null > "$out.stdout" 2>&1
+        "$BIN" "$H5DIR/g2_prof_${arm}.h5" /dev/null /dev/null \
+        > "$out.stdout" 2>&1
     echo "  wrote $out.nsys-rep"
 
     echo "  --- GPU memory transfers ---"
