@@ -304,7 +304,7 @@ vol_fetch_result(compression_ctx *ctx, struct pressio_data *result,
                                            cudaMemcpyDeviceToHost,
                                            (cudaStream_t)ctx->stream);
         if (cerr == cudaSuccess)
-            cerr = vol_stream_barrier(ctx);
+            cerr = vol_stream_barrier(ctx, min_compress_failed);
         if (cerr != cudaSuccess) {
             H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
                     vol_err_class, maj_compression, min_compress_failed,
@@ -345,7 +345,7 @@ vol_fetch_into(compression_ctx *ctx, struct pressio_data *result,
         cudaError_t cerr = cudaMemcpyAsync(dst, src, want, cudaMemcpyDeviceToHost,
                                            (cudaStream_t)ctx->stream);
         if (cerr == cudaSuccess)
-            cerr = vol_stream_barrier(ctx);
+            cerr = vol_stream_barrier(ctx, min_decompress_failed);
         if (cerr != cudaSuccess) {
             H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
                     vol_err_class, maj_compression, min_compress_failed,

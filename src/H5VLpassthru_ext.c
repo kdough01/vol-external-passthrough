@@ -50,6 +50,10 @@
 #include "vol_progressive.h"
 #include "vol_container_read.h"
 
+#ifdef USE_CUDA
+#include <cuda_runtime.h>
+#endif
+
 /**********/
 /* Macros */
 /**********/
