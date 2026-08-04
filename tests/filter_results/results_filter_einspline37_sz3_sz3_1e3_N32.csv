@@ -1,0 +1,3 @@
+dataset,compressor,path,op,phase,ms,ratio,rmse
+einspline37,sz3_1e3,filter,write,total,118709.6204,3.3782,
+einspline37,sz3_1e3,filter,read,total,120220.2972,,5.741623e-04
