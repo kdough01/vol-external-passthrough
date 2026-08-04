@@ -2401,9 +2401,10 @@ vol_write_whole(const vol_write_req_t *req, const void *blob, hsize_t total,
 
     const void *wbufs[] = { blob };
     hid_t mspace = H5S_ALL, fspace = H5S_ALL;
+    void *under = req->under;
 
     double _io0 = bench_now_ms();
-    herr_t rc = H5VLdataset_write(1, &req->under, req->d->under_vol_id,
+    herr_t rc = H5VLdataset_write(1, &under, req->d->under_vol_id,
                                   (hid_t[]){H5T_NATIVE_UCHAR},
                                   &mspace, &fspace, req->plist_id, wbufs, NULL);
     t->io_ms += bench_now_ms() - _io0;
@@ -2421,6 +2422,7 @@ vol_write_at(const vol_write_req_t *req, const void *buf,
              hsize_t off, hsize_t len, hsize_t total, vol_write_timing_t *t)
 {
     if (len == 0) return 0;
+    void *under = req->under;
 
     double _p0 = bench_now_ms();
     hid_t mspace = H5Screate_simple(1, &len, NULL);
@@ -2430,7 +2432,7 @@ vol_write_at(const vol_write_req_t *req, const void *buf,
 
     const void *bufs[] = { buf };
     double _io0 = bench_now_ms();
-    herr_t rc = H5VLdataset_write(1, &req->under, req->d->under_vol_id,
+    herr_t rc = H5VLdataset_write(1, &under, req->d->under_vol_id,
                                   (hid_t[]){H5T_NATIVE_UCHAR},
                                   &mspace, &fspace, req->plist_id, bufs, NULL);
     t->io_ms += bench_now_ms() - _io0;
