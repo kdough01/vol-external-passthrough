@@ -525,35 +525,36 @@ const void *wbuf = hbuf;
         }
 #endif
 
-        void *rbuf = std::malloc(raw);
-        if (!rbuf) { std::fprintf(stderr, "[ERR] OOM rbuf %s\n", rz.name); std::free(hbuf); continue; }
 
-        std::printf("\n=== %s (%.1f MiB, %s, %s%s) ===\n", rz.name,
-                    raw / (1024.0 * 1024.0), bench_dtype_name(rz.dtype),
-                    bench_src_name(rz.src),
-                    rz.xform != BENCH_XFORM_NONE ? ", transformed" : "");
-
-        for (int ci = 0; ci < BENCH_NUM_COMPRESSORS; ++ci) {
-            const bench_compressor_t *c = &BENCH_COMPRESSORS[ci];
-            if (!name_selected(only_cmp, c->name)) continue;
-            run_pair(h5base, &rz, c, hbuf, wbuf, rbuf, raw,
-                                measured_range, csv, xcsv, &acc);
+std::printf("\n=== %s (%.1f MiB, %s, %s%s) ===\n", rz.name,
+    raw / (1024.0 * 1024.0), bench_dtype_name(rz.dtype),
+    bench_src_name(rz.src),
+    rz.xform != BENCH_XFORM_NONE ? ", transformed" : "");
+    
+    for (int ci = 0; ci < BENCH_NUM_COMPRESSORS; ++ci) {
+        const bench_compressor_t *c = &BENCH_COMPRESSORS[ci];
+        if (!name_selected(only_cmp, c->name)) continue;
+        run_pair(h5base, &rz, c, hbuf, wbuf, rbuf, raw,
+            measured_range, csv, xcsv, &acc);
         }
-#ifdef USE_CUDA
+        #ifdef USE_CUDA
         if (dbuf) cudaFree(dbuf);
         if (sbuf) std::free(sbuf);
-#endif
+        #endif
         std::free(rbuf); std::free(hbuf);
         n_ok++;
     }
-
+    
     /* File-level rows are sums over the per-measurement files, so create and
-     * close are genuinely attributable rather than a single aggregate for a
-     * whole multi-dataset container. */
-    const double file_wtotal = acc.create_ms + acc.write_ms + acc.flush_ms + acc.close_ms;
-    const double file_rtotal = acc.open_ms + acc.read_ms;
-    const double file_ratio  = acc.storage ? (double)acc.raw_bytes / (double)acc.storage : 0.0;
-
+    * close are genuinely attributable rather than a single aggregate for a
+    * whole multi-dataset container. */
+   const double file_wtotal = acc.create_ms + acc.write_ms + acc.flush_ms + acc.close_ms;
+   const double file_rtotal = acc.open_ms + acc.read_ms;
+   const double file_ratio  = acc.storage ? (double)acc.raw_bytes / (double)acc.storage : 0.0;
+   
+   void *rbuf = std::malloc(raw);
+   if (!rbuf) { std::fprintf(stderr, "[ERR] OOM rbuf %s\n", rz.name); std::free(hbuf); continue; }
+   
     std::printf("\n=== TOTALS over %d measurement files: create=%.2f write=%.2f "
                 "flush=%.2f close=%.2f => write_total=%.2f ms | open=%.2f "
                 "read=%.2f => read_total=%.2f ms | ratio=%.2fx ===\n",
