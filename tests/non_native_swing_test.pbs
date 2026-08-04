@@ -6,12 +6,6 @@
 #PBS -A SDR
 #PBS -q gpu
 
-# mem= MUST exceed 2x the largest dataset: the harness holds hbuf and rbuf
-# simultaneously. einspline37 is 12.6 GiB -> ~26 GiB of buffers, so the old
-# mem=8gb could never run it; the job was being OOM-killed or timing out and
-# `return 0` in run_vol_group made that look like a plotting gap instead of a
-# failure. bench_vol_timing now checks MemAvailable and prints [SKIP] instead.
-
 cd $PBS_O_WORKDIR/..
 WORK="$(pwd)/tests"
 RESULTS="$WORK/results"

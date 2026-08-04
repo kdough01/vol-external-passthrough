@@ -1,641 +1,698 @@
-#ifndef BENCH_CONFIG_H
-#define BENCH_CONFIG_H
-
-#ifndef _POSIX_C_SOURCE
-#define _POSIX_C_SOURCE 200809L
-#endif
-
-#include <stddef.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <hdf5.h>
+#include <cstdlib>
+#include <cstdio>
+#include <cstring>
+#include <cmath>
+#include <cfloat>
+#include <ctime>
+#include <cerrno>
+#include <stdexcept>
+#include <exception>
+#include <fcntl.h>
 #include <unistd.h>
-#include <float.h>
-#include <math.h>
-
-#ifdef __cplusplus
-extern "C" {
+#include <sys/stat.h>
+#ifdef USE_CUDA
+#include <cuda_runtime.h>
 #endif
 
-#ifndef BENCH_DATA_ROOT
-#define BENCH_DATA_ROOT "/lcrc/project/ECP-EZ/public/compression"
-#endif
+#define BENCH_CONFIG_ENABLE_HDF5
+#include "bench_config.h"
+#include "bench_timing.h"
+#include "miranda.h"
 
-#define BENCH_MAX_RANK 4
-
-typedef enum {
-    BENCH_F32 = 0,   /* little-endian (.f32)      */
-    BENCH_F64 = 1    /* little-endian (.f64/.d64) */
-} bench_dtype_t;
-
-typedef enum {
-    BENCH_BOUND_ABS = 0,   /* pointwise absolute error bound  */
-    BENCH_BOUND_REL = 1    /* value-range relative error bound */
-} bench_bound_mode_t;
-
-typedef enum {
-    BENCH_SRC_RAW  = 0,
-    BENCH_SRC_HDF5 = 1
-} bench_src_t;
-
-typedef enum {
-    BENCH_XFORM_NONE  = 0,
-    BENCH_XFORM_LOG1P = 1,   /* y = log1p(x); non-negative fields only        */
-    BENCH_XFORM_ASINH = 2    /* y = asinh(x); signed-safe "log" (velocity)    */
-} bench_xform_t;
+static const char *XCSV_HEADER =
+    "dataset,compressor,codec_kind,chunk_n,rep,"
+    "logical_bytes,stored_bytes,ratio,"
+    "create_ms,write_ms,flush_ms,sync_ms,close_ms,csync_ms,"
+    "evict_ms,open_ms,read_ms,"
+    "rmse,abs_thresh,maxae,bound_ok\n";
 
 typedef struct {
-    const char        *name;        /* short id used in output filenames/logs */
-    const char        *path;        /* raw field, or the .h5/.nc4 container    */
-    int                rank;        /* number of dimensions (RAW: required)    */
-    size_t             dims[BENCH_MAX_RANK]; /* row-major (HDF5 order)         */
-    bench_dtype_t      dtype;
-    bench_bound_mode_t bound_mode;  /* NOMINAL bound mode for this field      */
-    double             bound;       /* NOMINAL bound value                    */
-    double             assumed_range; /* fallback range when none measured     */
-    int                gpu_suitable;/* 1 = large/contiguous enough for GPU codec */
-    const char        *note;        /* provenance / caveats                   */
-    bench_src_t        src;         /* BENCH_SRC_RAW (default/0) or _HDF5      */
-    const char        *h5dset;      /* HDF5 src: dataset path inside file      */
-    bench_xform_t      xform;
-} bench_dataset_t;
+    double create_ms, write_ms, flush_ms, sync_ms, close_ms, csync_ms;
+    double evict_ms, open_ms, read_ms;
+    unsigned long long stored;
+} rep_timing;
 
-/* IMPORTANT: bound_mode/bound here are the field's NOMINAL error control. They
- * are NOT what the codec is actually configured with when a compressor entry
- * carries a literal opts_json — and every lossy entry below does. Use
- * bench_abs_threshold() for fidelity checks, never d->bound. */
+/* ------------------------------------------------------------------ *
+ * Wall-clock timer.  fsync() spends its time blocked in the kernel on
+ * device completion, which a CPU-time clock will not see at all, so the
+ * durability phases must be measured against CLOCK_MONOTONIC.
+ * ------------------------------------------------------------------ */
+static inline double bench_wall_now_ms(void) {
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return (double)ts.tv_sec * 1.0e3 + (double)ts.tv_nsec * 1.0e-6;
+}
 
-static const bench_dataset_t BENCH_DATASETS[] = {
-
-    {
-        "miranda",
-        BENCH_DATA_ROOT "/Miranda/SDRBENCH-Miranda-256x384x384/density.d64",
-        3, {256, 384, 384, 0}, BENCH_F64,
-        BENCH_BOUND_REL, 1e-3, 0.0, 1,
-        "Clean d64; cuszp returns RMSE~2.7e-4 here. SDRBench names it density.d64.",
-        BENCH_SRC_RAW, NULL
-    },
-
-    {
-        "ocean_temp",
-        BENCH_DATA_ROOT "/oceanbox/Tobbeholmane_0001.nc",
-        0, {0, 0, 0, 0}, BENCH_F32,
-        BENCH_BOUND_REL, 1e-3, 0.0, 1,
-        "NetCDF-4 (HDF5-backed). Confirm via `ncdump -k`. Shape/type read at load. "
-        "scale_factor/add_offset packing NOT applied.",
-        BENCH_SRC_HDF5, "/temp"
-    },
-
-    {
-        "einspline37",
-        BENCH_DATA_ROOT "/QMCPACK-bigdata/einspline.tile_37-1-242-23-8.spin_0.tw_0.l0u6144.g112x66x66.dat",
-        1, {13560851520 / 4, 0, 0, 0}, BENCH_F32,
-        BENCH_BOUND_REL, 1e-3, 0.0, 1,
-        "Raw headerless float32 dump; 1D flat for the codec. 12.6 GiB -> needs "
-        "~26 GiB RAM for hbuf+rbuf. Check your PBS mem= request.",
-        BENCH_SRC_RAW, NULL
-    },
-
-    {
-        "scale-T",
-        BENCH_DATA_ROOT "/scale-letkf/T-98x1200x1200.f32",
-        3, {98, 1200, 1200, 0}, BENCH_F32,
-        BENCH_BOUND_REL, 1e-3, 0.0, 1,
-        "SCALE-LETKF air temperature. Smooth, well-correlated; representative easy case.",
-        BENCH_SRC_RAW, NULL, BENCH_XFORM_LOG1P
-    },
-
-    {
-        "s3d",
-        BENCH_DATA_ROOT "/S3D/stat_planar.1.1000E-03.field.mpi",
-        3, {500, 500, 500, 0}, BENCH_F64,
-        BENCH_BOUND_REL, 1e-3, 0.0, 1,
-        "SDRBench lists S3D as f64 (.d64) despite one stray f32 line on the site.",
-        BENCH_SRC_RAW, NULL
-    },
-
-    {
-        "nyx_baryon",
-        BENCH_DATA_ROOT "/NYX-Zarija/z42_n512_l10.h5",
-        0, {0, 0, 0, 0}, BENCH_F32,
-        BENCH_BOUND_REL, 1e-3, 0.0, 1,
-        "NYX 512^3.",
-        BENCH_SRC_HDF5, "/native_fields/baryon_density", BENCH_XFORM_LOG1P
-    },
+struct BenchWallTimer {
+    double t0;
+    void   start()   { t0 = bench_wall_now_ms(); }
+    double stop_ms() { return bench_wall_now_ms() - t0; }
 };
 
-#define BENCH_NUM_DATASETS \
-    ((int)(sizeof(BENCH_DATASETS) / sizeof(BENCH_DATASETS[0])))
-
-static inline size_t bench_dtype_size(bench_dtype_t t) {
-    return (t == BENCH_F64) ? 8u : 4u;
-}
-static inline const char *bench_dtype_name(bench_dtype_t t) {
-    return (t == BENCH_F64) ? "double" : "float";
-}
-static inline size_t bench_num_elements(const bench_dataset_t *d) {
-    size_t n = 1;
-    for (int i = 0; i < d->rank; ++i) n *= d->dims[i];
-    return n;
-}
-static inline size_t bench_num_bytes(const bench_dataset_t *d) {
-    return bench_num_elements(d) * bench_dtype_size(d->dtype);
-}
-static inline const char *bench_bound_mode_name(bench_bound_mode_t m) {
-    return (m == BENCH_BOUND_ABS) ? "abs" : "rel";
-}
-static inline const char *bench_src_name(bench_src_t s) {
-    return (s == BENCH_SRC_HDF5) ? "hdf5" : "raw";
-}
-static inline double bench_gib(size_t bytes) {
-    return (double)bytes / (1024.0 * 1024.0 * 1024.0);
-}
-static inline const bench_dataset_t *bench_dataset_by_name(const char *name) {
-    for (int i = 0; i < BENCH_NUM_DATASETS; ++i)
-        if (name && BENCH_DATASETS[i].name &&
-            0 == strcmp(name, BENCH_DATASETS[i].name))
-            return &BENCH_DATASETS[i];
-    return NULL;
+static void xcsv_row(FILE *fp, const char *dset, const bench_compressor_t *c,
+                     int chunk_n, int rep, unsigned long long logical,
+                     const rep_timing *t,
+                     double rmse, double abs_thresh, double maxae) {
+    if (!fp) return;
+    const double ratio = t->stored ? (double)logical / (double)t->stored : 0.0;
+    /* -1 == "not applicable": rate-mode entries are lossy with no error bound,
+     * so a pass/fail verdict would be meaningless.  Filter these out downstream
+     * rather than reading them as failures. */
+    const int bound_ok = !bench_bound_is_checkable(c) ? -1
+                       : (abs_thresh > 0.0) ? (maxae <= 2.0 * abs_thresh)
+                                            : (maxae == 0.0);
+    std::fprintf(fp,
+        "%s,%s,%s,%d,%d,%llu,%llu,%.4f,"
+        "%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,"
+        "%.4f,%.4f,%.4f,"
+        "%.6e,%.6e,%.6e,%d\n",
+        dset, c->name, bench_codec_kind_name(c->kind), chunk_n, rep,
+        logical, t->stored, ratio,
+        t->create_ms, t->write_ms, t->flush_ms, t->sync_ms,
+        t->close_ms, t->csync_ms,
+        t->evict_ms, t->open_ms, t->read_ms,
+        rmse, abs_thresh, maxae, bound_ok);
+    std::fflush(fp);
 }
 
-/* MemAvailable from /proc/meminfo, in bytes. 0 if unknown.
- * Used to skip a dataset cleanly instead of getting OOM-killed halfway
- * through a sweep (einspline37 needs ~26 GiB for hbuf+rbuf alone). */
-static inline size_t bench_mem_available_bytes(void) {
-    FILE  *fp = fopen("/proc/meminfo", "r");
-    char   line[256];
-    size_t kb = 0;
-    if (!fp) return 0;
-    while (fgets(line, sizeof(line), fp)) {
-        if (0 == strncmp(line, "MemAvailable:", 13)) {
-            if (1 == sscanf(line + 13, "%zu", &kb)) break;
-            kb = 0;
-        }
-    }
-    fclose(fp);
-    return kb * 1024u;
-}
+typedef struct { double min, max, mean, rmse, maxae; } bench_stats;
 
-static inline int bench_datasets_validate(void) {
-    int    found = 0;
-    size_t avail = bench_mem_available_bytes();
-
-    fprintf(stderr, "%-14s %-6s %-4s %-6s %-22s %-10s %-10s %s\n",
-            "name", "dtype", "rank", "src", "dims", "MiB", "needGiB", "exists");
-    for (int i = 0; i < BENCH_NUM_DATASETS; ++i) {
-        const bench_dataset_t *d = &BENCH_DATASETS[i];
-        char dims[64]; size_t off = 0;
-        size_t nb = 0;
-        if (d->src == BENCH_SRC_HDF5 && d->rank == 0) {
-            snprintf(dims, sizeof(dims), "(from file)");
-        } else {
-            for (int k = 0; k < d->rank; ++k)
-                off += (size_t)snprintf(dims + off, sizeof(dims) - off,
-                                        k ? "x%zu" : "%zu", d->dims[k]);
-            nb = bench_num_bytes(d);
-        }
-        int ok = (access(d->path, R_OK) == 0);
-        found += ok;
-        fprintf(stderr, "%-14s %-6s %-4d %-6s %-22s %-10.1f %-10.1f %s\n",
-                d->name, bench_dtype_name(d->dtype), d->rank,
-                bench_src_name(d->src), dims,
-                nb / (1024.0 * 1024.0), bench_gib(2 * nb),
-                ok ? "yes" : "NO  <-- fix path");
-    }
-    if (avail)
-        fprintf(stderr, "MemAvailable: %.1f GiB "
-                        "(needGiB is hbuf+rbuf only; the connector needs more)\n",
-                bench_gib(avail));
-    fprintf(stderr, "%d/%d dataset paths readable\n", found, BENCH_NUM_DATASETS);
-    return found;
-}
-
-static inline const char *bench_xform_name(bench_xform_t x) {
-    switch (x) {
-        case BENCH_XFORM_LOG1P: return "log1p";
-        case BENCH_XFORM_ASINH: return "asinh";
-        default:                return "none";
-    }
-}
-static inline void bench_apply_xform(void *buf, size_t nelem,
-                                     bench_dtype_t dt, bench_xform_t xf) {
-    if (xf == BENCH_XFORM_NONE) return;
+static bench_stats bench_compute_stats(const void *orig, const void *dec,
+                                       size_t nelem, bench_dtype_t dt,
+                                       bench_xform_t xf) {
+    double mn = DBL_MAX, mx = -DBL_MAX, sum = 0.0, se = 0.0, maxae = 0.0;
     for (size_t i = 0; i < nelem; ++i) {
-        if (dt == BENCH_F64) {
-            double v = ((double *)buf)[i];
-            ((double *)buf)[i] = (xf == BENCH_XFORM_LOG1P) ? log1p(v) : asinh(v);
-        } else {
-            float v = ((float *)buf)[i];
-            ((float *)buf)[i] = (xf == BENCH_XFORM_LOG1P) ? log1pf(v) : asinhf(v);
+        double o = (dt == BENCH_F64) ? ((const double *)orig)[i]
+                                     : (double)((const float *)orig)[i];
+        double v = (dt == BENCH_F64) ? ((const double *)dec)[i]
+                                     : (double)((const float *)dec)[i];
+        /* Invert preprocessing so error is in physical units. NONE = identity. */
+        if      (xf == BENCH_XFORM_LOG1P) { o = expm1(o); v = expm1(v); }
+        else if (xf == BENCH_XFORM_ASINH) { o = sinh(o);  v = sinh(v);  }
+        if (o < mn) mn = o;
+        if (o > mx) mx = o;
+        sum += o;
+        double e = o - v;
+        se += e * e;
+        double ae = std::fabs(e); if (ae > maxae) maxae = ae;
+    }
+    bench_stats s;
+    s.min = mn; s.max = mx;
+    s.mean  = sum / (double)nelem;
+    s.rmse  = std::sqrt(se / (double)nelem);
+    s.maxae = maxae;
+    return s;
+}
+
+static void bench_zero_run(const void *orig, const void *dec,
+                           size_t nelem, bench_dtype_t dt, const char *label) {
+    size_t total = 0, run = 0, best = 0, best_start = 0, cur = 0;
+    for (size_t i = 0; i < nelem; ++i) {
+        double o = (dt==BENCH_F64)? ((const double*)orig)[i] : (double)((const float*)orig)[i];
+        double v = (dt==BENCH_F64)? ((const double*)dec )[i] : (double)((const float*)dec )[i];
+        if (v == 0.0 && o != 0.0) {
+            if (run == 0) cur = i;
+            if (++run > best) { best = run; best_start = cur; }
+            ++total;
+        } else run = 0;
+    }
+    std::fprintf(stderr,
+        "[zerorun] %-28s fill_zeros=%zu (%.2f%%)  longest=%zu @ [%zu..%zu]\n",
+        label, total, 100.0*total/nelem, best, best_start, best_start + best);
+}
+
+/* thr is an ABSOLUTE error threshold from bench_abs_threshold(), not the
+ * dataset's nominal relative bound. */
+static int bench_check_chunks(const void *orig, const void *dec, size_t nelem,
+                              bench_dtype_t dt, int nchunks, double thr,
+                              const char *label) {
+    if (nchunks < 1) nchunks = 1;
+    size_t base = nelem / (size_t)nchunks, rem = nelem % (size_t)nchunks, off = 0;
+    int bad = 0;
+    for (int c = 0; c < nchunks; ++c) {
+        size_t cn = base + ((size_t)c < rem ? 1 : 0);
+        double se = 0.0, maxae = 0.0; size_t nz = 0;
+        for (size_t i = off; i < off + cn; ++i) {
+            double o = (dt==BENCH_F64)? ((const double*)orig)[i] : (double)((const float*)orig)[i];
+            double v = (dt==BENCH_F64)? ((const double*)dec )[i] : (double)((const float*)dec )[i];
+            double e = o - v, ae = std::fabs(e);
+            se += e*e; if (ae > maxae) maxae = ae;
+            if (v == 0.0 && std::fabs(o) > thr) ++nz;
         }
+        int chunk_bad = (maxae > 2.0 * thr);
+        bad += chunk_bad;
+        std::fprintf(stderr,
+            "[chunkchk] %-28s chunk %2d/%-2d n=%zu rmse=%.3e maxae=%.3e "
+            "thr=%.3e fillzero=%zu %s\n",
+            label, c, nchunks, cn, std::sqrt(se/cn), maxae, thr, nz,
+            chunk_bad ? "<-- BAD" : "");
+        off += cn;
     }
+    if (bad) std::fprintf(stderr, "[chunkchk] %-28s **%d/%d chunks bad**\n", label, bad, nchunks);
+    return bad;
 }
 
-static inline void *bench_load_raw(const bench_dataset_t *d, size_t *out_bytes) {
-    size_t want = bench_num_bytes(d);
-    FILE *fp = fopen(d->path, "rb");
-    if (!fp) {
-        fprintf(stderr, "bench_load_raw: cannot open %s\n", d->path);
-        return NULL;
+static int bench_locate_bad(const void *orig, const void *dec, size_t nelem,
+                            bench_dtype_t dt, int nchunks, double thr_in,
+                            const char *label) {
+    if (nchunks < 1) nchunks = 1;
+    const size_t dsize = bench_dtype_size(dt);
+    const size_t base  = nelem / (size_t)nchunks;
+    const size_t rem   = nelem % (size_t)nchunks;
+    const double thr   = 2.0 * thr_in;
+    const size_t GAP   = 256;   /* merge bad runs split by < GAP good elems */
+
+    auto chunk_of = [&](size_t i, size_t *cstart) -> int {
+        size_t big = rem * (base + 1);
+        if (i < big) { int c = (int)(i / (base + 1)); *cstart = (size_t)c * (base + 1); return c; }
+        size_t j = i - big; int c = (int)rem + (int)(j / base);
+        *cstart = big + (j - j % base); return c;
+    };
+    auto val = [&](const void *p, size_t i) {
+        return (dt == BENCH_F64) ? ((const double*)p)[i] : (double)((const float*)p)[i];
+    };
+
+    int nblocks = 0, printed = 0;
+    size_t i = 0;
+    while (i < nelem) {
+        if (std::fabs(val(orig, i) - val(dec, i)) <= thr) { ++i; continue; }
+        size_t start = i, last_bad = i, nbad = 0; double blk_maxae = 0.0;
+        while (i < nelem) {
+            double ae = std::fabs(val(orig, i) - val(dec, i));
+            if (ae > thr) { last_bad = i; ++nbad; if (ae > blk_maxae) blk_maxae = ae; }
+            else if (i - last_bad > GAP) break;
+            ++i;
+        }
+        size_t len = last_bad - start + 1, cstart; int c = chunk_of(start, &cstart);
+        size_t off = start - cstart;
+        ++nblocks;
+        if (printed++ < 40)
+            std::fprintf(stderr,
+              "[badblk] %-24s blk %d: elem[%zu..%zu] len=%zu nbad=%zu maxae=%.3e | "
+              "byte_off=%zu | chunk %d (starts elem %zu) off_in_chunk=%zu elem / %zu B\n",
+              label, nblocks, start, last_bad, len, nbad, blk_maxae,
+              start * dsize, c, cstart, off, off * dsize);
     }
-    void *buf = malloc(want);
-    if (!buf) {
-        fprintf(stderr, "bench_load_raw: OOM (%zu bytes) for %s\n", want, d->name);
-        fclose(fp);
-        return NULL;
-    }
-    size_t got = fread(buf, 1, want, fp);
-    fclose(fp);
-    if (got != want) {
-        fprintf(stderr, "bench_load_raw: short read %s (%zu/%zu bytes)\n",
-                d->path, got, want);
-        free(buf);
-        return NULL;
-    }
-    if (out_bytes) *out_bytes = want;
-    return buf;
+    std::fprintf(stderr, nblocks ? "[badblk] %-24s %d bad block(s)\n"
+                                 : "[badblk] %-24s clean\n", label, nblocks);
+    return nblocks;
 }
 
-#ifdef BENCH_CONFIG_ENABLE_HDF5
-static inline void *bench_load_h5(const bench_dataset_t *in,
-                                  bench_dataset_t *resolved,
-                                  size_t *out_bytes) {
-    if (!in->h5dset || !in->h5dset[0]) {
-        fprintf(stderr, "bench_load_h5: '%s' has BENCH_SRC_HDF5 but h5dset is unset.\n",
-                in->name);
-        return NULL;
-    }
-    hid_t fapl = H5Pcreate(H5P_FILE_ACCESS);
-    H5Pset_vol(fapl, H5VL_NATIVE, NULL);   /* read the source natively; bypass passthrough */
-    hid_t fid = H5Fopen(in->path, H5F_ACC_RDONLY, fapl);
-    H5Pclose(fapl);
-    if (fid < 0) {
-        fprintf(stderr, "bench_load_h5: H5Fopen failed: %s "
-                "(not HDF5? NetCDF-3/classic is unreadable here)\n", in->path);
-        return NULL;
-    }
-    hid_t did = H5Dopen2(fid, in->h5dset, H5P_DEFAULT);
-    if (did < 0) {
-        fprintf(stderr, "bench_load_h5: dataset '%s' not found in %s "
-                "(check `h5ls -r`)\n", in->h5dset, in->path);
-        H5Fclose(fid);
-        return NULL;
-    }
-
-    hid_t sid  = H5Dget_space(did);
-    int   rank = H5Sget_simple_extent_ndims(sid);
-    if (rank < 1 || rank > BENCH_MAX_RANK) {
-        fprintf(stderr, "bench_load_h5: rank %d unsupported (1..%d) for %s\n",
-                rank, BENCH_MAX_RANK, in->h5dset);
-        H5Sclose(sid); H5Dclose(did); H5Fclose(fid);
-        return NULL;
-    }
-    hsize_t hdims[BENCH_MAX_RANK];
-    H5Sget_simple_extent_dims(sid, hdims, NULL);
-
-    hid_t  ftype  = H5Dget_type(did);
-    int    tclass = (int)H5Tget_class(ftype);
-    size_t tsize  = H5Tget_size(ftype);
-    bench_dtype_t dt;
-    if (tclass == (int)H5T_FLOAT && tsize == 4)      dt = BENCH_F32;
-    else if (tclass == (int)H5T_FLOAT && tsize == 8) dt = BENCH_F64;
-    else {
-        fprintf(stderr, "bench_load_h5: unsupported type (class=%d size=%zu) for %s; "
-                "only float32/float64 handled.\n", tclass, tsize, in->h5dset);
-        H5Tclose(ftype); H5Sclose(sid); H5Dclose(did); H5Fclose(fid);
-        return NULL;
-    }
-
-    *resolved       = *in;
-    resolved->rank  = rank;
-    resolved->dtype = dt;
-    resolved->src   = BENCH_SRC_HDF5;
-    for (int i = 0; i < rank; ++i)              resolved->dims[i] = (size_t)hdims[i];
-    for (int i = rank; i < BENCH_MAX_RANK; ++i) resolved->dims[i] = 0;
-
-    size_t nbytes = bench_num_bytes(resolved);
-    void  *buf    = malloc(nbytes);
-    if (!buf) {
-        fprintf(stderr, "bench_load_h5: OOM (%zu bytes) for %s\n", nbytes, in->name);
-        H5Tclose(ftype); H5Sclose(sid); H5Dclose(did); H5Fclose(fid);
-        return NULL;
-    }
-    hid_t  mtype = (dt == BENCH_F64) ? H5T_NATIVE_DOUBLE : H5T_NATIVE_FLOAT;
-    herr_t rc    = H5Dread(did, mtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
-
-    H5Tclose(ftype); H5Sclose(sid); H5Dclose(did); H5Fclose(fid);
-    if (rc < 0) {
-        fprintf(stderr, "bench_load_h5: H5Dread failed for %s\n", in->h5dset);
-        free(buf);
-        return NULL;
-    }
-    if (out_bytes) *out_bytes = nbytes;
-    return buf;
+static int env_int(const char *name, int dflt) {
+    const char *s = std::getenv(name);
+    if (!s || !*s) return dflt;
+    return std::atoi(s);
 }
-#endif /* BENCH_CONFIG_ENABLE_HDF5 */
+static int bench_verify(void)  { return env_int("BENCH_VERIFY", 0) != 0; }
+static int bench_keep_h5(void) { return env_int("BENCH_KEEP_H5", 0) != 0; }
 
-static inline void *bench_load_field(const bench_dataset_t *in,
-                                     bench_dataset_t *resolved,
-                                     size_t *out_bytes) {
-    if (in->src == BENCH_SRC_HDF5) {
-#ifdef BENCH_CONFIG_ENABLE_HDF5
-        return bench_load_h5(in, resolved, out_bytes);
-#else
-        fprintf(stderr, "bench_load_field: '%s' is an HDF5 source but this TU was "
-                "built without -DBENCH_CONFIG_ENABLE_HDF5.\n", in->name);
-        return NULL;
-#endif
+/* Durability / cache controls.  Both default ON: without them write_ms and
+ * read_ms measure the page cache, not the storage device, which is what makes
+ * the io_ms column jump around between runs.
+ *   BENCH_FSYNC=0       -- skip fsync (old, cache-only behaviour)
+ *   BENCH_DROP_CACHE=0  -- skip page-cache eviction before the read phase
+ *   BENCH_SYNC_DIR=0    -- skip the parent-directory fsync
+ */
+static int bench_do_fsync(void)      { return env_int("BENCH_FSYNC", 1) != 0; }
+static int bench_do_dropcache(void)  { return env_int("BENCH_DROP_CACHE", 1) != 0; }
+static int bench_do_syncdir(void)    { return env_int("BENCH_SYNC_DIR", 1) != 0; }
+
+static double bench_fsync_path(const char *path, int sync_dir) {
+    BenchWallTimer t; t.start();
+
+    int fd = ::open(path, O_RDONLY);
+    if (fd < 0) {
+        std::fprintf(stderr, "[warn] fsync open failed %s: %s\n",
+                     path, std::strerror(errno));
+        return 0.0;
     }
-    *resolved = *in;                 /* raw: descriptor is already complete */
-    return bench_load_raw(in, out_bytes);
+    if (::fsync(fd) != 0)
+        std::fprintf(stderr, "[warn] fsync failed %s: %s\n",
+                     path, std::strerror(errno));
+    ::close(fd);
+
+    if (sync_dir) {
+        char dir[1024];
+        std::snprintf(dir, sizeof(dir), "%s", path);
+        char *slash = std::strrchr(dir, '/');
+        if (slash) { if (slash == dir) dir[1] = '\0'; else *slash = '\0'; }
+        else       { std::snprintf(dir, sizeof(dir), "."); }
+        int dfd = ::open(dir, O_RDONLY | O_DIRECTORY);
+        if (dfd >= 0) { (void)::fsync(dfd); ::close(dfd); }
+    }
+    return t.stop_ms();
 }
 
-#ifdef BENCH_CONFIG_ENABLE_HDF5
-static inline hid_t bench_dataset_h5type(const bench_dataset_t *d) {
-    return (d->dtype == BENCH_F64) ? H5T_IEEE_F64LE : H5T_IEEE_F32LE;  /* file type */
-}
-static inline hid_t bench_dataset_h5native(const bench_dataset_t *d) {
-    return (d->dtype == BENCH_F64) ? H5T_NATIVE_DOUBLE : H5T_NATIVE_FLOAT;
-}
-static inline void bench_dataset_h5dims(const bench_dataset_t *d, hsize_t out[]) {
-    for (int i = 0; i < d->rank; ++i) out[i] = (hsize_t)d->dims[i];
-}
-#endif /* BENCH_CONFIG_ENABLE_HDF5 */
+/* Evict the file from the page cache so the read phase actually touches the
+ * device.  POSIX_FADV_DONTNEED only drops CLEAN pages, hence the fsync first.
+ * Best effort: on a shared node, or on Lustre/GPFS where client-side caching
+ * is managed by the filesystem, some pages may survive. */
+static double bench_evict_path(const char *path) {
+    BenchWallTimer t; t.start();
 
-#ifdef BENCH_CONFIG_ENABLE_PRESSIO
-static inline enum pressio_dtype bench_dataset_pressio_dtype(const bench_dataset_t *d) {
-    return (d->dtype == BENCH_F64) ? pressio_double_dtype : pressio_float_dtype;
-}
-static inline void bench_dataset_pressio_dims(const bench_dataset_t *d, size_t out[]) {
-    /* pressio wants fastest-varying dimension first (reverse of HDF5 order) */
-    for (int i = 0; i < d->rank; ++i) out[i] = d->dims[d->rank - 1 - i];
-}
-#endif /* BENCH_CONFIG_ENABLE_PRESSIO */
+    int fd = ::open(path, O_RDONLY);
+    if (fd < 0) return 0.0;
+    (void)::fsync(fd);
+    if (posix_fadvise(fd, 0, 0, POSIX_FADV_DONTNEED) != 0)
+        std::fprintf(stderr, "[warn] fadvise DONTNEED failed %s: %s\n",
+                     path, std::strerror(errno));
+    ::close(fd);
 
-typedef enum {
-    BENCH_CPU_CODEC = 0,
-    BENCH_GPU_CODEC = 1
-} bench_codec_kind_t;
+    return t.stop_ms();
+}
+
+static int name_selected(const char *sel, const char *name) {
+    if (!sel || !*sel) return 1;
+    size_t nl = std::strlen(name);
+    for (const char *p = std::strstr(sel, name); p; p = std::strstr(p + 1, name)) {
+        char b = (p == sel) ? ',' : p[-1], a = p[nl];
+        if ((b == ',' || b == ' ') && (a == ',' || a == ' ' || a == '\0')) return 1;
+    }
+    return 0;
+}
+
+/* "<base>.h5" + suffix -> "<base><suffix>.h5"; no extension -> plain append. */
+static void derive_path(const char *base, const char *suffix,
+                        char *out, size_t n) {
+    const char *dot = std::strrchr(base, '.');
+    if (dot && 0 == std::strcmp(dot, ".h5"))
+        std::snprintf(out, n, "%.*s%s.h5", (int)(dot - base), base, suffix);
+    else
+        std::snprintf(out, n, "%s%s.h5", base, suffix);
+}
 
 typedef struct {
-    const char        *name;          /* config label / dataset suffix / CSV tag  */
-    const char        *pressio_id;    /* compressor id for make_dcpl; NULL=default*/
-    const char        *opts_json;     /* literal libpressio options JSON          */
-    bench_codec_kind_t kind;
-    int                lossless;      /* 1 => bit-exact expected                  */
+    double             write_ms, flush_ms, sync_ms, close_ms, csync_ms;
+    double             create_ms, evict_ms, open_ms, read_ms;
+    size_t             raw_bytes;
+    unsigned long long storage;
+    int                n;
+} bench_file_acc;
 
-    /* The bound this entry ACTUALLY configures. Declared explicitly rather than
-     * parsed out of opts_json, so fidelity checks can't drift from what the
-     * codec was told. Every lossy entry below sets an ABSOLUTE bound even though
-     * the datasets declare a nominal RELATIVE one -- that mismatch is exactly
-     * what made the old checks (which thresholded on d->bound) vacuous. */
-    bench_bound_mode_t cfg_bound_mode;
-    double             cfg_bound;
+static int run_rep(const char *path, const char *dsname,
+                   const bench_dataset_t *d, const bench_compressor_t *c,
+                   const char *oj, hid_t space, hid_t ntype,
+                   const void *hbuf, void *rbuf, size_t raw_bytes,
+                   rep_timing *t) {
+    std::memset(t, 0, sizeof(*t));
 
-    const char        *stream_opt_key;/* GPU: userptr key for the cudaStream_t    */
-    const char        *note;
-} bench_compressor_t;
+    const int do_fsync = bench_do_fsync();
+    const int do_evict = bench_do_dropcache();
+    const int do_sdir  = bench_do_syncdir();
 
-static const bench_compressor_t BENCH_COMPRESSORS[] = {
-    { "noop", "noop", NULL, BENCH_CPU_CODEC, 1,
-      BENCH_BOUND_ABS, 0.0, NULL,
-      "Connector default (no compressor). Bit-exact baseline; isolates overhead." },
-
-    { "cuszp_1e3", "cuszp",
-      "{\"pressio:abs\":1e-3,\"cuszp:mode_str\":\"outlier\"}",
-      BENCH_GPU_CODEC, 0, BENCH_BOUND_ABS, 1e-3, "cuszp:cuda_stream",
-      "GPU abs 1e-3, outlier mode." },
-
-    { "cuszp_1e6", "cuszp",
-      "{\"pressio:abs\":1e-6,\"cuszp:mode_str\":\"outlier\"}",
-      BENCH_GPU_CODEC, 0, BENCH_BOUND_ABS, 1e-6, "cuszp:cuda_stream",
-      "GPU abs 1e-6, outlier mode." },
-
-    { "sz3_1e3", "sz3",
-      "{\"sz3:error_bound_mode_str\":\"abs\",\"sz3:abs_error_bound\":1e-3}",
-      BENCH_CPU_CODEC, 0, BENCH_BOUND_ABS, 1e-3, NULL,
-      "CPU error-bounded lossy, abs 1e-3." },
-
-    { "sz3_1e6", "sz3",
-      "{\"sz3:error_bound_mode_str\":\"abs\",\"sz3:abs_error_bound\":1e-6}",
-      BENCH_CPU_CODEC, 0, BENCH_BOUND_ABS, 1e-6, NULL,
-      "CPU error-bounded lossy, abs 1e-6 (tighter)." },
-
-    { "bzip2", "bzip2",
-      "{\"bzip2:block_size\":9}",
-      BENCH_CPU_CODEC, 1, BENCH_BOUND_ABS, 0.0, NULL,
-      "CPU lossless, general purpose. CPU comparator." },
-
-#define ZFP_RATE_PAIR(RATE, TAG)                                                   \
-    { "zfp_cpu_r" TAG, "zfp",                                                      \
-      "{\"zfp:rate\":" #RATE ",\"zfp:wra\":0,\"zfp:execution_name\":\"serial\"}",  \
-      BENCH_CPU_CODEC, 0, BENCH_BOUND_NONE, 0.0, NULL,                             \
-      "ZFP serial fixed-rate " TAG " bits/value." },                               \
-    { "zfp_gpu_r" TAG, "zfp",                                                      \
-      "{\"zfp:rate\":" #RATE ",\"zfp:wra\":0,\"zfp:execution_name\":\"cuda\"}",    \
-      BENCH_GPU_CODEC, 0, BENCH_BOUND_NONE, 0.0, NULL,                             \
-      "ZFP CUDA fixed-rate " TAG " bits/value." }
-
-    ZFP_RATE_PAIR(4.0,  "4"),
-    ZFP_RATE_PAIR(8.0,  "8"),
-    ZFP_RATE_PAIR(12.0, "12"),
-    ZFP_RATE_PAIR(16.0, "16"),
-
-    /* --- JSON-path chunking (N chunks via opts_json; do NOT set VOL_COMP_* env).
-     *     chunk_n=8 divides every static dataset. noop+pressio is omitted:
-     *     rejected by the VOL by design. --- */
-
-    { "noop_vjson", "noop",
-      "{\"vol:chunking_mode\":\"vol\",\"vol:chunk_n\":8}",
-      BENCH_CPU_CODEC, 1, BENCH_BOUND_ABS, 0.0, NULL,
-      "noop, VOL chunking via opts_json." },
-
-    { "bzip2_vjson", "bzip2",
-      "{\"bzip2:block_size\":9,\"vol:chunking_mode\":\"vol\",\"vol:chunk_n\":8}",
-      BENCH_CPU_CODEC, 1, BENCH_BOUND_ABS, 0.0, NULL,
-      "bzip2, VOL chunking via opts_json." },
-    { "bzip2_pjson", "bzip2",
-      "{\"bzip2:block_size\":9,\"vol:chunking_mode\":\"pressio\",\"vol:chunk_n\":8}",
-      BENCH_CPU_CODEC, 1, BENCH_BOUND_ABS, 0.0, NULL,
-      "bzip2, pressio chunking via opts_json." },
-
-    { "sz3_1e3_vjson", "sz3",
-      "{\"sz3:error_bound_mode_str\":\"abs\",\"sz3:abs_error_bound\":1e-3,"
-       "\"vol:chunking_mode\":\"vol\",\"vol:chunk_n\":8}",
-      BENCH_CPU_CODEC, 0, BENCH_BOUND_ABS, 1e-3, NULL,
-      "sz3 1e-3, VOL chunking via opts_json." },
-    { "sz3_1e3_pjson", "sz3",
-      "{\"sz3:error_bound_mode_str\":\"abs\",\"sz3:abs_error_bound\":1e-3,"
-       "\"vol:chunking_mode\":\"pressio\",\"vol:chunk_n\":8}",
-      BENCH_CPU_CODEC, 0, BENCH_BOUND_ABS, 1e-3, NULL,
-      "sz3 1e-3, pressio chunking via opts_json." },
-
-    { "sz3_1e6_vjson", "sz3",
-      "{\"sz3:error_bound_mode_str\":\"abs\",\"sz3:abs_error_bound\":1e-6,"
-       "\"vol:chunking_mode\":\"vol\",\"vol:chunk_n\":8}",
-      BENCH_CPU_CODEC, 0, BENCH_BOUND_ABS, 1e-6, NULL,
-      "sz3 1e-6, VOL chunking via opts_json." },
-    { "sz3_1e6_pjson", "sz3",
-      "{\"sz3:error_bound_mode_str\":\"abs\",\"sz3:abs_error_bound\":1e-6,"
-       "\"vol:chunking_mode\":\"pressio\",\"vol:chunk_n\":8}",
-      BENCH_CPU_CODEC, 0, BENCH_BOUND_ABS, 1e-6, NULL,
-      "sz3 1e-6, pressio chunking via opts_json." },
-
-    { "cuszp_1e3_vjson", "cuszp",
-      "{\"pressio:abs\":1e-3,\"cuszp:mode_str\":\"outlier\","
-       "\"vol:chunking_mode\":\"vol\",\"vol:chunk_n\":8}",
-      BENCH_GPU_CODEC, 0, BENCH_BOUND_ABS, 1e-3, "cuszp:cuda_stream",
-      "cuszp 1e-3, VOL chunking via opts_json." },
-    { "cuszp_1e3_pjson", "cuszp",
-      "{\"pressio:abs\":1e-3,\"cuszp:mode_str\":\"outlier\","
-       "\"vol:chunking_mode\":\"pressio\",\"vol:chunk_n\":8}",
-      BENCH_GPU_CODEC, 0, BENCH_BOUND_ABS, 1e-3, "cuszp:cuda_stream",
-      "cuszp 1e-3, pressio chunking via opts_json." },
-
-    { "cuszp_1e6_vjson", "cuszp",
-      "{\"pressio:abs\":1e-6,\"cuszp:mode_str\":\"outlier\","
-       "\"vol:chunking_mode\":\"vol\",\"vol:chunk_n\":8}",
-      BENCH_GPU_CODEC, 0, BENCH_BOUND_ABS, 1e-6, "cuszp:cuda_stream",
-      "cuszp 1e-6, VOL chunking via opts_json." },
-    { "cuszp_1e6_pjson", "cuszp",
-      "{\"pressio:abs\":1e-6,\"cuszp:mode_str\":\"outlier\","
-       "\"vol:chunking_mode\":\"pressio\",\"vol:chunk_n\":8}",
-      BENCH_GPU_CODEC, 0, BENCH_BOUND_ABS, 1e-6, "cuszp:cuda_stream",
-      "cuszp 1e-6, pressio chunking via opts_json." },
-};
-
-#define BENCH_NUM_COMPRESSORS \
-    ((int)(sizeof(BENCH_COMPRESSORS) / sizeof(BENCH_COMPRESSORS[0])))
-
-static inline const char *bench_codec_kind_name(bench_codec_kind_t k) {
-    return (k == BENCH_GPU_CODEC) ? "gpu" : "cpu";
-}
-static inline const bench_compressor_t *bench_compressor_by_name(const char *name) {
-    for (int i = 0; i < BENCH_NUM_COMPRESSORS; ++i)
-        if (name && 0 == strcmp(name, BENCH_COMPRESSORS[i].name))
-            return &BENCH_COMPRESSORS[i];
-    return NULL;
-}
-/* The options JSON to hand to make_dcpl / pressio: literal opts_json or "{}". */
-static inline const char *bench_compressor_opts(const bench_compressor_t *c) {
-    return (c->opts_json && c->opts_json[0]) ? c->opts_json : "{}";
-}
-
-/* ------------------------------------------------------------------------
- * Fidelity threshold.
- *
- * Returns the ABSOLUTE error above which a point is considered wrong, derived
- * from what the codec was actually configured with (cfg_bound_mode/cfg_bound),
- * not from the dataset's nominal bound. The old code thresholded fidelity
- * checks on d->bound (relative 1e-3) while configuring pressio:abs, so e.g.
- * cuszp_1e6 was tested at 2e-3 against a 1e-6 bound and passed vacuously.
- * --------------------------------------------------------------------- */
-static inline double bench_abs_threshold(const bench_compressor_t *c,
-                                         const bench_dataset_t *d,
-                                         double measured_range) {
-    double range;
-    if (!c) return 0.0;
-    if (c->lossless) return 0.0;                      /* bit-exact expected */
-    if (c->cfg_bound_mode == BENCH_BOUND_ABS) return c->cfg_bound;
-
-    range = (measured_range > 0.0) ? measured_range
-          : (d && d->assumed_range > 0.0) ? d->assumed_range
-          : 1.0;
-    return c->cfg_bound * range;
-}
-
-/* Number of chunks declared in opts_json ("vol:chunk_n"). 1 if absent. */
-static inline int bench_compressor_chunk_n(const bench_compressor_t *c) {
-    const char *p;
-    int n;
-    if (!c || !c->opts_json) return 1;
-    p = strstr(c->opts_json, "\"vol:chunk_n\"");
-    if (!p) return 1;
-    p = strchr(p, ':');
-    if (!p) return 1;
-    ++p;
-    while (*p == ' ' || *p == '\t') ++p;
-    n = atoi(p);
-    return n > 0 ? n : 1;
-}
-
-/* Effective chunk count: VOL_COMP_CHUNK_N env overrides opts_json, matching
- * the connector's own precedence in H5VL_pass_through_ext_chunk_bytes(). */
-static inline int bench_effective_chunk_n(const bench_compressor_t *c) {
-    const char *e = getenv("VOL_COMP_CHUNK_N");
-    if (e && *e) {
-        int n = atoi(e);
-        if (n > 0) return n;
-    }
-    return bench_compressor_chunk_n(c);
-}
-
-static inline int bench_compressor_opts_json(const bench_compressor_t *c,
-                                             const bench_dataset_t *d,
-                                             char *buf, size_t n) {
-    int ret;
-    int dbg = (getenv("BENCH_DEBUG") != NULL);
-
-    /* 1) An explicit literal opts_json on the compressor entry wins outright.
-     *    Every lossy entry in the table above takes this path. */
-    if (c->opts_json && c->opts_json[0]) {
-        ret = snprintf(buf, n, "%s", c->opts_json);
-        if (dbg) fprintf(stderr, "[dbg opts] %-16s %-12s LITERAL  -> %s\n",
-                         c->name, d->name, buf);
-        return ret;
-    }
-
-    /* 2) Lossless codecs take no bound. */
-    if (c->lossless) {
-        ret = snprintf(buf, n, "{}");
-        if (dbg) fprintf(stderr, "[dbg opts] %-16s %-12s LOSSLESS -> %s\n",
-                         c->name, d->name, buf);
-        return ret;
-    }
-
-    /* 3) No literal JSON: build one from the entry's declared bound. cuSZp is
-     *    natively absolute and its libpressio plugin's only bound knob is
-     *    pressio:abs, so a relative request is converted using the dataset's
-     *    assumed_range. (The old unreachable `strcmp(c->name, "cuszp")` branch
-     *    is gone -- no entry is named exactly "cuszp", so it never ran.) */
+    /* ---------------- WRITE PHASE (own file) ---------------- */
     {
-        const int is_cuszp = (c->pressio_id && 0 == strcmp(c->pressio_id, "cuszp"));
-        double    absb;
-
-        if (c->cfg_bound_mode == BENCH_BOUND_ABS) {
-            absb = c->cfg_bound;
-        } else {
-            double range = (d->assumed_range > 0.0) ? d->assumed_range : 1.0;
-            absb = c->cfg_bound * range;
+        BenchCpuTimer ct; ct.start();
+        hid_t file = H5Fcreate(path, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+        t->create_ms = ct.stop_ms();
+        if (file < 0) {
+            std::fprintf(stderr, "[ERR] H5Fcreate failed %s\n", path);
+            return -1;
         }
 
-        if (is_cuszp)
-            ret = snprintf(buf, n,
-                "{\"pressio:abs\": %.10e, \"cuszp:mode_str\": \"outlier\"}", absb);
-        else if (c->cfg_bound_mode == BENCH_BOUND_ABS)
-            ret = snprintf(buf, n, "{\"pressio:abs\": %.10e}", absb);
-        else
-            ret = snprintf(buf, n, "{\"pressio:rel\": %.10e}", c->cfg_bound);
+        hid_t dcpl = make_dcpl(c->pressio_id, oj);
+        hid_t dset = H5Dcreate2(file, dsname, ntype, space, H5P_DEFAULT,
+                                dcpl, H5P_DEFAULT);
+        if (dset < 0) {
+            std::fprintf(stderr, "[ERR] H5Dcreate2 failed %s\n", dsname);
+            H5Pclose(dcpl); H5Fclose(file);
+            return -1;
+        }
 
-        if (dbg) fprintf(stderr, "[dbg opts] %-16s %-12s DERIVED  -> %s\n",
-                         c->name, d->name, buf);
-        return ret;
+        BenchCpuTimer wt; wt.start();
+        herr_t wret = H5Dwrite(dset, ntype, H5S_ALL, H5S_ALL, H5P_DEFAULT, hbuf);
+        t->write_ms = wt.stop_ms();
+
+        /* H5Dwrite only reaches HDF5's cache; H5Fflush only reaches the OS
+         * page cache.  The fsync below is what actually forces the bytes to
+         * the device, and it is the phase that makes io_ms reproducible. */
+        BenchWallTimer ft; ft.start();
+        (void)H5Fflush(file, H5F_SCOPE_LOCAL);
+        t->flush_ms = ft.stop_ms();
+
+        if (do_fsync) t->sync_ms = bench_fsync_path(path, do_sdir);
+
+        t->stored = (unsigned long long)H5Dget_storage_size(dset);
+        H5Dclose(dset);
+        H5Pclose(dcpl);
+
+        BenchWallTimer clt; clt.start();
+        H5Fclose(file);
+        t->close_ms = clt.stop_ms();
+
+        /* H5Fclose can emit superblock/metadata updates after the flush, so
+         * the file is not durable until this second fsync returns.  It should
+         * be small; if it is not, HDF5 deferred real payload to close. */
+        if (do_fsync) t->csync_ms = bench_fsync_path(path, do_sdir);
+
+        if (wret < 0) {
+            std::fprintf(stderr, "[ERR] H5Dwrite failed %s\n", dsname);
+            return -1;
+        }
     }
+
+    /* ---------------- READ PHASE (fresh open, cold cache) ---------------- */
+    {
+        std::memset(rbuf, 0, raw_bytes);
+
+        /* Not counted in read_total: this is cache teardown, not read cost. */
+        if (do_evict) t->evict_ms = bench_evict_path(path);
+
+        BenchWallTimer ot; ot.start();
+        hid_t file = H5Fopen(path, H5F_ACC_RDONLY, H5P_DEFAULT);
+        t->open_ms = ot.stop_ms();
+        if (file < 0) {
+            std::fprintf(stderr, "[ERR] H5Fopen failed %s\n", path);
+            return -1;
+        }
+
+        hid_t dset = H5Dopen2(file, dsname, H5P_DEFAULT);
+        if (dset < 0) {
+            std::fprintf(stderr, "[ERR] H5Dopen2 failed %s\n", dsname);
+            H5Fclose(file);
+            return -1;
+        }
+
+        BenchCpuTimer rt; rt.start();
+        herr_t rret = H5Dread(dset, ntype, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf);
+        t->read_ms = rt.stop_ms();
+
+        H5Dclose(dset);
+        H5Fclose(file);
+
+        if (rret < 0) {
+            std::fprintf(stderr, "[ERR] H5Dread failed %s\n", dsname);
+            return -1;
+        }
+    }
+    return 0;
 }
 
-static inline int bench_compressor_vol_info_json(const bench_compressor_t *c,
-                                                 const bench_dataset_t *d,
-                                                 char *buf, size_t n) {
+static void run_pair(const char *h5base,
+                     const bench_dataset_t *d, const bench_compressor_t *c,
+                     const void *hbuf, const void *wbuf, void *rbuf,
+                     size_t raw_bytes, double measured_range,
+                     FILE *csv, FILE *xcsv, bench_file_acc *acc) {
+    const bool   dbg     = std::getenv("BENCH_DEBUG") != NULL;
+    const int    verify  = bench_verify();
+    const int    chunk_n = bench_effective_chunk_n(c);
+    const double thr     = bench_abs_threshold(c, d, measured_range);
+
+    hid_t space = H5I_INVALID_HID;
+
+  try {
+    size_t  nelem = bench_num_elements(d);
+    hid_t   ntype = bench_dataset_h5native(d);
+    hsize_t dims[BENCH_MAX_RANK];
+    bench_dataset_h5dims(d, dims);
+    space = H5Screate_simple(d->rank, dims, NULL);
+
     char opts[256];
     bench_compressor_opts_json(c, d, opts, sizeof(opts));
-    if (!c->pressio_id)
-        return snprintf(buf, n, "{\"compressor\": null, \"options\": %s}", opts);
-    return snprintf(buf, n,
-        "{\"compressor\": \"%s\", \"options\": %s}", c->pressio_id, opts);
+    const char *oj = (std::strcmp(opts, "{}") == 0) ? NULL : opts;
+
+    if (dbg)
+        std::fprintf(stderr,
+            "[dbg run_pair] %s_%s rank=%d nelem=%zu xform=%s pressio_id=%s "
+            "chunk_n=%d abs_thresh=%.3e opts=%s\n",
+            d->name, c->name, d->rank, nelem, bench_xform_name(d->xform),
+            c->pressio_id ? c->pressio_id : "(null)", chunk_n, thr,
+            oj ? oj : "(default)");
+
+    {
+        char       path[1024], suffix[64], dsname[224];
+        rep_timing t;
+
+        std::snprintf(suffix, sizeof(suffix), "_%s", c->name);
+        derive_path(h5base, suffix, path, sizeof(path));
+        std::snprintf(dsname, sizeof(dsname), "%s_%s", d->name, c->name);
+
+        if (run_rep(path, dsname, d, c, oj, space, ntype,
+                    wbuf, rbuf, raw_bytes, &t) != 0) {
+            if (!bench_keep_h5()) std::remove(path);
+            if (space != H5I_INVALID_HID) H5Sclose(space);
+            return;
+        }
+
+        /* ---------------- FIDELITY ---------------- */
+        bench_stats st = bench_compute_stats(hbuf, rbuf, nelem, d->dtype,
+                                             BENCH_XFORM_NONE);
+
+        if (verify) {
+            bench_zero_run(hbuf, rbuf, nelem, d->dtype, dsname);
+            /* thr == 0 on a lossy rate-mode entry would flag every chunk bad,
+             * so run the threshold-based checks only where a bound exists. */
+            if (bench_bound_is_checkable(c)) {
+                bench_check_chunks(hbuf, rbuf, nelem, d->dtype, chunk_n, thr, dsname);
+                bench_locate_bad(hbuf, rbuf, nelem, d->dtype, chunk_n, thr, dsname);
+            } else {
+                std::fprintf(stderr, "[chunkchk] %-28s skipped (no error bound; "
+                             "rate mode)\n", dsname);
+            }
+        }
+
+        if (c->lossless && st.maxae != 0.0)
+            std::fprintf(stderr, "[FAIL] %-28s declared lossless but maxae=%.6e\n",
+                         dsname, st.maxae);
+        else if (thr > 0.0 && st.maxae > 2.0 * thr)
+            std::fprintf(stderr, "[FAIL] %-28s maxae=%.6e exceeds 2x configured "
+                                 "bound %.6e\n", dsname, st.maxae, thr);
+
+        const double ratio = t.stored ? (double)raw_bytes / (double)t.stored : 0.0;
+
+        bench_csv_row(csv, d->name, c->name, "vol", "write", "total", t.write_ms, ratio, -1.0);
+        bench_csv_row(csv, d->name, c->name, "vol", "write", "flush", t.flush_ms, -1.0, -1.0);
+        bench_csv_row(csv, d->name, c->name, "vol", "write", "sync",  t.sync_ms,  -1.0, -1.0);
+        bench_csv_row(csv, d->name, c->name, "vol", "write", "close", t.close_ms, -1.0, -1.0);
+        bench_csv_row(csv, d->name, c->name, "vol", "write", "csync", t.csync_ms, -1.0, -1.0);
+        bench_csv_row(csv, d->name, c->name, "vol", "read",  "evict", t.evict_ms, -1.0, -1.0);
+        bench_csv_row(csv, d->name, c->name, "vol", "read",  "total", t.read_ms, -1.0, st.rmse);
+
+        xcsv_row(xcsv, d->name, c, chunk_n, 0,
+                 (unsigned long long)raw_bytes, &t, st.rmse, thr, st.maxae);
+
+        if (acc) {
+            acc->create_ms += t.create_ms; acc->write_ms += t.write_ms;
+            acc->flush_ms  += t.flush_ms;  acc->sync_ms  += t.sync_ms;
+            acc->close_ms  += t.close_ms;  acc->csync_ms += t.csync_ms;
+            acc->evict_ms  += t.evict_ms;
+            acc->open_ms   += t.open_ms;   acc->read_ms  += t.read_ms;
+            acc->raw_bytes += raw_bytes;   acc->storage  += t.stored;
+            acc->n         += 1;
+        }
+
+        std::printf("  %-28s C=%7.2f W=%9.2f F=%8.2f S=%9.2f X=%8.2f S2=%7.2f | "
+                    "E=%7.2f O=%7.2f R=%9.2f ms  ratio=%6.2fx  "
+                    "RMSE=%.3e maxae=%.3e%s\n",
+                    dsname, t.create_ms, t.write_ms, t.flush_ms, t.sync_ms,
+                    t.close_ms, t.csync_ms,
+                    t.evict_ms, t.open_ms, t.read_ms, ratio, st.rmse, st.maxae,
+                    (d->xform != BENCH_XFORM_NONE) ? " (log-space)" : "");
+        std::fflush(stdout);
+
+        if (!bench_keep_h5()) std::remove(path);
+    }
+
+  } catch (const std::exception &e) {
+      std::fprintf(stderr, "[ERR] run_pair %s/%s threw: %s (skipped; sweep continues)\n",
+                   d->name, c->name, e.what());
+      std::fflush(stderr);
+  } catch (...) {
+      std::fprintf(stderr, "[ERR] run_pair %s/%s threw unknown exception (skipped)\n",
+                   d->name, c->name);
+      std::fflush(stderr);
+  }
+
+    if (space != H5I_INVALID_HID) H5Sclose(space);
 }
 
-#ifdef __cplusplus
-}  /* extern "C" */
+int main(int argc, char **argv) {
+    const char *h5base   = (argc > 1) ? argv[1] : "bench_out.h5";
+    const char *csvpath  = (argc > 2) ? argv[2] : "results_vol.csv";
+    const char *xcsvpath = (argc > 3) ? argv[3] : std::getenv("BENCH_CSV_EX");
+    const char *only     = std::getenv("BENCH_ONLY");
+    const char *only_cmp = std::getenv("BENCH_COMP");
+    const bool  dbg      = std::getenv("BENCH_DEBUG") != NULL;
+
+    char xcsv_default[512];
+    if (!xcsvpath || !*xcsvpath) {
+        std::snprintf(xcsv_default, sizeof(xcsv_default), "%s.ext.csv", csvpath);
+        xcsvpath = xcsv_default;
+    }
+
+    std::fprintf(stderr,
+        "[dbg main] h5base=%s csv=%s xcsv=%s only=%s comp=%s "
+        "verify=%d keep_h5=%d debug=%d\n",
+        h5base, csvpath, xcsvpath, only ? only : "(all)",
+        only_cmp ? only_cmp : "(all)",
+        bench_verify(), bench_keep_h5(), (int)dbg);
+    std::fprintf(stderr,
+        "[dbg main] durability: fsync=%d sync_dir=%d drop_cache=%d "
+        "(BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)\n",
+        bench_do_fsync(), bench_do_syncdir(), bench_do_dropcache());
+    std::fprintf(stderr,
+        "[dbg main] one measurement per (dataset x compressor), no warmup, "
+        "own file at <base>_<comp>.h5\n");
+
+    register_vol_properties();
+    bench_datasets_validate();
+
+    FILE *csv = std::fopen(csvpath, "w");
+    if (!csv) { std::perror("csv"); return 1; }
+    bench_csv_header(csv);
+
+    FILE *xcsv = std::fopen(xcsvpath, "w");
+    if (!xcsv) { std::perror("xcsv"); std::fclose(csv); return 1; }
+    std::fputs(XCSV_HEADER, xcsv);
+
+    bench_file_acc acc;
+    std::memset(&acc, 0, sizeof(acc));
+    int n_ok = 0, n_skip = 0;
+
+    const size_t mem_avail = bench_mem_available_bytes();
+
+    for (int di = 0; di < BENCH_NUM_DATASETS; ++di) {
+        const bench_dataset_t *d = &BENCH_DATASETS[di];
+        if (!name_selected(only, d->name)) continue;
+        if (access(d->path, R_OK) != 0) {
+            std::fprintf(stderr, "[dbg main] skip %s (unreadable: %s)\n",
+                         d->name, d->path);
+            n_skip++; continue;
+        }
+
+        if (d->src != BENCH_SRC_HDF5 && mem_avail) {
+            size_t need = 2 * bench_num_bytes(d);
+            if (need > (size_t)(0.9 * (double)mem_avail)) {
+                std::fprintf(stderr,
+                    "[SKIP] %s needs %.1f GiB for hbuf+rbuf but only %.1f GiB "
+                    "available -- raise the job's mem= request\n",
+                    d->name, bench_gib(need), bench_gib(mem_avail));
+                n_skip++; continue;
+            }
+        }
+
+        bench_dataset_t rz;
+        size_t raw = 0;
+        void *hbuf = bench_load_field(d, &rz, &raw);
+        if (!hbuf) {
+            std::fprintf(stderr, "[ERR] load failed %s\n", d->name);
+            n_skip++; continue;
+        }
+
+        if (rz.xform != BENCH_XFORM_NONE) {
+            if (dbg) std::fprintf(stderr, "[dbg main] applying %s to %s\n",
+                                  bench_xform_name(rz.xform), rz.name);
+            bench_apply_xform(hbuf, bench_num_elements(&rz), rz.dtype, rz.xform);
+        }
+
+        double measured_range = 0.0;
+        {
+            size_t ne = bench_num_elements(&rz);
+            double mn = DBL_MAX, mx = -DBL_MAX;
+            for (size_t i = 0; i < ne; ++i) {
+                double v = (rz.dtype == BENCH_F64) ? ((const double*)hbuf)[i]
+                                                   : (double)((const float*)hbuf)[i];
+                if (v < mn) mn = v;
+                if (v > mx) mx = v;
+            }
+            measured_range = mx - mn;
+            std::fprintf(stderr,
+                         "RANGE %-14s min=%.6e max=%.6e range=%.6e xform=%s\n",
+                         rz.name, mn, mx, measured_range,
+                         bench_xform_name(rz.xform));
+        }
+
+        void *rbuf = std::malloc(raw);
+        if (!rbuf) {
+            std::fprintf(stderr, "[ERR] OOM rbuf %s\n", rz.name);
+            std::free(hbuf);
+            continue;
+        }
+
+        const void *wbuf = hbuf;
+#ifdef USE_CUDA
+        void *dbuf = NULL;      /* the application's device-resident field */
+        void *sbuf = NULL;      /* host copy the filter path would require */
+        const int dev_mode  = (std::getenv("BENCH_DEVICE_INPUT") != NULL);
+        const int host_mode = (std::getenv("BENCH_HOST_STAGED")  != NULL);
+
+        if (dev_mode || host_mode) {
+            if (cudaMalloc(&dbuf, raw) != cudaSuccess) {
+                std::fprintf(stderr, "[ERR] cudaMalloc %.1f MiB failed for %s\n",
+                             raw / (1024.0 * 1024.0), rz.name);
+                std::free(rbuf); std::free(hbuf); continue;
+            }
+            cudaMemcpy(dbuf, hbuf, raw, cudaMemcpyHostToDevice);
+            cudaDeviceSynchronize();
+            std::fprintf(stderr, "[device] %s: %.1f MiB resident on GPU\n",
+                         rz.name, raw / (1024.0 * 1024.0));
+        }
+
+        if (dev_mode) {
+            wbuf = dbuf;
+            std::fprintf(stderr, "[device] arm=device: VOL receives the device "
+                                 "pointer; no host round trip for the write\n");
+        } else if (host_mode) {
+            sbuf = std::malloc(raw);
+            if (!sbuf) {
+                std::fprintf(stderr, "[ERR] OOM staging %zu bytes\n", raw);
+                cudaFree(dbuf); std::free(rbuf); std::free(hbuf); continue;
+            }
+            cudaEvent_t e0, e1; float d2h_ms = 0.0f;
+            cudaEventCreate(&e0); cudaEventCreate(&e1);
+            cudaEventRecord(e0);
+            cudaMemcpy(sbuf, dbuf, raw, cudaMemcpyDeviceToHost);
+            cudaEventRecord(e1); cudaEventSynchronize(e1);
+            cudaEventElapsedTime(&d2h_ms, e0, e1);
+            cudaEventDestroy(e0); cudaEventDestroy(e1);
+            wbuf = sbuf;
+            std::fprintf(stderr,
+                         "[device] arm=host d2h_ms=%.3f pcie_in=%.1f MiB\n",
+                         (double)d2h_ms, raw / (1024.0 * 1024.0));
+        }
 #endif
 
-#endif /* BENCH_CONFIG_H */
+        std::printf("\n=== %s (%.1f MiB, %s, %s%s) ===\n", rz.name,
+                    raw / (1024.0 * 1024.0), bench_dtype_name(rz.dtype),
+                    bench_src_name(rz.src),
+                    rz.xform != BENCH_XFORM_NONE ? ", transformed" : "");
+
+        for (int ci = 0; ci < BENCH_NUM_COMPRESSORS; ++ci) {
+            const bench_compressor_t *c = &BENCH_COMPRESSORS[ci];
+            if (!name_selected(only_cmp, c->name)) continue;
+            run_pair(h5base, &rz, c, hbuf, wbuf, rbuf, raw,
+                     measured_range, csv, xcsv, &acc);
+        }
+
+#ifdef USE_CUDA
+        if (dbuf) cudaFree(dbuf);
+        if (sbuf) std::free(sbuf);
+#endif
+        std::free(rbuf);
+        std::free(hbuf);
+        n_ok++;
+    }
+
+    const double file_wtotal = acc.create_ms + acc.write_ms + acc.flush_ms
+                             + acc.sync_ms  + acc.close_ms + acc.csync_ms;
+    const double file_rtotal = acc.open_ms + acc.read_ms;   /* evict excluded */
+    const double file_ratio  = acc.storage ? (double)acc.raw_bytes / (double)acc.storage : 0.0;
+
+    std::printf("\n=== TOTALS over %d measurement files: create=%.2f write=%.2f "
+                "flush=%.2f sync=%.2f close=%.2f csync=%.2f => write_total=%.2f ms | "
+                "evict=%.2f open=%.2f read=%.2f => read_total=%.2f ms | "
+                "ratio=%.2fx ===\n",
+                acc.n, acc.create_ms, acc.write_ms, acc.flush_ms, acc.sync_ms,
+                acc.close_ms, acc.csync_ms, file_wtotal,
+                acc.evict_ms, acc.open_ms, acc.read_ms, file_rtotal, file_ratio);
+
+    bench_csv_row(csv, h5base, "ALL", "vol", "write", "file", file_wtotal, file_ratio, -1.0);
+    bench_csv_row(csv, h5base, "ALL", "vol", "read",  "file", file_rtotal, -1.0,       -1.0);
+
+    std::fclose(csv);
+    std::fclose(xcsv);
+    std::fprintf(stderr, "[dbg main] done: %d datasets, %d skipped, "
+                 "%d measurements\n", n_ok, n_skip, acc.n);
+    return 0;
+}
