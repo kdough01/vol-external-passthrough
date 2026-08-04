@@ -33,6 +33,11 @@ typedef struct {
     unsigned long long stored;
 } rep_timing;
 
+/* ------------------------------------------------------------------ *
+ * Wall-clock timer.  fsync() spends its time blocked in the kernel on
+ * device completion, which a CPU-time clock will not see at all, so the
+ * durability phases must be measured against CLOCK_MONOTONIC.
+ * ------------------------------------------------------------------ */
 static inline double bench_wall_now_ms(void) {
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
@@ -51,7 +56,11 @@ static void xcsv_row(FILE *fp, const char *dset, const bench_compressor_t *c,
                      double rmse, double abs_thresh, double maxae) {
     if (!fp) return;
     const double ratio = t->stored ? (double)logical / (double)t->stored : 0.0;
-    const int bound_ok = (abs_thresh > 0.0) ? (maxae <= 2.0 * abs_thresh)
+    /* -1 == "not applicable": rate-mode entries are lossy with no error bound,
+     * so a pass/fail verdict would be meaningless.  Filter these out downstream
+     * rather than reading them as failures. */
+    const int bound_ok = !bench_bound_is_checkable(c) ? -1
+                       : (abs_thresh > 0.0) ? (maxae <= 2.0 * abs_thresh)
                                             : (maxae == 0.0);
     std::fprintf(fp,
         "%s,%s,%s,%d,%d,%llu,%llu,%.4f,"
@@ -198,10 +207,21 @@ static int env_int(const char *name, int dflt) {
 static int bench_verify(void)  { return env_int("BENCH_VERIFY", 0) != 0; }
 static int bench_keep_h5(void) { return env_int("BENCH_KEEP_H5", 0) != 0; }
 
+/* Durability / cache controls.  Both default ON: without them write_ms and
+ * read_ms measure the page cache, not the storage device, which is what makes
+ * the io_ms column jump around between runs.
+ *   BENCH_FSYNC=0       -- skip fsync (old, cache-only behaviour)
+ *   BENCH_DROP_CACHE=0  -- skip page-cache eviction before the read phase
+ *   BENCH_SYNC_DIR=0    -- skip the parent-directory fsync
+ */
 static int bench_do_fsync(void)      { return env_int("BENCH_FSYNC", 1) != 0; }
 static int bench_do_dropcache(void)  { return env_int("BENCH_DROP_CACHE", 1) != 0; }
 static int bench_do_syncdir(void)    { return env_int("BENCH_SYNC_DIR", 1) != 0; }
 
+/* fsync the file's data to the device.  Opening a second read-only descriptor
+ * is fine: fsync() acts on the inode, not on the descriptor's write history,
+ * so it flushes everything HDF5 wrote through its own fd.  sync_dir also
+ * fsyncs the containing directory so the newly created dirent is durable. */
 static double bench_fsync_path(const char *path, int sync_dir) {
     BenchWallTimer t; t.start();
 
@@ -228,6 +248,10 @@ static double bench_fsync_path(const char *path, int sync_dir) {
     return t.stop_ms();
 }
 
+/* Evict the file from the page cache so the read phase actually touches the
+ * device.  POSIX_FADV_DONTNEED only drops CLEAN pages, hence the fsync first.
+ * Best effort: on a shared node, or on Lustre/GPFS where client-side caching
+ * is managed by the filesystem, some pages may survive. */
 static double bench_evict_path(const char *path) {
     BenchWallTimer t; t.start();
 
@@ -421,8 +445,15 @@ static void run_pair(const char *h5base,
 
         if (verify) {
             bench_zero_run(hbuf, rbuf, nelem, d->dtype, dsname);
-            bench_check_chunks(hbuf, rbuf, nelem, d->dtype, chunk_n, thr, dsname);
-            bench_locate_bad(hbuf, rbuf, nelem, d->dtype, chunk_n, thr, dsname);
+            /* thr == 0 on a lossy rate-mode entry would flag every chunk bad,
+             * so run the threshold-based checks only where a bound exists. */
+            if (bench_bound_is_checkable(c)) {
+                bench_check_chunks(hbuf, rbuf, nelem, d->dtype, chunk_n, thr, dsname);
+                bench_locate_bad(hbuf, rbuf, nelem, d->dtype, chunk_n, thr, dsname);
+            } else {
+                std::fprintf(stderr, "[chunkchk] %-28s skipped (no error bound; "
+                             "rate mode)\n", dsname);
+            }
         }
 
         if (c->lossless && st.maxae != 0.0)
