@@ -513,7 +513,6 @@ int main(int argc, char **argv) {
             wbuf = dbuf;
             std::fprintf(stderr, "[device] arm=device: VOL receives the device "
                                  "pointer; no host round trip for the write\n");
-        }
         } else if (host_mode) {
             sbuf = std::malloc(raw);
             if (!sbuf) {
