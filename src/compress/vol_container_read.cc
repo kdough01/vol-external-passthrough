@@ -6,12 +6,22 @@ extern "C" {
 #include <libpressio/libpressio.h>
 #include "hdf5.h"
 #include "H5VLpassthru_ext.h"
+#if defined(__has_include)
+#  if __has_include("H5VLpassthru_ext_private.h")
+#    include "H5VLpassthru_ext_private.h"
+#  endif
+#endif
 #include "metadata_structs.h"
 #include "vol_errors.h"
 #include "vol_shared_meta.h"
 #include "vol_progressive.h"
 #include "vol_container_read.h"
 }
+
+#ifndef VOL_NATIVE_MAGIC
+#  error "VOL_NATIVE_MAGIC not visible -- include whichever header defines the \
+container magics (grep -rn VOL_NATIVE_MAGIC src/*.h)"
+#endif
 
 extern "C" size_t vol_logical_nbytes(const compression_ctx *ctx);
 
@@ -129,9 +139,14 @@ vol_container_read_range(void *under, hid_t under_vol_id, hid_t plist_id,
     }
     H5Sselect_hyperslab(fspace, H5S_SELECT_SET, &coff, NULL, &mlen, NULL);
 
-    void *bufs[] = { dst };
-    herr_t rc = H5VLdataset_read(1, &under, under_vol_id,
-                                 (hid_t[]){H5T_NATIVE_UCHAR},
+    /* Named arrays, not compound literals: (hid_t[]){...} is C99 and is fine
+     * in H5VLpassthru_ext.c, but this is C++ where taking the address of that
+     * temporary is ill-formed. */
+    hid_t  mtypes[1] = { H5T_NATIVE_UCHAR };
+    void  *bufs[1]   = { dst };
+    void  *unders[1] = { under };
+
+    herr_t rc = H5VLdataset_read(1, unders, under_vol_id, mtypes,
                                  &mspace, &fspace, plist_id, bufs, NULL);
     H5Sclose(mspace);
     H5Sclose(fspace);
@@ -414,10 +429,6 @@ vol_container_fetch(void *under, hid_t under_vol_id, hid_t plist_id,
     if (!plan || !out_cbuf) return -1;
     *out_cbuf = NULL;
 
-    /* calloc, not malloc: skipped regions are never touched, so on Linux they
-     * are never faulted in and RSS tracks bytes_needed rather than
-     * cont_bytes. Absolute offsets are preserved, so every existing decode
-     * function works against this buffer unchanged. */
     unsigned char *buf = (unsigned char *)calloc(1, (size_t)plan->cont_bytes);
     if (!buf) {
         H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
