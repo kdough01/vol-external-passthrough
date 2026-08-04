@@ -436,7 +436,8 @@ int main(int argc, char **argv) {
         const bench_dataset_t *d = &BENCH_DATASETS[di];
         if (!name_selected(only, d->name)) continue;
         if (access(d->path, R_OK) != 0) {
-            std::fprintf(stderr, "[dbg main] skip %s (unreadable: %s)\n", d->name, d->path);
+            std::fprintf(stderr, "[dbg main] skip %s (unreadable: %s)\n",
+                         d->name, d->path);
             n_skip++; continue;
         }
 
@@ -454,7 +455,10 @@ int main(int argc, char **argv) {
         bench_dataset_t rz;
         size_t raw = 0;
         void *hbuf = bench_load_field(d, &rz, &raw);
-        if (!hbuf) { std::fprintf(stderr, "[ERR] load failed %s\n", d->name); n_skip++; continue; }
+        if (!hbuf) {
+            std::fprintf(stderr, "[ERR] load failed %s\n", d->name);
+            n_skip++; continue;
+        }
 
         if (rz.xform != BENCH_XFORM_NONE) {
             if (dbg) std::fprintf(stderr, "[dbg main] applying %s to %s\n",
@@ -462,9 +466,6 @@ int main(int argc, char **argv) {
             bench_apply_xform(hbuf, bench_num_elements(&rz), rz.dtype, rz.xform);
         }
 
-        /* Range scan (post-transform); feeds bench_abs_threshold() for any
-         * relative-bounded entry so verification uses a measured range rather
-         * than the assumed_range placeholder. */
         double measured_range = 0.0;
         {
             size_t ne = bench_num_elements(&rz);
@@ -476,13 +477,20 @@ int main(int argc, char **argv) {
                 if (v > mx) mx = v;
             }
             measured_range = mx - mn;
-            std::fprintf(stderr, "RANGE %-14s min=%.6e max=%.6e range=%.6e xform=%s\n",
-                         rz.name, mn, mx, measured_range, bench_xform_name(rz.xform));
+            std::fprintf(stderr,
+                         "RANGE %-14s min=%.6e max=%.6e range=%.6e xform=%s\n",
+                         rz.name, mn, mx, measured_range,
+                         bench_xform_name(rz.xform));
         }
 
-        /* Optional device-resident input. Staged OUTSIDE the timed region:
-         * we are measuring the write path, not the app's data placement. */
-const void *wbuf = hbuf;
+        void *rbuf = std::malloc(raw);
+        if (!rbuf) {
+            std::fprintf(stderr, "[ERR] OOM rbuf %s\n", rz.name);
+            std::free(hbuf);
+            continue;
+        }
+
+        const void *wbuf = hbuf;
 #ifdef USE_CUDA
         void *dbuf = NULL;      /* the application's device-resident field */
         void *sbuf = NULL;      /* host copy the filter path would require */
@@ -490,8 +498,6 @@ const void *wbuf = hbuf;
         const int host_mode = (std::getenv("BENCH_HOST_STAGED")  != NULL);
 
         if (dev_mode || host_mode) {
-            /* Premise for BOTH arms: the field is already on the GPU.
-             * Outside the timer -- app placement, not a storage cost. */
             if (cudaMalloc(&dbuf, raw) != cudaSuccess) {
                 std::fprintf(stderr, "[ERR] cudaMalloc %.1f MiB failed for %s\n",
                              raw / (1024.0 * 1024.0), rz.name);
@@ -520,41 +526,37 @@ const void *wbuf = hbuf;
             cudaEventElapsedTime(&d2h_ms, e0, e1);
             cudaEventDestroy(e0); cudaEventDestroy(e1);
             wbuf = sbuf;
-            std::fprintf(stderr, "[device] arm=host d2h_ms=%.3f pcie_in=%.1f MiB\n",
+            std::fprintf(stderr,
+                         "[device] arm=host d2h_ms=%.3f pcie_in=%.1f MiB\n",
                          (double)d2h_ms, raw / (1024.0 * 1024.0));
         }
 #endif
 
+        std::printf("\n=== %s (%.1f MiB, %s, %s%s) ===\n", rz.name,
+                    raw / (1024.0 * 1024.0), bench_dtype_name(rz.dtype),
+                    bench_src_name(rz.src),
+                    rz.xform != BENCH_XFORM_NONE ? ", transformed" : "");
 
-std::printf("\n=== %s (%.1f MiB, %s, %s%s) ===\n", rz.name,
-    raw / (1024.0 * 1024.0), bench_dtype_name(rz.dtype),
-    bench_src_name(rz.src),
-    rz.xform != BENCH_XFORM_NONE ? ", transformed" : "");
-    
-    for (int ci = 0; ci < BENCH_NUM_COMPRESSORS; ++ci) {
-        const bench_compressor_t *c = &BENCH_COMPRESSORS[ci];
-        if (!name_selected(only_cmp, c->name)) continue;
-        run_pair(h5base, &rz, c, hbuf, wbuf, rbuf, raw,
-            measured_range, csv, xcsv, &acc);
+        for (int ci = 0; ci < BENCH_NUM_COMPRESSORS; ++ci) {
+            const bench_compressor_t *c = &BENCH_COMPRESSORS[ci];
+            if (!name_selected(only_cmp, c->name)) continue;
+            run_pair(h5base, &rz, c, hbuf, wbuf, rbuf, raw,
+                     measured_range, csv, xcsv, &acc);
         }
-        #ifdef USE_CUDA
+
+#ifdef USE_CUDA
         if (dbuf) cudaFree(dbuf);
         if (sbuf) std::free(sbuf);
-        #endif
-        std::free(rbuf); std::free(hbuf);
+#endif
+        std::free(rbuf);
+        std::free(hbuf);
         n_ok++;
     }
-    
-    /* File-level rows are sums over the per-measurement files, so create and
-    * close are genuinely attributable rather than a single aggregate for a
-    * whole multi-dataset container. */
-   const double file_wtotal = acc.create_ms + acc.write_ms + acc.flush_ms + acc.close_ms;
-   const double file_rtotal = acc.open_ms + acc.read_ms;
-   const double file_ratio  = acc.storage ? (double)acc.raw_bytes / (double)acc.storage : 0.0;
-   
-   void *rbuf = std::malloc(raw);
-   if (!rbuf) { std::fprintf(stderr, "[ERR] OOM rbuf %s\n", rz.name); std::free(hbuf); continue; }
-   
+
+    const double file_wtotal = acc.create_ms + acc.write_ms + acc.flush_ms + acc.close_ms;
+    const double file_rtotal = acc.open_ms + acc.read_ms;
+    const double file_ratio  = acc.storage ? (double)acc.raw_bytes / (double)acc.storage : 0.0;
+
     std::printf("\n=== TOTALS over %d measurement files: create=%.2f write=%.2f "
                 "flush=%.2f close=%.2f => write_total=%.2f ms | open=%.2f "
                 "read=%.2f => read_total=%.2f ms | ratio=%.2fx ===\n",
