@@ -1,48 +1,3 @@
-/* ============================================================================
- * bench_vol_timing.cc  --  APPROACH 2 of 3: passthrough VOL connector
- * ----------------------------------------------------------------------------
- * Drives the compressor THROUGH the VOL: H5Dcreate/H5Dwrite/H5Dread with the
- * connector active. The phase split (stage / compress / container / io) comes
- * from the connector itself via vol_timing_phases.c -> $VOL_PHASES_CSV. This
- * harness measures the envelope: create, write, flush, close, open, read,
- * ratio, fidelity.
- *
- * ONE MEASUREMENT, ONE FILE, NO WARMUP.
- *
- *   Each (dataset x compressor) is measured exactly once, in its own file:
- *   create -> write -> flush -> close, then a fresh open -> read -> close.
- *
- *   No warmup: a preliminary write perturbs the codec's device allocator and
- *   the filesystem before the thing being measured.
- *
- *   No repetitions: repeats inside one process share device-allocator and
- *   page-cache state, so they do not describe a single cold write either. If you
- *   want a distribution, run the whole process N times from the PBS script.
- *
- *   One file per measurement is also required for correctness, not just
- *   hygiene: closing and reopening a file handle mid-run leaves the connector
- *   without its _VOL_* attribute state, so a subsequent H5Dcreate2 produces a
- *   dataset whose H5Dopen2 fails with "can't locate attribute:
- *   '_VOL_ORIG_RANK'". This also matches the one-dataset-per-file usage that
- *   tier2_h5repack_roundtrip.pbs exercises.
- *
- *   NOTE: a fresh open does not clear the OS page cache, so reads remain
- *   page-cache-warm. State that in methods.
- *
- * OTHER BEHAVIOUR
- *   BENCH_VERIFY    (0)  gates the three O(nelem) diagnostic passes. Turn this
- *                        ON when chasing a bound violation: bench_check_chunks
- *                        reports per-chunk maxae, which localises the failure to
- *                        a single chunk.
- *   BENCH_KEEP_H5   (0)  keep the .h5 files instead of unlinking them
- *
- * Fidelity thresholds come from bench_abs_threshold(), i.e. the bound the codec
- * was actually configured with -- not d->bound, which is the dataset's nominal
- * relative bound and made the old checks vacuous.
- *
- * Build:
- *   h5c++ -O2 -std=c++17 bench_vol_timing.cc -lpressio -o bench_vol_timing
- * ==========================================================================*/
 #include <hdf5.h>
 #include <cstdlib>
 #include <cstdio>
@@ -51,20 +6,15 @@
 #include <cfloat>
 #include <stdexcept>
 #include <exception>
+#ifdef USE_CUDA
+#include <cuda_runtime.h>
+#endif
 
 #define BENCH_CONFIG_ENABLE_HDF5
 #include "bench_config.h"
 #include "bench_timing.h"
-#include "miranda.h"     /* register_vol_properties(), make_dcpl(id, opts_json) */
+#include "miranda.h"
 
-/* ---------------------------------------------------------------------------
- * Extended CSV. Written alongside the legacy bench_csv_row output so existing
- * merges keep working; the legacy 9-field schema has no room for a repetition
- * index or the separate flush/close/open columns.
- *
- * bench_pressio_timing.cc and bench_filter_timing.cc need this same header if
- * you want to merge across all three harnesses.
- * ------------------------------------------------------------------------ */
 static const char *XCSV_HEADER =
     "dataset,compressor,codec_kind,chunk_n,rep,"
     "logical_bytes,stored_bytes,ratio,"
@@ -172,9 +122,6 @@ static int bench_check_chunks(const void *orig, const void *dec, size_t nelem,
     return bad;
 }
 
-/* Locate contiguous corrupt blocks and map each to chunk + offset. Targets
- * GROSS corruption (error >> thr), ignoring points that are legitimately
- * quantized near the bound. */
 static int bench_locate_bad(const void *orig, const void *dec, size_t nelem,
                             bench_dtype_t dt, int nchunks, double thr_in,
                             const char *label) {
@@ -256,10 +203,6 @@ typedef struct {
     int                n;
 } bench_file_acc;
 
-/* --------------------------------------------------------------------------
- * One measurement: its own file, write phase then a fresh-open read phase.
- * Returns 0 on success.
- * ----------------------------------------------------------------------- */
 static int run_rep(const char *path, const char *dsname,
                    const bench_dataset_t *d, const bench_compressor_t *c,
                    const char *oj, hid_t space, hid_t ntype,
@@ -344,19 +287,10 @@ static int run_rep(const char *path, const char *dsname,
     return 0;
 }
 
-/* --------------------------------------------------------------------------
- * One (dataset x compressor) pair. ONE measurement, no warmup.
- *
- * Both were deliberately removed. A warmup write perturbs the codec and the
- * filesystem before the measurement, and repetitions in the same process share
- * device allocator and page-cache state, so neither produced a number that
- * described a single cold write. The rep column is retained in the CSV (always
- * 0) so the schema and the PBS summary column indices stay stable.
- * ----------------------------------------------------------------------- */
 static void run_pair(const char *h5base,
                      const bench_dataset_t *d, const bench_compressor_t *c,
-                     const void *hbuf, void *rbuf, size_t raw_bytes,
-                     double measured_range,
+                     const void *hbuf, const void *wbuf, void *rbuf,
+                     size_t raw_bytes, double measured_range,
                      FILE *csv, FILE *xcsv, bench_file_acc *acc) {
     const bool   dbg     = std::getenv("BENCH_DEBUG") != NULL;
     const int    verify  = bench_verify();
@@ -393,7 +327,7 @@ static void run_pair(const char *h5base,
         std::snprintf(dsname, sizeof(dsname), "%s_%s", d->name, c->name);
 
         if (run_rep(path, dsname, d, c, oj, space, ntype,
-                    hbuf, rbuf, raw_bytes, &t) != 0) {
+                    wbuf, rbuf, raw_bytes, &t) != 0) {
             if (!bench_keep_h5()) std::remove(path);
             if (space != H5I_INVALID_HID) H5Sclose(space);
             return;
@@ -506,9 +440,6 @@ int main(int argc, char **argv) {
             n_skip++; continue;
         }
 
-        /* Fail fast instead of getting OOM-killed mid-sweep: hbuf and rbuf are
-         * both resident, so einspline37 needs ~26 GiB before the connector
-         * allocates anything at all. */
         if (d->src != BENCH_SRC_HDF5 && mem_avail) {
             size_t need = 2 * bench_num_bytes(d);
             if (need > (size_t)(0.9 * (double)mem_avail)) {
@@ -549,6 +480,25 @@ int main(int argc, char **argv) {
                          rz.name, mn, mx, measured_range, bench_xform_name(rz.xform));
         }
 
+        /* Optional device-resident input. Staged OUTSIDE the timed region:
+         * we are measuring the write path, not the app's data placement. */
+        const void *wbuf = hbuf;
+#ifdef USE_CUDA
+        void *dbuf = NULL;
+        if (std::getenv("BENCH_DEVICE_INPUT")) {
+            if (cudaMalloc(&dbuf, raw) != cudaSuccess) {
+                std::fprintf(stderr, "[ERR] cudaMalloc %zu bytes failed for %s\n",
+                             raw, rz.name);
+                std::free(rbuf); std::free(hbuf); continue;
+            }
+            cudaMemcpy(dbuf, hbuf, raw, cudaMemcpyHostToDevice);
+            cudaDeviceSynchronize();
+            wbuf = dbuf;
+            std::fprintf(stderr, "[device] %s staged %.1f MiB to GPU\n",
+                         rz.name, raw / (1024.0 * 1024.0));
+        }
+#endif
+
         void *rbuf = std::malloc(raw);
         if (!rbuf) { std::fprintf(stderr, "[ERR] OOM rbuf %s\n", rz.name); std::free(hbuf); continue; }
 
@@ -560,9 +510,12 @@ int main(int argc, char **argv) {
         for (int ci = 0; ci < BENCH_NUM_COMPRESSORS; ++ci) {
             const bench_compressor_t *c = &BENCH_COMPRESSORS[ci];
             if (!name_selected(only_cmp, c->name)) continue;
-            run_pair(h5base, &rz, c, hbuf, rbuf, raw,
+            run_pair(h5base, &rz, c, hbuf, wbuf, rbuf, raw,
                      measured_range, csv, xcsv, &acc);
         }
+#ifdef USE_CUDA
+        if (dbuf) cudaFree(dbuf);
+#endif
         std::free(rbuf); std::free(hbuf);
         n_ok++;
     }
