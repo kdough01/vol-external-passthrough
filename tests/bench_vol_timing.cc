@@ -482,20 +482,46 @@ int main(int argc, char **argv) {
 
         /* Optional device-resident input. Staged OUTSIDE the timed region:
          * we are measuring the write path, not the app's data placement. */
-        const void *wbuf = hbuf;
+const void *wbuf = hbuf;
 #ifdef USE_CUDA
-        void *dbuf = NULL;
-        if (std::getenv("BENCH_DEVICE_INPUT")) {
+        void *dbuf = NULL;      /* the application's device-resident field */
+        void *sbuf = NULL;      /* host copy the filter path would require */
+        const int dev_mode  = (std::getenv("BENCH_DEVICE_INPUT") != NULL);
+        const int host_mode = (std::getenv("BENCH_HOST_STAGED")  != NULL);
+
+        if (dev_mode || host_mode) {
+            /* Premise for BOTH arms: the field is already on the GPU.
+             * Outside the timer -- app placement, not a storage cost. */
             if (cudaMalloc(&dbuf, raw) != cudaSuccess) {
-                std::fprintf(stderr, "[ERR] cudaMalloc %zu bytes failed for %s\n",
-                             raw, rz.name);
+                std::fprintf(stderr, "[ERR] cudaMalloc %.1f MiB failed for %s\n",
+                             raw / (1024.0 * 1024.0), rz.name);
                 std::free(rbuf); std::free(hbuf); continue;
             }
             cudaMemcpy(dbuf, hbuf, raw, cudaMemcpyHostToDevice);
             cudaDeviceSynchronize();
-            wbuf = dbuf;
-            std::fprintf(stderr, "[device] %s staged %.1f MiB to GPU\n",
+            std::fprintf(stderr, "[device] %s: %.1f MiB resident on GPU\n",
                          rz.name, raw / (1024.0 * 1024.0));
+        }
+
+        if (dev_mode) {
+            wbuf = dbuf;
+            std::fprintf(stderr, "[device] arm=device pcie_in=0 MiB\n");
+        } else if (host_mode) {
+            sbuf = std::malloc(raw);
+            if (!sbuf) {
+                std::fprintf(stderr, "[ERR] OOM staging %zu bytes\n", raw);
+                cudaFree(dbuf); std::free(rbuf); std::free(hbuf); continue;
+            }
+            cudaEvent_t e0, e1; float d2h_ms = 0.0f;
+            cudaEventCreate(&e0); cudaEventCreate(&e1);
+            cudaEventRecord(e0);
+            cudaMemcpy(sbuf, dbuf, raw, cudaMemcpyDeviceToHost);
+            cudaEventRecord(e1); cudaEventSynchronize(e1);
+            cudaEventElapsedTime(&d2h_ms, e0, e1);
+            cudaEventDestroy(e0); cudaEventDestroy(e1);
+            wbuf = sbuf;
+            std::fprintf(stderr, "[device] arm=host d2h_ms=%.3f pcie_in=%.1f MiB\n",
+                         (double)d2h_ms, raw / (1024.0 * 1024.0));
         }
 #endif
 
@@ -511,10 +537,11 @@ int main(int argc, char **argv) {
             const bench_compressor_t *c = &BENCH_COMPRESSORS[ci];
             if (!name_selected(only_cmp, c->name)) continue;
             run_pair(h5base, &rz, c, hbuf, wbuf, rbuf, raw,
-                     measured_range, csv, xcsv, &acc);
+                                measured_range, csv, xcsv, &acc);
         }
 #ifdef USE_CUDA
         if (dbuf) cudaFree(dbuf);
+        if (sbuf) std::free(sbuf);
 #endif
         std::free(rbuf); std::free(hbuf);
         n_ok++;

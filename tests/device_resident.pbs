@@ -7,7 +7,7 @@
 #PBS -q gpu
 
 DATASET="${BENCH_DATASET:-s3d}"
-COMP="${BENCH_COMP:-cuszp_1e3}"
+COMP="${BENCH_COMP:-cuszp_1e3}"     # must be a GPU codec: cuszp / cusz / nvcomp
 REPS="${BENCH_REPS:-3}"
 
 cd $PBS_O_WORKDIR/..
@@ -90,6 +90,7 @@ run_arm () {
     local arm="$1" rep="$2"
     local dev=""
     [ "$arm" = "device" ] && dev="BENCH_DEVICE_INPUT=1"
+    [ "$arm" = "host"   ] && dev="BENCH_HOST_STAGED=1"
 
     echo ""
     echo "--- [$arm] rep=$rep ---"
@@ -104,13 +105,14 @@ run_arm () {
               "$BIN" "$H5DIR/g2_${arm}.h5" /dev/null /dev/null 2>&1)
     echo "$OUT"
 
-    local w c dv io
-    w=$(echo  "$OUT" | grep -m1 -oP 'write[^0-9]*\K[0-9.]+')
-    c=$(echo  "$OUT" | grep -m1 -oP 'compress_ms=\K[0-9.]+')
-    dv=$(echo "$OUT" | grep -m1 -oP 'device_ms=\K[0-9.]+')
-    io=$(echo "$OUT" | grep -m1 -oP 'io_ms=\K[0-9.]+')
-    printf 'RESULT\t%s\t%s\t%s\t%s\t%s\t%s\n' \
-           "$arm" "$rep" "${w:-0}" "${c:-0}" "${dv:-0}" "${io:-0}"
+    local w c dv io d2h
+    w=$(echo   "$OUT" | grep -m1 -oP 'write[^0-9]*\K[0-9.]+')
+    c=$(echo   "$OUT" | grep -m1 -oP 'compress_ms=\K[0-9.]+')
+    dv=$(echo  "$OUT" | grep -m1 -oP 'device_ms=\K[0-9.]+')
+    io=$(echo  "$OUT" | grep -m1 -oP 'io_ms=\K[0-9.]+')
+    d2h=$(echo "$OUT" | grep -m1 -oP 'd2h_ms=\K[0-9.]+')
+    printf 'RESULT\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+           "$arm" "$rep" "${w:-0}" "${c:-0}" "${dv:-0}" "${io:-0}" "${d2h:-0}"
 }
 
 echo ""
@@ -127,6 +129,7 @@ profile_arm () {
     local arm="$1"
     local dev=""
     [ "$arm" = "device" ] && dev="BENCH_DEVICE_INPUT=1"
+    [ "$arm" = "host"   ] && dev="BENCH_HOST_STAGED=1"
     local out="$PROF/g2_${arm}"
 
     echo ""
