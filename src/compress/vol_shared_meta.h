@@ -16,12 +16,6 @@ extern "C" {
 #define VOL_SHARED_HDR_WORDS    8
 #define VOL_SHARED_DIR_WORDS    4      /* kind, flags, offset, length */
 
-/* New chunking mode. VOL_CHUNKING_NONE/VOL/PRESSIO are 0/1/2 in
- * H5VLpassthru_ext.h; this continues that sequence. */
-#ifndef VOL_CHUNKING_SHARED
-#define VOL_CHUNKING_SHARED  3
-#endif
-
 /* Region kinds. */
 #define VOL_REGION_SHARED_META  1u   /* once-per-dataset codec metadata      */
 #define VOL_REGION_CHUNK_TABLE  2u   /* uint64 csize[nchunks]                */

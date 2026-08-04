@@ -1,19 +1,3 @@
-/* =========================================================================
- *   word 0  VOL_PROGRESSIVE_MAGIC
- *   word 1  VOL_PROGRESSIVE_VERSION
- *   word 2  nregions            (= nlayers + 1)
- *   word 3  nlayers
- *   word 4  elem_size           (bytes per element, cross-check)
- *   word 5  total_bytes         (logical dataset size)
- *   word 6  reserved (0)
- *   word 7  reserved (0)
- *   then nregions x [kind][flags][offset][length]
- *        kind=VOL_REGION_SHARED_META, flags=0        -> bounds + global stats
- *        kind=VOL_REGION_LAYER,       flags=k        -> layer k payload
- *   then the region payloads.
- *
- * The SHARED_META region is:  double bounds[nlayers]; double gmin; double gmax;
- * ========================================================================= */
 #ifndef VOL_PROGRESSIVE_H
 #define VOL_PROGRESSIVE_H
 
@@ -21,20 +5,15 @@
 #include <stdint.h>
 #include "hdf5.h"
 #include "metadata_structs.h"
-#include "vol_shared_meta.h"     /* region kinds + directory word layout */
+#include "vol_shared_meta.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/* "VOLPRG01" */
 #define VOL_PROGRESSIVE_MAGIC     ((uint64_t)0x564F4C5052473031ULL)
 #define VOL_PROGRESSIVE_VERSION   ((uint64_t)1)
 #define VOL_PROGRESSIVE_HDR_WORDS 8
-
-#ifndef VOL_CHUNKING_PROGRESSIVE
-#define VOL_CHUNKING_PROGRESSIVE  4
-#endif
 
 #define VOL_PROGRESSIVE_DEFAULT_LAYERS 4
 #define VOL_PROGRESSIVE_DEFAULT_RATIO  8.0
