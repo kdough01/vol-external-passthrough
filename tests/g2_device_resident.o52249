@@ -1,37 +1,37 @@
-Job started on Tue Aug  4 14:51:46 CDT 2026   host=gpu4
+Job started on Tue Aug  4 15:06:51 CDT 2026   host=gpu4
 dataset=s3d comp=cuszp_1e3 reps=7
 NVIDIA A100-SXM4-40GB, 40960 MiB
 
 === building (build_g2) ===
-[  4%] Building CXX object tests/CMakeFiles/dump_cuszp_opts.dir/dump_cuszp_opts.cc.o
 [  8%] Building C object src/CMakeFiles/hdf5_vol_passthrough.dir/H5VLpassthru_ext.c.o
-[ 20%] Building C object src/CMakeFiles/hdf5_vol_passthrough.dir/new_h5api.c.o
+[  8%] Building C object src/CMakeFiles/hdf5_vol_passthrough.dir/new_h5api.c.o
+[ 16%] Building CXX object src/CMakeFiles/hdf5_vol_passthrough.dir/compress/vol_progressive.cc.o
+[ 20%] Building CXX object src/CMakeFiles/hdf5_vol_passthrough.dir/compress/compress.cc.o
 [ 24%] Building CXX object src/CMakeFiles/hdf5_vol_passthrough.dir/compress/vol_shared_meta.cc.o
-[ 28%] Building CXX object src/CMakeFiles/hdf5_vol_passthrough.dir/compress/compress.cc.o
-[ 28%] Building CXX object src/CMakeFiles/hdf5_vol_passthrough.dir/compress/vol_progressive.cc.o
 [ 28%] Building CXX object src/CMakeFiles/hdf5_vol_passthrough.dir/compress/vol_container_read.cc.o
+[ 28%] Building CXX object tests/CMakeFiles/dump_cuszp_opts.dir/dump_cuszp_opts.cc.o
 [ 32%] Linking CXX executable ../bin/dump_cuszp_opts
 [ 32%] Built target dump_cuszp_opts
 [ 36%] Linking CXX shared library ../lib/libhdf5_vol_passthrough.so
 [ 36%] Built target hdf5_vol_passthrough
-[ 44%] Building CXX object tests/CMakeFiles/bench_vol_timing.dir/bench_vol_timing.cc.o
+[ 40%] Building CXX object tests/CMakeFiles/bench_vol_timing.dir/bench_vol_timing.cc.o
 [ 48%] Building CXX object tests/CMakeFiles/bench_pressio_timing.dir/bench_pressio_timing.cc.o
 [ 48%] Building CXX object tests/CMakeFiles/bench_filter_timing.dir/bench_filter_timing.cc.o
 [ 56%] Building C object tests/CMakeFiles/test_time_hurricane.dir/test_time_hurricane.c.o
 [ 60%] Building C object tests/CMakeFiles/test_error_miranda.dir/test_error_miranda.c.o
+[ 64%] Building C object tests/CMakeFiles/test_ci.dir/test_ci.c.o
 [ 68%] Building C object tests/CMakeFiles/test_time_miranda.dir/test_time_miranda.c.o
 [ 68%] Building C object tests/CMakeFiles/test_cpu_write.dir/test_cpu_write.c.o
-[ 68%] Building C object tests/CMakeFiles/test_ci.dir/test_ci.c.o
 [ 72%] Linking C executable ../bin/test_cpu_write
-[ 76%] Linking C executable ../bin/test_time_hurricane
-[ 80%] Linking C executable ../bin/test_ci
-[ 84%] Linking C executable ../bin/test_error_miranda
-[ 88%] Linking C executable ../bin/test_time_miranda
+[ 76%] Linking C executable ../bin/test_ci
+[ 80%] Linking C executable ../bin/test_error_miranda
+[ 84%] Linking C executable ../bin/test_time_miranda
+[ 88%] Linking C executable ../bin/test_time_hurricane
 [ 88%] Built target test_cpu_write
-[ 88%] Built target test_time_hurricane
+[ 88%] Built target test_ci
 [ 88%] Built target test_error_miranda
 [ 88%] Built target test_time_miranda
-[ 88%] Built target test_ci
+[ 88%] Built target test_time_hurricane
 [ 92%] Linking CXX executable ../bin/bench_pressio_timing
 [ 96%] Linking CXX executable ../bin/bench_vol_timing
 [ 96%] Built target bench_pressio_timing
@@ -51,7 +51,7 @@ einspline37    float  1    raw    3390212880             12932.6    25.3       y
 scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
 s3d            double 3    raw    500x500x500            953.7      1.9        yes
 nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
-MemAvailable: 969.3 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+MemAvailable: 972.8 GiB (needGiB is hbuf+rbuf only; the connector needs more)
 6/6 dataset paths readable
 RANGE s3d            min=-6.362436e-15 max=3.920002e-02 range=3.920002e-02 xform=none
 [device] s3d: 953.7 MiB resident on GPU
@@ -61,12 +61,12 @@ RANGE s3d            min=-6.362436e-15 max=3.920002e-02 range=3.920002e-02 xform
 [VOL stream] 'cuszp' declares no 'cuszp:cuda_stream' -- codec manages its own stream. Using the default stream + device barrier before D2H. device_ms is NOT reported for this codec; use pressio_call_ms or nsys.
 
 === s3d (953.7 MiB, double, raw) ===
-Info: 0x5597574ffa00
-  s3d_cuszp_1e3                C=   4.12 W=   230.06 F=    0.41 X=    0.26 | O=   0.46 R=   645.14 ms  ratio= 46.22x  RMSE=4.899e-04 maxae=1.000e-03
+Info: 0x5581281348e0
+  s3d_cuszp_1e3                C=   4.06 W=   223.95 F=    0.32 X=    0.21 | O=   0.59 R=   610.25 ms  ratio= 46.22x  RMSE=4.899e-04 maxae=1.000e-03
 [dbg main] done: 1 datasets, 0 skipped, 1 measurements
 
-=== TOTALS over 1 measurement files: create=4.12 write=230.06 flush=0.41 close=0.26 => write_total=234.85 ms | open=0.46 read=645.14 => read_total=645.60 ms | ratio=46.22x ===
-RESULT	device	1	230.06	645.14	0
+=== TOTALS over 1 measurement files: create=4.06 write=223.95 flush=0.32 close=0.21 => write_total=228.54 ms | open=0.59 read=610.25 => read_total=610.84 ms | ratio=46.22x ===
+RESULT	device	1	223.95	610.25	0
 
 --- [host] rep=1 ---
 [dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/g2_host.h5 csv=/dev/null xcsv=/dev/null only=s3d comp=cuszp_1e3 verify=0 keep_h5=0 debug=0
@@ -78,22 +78,22 @@ einspline37    float  1    raw    3390212880             12932.6    25.3       y
 scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
 s3d            double 3    raw    500x500x500            953.7      1.9        yes
 nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
-MemAvailable: 969.3 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+MemAvailable: 972.8 GiB (needGiB is hbuf+rbuf only; the connector needs more)
 6/6 dataset paths readable
 RANGE s3d            min=-6.362436e-15 max=3.920002e-02 range=3.920002e-02 xform=none
 [device] s3d: 953.7 MiB resident on GPU
-[device] arm=host d2h_ms=549.421 pcie_in=953.7 MiB
+[device] arm=host d2h_ms=539.056 pcie_in=953.7 MiB
 [VOL stream] 'cuszp' declares no 'cuszp:cuda_stream' -- codec manages its own stream. Using the default stream + device barrier before D2H. device_ms is NOT reported for this codec; use pressio_call_ms or nsys.
 [copy] native id=cuszp      domain=cudamalloc   payload=21635458 B declared_cap=1125065536 B reserve=16 B
 [VOL stream] 'cuszp' declares no 'cuszp:cuda_stream' -- codec manages its own stream. Using the default stream + device barrier before D2H. device_ms is NOT reported for this codec; use pressio_call_ms or nsys.
 
 === s3d (953.7 MiB, double, raw) ===
-Info: 0x564dc3247e70
-  s3d_cuszp_1e3                C=   1.93 W=   246.97 F=    0.37 X=    0.23 | O=   0.56 R=   633.71 ms  ratio= 46.22x  RMSE=4.899e-04 maxae=1.000e-03
+Info: 0x559ae7d15d20
+  s3d_cuszp_1e3                C=   1.12 W=   228.72 F=    0.27 X=    0.21 | O=   0.52 R=   630.66 ms  ratio= 46.22x  RMSE=4.899e-04 maxae=1.000e-03
 [dbg main] done: 1 datasets, 0 skipped, 1 measurements
 
-=== TOTALS over 1 measurement files: create=1.93 write=246.97 flush=0.37 close=0.23 => write_total=249.50 ms | open=0.56 read=633.71 => read_total=634.27 ms | ratio=46.22x ===
-RESULT	host	1	246.97	633.71	549.421
+=== TOTALS over 1 measurement files: create=1.12 write=228.72 flush=0.27 close=0.21 => write_total=230.32 ms | open=0.52 read=630.66 => read_total=631.17 ms | ratio=46.22x ===
+RESULT	host	1	228.72	630.66	539.056
 
 --- [device] rep=2 ---
 [dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/g2_device.h5 csv=/dev/null xcsv=/dev/null only=s3d comp=cuszp_1e3 verify=0 keep_h5=0 debug=0
@@ -105,7 +105,7 @@ einspline37    float  1    raw    3390212880             12932.6    25.3       y
 scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
 s3d            double 3    raw    500x500x500            953.7      1.9        yes
 nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
-MemAvailable: 969.3 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+MemAvailable: 972.9 GiB (needGiB is hbuf+rbuf only; the connector needs more)
 6/6 dataset paths readable
 RANGE s3d            min=-6.362436e-15 max=3.920002e-02 range=3.920002e-02 xform=none
 [device] s3d: 953.7 MiB resident on GPU
@@ -115,12 +115,12 @@ RANGE s3d            min=-6.362436e-15 max=3.920002e-02 range=3.920002e-02 xform
 [VOL stream] 'cuszp' declares no 'cuszp:cuda_stream' -- codec manages its own stream. Using the default stream + device barrier before D2H. device_ms is NOT reported for this codec; use pressio_call_ms or nsys.
 
 === s3d (953.7 MiB, double, raw) ===
-Info: 0x55899edaabc0
-  s3d_cuszp_1e3                C=   1.79 W=   153.39 F=    0.33 X=    0.18 | O=   0.42 R=   657.35 ms  ratio= 46.22x  RMSE=4.899e-04 maxae=1.000e-03
+Info: 0x5652090f9aa0
+  s3d_cuszp_1e3                C=   1.24 W=   223.02 F=    0.25 X=    0.20 | O=   0.38 R=   635.74 ms  ratio= 46.22x  RMSE=4.899e-04 maxae=1.000e-03
 [dbg main] done: 1 datasets, 0 skipped, 1 measurements
 
-=== TOTALS over 1 measurement files: create=1.79 write=153.39 flush=0.33 close=0.18 => write_total=155.70 ms | open=0.42 read=657.35 => read_total=657.77 ms | ratio=46.22x ===
-RESULT	device	2	153.39	657.35	0
+=== TOTALS over 1 measurement files: create=1.24 write=223.02 flush=0.25 close=0.20 => write_total=224.72 ms | open=0.38 read=635.74 => read_total=636.12 ms | ratio=46.22x ===
+RESULT	device	2	223.02	635.74	0
 
 --- [host] rep=2 ---
 [dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/g2_host.h5 csv=/dev/null xcsv=/dev/null only=s3d comp=cuszp_1e3 verify=0 keep_h5=0 debug=0
@@ -132,22 +132,22 @@ einspline37    float  1    raw    3390212880             12932.6    25.3       y
 scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
 s3d            double 3    raw    500x500x500            953.7      1.9        yes
 nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
-MemAvailable: 969.3 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+MemAvailable: 972.9 GiB (needGiB is hbuf+rbuf only; the connector needs more)
 6/6 dataset paths readable
 RANGE s3d            min=-6.362436e-15 max=3.920002e-02 range=3.920002e-02 xform=none
 [device] s3d: 953.7 MiB resident on GPU
-[device] arm=host d2h_ms=554.049 pcie_in=953.7 MiB
+[device] arm=host d2h_ms=535.967 pcie_in=953.7 MiB
 [VOL stream] 'cuszp' declares no 'cuszp:cuda_stream' -- codec manages its own stream. Using the default stream + device barrier before D2H. device_ms is NOT reported for this codec; use pressio_call_ms or nsys.
 [copy] native id=cuszp      domain=cudamalloc   payload=21635458 B declared_cap=1125065536 B reserve=16 B
 [VOL stream] 'cuszp' declares no 'cuszp:cuda_stream' -- codec manages its own stream. Using the default stream + device barrier before D2H. device_ms is NOT reported for this codec; use pressio_call_ms or nsys.
 
 === s3d (953.7 MiB, double, raw) ===
-Info: 0x55a69ef41000
-  s3d_cuszp_1e3                C=   1.27 W=   213.56 F=    0.33 X=    0.18 | O=   0.61 R=   643.88 ms  ratio= 46.22x  RMSE=4.899e-04 maxae=1.000e-03
+Info: 0x55a592317cd0
+  s3d_cuszp_1e3                C=   1.19 W=   237.10 F=    0.27 X=    0.20 | O=   0.38 R=   625.86 ms  ratio= 46.22x  RMSE=4.899e-04 maxae=1.000e-03
 [dbg main] done: 1 datasets, 0 skipped, 1 measurements
 
-=== TOTALS over 1 measurement files: create=1.27 write=213.56 flush=0.33 close=0.18 => write_total=215.34 ms | open=0.61 read=643.88 => read_total=644.49 ms | ratio=46.22x ===
-RESULT	host	2	213.56	643.88	554.049
+=== TOTALS over 1 measurement files: create=1.19 write=237.10 flush=0.27 close=0.20 => write_total=238.77 ms | open=0.38 read=625.86 => read_total=626.24 ms | ratio=46.22x ===
+RESULT	host	2	237.10	625.86	535.967
 
 --- [device] rep=3 ---
 [dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/g2_device.h5 csv=/dev/null xcsv=/dev/null only=s3d comp=cuszp_1e3 verify=0 keep_h5=0 debug=0
@@ -159,7 +159,7 @@ einspline37    float  1    raw    3390212880             12932.6    25.3       y
 scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
 s3d            double 3    raw    500x500x500            953.7      1.9        yes
 nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
-MemAvailable: 969.3 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+MemAvailable: 972.9 GiB (needGiB is hbuf+rbuf only; the connector needs more)
 6/6 dataset paths readable
 RANGE s3d            min=-6.362436e-15 max=3.920002e-02 range=3.920002e-02 xform=none
 [device] s3d: 953.7 MiB resident on GPU
@@ -169,12 +169,12 @@ RANGE s3d            min=-6.362436e-15 max=3.920002e-02 range=3.920002e-02 xform
 [VOL stream] 'cuszp' declares no 'cuszp:cuda_stream' -- codec manages its own stream. Using the default stream + device barrier before D2H. device_ms is NOT reported for this codec; use pressio_call_ms or nsys.
 
 === s3d (953.7 MiB, double, raw) ===
-Info: 0x55de17ec6ab0
-  s3d_cuszp_1e3                C=   1.18 W=   258.41 F=    0.33 X=    0.19 | O=   0.42 R=   632.31 ms  ratio= 46.22x  RMSE=4.899e-04 maxae=1.000e-03
+Info: 0x55a6fc91da00
+  s3d_cuszp_1e3                C=   1.11 W=   155.58 F=    0.26 X=    0.17 | O=   0.38 R=   695.05 ms  ratio= 46.22x  RMSE=4.899e-04 maxae=1.000e-03
 [dbg main] done: 1 datasets, 0 skipped, 1 measurements
 
-=== TOTALS over 1 measurement files: create=1.18 write=258.41 flush=0.33 close=0.19 => write_total=260.11 ms | open=0.42 read=632.31 => read_total=632.73 ms | ratio=46.22x ===
-RESULT	device	3	258.41	632.31	0
+=== TOTALS over 1 measurement files: create=1.11 write=155.58 flush=0.26 close=0.17 => write_total=157.13 ms | open=0.38 read=695.05 => read_total=695.44 ms | ratio=46.22x ===
+RESULT	device	3	155.58	695.05	0
 
 --- [host] rep=3 ---
 [dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/g2_host.h5 csv=/dev/null xcsv=/dev/null only=s3d comp=cuszp_1e3 verify=0 keep_h5=0 debug=0
@@ -186,22 +186,22 @@ einspline37    float  1    raw    3390212880             12932.6    25.3       y
 scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
 s3d            double 3    raw    500x500x500            953.7      1.9        yes
 nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
-MemAvailable: 969.3 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+MemAvailable: 972.9 GiB (needGiB is hbuf+rbuf only; the connector needs more)
 6/6 dataset paths readable
 RANGE s3d            min=-6.362436e-15 max=3.920002e-02 range=3.920002e-02 xform=none
 [device] s3d: 953.7 MiB resident on GPU
-[device] arm=host d2h_ms=549.550 pcie_in=953.7 MiB
+[device] arm=host d2h_ms=532.097 pcie_in=953.7 MiB
 [VOL stream] 'cuszp' declares no 'cuszp:cuda_stream' -- codec manages its own stream. Using the default stream + device barrier before D2H. device_ms is NOT reported for this codec; use pressio_call_ms or nsys.
 [copy] native id=cuszp      domain=cudamalloc   payload=21635458 B declared_cap=1125065536 B reserve=16 B
 [VOL stream] 'cuszp' declares no 'cuszp:cuda_stream' -- codec manages its own stream. Using the default stream + device barrier before D2H. device_ms is NOT reported for this codec; use pressio_call_ms or nsys.
 
 === s3d (953.7 MiB, double, raw) ===
-Info: 0x5557eebbbe40
-  s3d_cuszp_1e3                C=   1.20 W=   285.16 F=    0.38 X=    0.24 | O=   0.55 R=   636.33 ms  ratio= 46.22x  RMSE=4.899e-04 maxae=1.000e-03
+Info: 0x5605c9a27f00
+  s3d_cuszp_1e3                C=   1.14 W=   289.08 F=    0.27 X=    0.22 | O=   0.52 R=   609.89 ms  ratio= 46.22x  RMSE=4.899e-04 maxae=1.000e-03
 [dbg main] done: 1 datasets, 0 skipped, 1 measurements
 
-=== TOTALS over 1 measurement files: create=1.20 write=285.16 flush=0.38 close=0.24 => write_total=286.98 ms | open=0.55 read=636.33 => read_total=636.89 ms | ratio=46.22x ===
-RESULT	host	3	285.16	636.33	549.550
+=== TOTALS over 1 measurement files: create=1.14 write=289.08 flush=0.27 close=0.22 => write_total=290.71 ms | open=0.52 read=609.89 => read_total=610.40 ms | ratio=46.22x ===
+RESULT	host	3	289.08	609.89	532.097
 
 --- [device] rep=4 ---
 [dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/g2_device.h5 csv=/dev/null xcsv=/dev/null only=s3d comp=cuszp_1e3 verify=0 keep_h5=0 debug=0
@@ -213,7 +213,7 @@ einspline37    float  1    raw    3390212880             12932.6    25.3       y
 scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
 s3d            double 3    raw    500x500x500            953.7      1.9        yes
 nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
-MemAvailable: 969.3 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+MemAvailable: 972.9 GiB (needGiB is hbuf+rbuf only; the connector needs more)
 6/6 dataset paths readable
 RANGE s3d            min=-6.362436e-15 max=3.920002e-02 range=3.920002e-02 xform=none
 [device] s3d: 953.7 MiB resident on GPU
@@ -223,12 +223,12 @@ RANGE s3d            min=-6.362436e-15 max=3.920002e-02 range=3.920002e-02 xform
 [VOL stream] 'cuszp' declares no 'cuszp:cuda_stream' -- codec manages its own stream. Using the default stream + device barrier before D2H. device_ms is NOT reported for this codec; use pressio_call_ms or nsys.
 
 === s3d (953.7 MiB, double, raw) ===
-Info: 0x55aaec076c30
-  s3d_cuszp_1e3                C=   1.30 W=   164.46 F=    0.34 X=    0.19 | O=   0.41 R=   635.32 ms  ratio= 46.22x  RMSE=4.899e-04 maxae=1.000e-03
+Info: 0x561fe96739f0
+  s3d_cuszp_1e3                C=   1.09 W=   130.67 F=    0.27 X=    0.17 | O=   0.38 R=   629.66 ms  ratio= 46.22x  RMSE=4.899e-04 maxae=1.000e-03
 [dbg main] done: 1 datasets, 0 skipped, 1 measurements
 
-=== TOTALS over 1 measurement files: create=1.30 write=164.46 flush=0.34 close=0.19 => write_total=166.29 ms | open=0.41 read=635.32 => read_total=635.73 ms | ratio=46.22x ===
-RESULT	device	4	164.46	635.32	0
+=== TOTALS over 1 measurement files: create=1.09 write=130.67 flush=0.27 close=0.17 => write_total=132.20 ms | open=0.38 read=629.66 => read_total=630.05 ms | ratio=46.22x ===
+RESULT	device	4	130.67	629.66	0
 
 --- [host] rep=4 ---
 [dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/g2_host.h5 csv=/dev/null xcsv=/dev/null only=s3d comp=cuszp_1e3 verify=0 keep_h5=0 debug=0
@@ -240,22 +240,22 @@ einspline37    float  1    raw    3390212880             12932.6    25.3       y
 scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
 s3d            double 3    raw    500x500x500            953.7      1.9        yes
 nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
-MemAvailable: 969.3 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+MemAvailable: 972.9 GiB (needGiB is hbuf+rbuf only; the connector needs more)
 6/6 dataset paths readable
 RANGE s3d            min=-6.362436e-15 max=3.920002e-02 range=3.920002e-02 xform=none
 [device] s3d: 953.7 MiB resident on GPU
-[device] arm=host d2h_ms=551.909 pcie_in=953.7 MiB
+[device] arm=host d2h_ms=536.031 pcie_in=953.7 MiB
 [VOL stream] 'cuszp' declares no 'cuszp:cuda_stream' -- codec manages its own stream. Using the default stream + device barrier before D2H. device_ms is NOT reported for this codec; use pressio_call_ms or nsys.
 [copy] native id=cuszp      domain=cudamalloc   payload=21635458 B declared_cap=1125065536 B reserve=16 B
 [VOL stream] 'cuszp' declares no 'cuszp:cuda_stream' -- codec manages its own stream. Using the default stream + device barrier before D2H. device_ms is NOT reported for this codec; use pressio_call_ms or nsys.
 
 === s3d (953.7 MiB, double, raw) ===
-Info: 0x5595ca790ff0
-  s3d_cuszp_1e3                C=   4.56 W=   336.33 F=    0.33 X=    0.23 | O=   0.54 R=   608.98 ms  ratio= 46.22x  RMSE=4.899e-04 maxae=1.000e-03
+Info: 0x55aa911bbe40
+  s3d_cuszp_1e3                C=   1.19 W=   259.06 F=    0.27 X=    0.22 | O=   0.50 R=   638.67 ms  ratio= 46.22x  RMSE=4.899e-04 maxae=1.000e-03
 [dbg main] done: 1 datasets, 0 skipped, 1 measurements
 
-=== TOTALS over 1 measurement files: create=4.56 write=336.33 flush=0.33 close=0.23 => write_total=341.44 ms | open=0.54 read=608.98 => read_total=609.52 ms | ratio=46.22x ===
-RESULT	host	4	336.33	608.98	551.909
+=== TOTALS over 1 measurement files: create=1.19 write=259.06 flush=0.27 close=0.22 => write_total=260.74 ms | open=0.50 read=638.67 => read_total=639.17 ms | ratio=46.22x ===
+RESULT	host	4	259.06	638.67	536.031
 
 --- [device] rep=5 ---
 [dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/g2_device.h5 csv=/dev/null xcsv=/dev/null only=s3d comp=cuszp_1e3 verify=0 keep_h5=0 debug=0
@@ -267,7 +267,7 @@ einspline37    float  1    raw    3390212880             12932.6    25.3       y
 scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
 s3d            double 3    raw    500x500x500            953.7      1.9        yes
 nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
-MemAvailable: 969.3 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+MemAvailable: 972.9 GiB (needGiB is hbuf+rbuf only; the connector needs more)
 6/6 dataset paths readable
 RANGE s3d            min=-6.362436e-15 max=3.920002e-02 range=3.920002e-02 xform=none
 [device] s3d: 953.7 MiB resident on GPU
@@ -277,12 +277,12 @@ RANGE s3d            min=-6.362436e-15 max=3.920002e-02 range=3.920002e-02 xform
 [VOL stream] 'cuszp' declares no 'cuszp:cuda_stream' -- codec manages its own stream. Using the default stream + device barrier before D2H. device_ms is NOT reported for this codec; use pressio_call_ms or nsys.
 
 === s3d (953.7 MiB, double, raw) ===
-Info: 0x5571e5472bb0
-  s3d_cuszp_1e3                C=   1.23 W=   215.13 F=    0.36 X=    0.20 | O=   0.42 R=   630.34 ms  ratio= 46.22x  RMSE=4.899e-04 maxae=1.000e-03
+Info: 0x558982b1eb20
+  s3d_cuszp_1e3                C=   1.25 W=   207.66 F=    0.27 X=    0.21 | O=   0.60 R=   609.88 ms  ratio= 46.22x  RMSE=4.899e-04 maxae=1.000e-03
 [dbg main] done: 1 datasets, 0 skipped, 1 measurements
 
-=== TOTALS over 1 measurement files: create=1.23 write=215.13 flush=0.36 close=0.20 => write_total=216.92 ms | open=0.42 read=630.34 => read_total=630.76 ms | ratio=46.22x ===
-RESULT	device	5	215.13	630.34	0
+=== TOTALS over 1 measurement files: create=1.25 write=207.66 flush=0.27 close=0.21 => write_total=209.38 ms | open=0.60 read=609.88 => read_total=610.48 ms | ratio=46.22x ===
+RESULT	device	5	207.66	609.88	0
 
 --- [host] rep=5 ---
 [dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/g2_host.h5 csv=/dev/null xcsv=/dev/null only=s3d comp=cuszp_1e3 verify=0 keep_h5=0 debug=0
@@ -294,22 +294,22 @@ einspline37    float  1    raw    3390212880             12932.6    25.3       y
 scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
 s3d            double 3    raw    500x500x500            953.7      1.9        yes
 nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
-MemAvailable: 969.3 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+MemAvailable: 972.9 GiB (needGiB is hbuf+rbuf only; the connector needs more)
 6/6 dataset paths readable
 RANGE s3d            min=-6.362436e-15 max=3.920002e-02 range=3.920002e-02 xform=none
 [device] s3d: 953.7 MiB resident on GPU
-[device] arm=host d2h_ms=555.028 pcie_in=953.7 MiB
+[device] arm=host d2h_ms=550.738 pcie_in=953.7 MiB
 [VOL stream] 'cuszp' declares no 'cuszp:cuda_stream' -- codec manages its own stream. Using the default stream + device barrier before D2H. device_ms is NOT reported for this codec; use pressio_call_ms or nsys.
 [copy] native id=cuszp      domain=cudamalloc   payload=21635458 B declared_cap=1125065536 B reserve=16 B
 [VOL stream] 'cuszp' declares no 'cuszp:cuda_stream' -- codec manages its own stream. Using the default stream + device barrier before D2H. device_ms is NOT reported for this codec; use pressio_call_ms or nsys.
 
 === s3d (953.7 MiB, double, raw) ===
-Info: 0x55eb5a33b000
-  s3d_cuszp_1e3                C=   1.22 W=   294.81 F=    0.33 X=    0.19 | O=   0.61 R=   609.87 ms  ratio= 46.22x  RMSE=4.899e-04 maxae=1.000e-03
+Info: 0x564d66dba000
+  s3d_cuszp_1e3                C=   1.20 W=   252.87 F=    0.26 X=    0.21 | O=   0.40 R=   610.12 ms  ratio= 46.22x  RMSE=4.899e-04 maxae=1.000e-03
 [dbg main] done: 1 datasets, 0 skipped, 1 measurements
 
-=== TOTALS over 1 measurement files: create=1.22 write=294.81 flush=0.33 close=0.19 => write_total=296.54 ms | open=0.61 read=609.87 => read_total=610.48 ms | ratio=46.22x ===
-RESULT	host	5	294.81	609.87	555.028
+=== TOTALS over 1 measurement files: create=1.20 write=252.87 flush=0.26 close=0.21 => write_total=254.55 ms | open=0.40 read=610.12 => read_total=610.52 ms | ratio=46.22x ===
+RESULT	host	5	252.87	610.12	550.738
 
 --- [device] rep=6 ---
 [dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/g2_device.h5 csv=/dev/null xcsv=/dev/null only=s3d comp=cuszp_1e3 verify=0 keep_h5=0 debug=0
@@ -321,7 +321,7 @@ einspline37    float  1    raw    3390212880             12932.6    25.3       y
 scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
 s3d            double 3    raw    500x500x500            953.7      1.9        yes
 nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
-MemAvailable: 969.3 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+MemAvailable: 972.8 GiB (needGiB is hbuf+rbuf only; the connector needs more)
 6/6 dataset paths readable
 RANGE s3d            min=-6.362436e-15 max=3.920002e-02 range=3.920002e-02 xform=none
 [device] s3d: 953.7 MiB resident on GPU
@@ -331,12 +331,12 @@ RANGE s3d            min=-6.362436e-15 max=3.920002e-02 range=3.920002e-02 xform
 [VOL stream] 'cuszp' declares no 'cuszp:cuda_stream' -- codec manages its own stream. Using the default stream + device barrier before D2H. device_ms is NOT reported for this codec; use pressio_call_ms or nsys.
 
 === s3d (953.7 MiB, double, raw) ===
-Info: 0x556406928b00
-  s3d_cuszp_1e3                C=   1.39 W=   139.01 F=    0.36 X=    0.18 | O=   0.42 R=   634.36 ms  ratio= 46.22x  RMSE=4.899e-04 maxae=1.000e-03
+Info: 0x55dbabb36b00
+  s3d_cuszp_1e3                C=   1.26 W=   128.90 F=    0.27 X=    0.20 | O=   0.58 R=   624.85 ms  ratio= 46.22x  RMSE=4.899e-04 maxae=1.000e-03
 [dbg main] done: 1 datasets, 0 skipped, 1 measurements
 
-=== TOTALS over 1 measurement files: create=1.39 write=139.01 flush=0.36 close=0.18 => write_total=140.94 ms | open=0.42 read=634.36 => read_total=634.78 ms | ratio=46.22x ===
-RESULT	device	6	139.01	634.36	0
+=== TOTALS over 1 measurement files: create=1.26 write=128.90 flush=0.27 close=0.20 => write_total=130.63 ms | open=0.58 read=624.85 => read_total=625.43 ms | ratio=46.22x ===
+RESULT	device	6	128.90	624.85	0
 
 --- [host] rep=6 ---
 [dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/g2_host.h5 csv=/dev/null xcsv=/dev/null only=s3d comp=cuszp_1e3 verify=0 keep_h5=0 debug=0
@@ -348,22 +348,22 @@ einspline37    float  1    raw    3390212880             12932.6    25.3       y
 scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
 s3d            double 3    raw    500x500x500            953.7      1.9        yes
 nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
-MemAvailable: 969.3 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+MemAvailable: 972.8 GiB (needGiB is hbuf+rbuf only; the connector needs more)
 6/6 dataset paths readable
 RANGE s3d            min=-6.362436e-15 max=3.920002e-02 range=3.920002e-02 xform=none
 [device] s3d: 953.7 MiB resident on GPU
-[device] arm=host d2h_ms=537.902 pcie_in=953.7 MiB
+[device] arm=host d2h_ms=539.079 pcie_in=953.7 MiB
 [VOL stream] 'cuszp' declares no 'cuszp:cuda_stream' -- codec manages its own stream. Using the default stream + device barrier before D2H. device_ms is NOT reported for this codec; use pressio_call_ms or nsys.
 [copy] native id=cuszp      domain=cudamalloc   payload=21635458 B declared_cap=1125065536 B reserve=16 B
 [VOL stream] 'cuszp' declares no 'cuszp:cuda_stream' -- codec manages its own stream. Using the default stream + device barrier before D2H. device_ms is NOT reported for this codec; use pressio_call_ms or nsys.
 
 === s3d (953.7 MiB, double, raw) ===
-Info: 0x56026f993ce0
-  s3d_cuszp_1e3                C=   1.26 W=   254.15 F=    0.34 X=    0.20 | O=   0.40 R=   635.69 ms  ratio= 46.22x  RMSE=4.899e-04 maxae=1.000e-03
+Info: 0x560f66686ca0
+  s3d_cuszp_1e3                C=   1.22 W=   278.20 F=    0.27 X=    0.24 | O=   0.38 R=   625.74 ms  ratio= 46.22x  RMSE=4.899e-04 maxae=1.000e-03
 [dbg main] done: 1 datasets, 0 skipped, 1 measurements
 
-=== TOTALS over 1 measurement files: create=1.26 write=254.15 flush=0.34 close=0.20 => write_total=255.96 ms | open=0.40 read=635.69 => read_total=636.09 ms | ratio=46.22x ===
-RESULT	host	6	254.15	635.69	537.902
+=== TOTALS over 1 measurement files: create=1.22 write=278.20 flush=0.27 close=0.24 => write_total=279.92 ms | open=0.38 read=625.74 => read_total=626.12 ms | ratio=46.22x ===
+RESULT	host	6	278.20	625.74	539.079
 
 --- [device] rep=7 ---
 [dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/g2_device.h5 csv=/dev/null xcsv=/dev/null only=s3d comp=cuszp_1e3 verify=0 keep_h5=0 debug=0
@@ -375,7 +375,7 @@ einspline37    float  1    raw    3390212880             12932.6    25.3       y
 scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
 s3d            double 3    raw    500x500x500            953.7      1.9        yes
 nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
-MemAvailable: 969.3 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+MemAvailable: 972.9 GiB (needGiB is hbuf+rbuf only; the connector needs more)
 6/6 dataset paths readable
 RANGE s3d            min=-6.362436e-15 max=3.920002e-02 range=3.920002e-02 xform=none
 [device] s3d: 953.7 MiB resident on GPU
@@ -385,12 +385,12 @@ RANGE s3d            min=-6.362436e-15 max=3.920002e-02 range=3.920002e-02 xform
 [VOL stream] 'cuszp' declares no 'cuszp:cuda_stream' -- codec manages its own stream. Using the default stream + device barrier before D2H. device_ms is NOT reported for this codec; use pressio_call_ms or nsys.
 
 === s3d (953.7 MiB, double, raw) ===
-Info: 0x5597256587b0
-  s3d_cuszp_1e3                C=   1.31 W=   148.18 F=    0.34 X=    0.19 | O=   0.42 R=   626.44 ms  ratio= 46.22x  RMSE=4.899e-04 maxae=1.000e-03
+Info: 0x5640f207c7a0
+  s3d_cuszp_1e3                C=   1.21 W=   168.89 F=    0.27 X=    0.18 | O=   0.59 R=   623.92 ms  ratio= 46.22x  RMSE=4.899e-04 maxae=1.000e-03
 [dbg main] done: 1 datasets, 0 skipped, 1 measurements
 
-=== TOTALS over 1 measurement files: create=1.31 write=148.18 flush=0.34 close=0.19 => write_total=150.02 ms | open=0.42 read=626.44 => read_total=626.86 ms | ratio=46.22x ===
-RESULT	device	7	148.18	626.44	0
+=== TOTALS over 1 measurement files: create=1.21 write=168.89 flush=0.27 close=0.18 => write_total=170.56 ms | open=0.59 read=623.92 => read_total=624.51 ms | ratio=46.22x ===
+RESULT	device	7	168.89	623.92	0
 
 --- [host] rep=7 ---
 [dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/g2_host.h5 csv=/dev/null xcsv=/dev/null only=s3d comp=cuszp_1e3 verify=0 keep_h5=0 debug=0
@@ -402,22 +402,22 @@ einspline37    float  1    raw    3390212880             12932.6    25.3       y
 scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
 s3d            double 3    raw    500x500x500            953.7      1.9        yes
 nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
-MemAvailable: 969.3 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+MemAvailable: 972.8 GiB (needGiB is hbuf+rbuf only; the connector needs more)
 6/6 dataset paths readable
 RANGE s3d            min=-6.362436e-15 max=3.920002e-02 range=3.920002e-02 xform=none
 [device] s3d: 953.7 MiB resident on GPU
-[device] arm=host d2h_ms=551.175 pcie_in=953.7 MiB
+[device] arm=host d2h_ms=550.912 pcie_in=953.7 MiB
 [VOL stream] 'cuszp' declares no 'cuszp:cuda_stream' -- codec manages its own stream. Using the default stream + device barrier before D2H. device_ms is NOT reported for this codec; use pressio_call_ms or nsys.
 [copy] native id=cuszp      domain=cudamalloc   payload=21635458 B declared_cap=1125065536 B reserve=16 B
 [VOL stream] 'cuszp' declares no 'cuszp:cuda_stream' -- codec manages its own stream. Using the default stream + device barrier before D2H. device_ms is NOT reported for this codec; use pressio_call_ms or nsys.
 
 === s3d (953.7 MiB, double, raw) ===
-Info: 0x555c35af9e00
-  s3d_cuszp_1e3                C=   1.22 W=   313.81 F=    0.34 X=    0.23 | O=   0.54 R=   650.78 ms  ratio= 46.22x  RMSE=4.899e-04 maxae=1.000e-03
+Info: 0x559477df4f60
+  s3d_cuszp_1e3                C=   1.21 W=   301.63 F=    0.27 X=    0.22 | O=   0.40 R=   623.33 ms  ratio= 46.22x  RMSE=4.899e-04 maxae=1.000e-03
 [dbg main] done: 1 datasets, 0 skipped, 1 measurements
 
-=== TOTALS over 1 measurement files: create=1.22 write=313.81 flush=0.34 close=0.23 => write_total=315.61 ms | open=0.54 read=650.78 => read_total=651.32 ms | ratio=46.22x ===
-RESULT	host	7	313.81	650.78	551.175
+=== TOTALS over 1 measurement files: create=1.21 write=301.63 flush=0.27 close=0.22 => write_total=303.34 ms | open=0.40 read=623.33 => read_total=623.73 ms | ratio=46.22x ===
+RESULT	host	7	301.63	623.33	550.912
 
 ############ [2] nsys profiles ############
 
@@ -432,9 +432,9 @@ RESULT	host	7	313.81	650.78	551.175
     +----------+-----------------+-------+-------------+------------+----------+-----------+-------------+------------------------------+
     | Time (%) | Total Time (ns) | Count |  Avg (ns)   |  Med (ns)  | Min (ns) | Max (ns)  | StdDev (ns) |          Operation           |
     +----------+-----------------+-------+-------------+------------+----------+-----------+-------------+------------------------------+
-    |     78.4 |       561527292 |     3 | 187175764.0 | 11267863.0 |     4704 | 550254725 | 314486030.9 | [CUDA memcpy Device-to-Host] |
-    |     21.5 |       154248829 |     2 |  77124414.5 | 77124414.5 |  2435945 | 151812884 | 105625446.5 | [CUDA memcpy Host-to-Device] |
-    |      0.1 |          668859 |     7 |     95551.3 |     2657.0 |     2208 |    652762 |    245707.2 | [CUDA memset]                |
+    |     87.1 |       574030891 |     3 | 191343630.3 | 11115929.0 |     4736 | 562910226 | 321834065.8 | [CUDA memcpy Device-to-Host] |
+    |     12.8 |        84634720 |     2 |  42317360.0 | 42317360.0 |  2443426 |  82191294 |  56390258.2 | [CUDA memcpy Host-to-Device] |
+    |      0.1 |          664311 |     7 |     94901.6 |     2592.0 |     2016 |    649112 |    244384.1 | [CUDA memset]                |
     +----------+-----------------+-------+-------------+------------+----------+-----------+-------------+------------------------------+
     
   --- GPU memory sizes ---
@@ -451,13 +451,46 @@ RESULT	host	7	313.81	650.78	551.175
     +----------+-----------------+-------+-------------+-------------+----------+-----------+-------------+------------------------------+
     | Time (%) | Total Time (ns) | Count |  Avg (ns)   |  Med (ns)   | Min (ns) | Max (ns)  | StdDev (ns) |          Operation           |
     +----------+-----------------+-------+-------------+-------------+----------+-----------+-------------+------------------------------+
-    |     82.2 |      1109652721 |     4 | 277413180.3 | 278336801.5 |     4608 | 552974510 | 313913267.1 | [CUDA memcpy Device-to-Host] |
-    |     17.8 |       240378539 |     3 |  80126179.7 |  86246004.0 |  2437993 | 151694542 |  74816231.8 | [CUDA memcpy Host-to-Device] |
-    |      0.0 |          663546 |     7 |     94792.3 |      2400.0 |     1728 |    648922 |    244348.8 | [CUDA memset]                |
+    |     82.6 |      1105095165 |     4 | 276273791.3 | 276010658.0 |     4704 | 553069145 | 312819516.3 | [CUDA memcpy Device-to-Host] |
+    |     17.3 |       231933577 |     3 |  77311192.3 |  80655248.0 |  2495939 | 148782390 |  73200536.0 | [CUDA memcpy Host-to-Device] |
+    |      0.0 |          662711 |     7 |     94673.0 |      2559.0 |     1696 |    648184 |    244075.8 | [CUDA memset]                |
     +----------+-----------------+-------+-------------+-------------+----------+-----------+-------------+------------------------------+
     
   --- GPU memory sizes ---
+    
+    NOTICE: Existing SQLite export found: /home/kdougherty/hdf5_projs/vol-external-passthrough/nsys_g2/g2_host.sqlite
+            It is assumed file was previously exported from: /home/kdougherty/hdf5_projs/vol-external-passthrough/nsys_g2/g2_host.nsys-rep
+            Consider using --force-export=true if needed.
+    
+    Processing [/home/kdougherty/hdf5_projs/vol-external-passthrough/nsys_g2/g2_host.sqlite] with [/gpfs/fs1/soft/swing/software/spack-built/linux-ubuntu22.04-x86_64/gcc-11.4.0/cuda-12.6.0-qb3dlng/nsight-systems-2024.4.2/host-linux-x64/reports/cuda_gpu_mem_size_sum.py]... 
+    
+     ** CUDA GPU MemOps Summary (by Size) (cuda_gpu_mem_size_sum):
+    
+    +------------+-------+----------+----------+----------+----------+-------------+------------------------------+
+    | Total (MB) | Count | Avg (MB) | Med (MB) | Min (MB) | Max (MB) | StdDev (MB) |          Operation           |
+    +------------+-------+----------+----------+----------+----------+-------------+------------------------------+
+    |   2021.635 |     4 |  505.409 |  510.818 |    0.000 | 1000.000 |     571.173 | [CUDA memcpy Device-to-Host] |
+    |   2021.635 |     3 |  673.878 | 1000.000 |   21.635 | 1000.000 |     564.859 | [CUDA memcpy Host-to-Device] |
+    |   1000.092 |     7 |  142.870 |    0.015 |    0.015 | 1000.000 |     377.959 | [CUDA memset]                |
+    +------------+-------+----------+----------+----------+----------+-------------+------------------------------+
+    
   --- kernels ---
+    
+    NOTICE: Existing SQLite export found: /home/kdougherty/hdf5_projs/vol-external-passthrough/nsys_g2/g2_host.sqlite
+            It is assumed file was previously exported from: /home/kdougherty/hdf5_projs/vol-external-passthrough/nsys_g2/g2_host.nsys-rep
+            Consider using --force-export=true if needed.
+    
+    Processing [/home/kdougherty/hdf5_projs/vol-external-passthrough/nsys_g2/g2_host.sqlite] with [/gpfs/fs1/soft/swing/software/spack-built/linux-ubuntu22.04-x86_64/gcc-11.4.0/cuda-12.6.0-qb3dlng/nsight-systems-2024.4.2/host-linux-x64/reports/cuda_gpu_kern_sum.py]... 
+    
+     ** CUDA GPU Kernel Summary (cuda_gpu_kern_sum):
+    
+    +----------+-----------------+-----------+-----------+-----------+----------+----------+-------------+------------------------------------------------------------------------------------------------------+
+    | Time (%) | Total Time (ns) | Instances | Avg (ns)  | Med (ns)  | Min (ns) | Max (ns) | StdDev (ns) |                                                 Name                                                 |
+    +----------+-----------------+-----------+-----------+-----------+----------+----------+-------------+------------------------------------------------------------------------------------------------------+
+    |     68.7 |         2149766 |         1 | 2149766.0 | 2149766.0 |  2149766 |  2149766 |         0.0 | cuSZp_compress_kernel_outlier_f64(const double *, unsigned char *, volatile unsigned int *, volatil… |
+    |     31.3 |          979989 |         1 |  979989.0 |  979989.0 |   979989 |   979989 |         0.0 | cuSZp_decompress_kernel_outlier_f64(double *, const unsigned char *, volatile unsigned int *, volat… |
+    +----------+-----------------+-----------+-----------+-----------+----------+----------+-------------+------------------------------------------------------------------------------------------------------+
+    
 
 ############ HOW TO READ IT ############
   [CUDA memcpy HtoD] on the host arm should be ~= the logical dataset
@@ -469,4 +502,4 @@ RESULT	host	7	313.81	650.78	551.175
   and the run proves nothing -- fix the benchmark, not the plot.
 
 profiles in: /home/kdougherty/hdf5_projs/vol-external-passthrough/nsys_g2   (open .nsys-rep in the Nsight Systems GUI)
-Job finished on Tue Aug  4 14:53:30 CDT 2026
+Job finished on Tue Aug  4 15:08:43 CDT 2026
