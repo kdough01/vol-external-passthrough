@@ -147,14 +147,13 @@ profile_arm () {
     echo "  wrote $out.nsys-rep"
 
     echo "  --- GPU memory transfers ---"
-    nsys stats --report cuda_gpu_mem_time_sum --format table "$out.nsys-rep" 2>/dev/null \
-        | sed 's/^/    /'
-    echo "  --- GPU memory sizes ---"
-    nsys stats --report cuda_gpu_mem_size_sum --format table "$out.nsys-rep" 2>/dev/null \
-        | sed 's/^/    /'
-    echo "  --- kernels ---"
-    nsys stats --report cuda_gpu_kern_sum --format table "$out.nsys-rep" 2>/dev/null \
-        | head -20 | sed 's/^/    /'
+    rm -f "$out.sqlite"
+    echo "  --- transfers / sizes / kernels ---"
+    nsys stats --force-export=true --format table \
+        --report cuda_gpu_mem_time_sum \
+        --report cuda_gpu_mem_size_sum \
+        --report cuda_gpu_kern_sum \
+        "$out.nsys-rep" 2>&1 | sed 's/^/    /'
 }
 
 profile_arm device
