@@ -1,0 +1,501 @@
+Job started on Tue Aug  4 16:31:59 CDT 2026   host=gpu2
+dataset=ocean_temp comp=cuszp_1e3 reps=7
+NVIDIA A100-SXM4-40GB, 40960 MiB
+
+=== building (build_g2) ===
+Consolidate compiler generated dependencies of target dump_cuszp_opts
+[  8%] Built target dump_cuszp_opts
+Consolidate compiler generated dependencies of target hdf5_vol_passthrough
+[ 36%] Built target hdf5_vol_passthrough
+Consolidate compiler generated dependencies of target bench_vol_timing
+Consolidate compiler generated dependencies of target test_cpu_write
+Consolidate compiler generated dependencies of target bench_pressio_timing
+Consolidate compiler generated dependencies of target test_ci
+Consolidate compiler generated dependencies of target test_time_miranda
+Consolidate compiler generated dependencies of target test_time_hurricane
+Consolidate compiler generated dependencies of target bench_filter_timing
+Consolidate compiler generated dependencies of target test_error_miranda
+[ 44%] Built target bench_vol_timing
+[ 52%] Built target test_cpu_write
+[ 60%] Built target bench_pressio_timing
+[ 68%] Built target test_ci
+[ 76%] Built target test_time_miranda
+[ 84%] Built target test_time_hurricane
+[ 92%] Built target test_error_miranda
+[100%] Built target bench_filter_timing
+
+############ [1] timing arms ############
+
+--- [device] rep=1 ---
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/g2_device.h5 csv=/dev/null xcsv=/dev/null only=ocean_temp comp=cuszp_1e3 verify=0 keep_h5=0 debug=0
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 929.4 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE ocean_temp     min=4.445019e+00 max=1.072704e+01 range=6.282023e+00 xform=none
+[device] ocean_temp: 123.1 MiB resident on GPU
+[device] arm=device: VOL receives the device pointer; no host round trip for the write
+[VOL stream] 'cuszp' declares no 'cuszp:cuda_stream' -- codec manages its own stream. Using the default stream + device barrier before D2H. device_ms is NOT reported for this codec; use pressio_call_ms or nsys.
+[copy] native id=cuszp      domain=cudamalloc   payload=34825114 B declared_cap=145329856 B reserve=16 B
+[VOL stream] 'cuszp' declares no 'cuszp:cuda_stream' -- codec manages its own stream. Using the default stream + device barrier before D2H. device_ms is NOT reported for this codec; use pressio_call_ms or nsys.
+
+=== ocean_temp (123.1 MiB, float, hdf5) ===
+Info: 0x559328f98c60
+  ocean_temp_cuszp_1e3         C=   3.97 W=   172.44 F=    0.29 X=    0.16 | O=   0.38 R=   182.83 ms  ratio=  3.71x  RMSE=5.773e-04 maxae=1.000e-03
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=3.97 write=172.44 flush=0.29 close=0.16 => write_total=176.86 ms | open=0.38 read=182.83 => read_total=183.21 ms | ratio=3.71x ===
+RESULT	device	1	172.44	182.83	0
+
+--- [host] rep=1 ---
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/g2_host.h5 csv=/dev/null xcsv=/dev/null only=ocean_temp comp=cuszp_1e3 verify=0 keep_h5=0 debug=0
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 929.4 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE ocean_temp     min=4.445019e+00 max=1.072704e+01 range=6.282023e+00 xform=none
+[device] ocean_temp: 123.1 MiB resident on GPU
+[device] arm=host d2h_ms=75.262 pcie_in=123.1 MiB
+[VOL stream] 'cuszp' declares no 'cuszp:cuda_stream' -- codec manages its own stream. Using the default stream + device barrier before D2H. device_ms is NOT reported for this codec; use pressio_call_ms or nsys.
+[copy] native id=cuszp      domain=cudamalloc   payload=34825114 B declared_cap=145329856 B reserve=16 B
+[VOL stream] 'cuszp' declares no 'cuszp:cuda_stream' -- codec manages its own stream. Using the default stream + device barrier before D2H. device_ms is NOT reported for this codec; use pressio_call_ms or nsys.
+
+=== ocean_temp (123.1 MiB, float, hdf5) ===
+Info: 0x564e660e3d60
+  ocean_temp_cuszp_1e3         C=   0.83 W=   184.79 F=    0.25 X=    0.17 | O=   0.36 R=   193.00 ms  ratio=  3.71x  RMSE=5.773e-04 maxae=1.000e-03
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=0.83 write=184.79 flush=0.25 close=0.17 => write_total=186.04 ms | open=0.36 read=193.00 => read_total=193.36 ms | ratio=3.71x ===
+RESULT	host	1	184.79	193.00	75.262
+
+--- [device] rep=2 ---
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/g2_device.h5 csv=/dev/null xcsv=/dev/null only=ocean_temp comp=cuszp_1e3 verify=0 keep_h5=0 debug=0
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 929.4 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE ocean_temp     min=4.445019e+00 max=1.072704e+01 range=6.282023e+00 xform=none
+[device] ocean_temp: 123.1 MiB resident on GPU
+[device] arm=device: VOL receives the device pointer; no host round trip for the write
+[VOL stream] 'cuszp' declares no 'cuszp:cuda_stream' -- codec manages its own stream. Using the default stream + device barrier before D2H. device_ms is NOT reported for this codec; use pressio_call_ms or nsys.
+[copy] native id=cuszp      domain=cudamalloc   payload=34825114 B declared_cap=145329856 B reserve=16 B
+[VOL stream] 'cuszp' declares no 'cuszp:cuda_stream' -- codec manages its own stream. Using the default stream + device barrier before D2H. device_ms is NOT reported for this codec; use pressio_call_ms or nsys.
+
+=== ocean_temp (123.1 MiB, float, hdf5) ===
+Info: 0x56020b9cfe00
+  ocean_temp_cuszp_1e3         C=   0.73 W=   149.28 F=    0.25 X=    0.16 | O=   0.36 R=   152.90 ms  ratio=  3.71x  RMSE=5.773e-04 maxae=1.000e-03
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=0.73 write=149.28 flush=0.25 close=0.16 => write_total=150.42 ms | open=0.36 read=152.90 => read_total=153.26 ms | ratio=3.71x ===
+RESULT	device	2	149.28	152.90	0
+
+--- [host] rep=2 ---
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/g2_host.h5 csv=/dev/null xcsv=/dev/null only=ocean_temp comp=cuszp_1e3 verify=0 keep_h5=0 debug=0
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 929.4 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE ocean_temp     min=4.445019e+00 max=1.072704e+01 range=6.282023e+00 xform=none
+[device] ocean_temp: 123.1 MiB resident on GPU
+[device] arm=host d2h_ms=75.440 pcie_in=123.1 MiB
+[VOL stream] 'cuszp' declares no 'cuszp:cuda_stream' -- codec manages its own stream. Using the default stream + device barrier before D2H. device_ms is NOT reported for this codec; use pressio_call_ms or nsys.
+[copy] native id=cuszp      domain=cudamalloc   payload=34825114 B declared_cap=145329856 B reserve=16 B
+[VOL stream] 'cuszp' declares no 'cuszp:cuda_stream' -- codec manages its own stream. Using the default stream + device barrier before D2H. device_ms is NOT reported for this codec; use pressio_call_ms or nsys.
+
+=== ocean_temp (123.1 MiB, float, hdf5) ===
+Info: 0x5645415e0af0
+  ocean_temp_cuszp_1e3         C=   0.84 W=   268.63 F=    0.26 X=    0.18 | O=   0.36 R=   209.74 ms  ratio=  3.71x  RMSE=5.773e-04 maxae=1.000e-03
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=0.84 write=268.63 flush=0.26 close=0.18 => write_total=269.90 ms | open=0.36 read=209.74 => read_total=210.10 ms | ratio=3.71x ===
+RESULT	host	2	268.63	209.74	75.440
+
+--- [device] rep=3 ---
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/g2_device.h5 csv=/dev/null xcsv=/dev/null only=ocean_temp comp=cuszp_1e3 verify=0 keep_h5=0 debug=0
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 929.4 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE ocean_temp     min=4.445019e+00 max=1.072704e+01 range=6.282023e+00 xform=none
+[device] ocean_temp: 123.1 MiB resident on GPU
+[device] arm=device: VOL receives the device pointer; no host round trip for the write
+[VOL stream] 'cuszp' declares no 'cuszp:cuda_stream' -- codec manages its own stream. Using the default stream + device barrier before D2H. device_ms is NOT reported for this codec; use pressio_call_ms or nsys.
+[copy] native id=cuszp      domain=cudamalloc   payload=34825114 B declared_cap=145329856 B reserve=16 B
+[VOL stream] 'cuszp' declares no 'cuszp:cuda_stream' -- codec manages its own stream. Using the default stream + device barrier before D2H. device_ms is NOT reported for this codec; use pressio_call_ms or nsys.
+
+=== ocean_temp (123.1 MiB, float, hdf5) ===
+Info: 0x55c5c13c2d30
+  ocean_temp_cuszp_1e3         C=   0.76 W=   192.05 F=    0.24 X=    0.16 | O=   0.36 R=   160.39 ms  ratio=  3.71x  RMSE=5.773e-04 maxae=1.000e-03
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=0.76 write=192.05 flush=0.24 close=0.16 => write_total=193.22 ms | open=0.36 read=160.39 => read_total=160.75 ms | ratio=3.71x ===
+RESULT	device	3	192.05	160.39	0
+
+--- [host] rep=3 ---
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/g2_host.h5 csv=/dev/null xcsv=/dev/null only=ocean_temp comp=cuszp_1e3 verify=0 keep_h5=0 debug=0
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 929.4 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE ocean_temp     min=4.445019e+00 max=1.072704e+01 range=6.282023e+00 xform=none
+[device] ocean_temp: 123.1 MiB resident on GPU
+[device] arm=host d2h_ms=75.584 pcie_in=123.1 MiB
+[VOL stream] 'cuszp' declares no 'cuszp:cuda_stream' -- codec manages its own stream. Using the default stream + device barrier before D2H. device_ms is NOT reported for this codec; use pressio_call_ms or nsys.
+[copy] native id=cuszp      domain=cudamalloc   payload=34825114 B declared_cap=145329856 B reserve=16 B
+[VOL stream] 'cuszp' declares no 'cuszp:cuda_stream' -- codec manages its own stream. Using the default stream + device barrier before D2H. device_ms is NOT reported for this codec; use pressio_call_ms or nsys.
+
+=== ocean_temp (123.1 MiB, float, hdf5) ===
+Info: 0x55faa9a54c60
+  ocean_temp_cuszp_1e3         C=   0.85 W=   199.53 F=    0.25 X=    0.17 | O=   0.36 R=   162.09 ms  ratio=  3.71x  RMSE=5.773e-04 maxae=1.000e-03
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=0.85 write=199.53 flush=0.25 close=0.17 => write_total=200.80 ms | open=0.36 read=162.09 => read_total=162.45 ms | ratio=3.71x ===
+RESULT	host	3	199.53	162.09	75.584
+
+--- [device] rep=4 ---
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/g2_device.h5 csv=/dev/null xcsv=/dev/null only=ocean_temp comp=cuszp_1e3 verify=0 keep_h5=0 debug=0
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 929.4 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE ocean_temp     min=4.445019e+00 max=1.072704e+01 range=6.282023e+00 xform=none
+[device] ocean_temp: 123.1 MiB resident on GPU
+[device] arm=device: VOL receives the device pointer; no host round trip for the write
+[VOL stream] 'cuszp' declares no 'cuszp:cuda_stream' -- codec manages its own stream. Using the default stream + device barrier before D2H. device_ms is NOT reported for this codec; use pressio_call_ms or nsys.
+[copy] native id=cuszp      domain=cudamalloc   payload=34825114 B declared_cap=145329856 B reserve=16 B
+[VOL stream] 'cuszp' declares no 'cuszp:cuda_stream' -- codec manages its own stream. Using the default stream + device barrier before D2H. device_ms is NOT reported for this codec; use pressio_call_ms or nsys.
+
+=== ocean_temp (123.1 MiB, float, hdf5) ===
+Info: 0x55dddce42c50
+  ocean_temp_cuszp_1e3         C=   0.87 W=   180.91 F=    0.25 X=    0.18 | O=   0.36 R=   169.70 ms  ratio=  3.71x  RMSE=5.773e-04 maxae=1.000e-03
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=0.87 write=180.91 flush=0.25 close=0.18 => write_total=182.21 ms | open=0.36 read=169.70 => read_total=170.06 ms | ratio=3.71x ===
+RESULT	device	4	180.91	169.70	0
+
+--- [host] rep=4 ---
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/g2_host.h5 csv=/dev/null xcsv=/dev/null only=ocean_temp comp=cuszp_1e3 verify=0 keep_h5=0 debug=0
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 929.4 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE ocean_temp     min=4.445019e+00 max=1.072704e+01 range=6.282023e+00 xform=none
+[device] ocean_temp: 123.1 MiB resident on GPU
+[device] arm=host d2h_ms=75.080 pcie_in=123.1 MiB
+[VOL stream] 'cuszp' declares no 'cuszp:cuda_stream' -- codec manages its own stream. Using the default stream + device barrier before D2H. device_ms is NOT reported for this codec; use pressio_call_ms or nsys.
+[copy] native id=cuszp      domain=cudamalloc   payload=34825114 B declared_cap=145329856 B reserve=16 B
+[VOL stream] 'cuszp' declares no 'cuszp:cuda_stream' -- codec manages its own stream. Using the default stream + device barrier before D2H. device_ms is NOT reported for this codec; use pressio_call_ms or nsys.
+
+=== ocean_temp (123.1 MiB, float, hdf5) ===
+Info: 0x5563e6e22b00
+  ocean_temp_cuszp_1e3         C=   0.75 W=   269.92 F=    0.25 X=    0.17 | O=   0.36 R=   185.88 ms  ratio=  3.71x  RMSE=5.773e-04 maxae=1.000e-03
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=0.75 write=269.92 flush=0.25 close=0.17 => write_total=271.09 ms | open=0.36 read=185.88 => read_total=186.24 ms | ratio=3.71x ===
+RESULT	host	4	269.92	185.88	75.080
+
+--- [device] rep=5 ---
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/g2_device.h5 csv=/dev/null xcsv=/dev/null only=ocean_temp comp=cuszp_1e3 verify=0 keep_h5=0 debug=0
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 929.4 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE ocean_temp     min=4.445019e+00 max=1.072704e+01 range=6.282023e+00 xform=none
+[device] ocean_temp: 123.1 MiB resident on GPU
+[device] arm=device: VOL receives the device pointer; no host round trip for the write
+[VOL stream] 'cuszp' declares no 'cuszp:cuda_stream' -- codec manages its own stream. Using the default stream + device barrier before D2H. device_ms is NOT reported for this codec; use pressio_call_ms or nsys.
+[copy] native id=cuszp      domain=cudamalloc   payload=34825114 B declared_cap=145329856 B reserve=16 B
+[VOL stream] 'cuszp' declares no 'cuszp:cuda_stream' -- codec manages its own stream. Using the default stream + device barrier before D2H. device_ms is NOT reported for this codec; use pressio_call_ms or nsys.
+
+=== ocean_temp (123.1 MiB, float, hdf5) ===
+Info: 0x562404e80e00
+  ocean_temp_cuszp_1e3         C=   0.73 W=   206.46 F=    0.29 X=    0.15 | O=   0.35 R=   129.26 ms  ratio=  3.71x  RMSE=5.773e-04 maxae=1.000e-03
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=0.73 write=206.46 flush=0.29 close=0.15 => write_total=207.64 ms | open=0.35 read=129.26 => read_total=129.61 ms | ratio=3.71x ===
+RESULT	device	5	206.46	129.26	0
+
+--- [host] rep=5 ---
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/g2_host.h5 csv=/dev/null xcsv=/dev/null only=ocean_temp comp=cuszp_1e3 verify=0 keep_h5=0 debug=0
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 929.4 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE ocean_temp     min=4.445019e+00 max=1.072704e+01 range=6.282023e+00 xform=none
+[device] ocean_temp: 123.1 MiB resident on GPU
+[device] arm=host d2h_ms=77.897 pcie_in=123.1 MiB
+[VOL stream] 'cuszp' declares no 'cuszp:cuda_stream' -- codec manages its own stream. Using the default stream + device barrier before D2H. device_ms is NOT reported for this codec; use pressio_call_ms or nsys.
+[copy] native id=cuszp      domain=cudamalloc   payload=34825114 B declared_cap=145329856 B reserve=16 B
+[VOL stream] 'cuszp' declares no 'cuszp:cuda_stream' -- codec manages its own stream. Using the default stream + device barrier before D2H. device_ms is NOT reported for this codec; use pressio_call_ms or nsys.
+
+=== ocean_temp (123.1 MiB, float, hdf5) ===
+Info: 0x555cf111ae00
+  ocean_temp_cuszp_1e3         C=   0.84 W=   211.37 F=    0.24 X=    0.17 | O=   0.36 R=   190.77 ms  ratio=  3.71x  RMSE=5.773e-04 maxae=1.000e-03
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=0.84 write=211.37 flush=0.24 close=0.17 => write_total=212.62 ms | open=0.36 read=190.77 => read_total=191.13 ms | ratio=3.71x ===
+RESULT	host	5	211.37	190.77	77.897
+
+--- [device] rep=6 ---
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/g2_device.h5 csv=/dev/null xcsv=/dev/null only=ocean_temp comp=cuszp_1e3 verify=0 keep_h5=0 debug=0
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 929.4 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE ocean_temp     min=4.445019e+00 max=1.072704e+01 range=6.282023e+00 xform=none
+[device] ocean_temp: 123.1 MiB resident on GPU
+[device] arm=device: VOL receives the device pointer; no host round trip for the write
+[VOL stream] 'cuszp' declares no 'cuszp:cuda_stream' -- codec manages its own stream. Using the default stream + device barrier before D2H. device_ms is NOT reported for this codec; use pressio_call_ms or nsys.
+[copy] native id=cuszp      domain=cudamalloc   payload=34825114 B declared_cap=145329856 B reserve=16 B
+[VOL stream] 'cuszp' declares no 'cuszp:cuda_stream' -- codec manages its own stream. Using the default stream + device barrier before D2H. device_ms is NOT reported for this codec; use pressio_call_ms or nsys.
+
+=== ocean_temp (123.1 MiB, float, hdf5) ===
+Info: 0x55cd11a78c60
+  ocean_temp_cuszp_1e3         C=   0.77 W=   179.80 F=    0.25 X=    0.15 | O=   0.37 R=   232.09 ms  ratio=  3.71x  RMSE=5.773e-04 maxae=1.000e-03
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=0.77 write=179.80 flush=0.25 close=0.15 => write_total=180.97 ms | open=0.37 read=232.09 => read_total=232.45 ms | ratio=3.71x ===
+RESULT	device	6	179.80	232.09	0
+
+--- [host] rep=6 ---
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/g2_host.h5 csv=/dev/null xcsv=/dev/null only=ocean_temp comp=cuszp_1e3 verify=0 keep_h5=0 debug=0
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 929.4 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE ocean_temp     min=4.445019e+00 max=1.072704e+01 range=6.282023e+00 xform=none
+[device] ocean_temp: 123.1 MiB resident on GPU
+[device] arm=host d2h_ms=77.492 pcie_in=123.1 MiB
+[VOL stream] 'cuszp' declares no 'cuszp:cuda_stream' -- codec manages its own stream. Using the default stream + device barrier before D2H. device_ms is NOT reported for this codec; use pressio_call_ms or nsys.
+[copy] native id=cuszp      domain=cudamalloc   payload=34825114 B declared_cap=145329856 B reserve=16 B
+[VOL stream] 'cuszp' declares no 'cuszp:cuda_stream' -- codec manages its own stream. Using the default stream + device barrier before D2H. device_ms is NOT reported for this codec; use pressio_call_ms or nsys.
+
+=== ocean_temp (123.1 MiB, float, hdf5) ===
+Info: 0x5649729faad0
+  ocean_temp_cuszp_1e3         C=   0.80 W=   181.77 F=    0.25 X=    0.23 | O=   0.36 R=   151.12 ms  ratio=  3.71x  RMSE=5.773e-04 maxae=1.000e-03
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=0.80 write=181.77 flush=0.25 close=0.23 => write_total=183.04 ms | open=0.36 read=151.12 => read_total=151.48 ms | ratio=3.71x ===
+RESULT	host	6	181.77	151.12	77.492
+
+--- [device] rep=7 ---
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/g2_device.h5 csv=/dev/null xcsv=/dev/null only=ocean_temp comp=cuszp_1e3 verify=0 keep_h5=0 debug=0
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 929.4 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE ocean_temp     min=4.445019e+00 max=1.072704e+01 range=6.282023e+00 xform=none
+[device] ocean_temp: 123.1 MiB resident on GPU
+[device] arm=device: VOL receives the device pointer; no host round trip for the write
+[VOL stream] 'cuszp' declares no 'cuszp:cuda_stream' -- codec manages its own stream. Using the default stream + device barrier before D2H. device_ms is NOT reported for this codec; use pressio_call_ms or nsys.
+[copy] native id=cuszp      domain=cudamalloc   payload=34825114 B declared_cap=145329856 B reserve=16 B
+[VOL stream] 'cuszp' declares no 'cuszp:cuda_stream' -- codec manages its own stream. Using the default stream + device barrier before D2H. device_ms is NOT reported for this codec; use pressio_call_ms or nsys.
+
+=== ocean_temp (123.1 MiB, float, hdf5) ===
+Info: 0x561615a859e0
+  ocean_temp_cuszp_1e3         C=   0.76 W=   207.10 F=    0.25 X=    0.18 | O=   0.37 R=   143.07 ms  ratio=  3.71x  RMSE=5.773e-04 maxae=1.000e-03
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=0.76 write=207.10 flush=0.25 close=0.18 => write_total=208.28 ms | open=0.37 read=143.07 => read_total=143.43 ms | ratio=3.71x ===
+RESULT	device	7	207.10	143.07	0
+
+--- [host] rep=7 ---
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/g2_host.h5 csv=/dev/null xcsv=/dev/null only=ocean_temp comp=cuszp_1e3 verify=0 keep_h5=0 debug=0
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 929.3 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE ocean_temp     min=4.445019e+00 max=1.072704e+01 range=6.282023e+00 xform=none
+[device] ocean_temp: 123.1 MiB resident on GPU
+[device] arm=host d2h_ms=78.151 pcie_in=123.1 MiB
+[VOL stream] 'cuszp' declares no 'cuszp:cuda_stream' -- codec manages its own stream. Using the default stream + device barrier before D2H. device_ms is NOT reported for this codec; use pressio_call_ms or nsys.
+[copy] native id=cuszp      domain=cudamalloc   payload=34825114 B declared_cap=145329856 B reserve=16 B
+[VOL stream] 'cuszp' declares no 'cuszp:cuda_stream' -- codec manages its own stream. Using the default stream + device barrier before D2H. device_ms is NOT reported for this codec; use pressio_call_ms or nsys.
+
+=== ocean_temp (123.1 MiB, float, hdf5) ===
+Info: 0x5639c00ada20
+  ocean_temp_cuszp_1e3         C=   0.85 W=   164.00 F=    0.24 X=    0.15 | O=   0.35 R=   157.16 ms  ratio=  3.71x  RMSE=5.773e-04 maxae=1.000e-03
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=0.85 write=164.00 flush=0.24 close=0.15 => write_total=165.25 ms | open=0.35 read=157.16 => read_total=157.52 ms | ratio=3.71x ===
+RESULT	host	7	164.00	157.16	78.151
+
+############ [2] nsys profiles ############
+
+--- nsys [device] ---
+  wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/nsys_g2/g2_device.nsys-rep
+  --- GPU memory transfers ---
+  --- transfers / sizes / kernels ---
+    Generating SQLite file /home/kdougherty/hdf5_projs/vol-external-passthrough/nsys_g2/g2_device.sqlite from /home/kdougherty/hdf5_projs/vol-external-passthrough/nsys_g2/g2_device.nsys-rep
+    Processing [/home/kdougherty/hdf5_projs/vol-external-passthrough/nsys_g2/g2_device.sqlite] with [/gpfs/fs1/soft/swing/software/spack-built/linux-ubuntu22.04-x86_64/gcc-11.4.0/cuda-12.6.0-qb3dlng/nsight-systems-2024.4.2/host-linux-x64/reports/cuda_gpu_mem_time_sum.py]... 
+    
+     ** CUDA GPU MemOps Summary (by Time) (cuda_gpu_mem_time_sum):
+    
+    +----------+-----------------+-------+------------+------------+----------+----------+-------------+------------------------------+
+    | Time (%) | Total Time (ns) | Count |  Avg (ns)  |  Med (ns)  | Min (ns) | Max (ns) | StdDev (ns) |          Operation           |
+    +----------+-----------------+-------+------------+------------+----------+----------+-------------+------------------------------+
+    |     84.9 |        89078685 |     3 | 29692895.0 | 19234880.0 |     4672 | 69839133 |  36072711.9 | [CUDA memcpy Device-to-Host] |
+    |     15.0 |        15793437 |     2 |  7896718.5 |  7896718.5 |  3792832 | 12000605 |   5803771.9 | [CUDA memcpy Host-to-Device] |
+    |      0.1 |           99199 |     7 |    14171.3 |     1633.0 |     1567 |    88256 |     32669.8 | [CUDA memset]                |
+    +----------+-----------------+-------+------------+------------+----------+----------+-------------+------------------------------+
+    
+    Processing [/home/kdougherty/hdf5_projs/vol-external-passthrough/nsys_g2/g2_device.sqlite] with [/gpfs/fs1/soft/swing/software/spack-built/linux-ubuntu22.04-x86_64/gcc-11.4.0/cuda-12.6.0-qb3dlng/nsight-systems-2024.4.2/host-linux-x64/reports/cuda_gpu_mem_size_sum.py]... 
+    
+     ** CUDA GPU MemOps Summary (by Size) (cuda_gpu_mem_size_sum):
+    
+    +------------+-------+----------+----------+----------+----------+-------------+------------------------------+
+    | Total (MB) | Count | Avg (MB) | Med (MB) | Min (MB) | Max (MB) | StdDev (MB) |          Operation           |
+    +------------+-------+----------+----------+----------+----------+-------------+------------------------------+
+    |    163.949 |     3 |   54.650 |   34.825 |    0.000 |  129.124 |      66.806 | [CUDA memcpy Device-to-Host] |
+    |    163.949 |     2 |   81.974 |   81.974 |   34.825 |  129.124 |      66.679 | [CUDA memcpy Host-to-Device] |
+    |    129.148 |     7 |   18.450 |    0.004 |    0.004 |  129.124 |      48.803 | [CUDA memset]                |
+    +------------+-------+----------+----------+----------+----------+-------------+------------------------------+
+    
+    Processing [/home/kdougherty/hdf5_projs/vol-external-passthrough/nsys_g2/g2_device.sqlite] with [/gpfs/fs1/soft/swing/software/spack-built/linux-ubuntu22.04-x86_64/gcc-11.4.0/cuda-12.6.0-qb3dlng/nsight-systems-2024.4.2/host-linux-x64/reports/cuda_gpu_kern_sum.py]... 
+    
+     ** CUDA GPU Kernel Summary (cuda_gpu_kern_sum):
+    
+    +----------+-----------------+-----------+----------+----------+----------+----------+-------------+------------------------------------------------------------------------------------------------------+
+    | Time (%) | Total Time (ns) | Instances | Avg (ns) | Med (ns) | Min (ns) | Max (ns) | StdDev (ns) |                                                 Name                                                 |
+    +----------+-----------------+-----------+----------+----------+----------+----------+-------------+------------------------------------------------------------------------------------------------------+
+    |     52.2 |          747226 |         1 | 747226.0 | 747226.0 |   747226 |   747226 |         0.0 | cuSZp_compress_kernel_outlier_f32(const float *, unsigned char *, volatile unsigned int *, volatile… |
+    |     47.8 |          684922 |         1 | 684922.0 | 684922.0 |   684922 |   684922 |         0.0 | cuSZp_decompress_kernel_outlier_f32(float *, const unsigned char *, volatile unsigned int *, volati… |
+    +----------+-----------------+-----------+----------+----------+----------+----------+-------------+------------------------------------------------------------------------------------------------------+
+    
+
+--- nsys [host] ---
+  wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/nsys_g2/g2_host.nsys-rep
+  --- GPU memory transfers ---
+  --- transfers / sizes / kernels ---
+    Generating SQLite file /home/kdougherty/hdf5_projs/vol-external-passthrough/nsys_g2/g2_host.sqlite from /home/kdougherty/hdf5_projs/vol-external-passthrough/nsys_g2/g2_host.nsys-rep
+    Processing [/home/kdougherty/hdf5_projs/vol-external-passthrough/nsys_g2/g2_host.sqlite] with [/gpfs/fs1/soft/swing/software/spack-built/linux-ubuntu22.04-x86_64/gcc-11.4.0/cuda-12.6.0-qb3dlng/nsight-systems-2024.4.2/host-linux-x64/reports/cuda_gpu_mem_time_sum.py]... 
+    
+     ** CUDA GPU MemOps Summary (by Time) (cuda_gpu_mem_time_sum):
+    
+    +----------+-----------------+-------+------------+------------+----------+----------+-------------+------------------------------+
+    | Time (%) | Total Time (ns) | Count |  Avg (ns)  |  Med (ns)  | Min (ns) | Max (ns) | StdDev (ns) |          Operation           |
+    +----------+-----------------+-------+------------+------------+----------+----------+-------------+------------------------------+
+    |     85.7 |       157347667 |     4 | 39336916.8 | 44130436.5 |     4640 | 69082154 |  35220381.4 | [CUDA memcpy Device-to-Host] |
+    |     14.3 |        26219640 |     3 |  8739880.0 | 10385112.0 |  3752442 | 12082086 |   4401798.9 | [CUDA memcpy Host-to-Device] |
+    |      0.1 |           98527 |     7 |    14075.3 |     1632.0 |     1568 |    87839 |     32527.7 | [CUDA memset]                |
+    +----------+-----------------+-------+------------+------------+----------+----------+-------------+------------------------------+
+    
+    Processing [/home/kdougherty/hdf5_projs/vol-external-passthrough/nsys_g2/g2_host.sqlite] with [/gpfs/fs1/soft/swing/software/spack-built/linux-ubuntu22.04-x86_64/gcc-11.4.0/cuda-12.6.0-qb3dlng/nsight-systems-2024.4.2/host-linux-x64/reports/cuda_gpu_mem_size_sum.py]... 
+    
+     ** CUDA GPU MemOps Summary (by Size) (cuda_gpu_mem_size_sum):
+    
+    +------------+-------+----------+----------+----------+----------+-------------+------------------------------+
+    | Total (MB) | Count | Avg (MB) | Med (MB) | Min (MB) | Max (MB) | StdDev (MB) |          Operation           |
+    +------------+-------+----------+----------+----------+----------+-------------+------------------------------+
+    |    293.073 |     4 |   73.268 |   81.974 |    0.000 |  129.124 |      66.045 | [CUDA memcpy Device-to-Host] |
+    |    293.073 |     3 |   97.691 |  129.124 |   34.825 |  129.124 |      54.443 | [CUDA memcpy Host-to-Device] |
+    |    129.148 |     7 |   18.450 |    0.004 |    0.004 |  129.124 |      48.803 | [CUDA memset]                |
+    +------------+-------+----------+----------+----------+----------+-------------+------------------------------+
+    
+    Processing [/home/kdougherty/hdf5_projs/vol-external-passthrough/nsys_g2/g2_host.sqlite] with [/gpfs/fs1/soft/swing/software/spack-built/linux-ubuntu22.04-x86_64/gcc-11.4.0/cuda-12.6.0-qb3dlng/nsight-systems-2024.4.2/host-linux-x64/reports/cuda_gpu_kern_sum.py]... 
+    
+     ** CUDA GPU Kernel Summary (cuda_gpu_kern_sum):
+    
+    +----------+-----------------+-----------+----------+----------+----------+----------+-------------+------------------------------------------------------------------------------------------------------+
+    | Time (%) | Total Time (ns) | Instances | Avg (ns) | Med (ns) | Min (ns) | Max (ns) | StdDev (ns) |                                                 Name                                                 |
+    +----------+-----------------+-----------+----------+----------+----------+----------+-------------+------------------------------------------------------------------------------------------------------+
+    |     51.8 |          740472 |         1 | 740472.0 | 740472.0 |   740472 |   740472 |         0.0 | cuSZp_compress_kernel_outlier_f32(const float *, unsigned char *, volatile unsigned int *, volatile… |
+    |     48.2 |          688121 |         1 | 688121.0 | 688121.0 |   688121 |   688121 |         0.0 | cuSZp_decompress_kernel_outlier_f32(float *, const unsigned char *, volatile unsigned int *, volati… |
+    +----------+-----------------+-----------+----------+----------+----------+----------+-------------+------------------------------------------------------------------------------------------------------+
+    
+
+############ HOW TO READ IT ############
+  [CUDA memcpy HtoD] on the host arm should be ~= the logical dataset
+  size. On the device arm it should be ~0 for the input. That delta is
+  the overhead a filter cannot avoid, because H5Z only ever sees host
+  bytes.
+
+  If BOTH arms show the same HtoD, BENCH_DEVICE_INPUT is not wired up
+  and the run proves nothing -- fix the benchmark, not the plot.
+
+profiles in: /home/kdougherty/hdf5_projs/vol-external-passthrough/nsys_g2   (open .nsys-rep in the Nsight Systems GUI)
+Job finished on Tue Aug  4 16:32:57 CDT 2026

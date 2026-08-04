@@ -6,7 +6,7 @@
 #PBS -A SDR
 #PBS -q gpu
 
-DATASET="${BENCH_DATASET:-s3d}"
+DATASET="${BENCH_DATASET:-nyx_baryon}"
 COMP="${BENCH_COMP:-cuszp_1e3}"
 REPS="${BENCH_REPS:-7}"
 
