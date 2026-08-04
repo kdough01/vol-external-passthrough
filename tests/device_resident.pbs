@@ -1,5 +1,5 @@
 #!/bin/bash
-#PBS -N g1_shared_ratio
+#PBS -N g2_device_resident
 #PBS -l select=1:ncpus=16:ngpus=1:mpiprocs=1:mem=128gb
 #PBS -l walltime=03:00:00
 #PBS -j oe
@@ -7,15 +7,18 @@
 #PBS -q gpu
 
 DATASET="${BENCH_DATASET:-s3d}"
-COMP="${BENCH_COMP:-zstd}"
-CHUNKS="${BENCH_CHUNKS:-8 64 512 2048 8192 32768}"
+COMP="${BENCH_COMP:-cuszp_1e3}"
+REPS="${BENCH_REPS:-3}"
 
 cd $PBS_O_WORKDIR/..
 WORK="$(pwd)"
-BUILD="build_g1"
+BUILD="build_g2"
+PROF="$WORK/nsys_g2"
+mkdir -p "$PROF"
 
 echo "Job started on $(date)   host=$(hostname)"
-echo "dataset=$DATASET comp=$COMP chunks=[$CHUNKS]"
+echo "dataset=$DATASET comp=$COMP reps=$REPS"
+nvidia-smi --query-gpu=name,memory.total --format=csv,noheader
 
 module load gcc/11.4.0
 module load hpcx/2.26-gcc
@@ -25,25 +28,6 @@ LP_VIEW=/home/kdougherty/libpressio_cuda/.spack-env/view
 CLEAN_PATH=$(echo "$PATH" | tr ':' '\n' | grep -v spack-env | tr '\n' ':')
 GCC_LIB=$(gcc --print-file-name=libstdc++.so | xargs dirname 2>/dev/null)
 [ "$GCC_LIB" = "." ] && GCC_LIB=/usr/lib/gcc/x86_64-linux-gnu/11
-
-echo ""
-echo "=== [0] prerequisites ==="
-HAVE_ZSTD=0; HAVE_ZDICT=0
-"$LP_VIEW"/bin/pressio -a compressors 2>/dev/null | tr ' ' '\n' | grep -qx zstd \
-    && { echo "  libpressio 'zstd' plugin: YES"; HAVE_ZSTD=1; } \
-    || echo "  libpressio 'zstd' plugin: NO  (only reachable as blosc:compressor=zstd)"
-[ -f "$LP_VIEW/include/zdict.h" ] \
-    && { echo "  zdict.h: YES"; HAVE_ZDICT=1; } \
-    || echo "  zdict.h: NO  -- dictionary provider cannot compile"
-
-if [ "$HAVE_ZSTD" -eq 0 ]; then
-    echo "  >>> falling back to COMP=blosc (set blosc:compressor=zstd in bench_config.h)"
-    COMP="${BENCH_COMP_FALLBACK:-blosc}"
-fi
-if [ "$HAVE_ZDICT" -eq 0 ]; then
-    echo "  >>> WARNING: shared and nodict will be IDENTICAL. Figure 1 cannot"
-    echo "  >>> demonstrate contribution 3 in this configuration."
-fi
 
 SYSTEM_MPICC=$(which mpicc)
 SYSTEM_MPICXX=$(which mpicxx)
@@ -76,71 +60,102 @@ cmake -S . -B "$BUILD" \
     -DCMAKE_C_COMPILER="$SYSTEM_MPICC" -DCMAKE_CXX_COMPILER="$SYSTEM_MPICXX" \
     -DUSE_CUDA=ON -DCMAKE_PREFIX_PATH="$LP_VIEW" \
     -DLibPressio_DIR="$LP_CMAKE_DIR" -Wno-dev \
-    > build_g1.log 2>&1 || { echo "cmake failed"; tail -30 build_g1.log; exit 1; }
-grep -q "zstd dictionary provider ENABLED" build_g1.log \
-    && echo "  provider: COMPILED IN" || echo "  provider: NOT compiled in"
+    > build_g2.log 2>&1 || { echo "cmake failed"; tail -30 build_g2.log; exit 1; }
 env PATH="$CLEAN_PATH" LD_LIBRARY_PATH="$GCC_LIB" cmake --build "$BUILD" -j16 \
     || { echo "build failed -- refusing to run a stale binary"; exit 1; }
 
-VOL_BIN="$BUILD/tests/bench_vol_timing"
-FLT_BIN="$BUILD/tests/bench_filter_timing"
+BIN="$BUILD/tests/bench_vol_timing"
 VOL_PLUGIN_PATH="${VOL_PLUGIN_PATH:-$WORK/$BUILD/src}"
 VOL_CONNECTOR="${VOL_CONNECTOR:-pass_through_ext under_vol=0;under_info={}}"
-FILTER_PLUGIN_PATH="${FILTER_PLUGIN_PATH:-$WORK/tests/h5z_plugins}"
-H5DIR="${VOL_H5DIR:-/lcrc/project/SDR/$USER/vol_bench_h5}"
-mkdir -p "$H5DIR"
 
-run_vol () {
-    local arm="$1" N="$2" dis=""
-    [ "$arm" = "nodict" ] && dis="VOL_SHARED_DISABLE=1"
+if ! "$BIN" --help 2>&1 | grep -qi device && [ -z "${BENCH_DEVICE_INPUT_OK:-}" ]; then
+    echo ""
+    echo ">>> WARNING: could not confirm bench_vol_timing supports device input."
+    echo ">>> If BENCH_DEVICE_INPUT is ignored, BOTH arms run host-staged and"
+    echo ">>> the figure will show no difference -- a null result that looks real."
+    echo ">>> Add the device mode from the header comment first."
+fi
+
+run_arm () {
+    local arm="$1" rep="$2"
+    local dev=""
+    [ "$arm" = "device" ] && dev="BENCH_DEVICE_INPUT=1"
 
     echo ""
-    echo "--- [$arm] N=$N ---"
+    echo "--- [$arm] rep=$rep ---"
     local OUT
     OUT=$(env HDF5_PLUGIN_PATH="$VOL_PLUGIN_PATH" \
               HDF5_VOL_CONNECTOR="$VOL_CONNECTOR" \
-              VOL_COMP_CHUNKING=shared VOL_COMP_CHUNK_N="$N" \
-              VOL_COMP_CHUNK_LOG=1 ${dis:+$dis} \
+              VOL_COMP_CHUNKING=none \
+              VOL_COMP_COPY_LOG=1 VOL_COMP_GPU_EVENTS=1 \
+              ${dev:+$dev} \
               timeout --signal=KILL 1800 \
-              "$VOL_BIN" --comp "$COMP" --only "$DATASET" \
-                         --out /dev/null --ext /dev/null 2>&1)
+              "$BIN" --comp "$COMP" --only "$DATASET" \
+                     --out /dev/null --ext /dev/null 2>&1)
     echo "$OUT"
 
-    local ratio cbytes
-    ratio=$(echo "$OUT" | grep -m1 '^\[shared\]' | sed -n 's/.*(\([0-9.]*\)x).*/\1/p')
-    cbytes=$(echo "$OUT" | grep -m1 '^\[shared\]' | sed -n 's/.*total=\([0-9]*\) B.*/\1/p')
-    [ -n "$ratio" ] && printf 'RESULT\t%s\t%s\t%s\t%s\n' "$arm" "$N" "$ratio" "${cbytes:-0}"
-}
-
-run_filter () {
-    local N="$1"
-    echo ""
-    echo "--- [filter] N=$N ---"
-    local h5="$H5DIR/g1_filter_N${N}.h5"
-    local xcsv="/tmp/g1_flt_$$.csv"
-    rm -f "$h5"
-
-    env -u HDF5_VOL_CONNECTOR HDF5_PLUGIN_PATH="$FILTER_PLUGIN_PATH" \
-        timeout --signal=KILL 1800 \
-        "$FLT_BIN" --deflate --only "$DATASET" --chunk-n "$N" \
-                   --h5 "$h5" --out /dev/null --ext "$xcsv" 2>&1
-    rm -f "$h5"
-
-    local line
-    line=$(awk -F, 'FNR>1 && $5!="-1" {print $8"\t"$7; exit}' "$xcsv" 2>/dev/null)
-    rm -f "$xcsv"
-    [ -n "$line" ] && printf 'RESULT\tfilter\t%s\t%s\n' "$N" "$line"
+    local w c dv io
+    w=$(echo  "$OUT" | grep -m1 -oP 'write[^0-9]*\K[0-9.]+')
+    c=$(echo  "$OUT" | grep -m1 -oP 'compress_ms=\K[0-9.]+')
+    dv=$(echo "$OUT" | grep -m1 -oP 'device_ms=\K[0-9.]+')
+    io=$(echo "$OUT" | grep -m1 -oP 'io_ms=\K[0-9.]+')
+    printf 'RESULT\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+           "$arm" "$rep" "${w:-0}" "${c:-0}" "${dv:-0}" "${io:-0}"
 }
 
 echo ""
-echo "############ sweep ############"
-for N in $CHUNKS; do
-    run_vol shared "$N"
-    run_vol nodict "$N"
-    run_filter     "$N"
+echo "############ [1] timing arms ############"
+for r in $(seq 1 "$REPS"); do
+    run_arm device "$r"
+    run_arm host   "$r"
 done
 
 echo ""
-echo "############ RESULT lines above are the figure ############"
-echo "plot with:  python3 plot_figures.py --fig1 <this-log>"
+echo "############ [2] nsys profiles ############"
+
+profile_arm () {
+    local arm="$1"
+    local dev=""
+    [ "$arm" = "device" ] && dev="BENCH_DEVICE_INPUT=1"
+    local out="$PROF/g2_${arm}"
+
+    echo ""
+    echo "--- nsys [$arm] ---"
+    env HDF5_PLUGIN_PATH="$VOL_PLUGIN_PATH" \
+        HDF5_VOL_CONNECTOR="$VOL_CONNECTOR" \
+        VOL_COMP_CHUNKING=none ${dev:+$dev} \
+    nsys profile \
+        --trace=cuda,nvtx,osrt \
+        --cuda-memory-usage=true \
+        --force-overwrite=true \
+        -o "$out" \
+        "$BIN" --comp "$COMP" --only "$DATASET" \
+               --out /dev/null --ext /dev/null > "$out.stdout" 2>&1
+    echo "  wrote $out.nsys-rep"
+
+    echo "  --- GPU memory transfers ---"
+    nsys stats --report cuda_gpu_mem_time_sum --format table "$out.nsys-rep" 2>/dev/null \
+        | sed 's/^/    /'
+    echo "  --- GPU memory sizes ---"
+    nsys stats --report cuda_gpu_mem_size_sum --format table "$out.nsys-rep" 2>/dev/null \
+        | sed 's/^/    /'
+    echo "  --- kernels ---"
+    nsys stats --report cuda_gpu_kern_sum --format table "$out.nsys-rep" 2>/dev/null \
+        | head -20 | sed 's/^/    /'
+}
+
+profile_arm device
+profile_arm host
+
+echo ""
+echo "############ HOW TO READ IT ############"
+echo "  [CUDA memcpy HtoD] on the host arm should be ~= the logical dataset"
+echo "  size. On the device arm it should be ~0 for the input. That delta is"
+echo "  the overhead a filter cannot avoid, because H5Z only ever sees host"
+echo "  bytes."
+echo ""
+echo "  If BOTH arms show the same HtoD, BENCH_DEVICE_INPUT is not wired up"
+echo "  and the run proves nothing -- fix the benchmark, not the plot."
+echo ""
+echo "profiles in: $PROF   (open .nsys-rep in the Nsight Systems GUI)"
 echo "Job finished on $(date)"
