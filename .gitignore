@@ -20,3 +20,12 @@ Makefile
 .DS_Storeresults_pressio.csv
 
 tests/analysis.ipynb
+
+# Build files
+async_new_h5api_ex.exe
+new_h5api_ex.exe
+new_h5api.o
+libnew_h5api.a
+libh5passthrough_vol.so
+build/
+spack-env/

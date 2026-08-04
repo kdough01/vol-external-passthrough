@@ -9,7 +9,9 @@
 typedef enum vol_chunking_mode {
     VOL_CHUNKING_NONE = 0,
     VOL_CHUNKING_VOL,
-    VOL_CHUNKING_PRESSIO
+    VOL_CHUNKING_PRESSIO,
+    VOL_CHUNKING_SHARED,
+    VOL_CHUNKING_PROGRESSIVE
 } vol_chunking_mode_t;
 
 /* Must come first — used by datatype_ctx */

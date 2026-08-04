@@ -1,13 +1,29 @@
 cmake_minimum_required(VERSION 3.18)
 
-option(USE_CUDA "Enable CUDA GPU compression" OFF)
+# ---------------------------------------------------------------------------
+# Options
+# ---------------------------------------------------------------------------
+option(USE_CUDA           "Enable CUDA GPU compression" OFF)
+option(BUILD_TESTS        "Build the test suite"        ON)
+option(BUILD_EXAMPLES     "Build the example programs"  ON)
 
+# ---------------------------------------------------------------------------
+# Project
+# ---------------------------------------------------------------------------
 if(USE_CUDA)
   project(HDF5_VOL_PASSTHROUGH VERSION 0.0.1 LANGUAGES C CXX CUDA)
 else()
   project(HDF5_VOL_PASSTHROUGH VERSION 0.0.1 LANGUAGES C CXX)
 endif()
 
+# Put build artifacts in predictable locations.
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
+# ---------------------------------------------------------------------------
+# Install directory layout
+# ---------------------------------------------------------------------------
 if(NOT HDF5_VOL_PASSTHROUGH_INSTALL_BIN_DIR)
   set(HDF5_VOL_PASSTHROUGH_INSTALL_BIN_DIR ${CMAKE_INSTALL_PREFIX}/bin)
 endif()
@@ -21,53 +37,27 @@ if(NOT HDF5_VOL_PASSTHROUGH_INSTALL_DATA_DIR)
   set(HDF5_VOL_PASSTHROUGH_INSTALL_DATA_DIR ${CMAKE_INSTALL_PREFIX}/share)
 endif()
 
-find_package(HDF5 REQUIRED)
+# ---------------------------------------------------------------------------
+# Dependencies (resolved once, shared by all subdirectories)
+# ---------------------------------------------------------------------------
+find_package(HDF5      REQUIRED)
 find_package(LibPressio REQUIRED)
-
-set(VOL_SRCS
-    ${CMAKE_CURRENT_SOURCE_DIR}/H5VLpassthru_ext.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/compress.cc
-)
-
-add_library(hdf5_vol_passthrough SHARED ${VOL_SRCS} vol_errors.h)
-
 find_package(MPI)
-if(MPI_FOUND)
-    target_link_libraries(hdf5_vol_passthrough PRIVATE MPI::MPI_C)
-    target_compile_definitions(hdf5_vol_passthrough PRIVATE HAVE_MPI)
-endif()
-
-# target_compile_definitions(hdf5_vol_passthrough PRIVATE ENABLE_EXT_PASSTHRU_LOGGING)
-target_compile_features(hdf5_vol_passthrough PRIVATE cxx_std_17)
 
 if(USE_CUDA)
-  target_compile_definitions(hdf5_vol_passthrough PRIVATE USE_CUDA)
-  target_include_directories(hdf5_vol_passthrough
-    PRIVATE ${CUDAToolkit_INCLUDE_DIRS}
-  )
-  target_link_libraries(hdf5_vol_passthrough PRIVATE CUDA::cudart)
-  set_target_properties(hdf5_vol_passthrough PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
+  find_package(CUDAToolkit REQUIRED)
 endif()
 
-target_include_directories(hdf5_vol_passthrough
-  PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
-  PUBLIC  ${HDF5_INCLUDE_DIRS} ${LIBPRESSIO_INCLUDE_DIRS}
-)
-target_link_libraries(hdf5_vol_passthrough PRIVATE
-  ${HDF5_LIBRARIES}
-  LibPressio::libpressio
-)
+# ---------------------------------------------------------------------------
+# Subdirectories
+# ---------------------------------------------------------------------------
+add_subdirectory(src)
 
-add_subdirectory(tests)
+if(BUILD_TESTS)
+  enable_testing()
+  add_subdirectory(tests)
+endif()
 
-install(
-  FILES ${CMAKE_CURRENT_SOURCE_DIR}/H5VLpassthru_ext.h
-  DESTINATION ${HDF5_VOL_PASSTHROUGH_INSTALL_INCLUDE_DIR}
-  COMPONENT headers
-)
-install(
-  TARGETS hdf5_vol_passthrough
-  EXPORT  ${HDF5_VOL_PASSTHROUGH_EXPORTED_TARGETS}
-  LIBRARY DESTINATION ${HDF5_VOL_PASSTHROUGH_INSTALL_LIB_DIR}
-  ARCHIVE DESTINATION ${HDF5_VOL_PASSTHROUGH_INSTALL_LIB_DIR}
-)
+if(BUILD_EXAMPLES)
+  add_subdirectory(examples)
+endif()

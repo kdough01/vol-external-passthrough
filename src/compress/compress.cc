@@ -1389,6 +1389,8 @@ H5VL_pass_through_ext_chunking_mode(const compression_ctx *ctx)
             return VOL_CHUNKING_VOL;
         if (strcasecmp(env, "pressio") == 0 || strcasecmp(env, "libpressio") == 0)
             return VOL_CHUNKING_PRESSIO;
+        if (strcasecmp(env, "shared") == 0)
+            return VOL_CHUNKING_SHARED;
         /* unrecognized value: ignore the override, fall through */
     }
 
@@ -1489,6 +1491,8 @@ H5VL_pass_through_ext_parse_chunking_opts(compression_ctx *ctx,
         else if (strcasecmp(mode, "pressio") == 0 ||
                  strcasecmp(mode, "libpressio") == 0)
             ctx->chunking_mode = VOL_CHUNKING_PRESSIO;
+        else if (strcasecmp(mode, "shared") == 0)
+            ctx->chunking_mode = VOL_CHUNKING_SHARED;
 #ifdef ENABLE_EXT_PASSTHRU_LOGGING
         else if (strcasecmp(mode, "none") != 0)
             fprintf(stderr, "VOL: ignoring unknown vol:chunking_mode '%s'\n", mode);
