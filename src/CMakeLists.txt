@@ -4,6 +4,7 @@
 
 set(VOL_SRCS
     ${CMAKE_CURRENT_SOURCE_DIR}/H5VLpassthru_ext.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/new_h5api.c
     ${CMAKE_CURRENT_SOURCE_DIR}/compress/compress.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/compress/vol_shared_meta.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/compress/vol_progressive.cc
