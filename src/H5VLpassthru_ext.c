@@ -670,23 +670,6 @@ vol_scatter_cb(const void **data_out, size_t *len_out, void *op_data)
     return 0;
 }
 
-#define VOL_CHUNK_MAGIC     0x564F4C43484B3032ULL   /* "VOLCHK02" */
-#define VOL_CHUNK_HDR_WORDS 3                        /* magic, nchunks, chunk_bytes */
-
-#ifndef VOL_NATIVE_MAGIC
-#define VOL_NATIVE_MAGIC ((uint64_t)0x564F4C4E41544956ULL)
-#endif
-
-/* chunking modes (compression_ctx.chunking_mode) */
-#define VOL_CHUNKING_NONE    0
-#define VOL_CHUNKING_VOL     1
-#define VOL_CHUNKING_PRESSIO 2
-#define VOL_CHUNKING_SHARED  3
-
-/* pressio-chunked container: [magic][uint64 csize][uint64 chunk_elems][payload] */
-#define VOL_PRESSIO_MAGIC     0x564F4C5052534F31ULL   /* "VOLPRSO1" */
-#define VOL_PRESSIO_HDR_WORDS 3
-
 
 /*-------------------------------------------------------------------------
  * Function:    H5VL__pass_through_new_obj
