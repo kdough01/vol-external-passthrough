@@ -5,9 +5,9 @@
 set(VOL_SRCS
     ${CMAKE_CURRENT_SOURCE_DIR}/H5VLpassthru_ext.c
     ${CMAKE_CURRENT_SOURCE_DIR}/compress/compress.cc
-    # ${CMAKE_CURRENT_SOURCE_DIR}/compress/vol_shared_meta.cc
-    # ${CMAKE_CURRENT_SOURCE_DIR}/compress/vol_progressive.cc
-    # ${CMAKE_CURRENT_SOURCE_DIR}/compress/vol_container_read.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/compress/vol_shared_meta.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/compress/vol_progressive.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/compress/vol_container_read.cc
 )
 
 add_library(hdf5_vol_passthrough SHARED ${VOL_SRCS})
