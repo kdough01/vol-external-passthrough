@@ -2529,3 +2529,674 @@ RANGE einspline37    min=-2.125822e+01 max=2.036857e+01 range=4.162679e+01 xform
 [chunk-out] 'cuszp' rank=1 847553220 -> 514002074 B (1.65x), cap 953562908 B
 [chunk-out] 'cuszp' rank=1 847553220 -> 515776080 B (1.64x), cap 953562908 B
 [VOL timing] UNACCOUNTED 684.746 ms of 10639.393 ms (6.4%) dset=einspline37_cuszp_1e6 comp=cuszp -- a timer is missing
+[FAIL] einspline37_cuszp_1e6        maxae=3.814697e-06 exceeds 2x configured bound 1.000000e-06
+
+=== einspline37 (12932.6 MiB, float, raw) ===
+Info: 0x561296f4d3a0
+  einspline37_cuszp_1e6        C=   1.24 W= 10639.92 F=  164.81 S=   245.02 X=    0.29 S2=  75.86 | E=   0.23 O=   0.36 R= 15053.77 ms  ratio=  1.65x  RMSE=5.784e-07 maxae=3.815e-06
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.24 write=10639.92 flush=164.81 sync=245.02 close=0.29 csync=75.86 => write_total=11127.15 ms | evict=0.23 open=0.36 read=15053.77 => read_total=15054.13 ms | ratio=1.65x ===
+
+=== VOL timing [miranda_cuszp_1e6_pressio_N8] : miranda (chunking: pressio, N=8) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_miranda_cuszp_1e6_pressio_N8.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_215108_52319/results_vol_miranda_cuszp_1e6_pressio_N8.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_215108_52319/results_ext_miranda_cuszp_1e6_pressio_N8.csv only=miranda comp=cuszp_1e6 verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 950.8 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE miranda        min=9.999878e-01 max=3.000046e+00 range=2.000058e+00 xform=none
+[chunk] cuszp      N=8   -> 8 chunks x 37748736 B (36.000 MiB, 4718592 elems, 32 slices of 147456 elems) total=301989888 B
+[chunk] pressio-mode chunking:size = [384,384,32] (pressio order, fastest first)
+[chunk] pressio-mode chunking:size = [384,384,32] (pressio order, fastest first)
+
+=== miranda (288.0 MiB, double, raw) ===
+Info: 0x55a1746ed340
+  miranda_cuszp_1e6            C=   1.14 W=   264.54 F=    0.34 S=   150.81 X=    0.20 S2= 107.83 | E=   4.34 O=   0.30 R=   654.56 ms  ratio= 11.16x  RMSE=3.091e-07 maxae=1.000e-06
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.14 write=264.54 flush=0.34 sync=150.81 close=0.20 csync=107.83 => write_total=524.86 ms | evict=4.34 open=0.30 read=654.56 => read_total=654.86 ms | ratio=11.16x ===
+
+=== VOL timing [miranda_cuszp_1e6_pressio_N16] : miranda (chunking: pressio, N=16) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_miranda_cuszp_1e6_pressio_N16.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_215108_52319/results_vol_miranda_cuszp_1e6_pressio_N16.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_215108_52319/results_ext_miranda_cuszp_1e6_pressio_N16.csv only=miranda comp=cuszp_1e6 verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 950.8 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE miranda        min=9.999878e-01 max=3.000046e+00 range=2.000058e+00 xform=none
+[chunk] cuszp      N=16  -> 16 chunks x 18874368 B (18.000 MiB, 2359296 elems, 16 slices of 147456 elems) total=301989888 B
+[chunk] pressio-mode chunking:size = [384,384,16] (pressio order, fastest first)
+[chunk] pressio-mode chunking:size = [384,384,16] (pressio order, fastest first)
+
+=== miranda (288.0 MiB, double, raw) ===
+Info: 0x563b6800d3d0
+  miranda_cuszp_1e6            C=   1.14 W=   269.88 F=    0.28 S=   166.87 X=    0.23 S2= 131.63 | E=   1.96 O=   0.31 R=   645.27 ms  ratio= 11.16x  RMSE=3.091e-07 maxae=1.000e-06
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.14 write=269.88 flush=0.28 sync=166.87 close=0.23 csync=131.63 => write_total=570.03 ms | evict=1.96 open=0.31 read=645.27 => read_total=645.58 ms | ratio=11.16x ===
+
+=== VOL timing [scale-T_cuszp_1e6_pressio_N8] : scale-T (chunking: pressio, N=8) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_scale-T_cuszp_1e6_pressio_N8.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_215108_52319/results_vol_scale-T_cuszp_1e6_pressio_N8.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_215108_52319/results_ext_scale-T_cuszp_1e6_pressio_N8.csv only=scale-T comp=cuszp_1e6 verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 950.8 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE scale-T        min=5.209023e+00 max=5.754571e+00 range=5.455480e-01 xform=log1p
+[chunk] cuszp      N=8   -> 8 chunks x 74880000 B (71.411 MiB, 18720000 elems, 13 slices of 1440000 elems) total=564480000 B  [RAGGED: final chunk is short]
+[VOL timing] UNACCOUNTED 0.038 ms of 0.053 ms (71.7%) dset=scale-T_cuszp_1e6 comp=cuszp -- a timer is missing
+HDF5-DIAG: Error detected in HDF5 (1.14.6):
+  #000: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5D.c line 1347 in H5Dwrite(): can't synchronously write data
+    major: Dataset
+    minor: Write failed
+  #001: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5D.c line 1294 in H5D__write_api_common(): can't write data
+    major: Dataset
+    minor: Write failed
+  #002: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5VLcallback.c line 2201 in H5VL_dataset_write(): dataset write failed
+    major: Virtual Object Layer
+    minor: Write failed
+  #003: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5VLcallback.c line 2157 in H5VL__dataset_write(): dataset write failed
+    major: Virtual Object Layer
+    minor: Write failed
+VOL Passthrough-DIAG: Error detected in vol_passthrough (1.0):
+  #004: /home/kdougherty/hdf5_projs/vol-external-passthrough/src/H5VLpassthru_ext.c line 2565 in vol_write_pressio(): pressio-chunked compression failed for dataset 0 compressor='cuszp'
+    major: Compression
+    minor: Compression failed
+  #005: /home/kdougherty/hdf5_projs/vol-external-passthrough/src/compress/compress.cc line 1673 in vol_compress_pressio_impl(): chunking_mode 'pressio': 98 slices along the slowest axis is not evenly divisible by 13 slices per chunk; libpressio's chunking plugin would pad the final chunk, which is not bound-safe for all codecs (observed with cuszp). Pick a chunk count that divides 98, or use chunking_mode 'vol'
+    major: Compression
+    minor: Compression failed
+[ERR] H5Dwrite failed scale-T_cuszp_1e6
+[dbg main] done: 1 datasets, 0 skipped, 0 measurements
+
+=== scale-T (538.3 MiB, float, raw, transformed) ===
+Info: 0x559a4d59d3b0
+
+=== TOTALS over 0 measurement files: create=0.00 write=0.00 flush=0.00 sync=0.00 close=0.00 csync=0.00 => write_total=0.00 ms | evict=0.00 open=0.00 read=0.00 => read_total=0.00 ms | ratio=0.00x ===
+
+=== VOL timing [scale-T_cuszp_1e6_pressio_N16] : scale-T (chunking: pressio, N=16) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_scale-T_cuszp_1e6_pressio_N16.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_215108_52319/results_vol_scale-T_cuszp_1e6_pressio_N16.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_215108_52319/results_ext_scale-T_cuszp_1e6_pressio_N16.csv only=scale-T comp=cuszp_1e6 verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 950.8 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE scale-T        min=5.209023e+00 max=5.754571e+00 range=5.455480e-01 xform=log1p
+[chunk] cuszp      N=16  -> 14 chunks x 40320000 B (38.452 MiB, 10080000 elems, 7 slices of 1440000 elems) total=564480000 B
+[chunk] pressio-mode chunking:size = [1200,1200,7] (pressio order, fastest first)
+[chunk] pressio-mode chunking:size = [1200,1200,7] (pressio order, fastest first)
+[FAIL] scale-T_cuszp_1e6            maxae=3.924144e+01 exceeds 2x configured bound 1.000000e-06
+
+=== scale-T (538.3 MiB, float, raw, transformed) ===
+Info: 0x55bd926d2230
+  scale-T_cuszp_1e6            C=   1.20 W=   598.63 F=   70.72 S=   135.53 X=    0.22 S2=  67.31 | E=   1.19 O=   0.30 R=  1352.51 ms  ratio=  3.31x  RMSE=2.003e-01 maxae=3.924e+01 (log-space)
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.20 write=598.63 flush=70.72 sync=135.53 close=0.22 csync=67.31 => write_total=873.61 ms | evict=1.19 open=0.30 read=1352.51 => read_total=1352.80 ms | ratio=3.31x ===
+
+=== VOL timing [s3d_cuszp_1e6_pressio_N8] : s3d (chunking: pressio, N=8) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_s3d_cuszp_1e6_pressio_N8.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_215108_52319/results_vol_s3d_cuszp_1e6_pressio_N8.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_215108_52319/results_ext_s3d_cuszp_1e6_pressio_N8.csv only=s3d comp=cuszp_1e6 verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 950.8 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE s3d            min=-6.362436e-15 max=3.920002e-02 range=3.920002e-02 xform=none
+[chunk] cuszp      N=8   -> 8 chunks x 126000000 B (120.163 MiB, 15750000 elems, 63 slices of 250000 elems) total=1000000000 B  [RAGGED: final chunk is short]
+[VOL timing] UNACCOUNTED 0.039 ms of 0.052 ms (74.6%) dset=s3d_cuszp_1e6 comp=cuszp -- a timer is missing
+HDF5-DIAG: Error detected in HDF5 (1.14.6):
+  #000: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5D.c line 1347 in H5Dwrite(): can't synchronously write data
+    major: Dataset
+    minor: Write failed
+  #001: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5D.c line 1294 in H5D__write_api_common(): can't write data
+    major: Dataset
+    minor: Write failed
+  #002: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5VLcallback.c line 2201 in H5VL_dataset_write(): dataset write failed
+    major: Virtual Object Layer
+    minor: Write failed
+  #003: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5VLcallback.c line 2157 in H5VL__dataset_write(): dataset write failed
+    major: Virtual Object Layer
+    minor: Write failed
+VOL Passthrough-DIAG: Error detected in vol_passthrough (1.0):
+  #004: /home/kdougherty/hdf5_projs/vol-external-passthrough/src/H5VLpassthru_ext.c line 2565 in vol_write_pressio(): pressio-chunked compression failed for dataset 0 compressor='cuszp'
+    major: Compression
+    minor: Compression failed
+  #005: /home/kdougherty/hdf5_projs/vol-external-passthrough/src/compress/compress.cc line 1673 in vol_compress_pressio_impl(): chunking_mode 'pressio': 500 slices along the slowest axis is not evenly divisible by 63 slices per chunk; libpressio's chunking plugin would pad the final chunk, which is not bound-safe for all codecs (observed with cuszp). Pick a chunk count that divides 500, or use chunking_mode 'vol'
+    major: Compression
+    minor: Compression failed
+[ERR] H5Dwrite failed s3d_cuszp_1e6
+[dbg main] done: 1 datasets, 0 skipped, 0 measurements
+
+=== s3d (953.7 MiB, double, raw) ===
+Info: 0x558bcbe5c320
+
+=== TOTALS over 0 measurement files: create=0.00 write=0.00 flush=0.00 sync=0.00 close=0.00 csync=0.00 => write_total=0.00 ms | evict=0.00 open=0.00 read=0.00 => read_total=0.00 ms | ratio=0.00x ===
+
+=== VOL timing [s3d_cuszp_1e6_pressio_N16] : s3d (chunking: pressio, N=16) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_s3d_cuszp_1e6_pressio_N16.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_215108_52319/results_vol_s3d_cuszp_1e6_pressio_N16.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_215108_52319/results_ext_s3d_cuszp_1e6_pressio_N16.csv only=s3d comp=cuszp_1e6 verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 950.8 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE s3d            min=-6.362436e-15 max=3.920002e-02 range=3.920002e-02 xform=none
+[chunk] cuszp      N=16  -> 16 chunks x 64000000 B (61.035 MiB, 8000000 elems, 32 slices of 250000 elems) total=1000000000 B  [RAGGED: final chunk is short]
+[VOL timing] UNACCOUNTED 0.042 ms of 0.056 ms (74.7%) dset=s3d_cuszp_1e6 comp=cuszp -- a timer is missing
+HDF5-DIAG: Error detected in HDF5 (1.14.6):
+  #000: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5D.c line 1347 in H5Dwrite(): can't synchronously write data
+    major: Dataset
+    minor: Write failed
+  #001: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5D.c line 1294 in H5D__write_api_common(): can't write data
+    major: Dataset
+    minor: Write failed
+  #002: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5VLcallback.c line 2201 in H5VL_dataset_write(): dataset write failed
+    major: Virtual Object Layer
+    minor: Write failed
+  #003: /tmp/kdougherty/spack-stage/spack-stage-hdf5-1.14.6-5xmaem7gc5f7nrmzra2g6strbryl24k7/spack-src/src/H5VLcallback.c line 2157 in H5VL__dataset_write(): dataset write failed
+    major: Virtual Object Layer
+    minor: Write failed
+VOL Passthrough-DIAG: Error detected in vol_passthrough (1.0):
+  #004: /home/kdougherty/hdf5_projs/vol-external-passthrough/src/H5VLpassthru_ext.c line 2565 in vol_write_pressio(): pressio-chunked compression failed for dataset 0 compressor='cuszp'
+    major: Compression
+    minor: Compression failed
+  #005: /home/kdougherty/hdf5_projs/vol-external-passthrough/src/compress/compress.cc line 1673 in vol_compress_pressio_impl(): chunking_mode 'pressio': 500 slices along the slowest axis is not evenly divisible by 32 slices per chunk; libpressio's chunking plugin would pad the final chunk, which is not bound-safe for all codecs (observed with cuszp). Pick a chunk count that divides 500, or use chunking_mode 'vol'
+    major: Compression
+    minor: Compression failed
+[ERR] H5Dwrite failed s3d_cuszp_1e6
+[dbg main] done: 1 datasets, 0 skipped, 0 measurements
+
+=== s3d (953.7 MiB, double, raw) ===
+Info: 0x5627ed0a84c0
+
+=== TOTALS over 0 measurement files: create=0.00 write=0.00 flush=0.00 sync=0.00 close=0.00 csync=0.00 => write_total=0.00 ms | evict=0.00 open=0.00 read=0.00 => read_total=0.00 ms | ratio=0.00x ===
+
+=== VOL timing [nyx_baryon_cuszp_1e6_pressio_N8] : nyx_baryon (chunking: pressio, N=8) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_nyx_baryon_cuszp_1e6_pressio_N8.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_215108_52319/results_vol_nyx_baryon_cuszp_1e6_pressio_N8.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_215108_52319/results_ext_nyx_baryon_cuszp_1e6_pressio_N8.csv only=nyx_baryon comp=cuszp_1e6 verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 950.8 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE nyx_baryon     min=5.637747e-02 max=1.166017e+01 range=1.160379e+01 xform=log1p
+[chunk] cuszp      N=8   -> 8 chunks x 67108864 B (64.000 MiB, 16777216 elems, 64 slices of 262144 elems) total=536870912 B
+[chunk] pressio-mode chunking:size = [512,512,64] (pressio order, fastest first)
+[VOL timing] UNACCOUNTED 27.923 ms of 905.503 ms (3.1%) dset=nyx_baryon_cuszp_1e6 comp=cuszp -- a timer is missing
+[chunk] pressio-mode chunking:size = [512,512,64] (pressio order, fastest first)
+
+=== nyx_baryon (512.0 MiB, float, hdf5, transformed) ===
+Info: 0x561dc06287f0
+  nyx_baryon_cuszp_1e6         C=   1.00 W=   905.99 F=   68.56 S=    99.28 X=    0.17 S2= 125.96 | E=   3.69 O=   0.27 R=  1376.36 ms  ratio=  1.80x  RMSE=5.784e-07 maxae=1.907e-06 (log-space)
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.00 write=905.99 flush=68.56 sync=99.28 close=0.17 csync=125.96 => write_total=1200.97 ms | evict=3.69 open=0.27 read=1376.36 => read_total=1376.63 ms | ratio=1.80x ===
+
+=== VOL timing [nyx_baryon_cuszp_1e6_pressio_N16] : nyx_baryon (chunking: pressio, N=16) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_nyx_baryon_cuszp_1e6_pressio_N16.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_215108_52319/results_vol_nyx_baryon_cuszp_1e6_pressio_N16.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_215108_52319/results_ext_nyx_baryon_cuszp_1e6_pressio_N16.csv only=nyx_baryon comp=cuszp_1e6 verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 950.8 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE nyx_baryon     min=5.637747e-02 max=1.166017e+01 range=1.160379e+01 xform=log1p
+[chunk] cuszp      N=16  -> 16 chunks x 33554432 B (32.000 MiB, 8388608 elems, 32 slices of 262144 elems) total=536870912 B
+[chunk] pressio-mode chunking:size = [512,512,32] (pressio order, fastest first)
+[VOL timing] UNACCOUNTED 27.831 ms of 840.096 ms (3.3%) dset=nyx_baryon_cuszp_1e6 comp=cuszp -- a timer is missing
+[chunk] pressio-mode chunking:size = [512,512,32] (pressio order, fastest first)
+
+=== nyx_baryon (512.0 MiB, float, hdf5, transformed) ===
+Info: 0x555a0c2f8690
+  nyx_baryon_cuszp_1e6         C=   0.95 W=   840.57 F=  113.03 S=   134.81 X=    0.18 S2= 154.95 | E=   1.05 O=   0.27 R=  1349.84 ms  ratio=  1.80x  RMSE=5.784e-07 maxae=1.907e-06 (log-space)
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=0.95 write=840.57 flush=113.03 sync=134.81 close=0.18 csync=154.95 => write_total=1244.51 ms | evict=1.05 open=0.27 read=1349.84 => read_total=1350.11 ms | ratio=1.80x ===
+
+=== VOL timing [ocean_temp_cuszp_1e6_pressio_N8] : ocean_temp (chunking: pressio, N=8) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_ocean_temp_cuszp_1e6_pressio_N8.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_215108_52319/results_vol_ocean_temp_cuszp_1e6_pressio_N8.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_215108_52319/results_ext_ocean_temp_cuszp_1e6_pressio_N8.csv only=ocean_temp comp=cuszp_1e6 verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 950.8 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE ocean_temp     min=4.445019e+00 max=1.072704e+01 range=6.282023e+00 xform=none
+[chunk] cuszp      N=8   -> 8 chunks x 16140480 B (15.393 MiB, 4035120 elems, 3 slices of 1345040 elems) total=129123840 B
+[chunk] pressio-mode chunking:size = [39560,34,3] (pressio order, fastest first)
+[chunk] pressio-mode chunking:size = [39560,34,3] (pressio order, fastest first)
+
+=== ocean_temp (123.1 MiB, float, hdf5) ===
+Info: 0x5608c7551f20
+  ocean_temp_cuszp_1e6         C=   1.04 W=   326.50 F=    0.28 S=   159.36 X=    0.14 S2= 110.45 | E=   3.77 O=   0.29 R=   363.64 ms  ratio=  1.70x  RMSE=7.318e-07 maxae=1.907e-06
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.04 write=326.50 flush=0.28 sync=159.36 close=0.14 csync=110.45 => write_total=597.78 ms | evict=3.77 open=0.29 read=363.64 => read_total=363.93 ms | ratio=1.70x ===
+
+=== VOL timing [ocean_temp_cuszp_1e6_pressio_N16] : ocean_temp (chunking: pressio, N=16) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_ocean_temp_cuszp_1e6_pressio_N16.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_215108_52319/results_vol_ocean_temp_cuszp_1e6_pressio_N16.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_215108_52319/results_ext_ocean_temp_cuszp_1e6_pressio_N16.csv only=ocean_temp comp=cuszp_1e6 verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 950.8 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE ocean_temp     min=4.445019e+00 max=1.072704e+01 range=6.282023e+00 xform=none
+[chunk] cuszp      N=16  -> 12 chunks x 10760320 B (10.262 MiB, 2690080 elems, 2 slices of 1345040 elems) total=129123840 B
+[chunk] pressio-mode chunking:size = [39560,34,2] (pressio order, fastest first)
+[chunk] pressio-mode chunking:size = [39560,34,2] (pressio order, fastest first)
+
+=== ocean_temp (123.1 MiB, float, hdf5) ===
+Info: 0x558c324651e0
+  ocean_temp_cuszp_1e6         C=   0.91 W=   313.82 F=    0.28 S=   147.18 X=    0.13 S2= 151.55 | E=   1.58 O=   0.29 R=   401.28 ms  ratio=  1.70x  RMSE=7.318e-07 maxae=1.907e-06
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=0.91 write=313.82 flush=0.28 sync=147.18 close=0.13 csync=151.55 => write_total=613.87 ms | evict=1.58 open=0.29 read=401.28 => read_total=401.57 ms | ratio=1.70x ===
+
+=== VOL timing [qmc_cuszp_1e6_pressio_N8] : einspline37 (chunking: pressio, N=8) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_qmc_cuszp_1e6_pressio_N8.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_215108_52319/results_vol_qmc_cuszp_1e6_pressio_N8.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_215108_52319/results_ext_qmc_cuszp_1e6_pressio_N8.csv only=einspline37 comp=cuszp_1e6 verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 950.8 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE einspline37    min=-2.125822e+01 max=2.036857e+01 range=4.162679e+01 xform=none
+[chunk] cuszp      N=8   -> 8 chunks x 1695106440 B (1616.579 MiB, 423776610 elems, 423776610 slices of 1 elems) total=13560851520 B
+[chunk] pressio-mode chunking:size = [423776610] (pressio order, fastest first)
+[VOL timing] UNACCOUNTED 684.045 ms of 20558.454 ms (3.3%) dset=einspline37_cuszp_1e6 comp=cuszp -- a timer is missing
+[chunk] pressio-mode chunking:size = [423776610] (pressio order, fastest first)
+[FAIL] einspline37_cuszp_1e6        maxae=3.814697e-06 exceeds 2x configured bound 1.000000e-06
+
+=== einspline37 (12932.6 MiB, float, raw) ===
+Info: 0x5588da1102d0
+  einspline37_cuszp_1e6        C=   1.13 W= 20560.79 F=  307.23 S=   340.67 X=    0.28 S2=  60.58 | E=   0.21 O=   0.36 R= 32961.30 ms  ratio=  1.65x  RMSE=5.784e-07 maxae=3.815e-06
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.13 write=20560.79 flush=307.23 sync=340.67 close=0.28 csync=60.58 => write_total=21270.68 ms | evict=0.21 open=0.36 read=32961.30 => read_total=32961.66 ms | ratio=1.65x ===
+
+=== VOL timing [qmc_cuszp_1e6_pressio_N16] : einspline37 (chunking: pressio, N=16) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_qmc_cuszp_1e6_pressio_N16.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_215108_52319/results_vol_qmc_cuszp_1e6_pressio_N16.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_215108_52319/results_ext_qmc_cuszp_1e6_pressio_N16.csv only=einspline37 comp=cuszp_1e6 verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 950.8 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE einspline37    min=-2.125822e+01 max=2.036857e+01 range=4.162679e+01 xform=none
+[chunk] cuszp      N=16  -> 16 chunks x 847553220 B (808.290 MiB, 211888305 elems, 211888305 slices of 1 elems) total=13560851520 B
+[chunk] pressio-mode chunking:size = [211888305] (pressio order, fastest first)
+[VOL timing] UNACCOUNTED 683.011 ms of 19059.533 ms (3.6%) dset=einspline37_cuszp_1e6 comp=cuszp -- a timer is missing
+[chunk] pressio-mode chunking:size = [211888305] (pressio order, fastest first)
+[FAIL] einspline37_cuszp_1e6        maxae=3.814697e-06 exceeds 2x configured bound 1.000000e-06
+
+=== einspline37 (12932.6 MiB, float, raw) ===
+Info: 0x5652448d8430
+  einspline37_cuszp_1e6        C=   1.27 W= 19061.77 F=  360.01 S=   244.87 X=    0.38 S2= 119.36 | E=   0.27 O=   0.50 R= 34676.29 ms  ratio=  1.65x  RMSE=5.784e-07 maxae=3.815e-06
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.27 write=19061.77 flush=360.01 sync=244.87 close=0.38 csync=119.36 => write_total=19787.67 ms | evict=0.27 open=0.50 read=34676.29 => read_total=34676.79 ms | ratio=1.65x ===
+
+=== VOL timing [miranda_sz3_1e3] : miranda (chunking: native) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_miranda_sz3_1e3.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_215108_52319/results_vol_miranda_sz3_1e3.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_215108_52319/results_ext_miranda_sz3_1e3.csv only=miranda comp=sz3_1e3 verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 950.0 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE miranda        min=9.999878e-01 max=3.000046e+00 range=2.000058e+00 xform=none
+
+=== miranda (288.0 MiB, double, raw) ===
+Info: 0x5612eee832c0
+  miranda_sz3_1e3              C=   1.14 W=   925.50 F=    0.35 S=   119.65 X=    0.19 S2=  64.30 | E=   3.63 O=   0.31 R=   713.79 ms  ratio=164.57x  RMSE=3.127e-04 maxae=1.000e-03
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.14 write=925.50 flush=0.35 sync=119.65 close=0.19 csync=64.30 => write_total=1111.13 ms | evict=3.63 open=0.31 read=713.79 => read_total=714.10 ms | ratio=164.57x ===
+
+=== VOL timing [scale-T_sz3_1e3] : scale-T (chunking: native) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_scale-T_sz3_1e3.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_215108_52319/results_vol_scale-T_sz3_1e3.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_215108_52319/results_ext_scale-T_sz3_1e3.csv only=scale-T comp=sz3_1e3 verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 950.0 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE scale-T        min=5.209023e+00 max=5.754571e+00 range=5.455480e-01 xform=log1p
+
+=== scale-T (538.3 MiB, float, raw, transformed) ===
+Info: 0x55bc10d98220
+  scale-T_sz3_1e3              C=   1.28 W=  3194.76 F=    0.32 S=   164.44 X=    0.27 S2=  51.51 | E=   1.15 O=   0.31 R=  1570.25 ms  ratio=254.02x  RMSE=3.689e-04 maxae=9.999e-04 (log-space)
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.28 write=3194.76 flush=0.32 sync=164.44 close=0.27 csync=51.51 => write_total=3412.59 ms | evict=1.15 open=0.31 read=1570.25 => read_total=1570.55 ms | ratio=254.02x ===
+
+=== VOL timing [s3d_sz3_1e3] : s3d (chunking: native) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_s3d_sz3_1e3.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_215108_52319/results_vol_s3d_sz3_1e3.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_215108_52319/results_ext_s3d_sz3_1e3.csv only=s3d comp=sz3_1e3 verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 950.0 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE s3d            min=-6.362436e-15 max=3.920002e-02 range=3.920002e-02 xform=none
+
+=== s3d (953.7 MiB, double, raw) ===
+Info: 0x555c7de76240
+  s3d_sz3_1e3                  C=   1.22 W=  2619.16 F=    2.25 S=   107.13 X=    0.22 S2=  46.93 | E=   1.09 O=   0.43 R=  2039.75 ms  ratio=19195.33x  RMSE=1.247e-04 maxae=1.000e-03
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.22 write=2619.16 flush=2.25 sync=107.13 close=0.22 csync=46.93 => write_total=2776.92 ms | evict=1.09 open=0.43 read=2039.75 => read_total=2040.17 ms | ratio=19195.33x ===
+
+=== VOL timing [nyx_baryon_sz3_1e3] : nyx_baryon (chunking: native) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_nyx_baryon_sz3_1e3.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_215108_52319/results_vol_nyx_baryon_sz3_1e3.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_215108_52319/results_ext_nyx_baryon_sz3_1e3.csv only=nyx_baryon comp=sz3_1e3 verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 950.0 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE nyx_baryon     min=5.637747e-02 max=1.166017e+01 range=1.160379e+01 xform=log1p
+
+=== nyx_baryon (512.0 MiB, float, hdf5, transformed) ===
+Info: 0x56465e7fd790
+  nyx_baryon_sz3_1e3           C=   1.04 W=  4400.85 F=    0.28 S=   139.59 X=    0.16 S2=  64.12 | E=   3.89 O=   0.44 R=  3495.55 ms  ratio=  7.85x  RMSE=5.766e-04 maxae=1.000e-03 (log-space)
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.04 write=4400.85 flush=0.28 sync=139.59 close=0.16 csync=64.12 => write_total=4606.04 ms | evict=3.89 open=0.44 read=3495.55 => read_total=3495.99 ms | ratio=7.85x ===
+
+=== VOL timing [ocean_temp_sz3_1e3] : ocean_temp (chunking: native) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_ocean_temp_sz3_1e3.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_215108_52319/results_vol_ocean_temp_sz3_1e3.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_215108_52319/results_ext_ocean_temp_sz3_1e3.csv only=ocean_temp comp=sz3_1e3 verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 950.0 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE ocean_temp     min=4.445019e+00 max=1.072704e+01 range=6.282023e+00 xform=none
+
+=== ocean_temp (123.1 MiB, float, hdf5) ===
+Info: 0x5563d8cb9230
+  ocean_temp_sz3_1e3           C=   0.99 W=  1070.13 F=    0.25 S=   132.31 X=    0.17 S2=  60.73 | E=   1.17 O=   0.28 R=   817.93 ms  ratio=  6.49x  RMSE=5.701e-04 maxae=9.999e-04
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=0.99 write=1070.13 flush=0.25 sync=132.31 close=0.17 csync=60.73 => write_total=1264.58 ms | evict=1.17 open=0.28 read=817.93 => read_total=818.21 ms | ratio=6.49x ===
+
+=== VOL timing [qmc_sz3_1e3] : einspline37 (chunking: native) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_qmc_sz3_1e3.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_215108_52319/results_vol_qmc_sz3_1e3.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_215108_52319/results_ext_qmc_sz3_1e3.csv only=einspline37 comp=sz3_1e3 verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 950.8 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE einspline37    min=-2.125822e+01 max=2.036857e+01 range=4.162679e+01 xform=none
+
+=== einspline37 (12932.6 MiB, float, raw) ===
+Info: 0x5569ad20b390
+  einspline37_sz3_1e3          C=   1.32 W=118015.77 F=    1.33 S=   303.98 X=    0.22 S2=  66.20 | E=   0.24 O=   0.41 R=139696.76 ms  ratio=  3.38x  RMSE=5.742e-04 maxae=1.000e-03
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.32 write=118015.77 flush=1.33 sync=303.98 close=0.22 csync=66.20 => write_total=118388.82 ms | evict=0.24 open=0.41 read=139696.76 => read_total=139697.18 ms | ratio=3.38x ===
+
+=== VOL timing [miranda_sz3_1e3_vol_N8] : miranda (chunking: vol, N=8) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_miranda_sz3_1e3_vol_N8.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_215108_52319/results_vol_miranda_sz3_1e3_vol_N8.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_215108_52319/results_ext_miranda_sz3_1e3_vol_N8.csv only=miranda comp=sz3_1e3 verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 950.8 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE miranda        min=9.999878e-01 max=3.000046e+00 range=2.000058e+00 xform=none
+[chunk] sz3        N=8   -> 8 chunks x 37748736 B (36.000 MiB, 4718592 elems, 32 slices of 147456 elems) total=301989888 B
+[VOL RAGGED] dataset 0 'sz3': clean split, 8 x 37748736 B, no ragged tail
+[chunk-out] 'sz3' rank=3 37748736 -> 185 B (204047.22x), cap 42532864 B
+[chunk-out] 'sz3' rank=3 37748736 -> 553 B (68261.73x), cap 42532864 B
+[chunk-out] 'sz3' rank=3 37748736 -> 1114 B (33885.76x), cap 42532864 B
+[chunk-out] 'sz3' rank=3 37748736 -> 617675 B (61.11x), cap 42532864 B
+[chunk-out] 'sz3' rank=3 37748736 -> 1132777 B (33.32x), cap 42532864 B
+[chunk-out] 'sz3' rank=3 37748736 -> 138700 B (272.16x), cap 42532864 B
+[chunk-out] 'sz3' rank=3 37748736 -> 664 B (56850.51x), cap 42532864 B
+[chunk-out] 'sz3' rank=3 37748736 -> 569 B (66342.24x), cap 42532864 B
+
+=== miranda (288.0 MiB, double, raw) ===
+Info: 0x55ed2c9f22f0
+  miranda_sz3_1e3              C=   1.70 W=   860.49 F=    0.33 S=   144.89 X=    0.65 S2=  92.05 | E=   1.15 O=   0.31 R=   579.44 ms  ratio=159.59x  RMSE=2.790e-04 maxae=1.000e-03
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.70 write=860.49 flush=0.33 sync=144.89 close=0.65 csync=92.05 => write_total=1100.12 ms | evict=1.15 open=0.31 read=579.44 => read_total=579.75 ms | ratio=159.59x ===
+
+=== VOL timing [miranda_sz3_1e3_vol_N16] : miranda (chunking: vol, N=16) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_miranda_sz3_1e3_vol_N16.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_215108_52319/results_vol_miranda_sz3_1e3_vol_N16.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_215108_52319/results_ext_miranda_sz3_1e3_vol_N16.csv only=miranda comp=sz3_1e3 verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 950.8 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE miranda        min=9.999878e-01 max=3.000046e+00 range=2.000058e+00 xform=none
+[chunk] sz3        N=16  -> 16 chunks x 18874368 B (18.000 MiB, 2359296 elems, 16 slices of 147456 elems) total=301989888 B
+[VOL RAGGED] dataset 0 'sz3': clean split, 16 x 18874368 B, no ragged tail
+[chunk-out] 'sz3' rank=3 18874368 -> 178 B (106035.78x), cap 21299200 B
+[chunk-out] 'sz3' rank=3 18874368 -> 546 B (34568.44x), cap 21299200 B
+[chunk-out] 'sz3' rank=3 18874368 -> 546 B (34568.44x), cap 21299200 B
+[chunk-out] 'sz3' rank=3 18874368 -> 602 B (31352.77x), cap 21299200 B
+[chunk-out] 'sz3' rank=3 18874368 -> 638 B (29583.65x), cap 21299200 B
+[chunk-out] 'sz3' rank=3 18874368 -> 1145 B (16484.16x), cap 21299200 B
+[chunk-out] 'sz3' rank=3 18874368 -> 172549 B (109.39x), cap 21299200 B
+[chunk-out] 'sz3' rank=3 18874368 -> 519829 B (36.31x), cap 21299200 B
+[chunk-out] 'sz3' rank=3 18874368 -> 635487 B (29.70x), cap 21299200 B
+[chunk-out] 'sz3' rank=3 18874368 -> 578574 B (32.62x), cap 21299200 B
+[chunk-out] 'sz3' rank=3 18874368 -> 137909 B (136.86x), cap 21299200 B
+[chunk-out] 'sz3' rank=3 18874368 -> 2339 B (8069.42x), cap 21299200 B
+[chunk-out] 'sz3' rank=3 18874368 -> 657 B (28728.11x), cap 21299200 B
+[chunk-out] 'sz3' rank=3 18874368 -> 606 B (31145.82x), cap 21299200 B
+[chunk-out] 'sz3' rank=3 18874368 -> 563 B (33524.63x), cap 21299200 B
+[chunk-out] 'sz3' rank=3 18874368 -> 530 B (35612.02x), cap 21299200 B
+
+=== miranda (288.0 MiB, double, raw) ===
+Info: 0x5593c9307350
+  miranda_sz3_1e3              C=   1.15 W=   804.43 F=    0.36 S=   124.34 X=    0.20 S2=  53.42 | E=   1.51 O=   0.30 R=   467.85 ms  ratio=147.11x  RMSE=2.709e-04 maxae=1.000e-03
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.15 write=804.43 flush=0.36 sync=124.34 close=0.20 csync=53.42 => write_total=983.90 ms | evict=1.51 open=0.30 read=467.85 => read_total=468.15 ms | ratio=147.11x ===
+
+=== VOL timing [scale-T_sz3_1e3_vol_N8] : scale-T (chunking: vol, N=8) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_scale-T_sz3_1e3_vol_N8.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_215108_52319/results_vol_scale-T_sz3_1e3_vol_N8.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_215108_52319/results_ext_scale-T_sz3_1e3_vol_N8.csv only=scale-T comp=sz3_1e3 verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 950.8 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE scale-T        min=5.209023e+00 max=5.754571e+00 range=5.455480e-01 xform=log1p
+[chunk] sz3        N=8   -> 8 chunks x 74880000 B (71.411 MiB, 18720000 elems, 13 slices of 1440000 elems) total=564480000 B  [RAGGED: final chunk is short]
+[VOL RAGGED] dataset 0 'sz3': 7 chunks of 74880000 B + a FINAL chunk of 40320000 B (53.8% of a full chunk). total=564480000 elem=4. The last chunk has a different length from the rest -- rule it out before blaming the codec.
+[chunk-out] 'sz3' rank=3 74880000 -> 405064 B (184.86x), cap 84305536 B
+[chunk-out] 'sz3' rank=3 74880000 -> 147972 B (506.04x), cap 84305536 B
+[chunk-out] 'sz3' rank=3 74880000 -> 258695 B (289.45x), cap 84305536 B
+[chunk-out] 'sz3' rank=3 74880000 -> 309401 B (242.02x), cap 84305536 B
+[chunk-out] 'sz3' rank=3 74880000 -> 159800 B (468.59x), cap 84305536 B
+[chunk-out] 'sz3' rank=3 74880000 -> 327346 B (228.75x), cap 84305536 B
+[chunk-out] 'sz3' rank=3 74880000 -> 423384 B (176.86x), cap 84305536 B
+[chunk-out] 'sz3' rank=3 40320000 -> 570981 B (70.62x), cap 45425536 B
+
+=== scale-T (538.3 MiB, float, raw, transformed) ===
+Info: 0x55938c31a230
+  scale-T_sz3_1e3              C=   1.20 W=  3050.30 F=    0.31 S=   166.64 X=    0.23 S2=  49.37 | E=   3.38 O=   0.31 R=  1591.06 ms  ratio=216.88x  RMSE=4.021e-04 maxae=1.001e-03 (log-space)
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.20 write=3050.30 flush=0.31 sync=166.64 close=0.23 csync=49.37 => write_total=3268.05 ms | evict=3.38 open=0.31 read=1591.06 => read_total=1591.37 ms | ratio=216.88x ===
+
+=== VOL timing [scale-T_sz3_1e3_vol_N16] : scale-T (chunking: vol, N=16) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_scale-T_sz3_1e3_vol_N16.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_215108_52319/results_vol_scale-T_sz3_1e3_vol_N16.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_215108_52319/results_ext_scale-T_sz3_1e3_vol_N16.csv only=scale-T comp=sz3_1e3 verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 950.8 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE scale-T        min=5.209023e+00 max=5.754571e+00 range=5.455480e-01 xform=log1p
+[chunk] sz3        N=16  -> 14 chunks x 40320000 B (38.452 MiB, 10080000 elems, 7 slices of 1440000 elems) total=564480000 B
+[VOL RAGGED] dataset 0 'sz3': clean split, 14 x 40320000 B, no ragged tail
+[chunk-out] 'sz3' rank=3 40320000 -> 388627 B (103.75x), cap 45425536 B
+[chunk-out] 'sz3' rank=3 40320000 -> 93805 B (429.83x), cap 45425536 B
+[chunk-out] 'sz3' rank=3 40320000 -> 102532 B (393.24x), cap 45425536 B
+[chunk-out] 'sz3' rank=3 40320000 -> 125013 B (322.53x), cap 45425536 B
+[chunk-out] 'sz3' rank=3 40320000 -> 149560 B (269.59x), cap 45425536 B
+[chunk-out] 'sz3' rank=3 40320000 -> 189692 B (212.56x), cap 45425536 B
+[chunk-out] 'sz3' rank=3 40320000 -> 199950 B (201.65x), cap 45425536 B
+[chunk-out] 'sz3' rank=3 40320000 -> 164549 B (245.03x), cap 45425536 B
+[chunk-out] 'sz3' rank=3 40320000 -> 118981 B (338.88x), cap 45425536 B
+[chunk-out] 'sz3' rank=3 40320000 -> 256560 B (157.16x), cap 45425536 B
+[chunk-out] 'sz3' rank=3 40320000 -> 145670 B (276.79x), cap 45425536 B
+[chunk-out] 'sz3' rank=3 40320000 -> 320948 B (125.63x), cap 45425536 B
+[chunk-out] 'sz3' rank=3 40320000 -> 336083 B (119.97x), cap 45425536 B
+[chunk-out] 'sz3' rank=3 40320000 -> 570981 B (70.62x), cap 45425536 B
+
+=== scale-T (538.3 MiB, float, raw, transformed) ===
+Info: 0x55a2b29aa300
+  scale-T_sz3_1e3              C=   1.26 W=  3136.89 F=    0.34 S=   160.72 X=    0.22 S2=  80.06 | E=   1.05 O=   0.43 R=  1599.97 ms  ratio=178.46x  RMSE=3.717e-04 maxae=1.002e-03 (log-space)
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.26 write=3136.89 flush=0.34 sync=160.72 close=0.22 csync=80.06 => write_total=3379.48 ms | evict=1.05 open=0.43 read=1599.97 => read_total=1600.40 ms | ratio=178.46x ===
+
+=== VOL timing [s3d_sz3_1e3_vol_N8] : s3d (chunking: vol, N=8) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_s3d_sz3_1e3_vol_N8.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_215108_52319/results_vol_s3d_sz3_1e3_vol_N8.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_215108_52319/results_ext_s3d_sz3_1e3_vol_N8.csv only=s3d comp=sz3_1e3 verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 950.8 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE s3d            min=-6.362436e-15 max=3.920002e-02 range=3.920002e-02 xform=none
+[chunk] sz3        N=8   -> 8 chunks x 126000000 B (120.163 MiB, 15750000 elems, 63 slices of 250000 elems) total=1000000000 B  [RAGGED: final chunk is short]
+[VOL RAGGED] dataset 0 'sz3': 7 chunks of 126000000 B + a FINAL chunk of 118000000 B (93.7% of a full chunk). total=1000000000 elem=8. The last chunk has a different length from the rest -- rule it out before blaming the codec.
+[chunk-out] 'sz3' rank=3 126000000 -> 9430 B (13361.61x), cap 141815536 B
+[chunk-out] 'sz3' rank=3 126000000 -> 10022 B (12572.34x), cap 141815536 B
+[chunk-out] 'sz3' rank=3 126000000 -> 8730 B (14432.99x), cap 141815536 B
+[chunk-out] 'sz3' rank=3 126000000 -> 10224 B (12323.94x), cap 141815536 B
+[chunk-out] 'sz3' rank=3 126000000 -> 9279 B (13579.05x), cap 141815536 B
+[chunk-out] 'sz3' rank=3 126000000 -> 9305 B (13541.11x), cap 141815536 B
+[chunk-out] 'sz3' rank=3 126000000 -> 8880 B (14189.19x), cap 141815536 B
+[chunk-out] 'sz3' rank=3 118000000 -> 7981 B (14785.11x), cap 132815536 B
