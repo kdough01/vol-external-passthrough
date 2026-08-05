@@ -596,14 +596,15 @@ static inline int bench_zfp_type_code(const bench_dataset_t *d) {
     return (d->dtype == BENCH_F64) ? 4 : 3;
 }
 
-/* Pull "zfp:rate":<double> out of an entry's opts_json. 0.0 if absent. */
 static inline double bench_zfp_rate_from_json(const bench_compressor_t *c) {
     const char *p;
     if (!c || !c->opts_json) return 0.0;
     p = strstr(c->opts_json, "\"zfp:rate\"");
     if (!p) return 0.0;
-    p = strchr(p, ':');
-    return p ? atof(p + 1) : 0.0;
+    p += 10;                                    /* strlen("\"zfp:rate\"") */
+    while (*p == ' ' || *p == '\t') p++;
+    if (*p != ':') return 0.0;
+    return atof(p + 1);
 }
 
 static inline double bench_abs_threshold(const bench_compressor_t *c,
