@@ -1,0 +1,6 @@
+dataset,compressor,path,op,phase,ms,ratio,rmse
+s3d,zfp_1e6,filter,write,total,2887.8222,41.2858,
+s3d,zfp_1e6,filter,write,sync,161.5039,,
+s3d,zfp_1e6,filter,write,csync,71.0888,,
+s3d,zfp_1e6,filter,read,evict,1.1082,,
+s3d,zfp_1e6,filter,read,total,1235.4419,,1.920152e-08

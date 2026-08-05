@@ -1,0 +1,236 @@
+Job started on Wed Aug  5 12:56:26 CDT 2026
+Running on : gpu2
+Datasets   : miranda ocean_temp scale-T s3d nyx_baryon einspline37
+Bounds     : zfp_cpu_r4 zfp_cpu_r8 zfp_cpu_r12 zfp_cpu_r16
+Chunk plan : miranda=N1 ocean_temp=N1 scale-T=N1 s3d=N1 nyx_baryon=N1 einspline37=N4 
+Build dir  : build_zfpfilter
+Results    : /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/20260805_125626_52394
+           : (also reachable as /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/latest)
+
+=== Building (build_zfpfilter) ===
+Consolidate compiler generated dependencies of target dump_cuszp_opts
+[  6%] Built target dump_cuszp_opts
+Consolidate compiler generated dependencies of target hdf5_vol_passthrough
+[ 31%] Built target hdf5_vol_passthrough
+Consolidate compiler generated dependencies of target test_time_miranda
+Consolidate compiler generated dependencies of target new_h5api_ex
+Consolidate compiler generated dependencies of target async_new_h5api_ex
+Consolidate compiler generated dependencies of target bench_filter_timing
+Consolidate compiler generated dependencies of target test_cpu_write
+Consolidate compiler generated dependencies of target test_error_miranda
+Consolidate compiler generated dependencies of target bench_pressio_timing
+[ 37%] Built target test_time_miranda
+Consolidate compiler generated dependencies of target test_time_hurricane
+Consolidate compiler generated dependencies of target test_ci
+[ 44%] Built target new_h5api_ex
+[ 51%] Built target async_new_h5api_ex
+[ 58%] Built target test_cpu_write
+[ 65%] Built target test_error_miranda
+[ 72%] Built target bench_pressio_timing
+[ 86%] Built target test_time_hurricane
+[ 86%] Built target test_ci
+Consolidate compiler generated dependencies of target bench_vol_timing
+[ 93%] Built target bench_vol_timing
+[ 96%] Building CXX object tests/CMakeFiles/bench_filter_timing.dir/bench_filter_timing.cc.o
+[100%] Linking CXX executable ../bin/bench_filter_timing
+[100%] Built target bench_filter_timing
+Binary     : build_zfpfilter/bin/bench_filter_timing
+filter plugins: libh5zzfp.so libhdf5sz3.so 
+
+=== zfp build used by the filter ===
+  libzfp -> /gpfs/fs1/home/kdougherty/spack/opt/spack/linux-zen2/zfp-0.5.5-vxzs7uhsw5mqg4tuqr47hztf75snu2qc/lib/libzfp.so.0.5.5
+  (H5Z-ZFP requires bsws=8. Run the VOL comparison with BENCH_ZFP64=0
+   so both paths use this same build.)
+h5 scratch: /lcrc/project/SDR/kdougherty/vol_bench_h5
+
+=== zfp filter availability ===
+  zfp: ok (rc=0)
+
+############ [1] zfp cd_values gate (miranda, abs 1e-6) ############
+
+=== filter [zfpfilter_miranda_zfp_1e6_N1] : miranda  (N=1, zfp_1e6) ===
+[filter] backend=zfp id=32013 chunk_n=1
+[filter] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE) -- these MUST match the VOL run or the two are not comparable
+CHUNKINFO dataset=miranda chunk_n=1 nchunks_actual=1 chunk_elems=37748736 chunk_bytes=301989888
+[zfp] zfp_1e6: FIXED ACCURACY 1.000e-06
+  miranda        zfp_1e6    N=1   C=  3.25 W=  1529.99 F=    0.25 S=  129.41 X=   0.89 S2=  55.10 | E=  1.07 O=  0.54 R=   539.92 ms  ratio= 14.33x  file=20.1 MiB  RMSE=2.210e-08 maxae=2.586e-07
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/20260805_125626_52394/results_filter_zfpfilter_miranda_zfp_1e6_N1.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/20260805_125626_52394/results_filter_ext_zfpfilter_miranda_zfp_1e6_N1.csv (0 failed configuration(s) recorded)
+  [time] miranda N=1 took 3s (rc=0)
+  *** FAIL maxae=539.92 thr=0.5389 ***
+  *** GATE FAILED — ratios below are INVALID until cd_values is fixed ***
+
+############ [2] zfp filter — all datasets ############
+
+=== filter [zfpfilter_miranda_zfp_cpu_r4_N1] : miranda  (N=1, zfp_cpu_r4) ===
+[filter] backend=zfp id=32013 chunk_n=1
+[filter] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE) -- these MUST match the VOL run or the two are not comparable
+CHUNKINFO dataset=miranda chunk_n=1 nchunks_actual=1 chunk_elems=37748736 chunk_bytes=301989888
+[ERR] zfp entry 'zfp_cpu_r4' declares neither zfp:rate nor an absolute bound; refusing to run it at accuracy=0
+[RECORDED FAILURE] miranda/zfp_cpu_r4 N=1
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/20260805_125626_52394/results_filter_zfpfilter_miranda_zfp_cpu_r4_N1.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/20260805_125626_52394/results_filter_ext_zfpfilter_miranda_zfp_cpu_r4_N1.csv (1 failed configuration(s) recorded)
+  [time] miranda N=1 took 0s (rc=2)
+  [note] zfpfilter_miranda_zfp_cpu_r4_N1 exited rc=2 (e.g. >4 GiB chunk) — recorded in the CSV
+
+=== filter [zfpfilter_ocean_temp_zfp_cpu_r4_N1] : ocean_temp  (N=1, zfp_cpu_r4) ===
+[filter] backend=zfp id=32013 chunk_n=1
+[filter] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE) -- these MUST match the VOL run or the two are not comparable
+CHUNKINFO dataset=ocean_temp chunk_n=1 nchunks_actual=1 chunk_elems=32280960 chunk_bytes=129123840
+[ERR] zfp entry 'zfp_cpu_r4' declares neither zfp:rate nor an absolute bound; refusing to run it at accuracy=0
+[RECORDED FAILURE] ocean_temp/zfp_cpu_r4 N=1
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/20260805_125626_52394/results_filter_zfpfilter_ocean_temp_zfp_cpu_r4_N1.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/20260805_125626_52394/results_filter_ext_zfpfilter_ocean_temp_zfp_cpu_r4_N1.csv (1 failed configuration(s) recorded)
+  [time] ocean_temp N=1 took 2s (rc=2)
+  [note] zfpfilter_ocean_temp_zfp_cpu_r4_N1 exited rc=2 (e.g. >4 GiB chunk) — recorded in the CSV
+
+=== filter [zfpfilter_scale-T_zfp_cpu_r4_N1] : scale-T  (N=1, zfp_cpu_r4) ===
+[filter] backend=zfp id=32013 chunk_n=1
+[filter] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE) -- these MUST match the VOL run or the two are not comparable
+CHUNKINFO dataset=scale-T chunk_n=1 nchunks_actual=1 chunk_elems=141120000 chunk_bytes=564480000
+[ERR] zfp entry 'zfp_cpu_r4' declares neither zfp:rate nor an absolute bound; refusing to run it at accuracy=0
+[RECORDED FAILURE] scale-T/zfp_cpu_r4 N=1
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/20260805_125626_52394/results_filter_zfpfilter_scale-T_zfp_cpu_r4_N1.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/20260805_125626_52394/results_filter_ext_zfpfilter_scale-T_zfp_cpu_r4_N1.csv (1 failed configuration(s) recorded)
+  [time] scale-T N=1 took 2s (rc=2)
+  [note] zfpfilter_scale-T_zfp_cpu_r4_N1 exited rc=2 (e.g. >4 GiB chunk) — recorded in the CSV
+
+=== filter [zfpfilter_s3d_zfp_cpu_r4_N1] : s3d  (N=1, zfp_cpu_r4) ===
+[filter] backend=zfp id=32013 chunk_n=1
+[filter] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE) -- these MUST match the VOL run or the two are not comparable
+CHUNKINFO dataset=s3d chunk_n=1 nchunks_actual=1 chunk_elems=125000000 chunk_bytes=1000000000
+[ERR] zfp entry 'zfp_cpu_r4' declares neither zfp:rate nor an absolute bound; refusing to run it at accuracy=0
+[RECORDED FAILURE] s3d/zfp_cpu_r4 N=1
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/20260805_125626_52394/results_filter_zfpfilter_s3d_zfp_cpu_r4_N1.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/20260805_125626_52394/results_filter_ext_zfpfilter_s3d_zfp_cpu_r4_N1.csv (1 failed configuration(s) recorded)
+  [time] s3d N=1 took 2s (rc=2)
+  [note] zfpfilter_s3d_zfp_cpu_r4_N1 exited rc=2 (e.g. >4 GiB chunk) — recorded in the CSV
+
+=== filter [zfpfilter_nyx_baryon_zfp_cpu_r4_N1] : nyx_baryon  (N=1, zfp_cpu_r4) ===
+[filter] backend=zfp id=32013 chunk_n=1
+[filter] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE) -- these MUST match the VOL run or the two are not comparable
+CHUNKINFO dataset=nyx_baryon chunk_n=1 nchunks_actual=1 chunk_elems=134217728 chunk_bytes=536870912
+[ERR] zfp entry 'zfp_cpu_r4' declares neither zfp:rate nor an absolute bound; refusing to run it at accuracy=0
+[RECORDED FAILURE] nyx_baryon/zfp_cpu_r4 N=1
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/20260805_125626_52394/results_filter_zfpfilter_nyx_baryon_zfp_cpu_r4_N1.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/20260805_125626_52394/results_filter_ext_zfpfilter_nyx_baryon_zfp_cpu_r4_N1.csv (1 failed configuration(s) recorded)
+  [time] nyx_baryon N=1 took 4s (rc=2)
+  [note] zfpfilter_nyx_baryon_zfp_cpu_r4_N1 exited rc=2 (e.g. >4 GiB chunk) — recorded in the CSV
+
+=== filter [zfpfilter_einspline37_zfp_cpu_r4_N4] : einspline37  (N=4, zfp_cpu_r4) ===
+[filter] backend=zfp id=32013 chunk_n=4
+[filter] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE) -- these MUST match the VOL run or the two are not comparable
+CHUNKINFO dataset=einspline37 chunk_n=4 nchunks_actual=4 chunk_elems=847553220 chunk_bytes=3390212880
+[ERR] zfp entry 'zfp_cpu_r4' declares neither zfp:rate nor an absolute bound; refusing to run it at accuracy=0
+[RECORDED FAILURE] einspline37/zfp_cpu_r4 N=4
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/20260805_125626_52394/results_filter_zfpfilter_einspline37_zfp_cpu_r4_N4.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/20260805_125626_52394/results_filter_ext_zfpfilter_einspline37_zfp_cpu_r4_N4.csv (1 failed configuration(s) recorded)
+  [time] einspline37 N=4 took 17s (rc=2)
+  [note] zfpfilter_einspline37_zfp_cpu_r4_N4 exited rc=2 (e.g. >4 GiB chunk) — recorded in the CSV
+
+=== filter [zfpfilter_miranda_zfp_cpu_r8_N1] : miranda  (N=1, zfp_cpu_r8) ===
+[filter] backend=zfp id=32013 chunk_n=1
+[filter] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE) -- these MUST match the VOL run or the two are not comparable
+CHUNKINFO dataset=miranda chunk_n=1 nchunks_actual=1 chunk_elems=37748736 chunk_bytes=301989888
+[ERR] zfp entry 'zfp_cpu_r8' declares neither zfp:rate nor an absolute bound; refusing to run it at accuracy=0
+[RECORDED FAILURE] miranda/zfp_cpu_r8 N=1
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/20260805_125626_52394/results_filter_zfpfilter_miranda_zfp_cpu_r8_N1.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/20260805_125626_52394/results_filter_ext_zfpfilter_miranda_zfp_cpu_r8_N1.csv (1 failed configuration(s) recorded)
+  [time] miranda N=1 took 0s (rc=2)
+  [note] zfpfilter_miranda_zfp_cpu_r8_N1 exited rc=2 (e.g. >4 GiB chunk) — recorded in the CSV
+
+=== filter [zfpfilter_ocean_temp_zfp_cpu_r8_N1] : ocean_temp  (N=1, zfp_cpu_r8) ===
+[filter] backend=zfp id=32013 chunk_n=1
+[filter] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE) -- these MUST match the VOL run or the two are not comparable
+CHUNKINFO dataset=ocean_temp chunk_n=1 nchunks_actual=1 chunk_elems=32280960 chunk_bytes=129123840
+[ERR] zfp entry 'zfp_cpu_r8' declares neither zfp:rate nor an absolute bound; refusing to run it at accuracy=0
+[RECORDED FAILURE] ocean_temp/zfp_cpu_r8 N=1
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/20260805_125626_52394/results_filter_zfpfilter_ocean_temp_zfp_cpu_r8_N1.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/20260805_125626_52394/results_filter_ext_zfpfilter_ocean_temp_zfp_cpu_r8_N1.csv (1 failed configuration(s) recorded)
+  [time] ocean_temp N=1 took 0s (rc=2)
+  [note] zfpfilter_ocean_temp_zfp_cpu_r8_N1 exited rc=2 (e.g. >4 GiB chunk) — recorded in the CSV
+
+=== filter [zfpfilter_scale-T_zfp_cpu_r8_N1] : scale-T  (N=1, zfp_cpu_r8) ===
+[filter] backend=zfp id=32013 chunk_n=1
+[filter] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE) -- these MUST match the VOL run or the two are not comparable
+CHUNKINFO dataset=scale-T chunk_n=1 nchunks_actual=1 chunk_elems=141120000 chunk_bytes=564480000
+[ERR] zfp entry 'zfp_cpu_r8' declares neither zfp:rate nor an absolute bound; refusing to run it at accuracy=0
+[RECORDED FAILURE] scale-T/zfp_cpu_r8 N=1
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/20260805_125626_52394/results_filter_zfpfilter_scale-T_zfp_cpu_r8_N1.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/20260805_125626_52394/results_filter_ext_zfpfilter_scale-T_zfp_cpu_r8_N1.csv (1 failed configuration(s) recorded)
+  [time] scale-T N=1 took 3s (rc=2)
+  [note] zfpfilter_scale-T_zfp_cpu_r8_N1 exited rc=2 (e.g. >4 GiB chunk) — recorded in the CSV
+
+=== filter [zfpfilter_s3d_zfp_cpu_r8_N1] : s3d  (N=1, zfp_cpu_r8) ===
+[filter] backend=zfp id=32013 chunk_n=1
+[filter] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE) -- these MUST match the VOL run or the two are not comparable
+CHUNKINFO dataset=s3d chunk_n=1 nchunks_actual=1 chunk_elems=125000000 chunk_bytes=1000000000
+[ERR] zfp entry 'zfp_cpu_r8' declares neither zfp:rate nor an absolute bound; refusing to run it at accuracy=0
+[RECORDED FAILURE] s3d/zfp_cpu_r8 N=1
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/20260805_125626_52394/results_filter_zfpfilter_s3d_zfp_cpu_r8_N1.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/20260805_125626_52394/results_filter_ext_zfpfilter_s3d_zfp_cpu_r8_N1.csv (1 failed configuration(s) recorded)
+  [time] s3d N=1 took 1s (rc=2)
+  [note] zfpfilter_s3d_zfp_cpu_r8_N1 exited rc=2 (e.g. >4 GiB chunk) — recorded in the CSV
+
+=== filter [zfpfilter_nyx_baryon_zfp_cpu_r8_N1] : nyx_baryon  (N=1, zfp_cpu_r8) ===
+[filter] backend=zfp id=32013 chunk_n=1
+[filter] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE) -- these MUST match the VOL run or the two are not comparable
+CHUNKINFO dataset=nyx_baryon chunk_n=1 nchunks_actual=1 chunk_elems=134217728 chunk_bytes=536870912
+[ERR] zfp entry 'zfp_cpu_r8' declares neither zfp:rate nor an absolute bound; refusing to run it at accuracy=0
+[RECORDED FAILURE] nyx_baryon/zfp_cpu_r8 N=1
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/20260805_125626_52394/results_filter_zfpfilter_nyx_baryon_zfp_cpu_r8_N1.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/20260805_125626_52394/results_filter_ext_zfpfilter_nyx_baryon_zfp_cpu_r8_N1.csv (1 failed configuration(s) recorded)
+  [time] nyx_baryon N=1 took 2s (rc=2)
+  [note] zfpfilter_nyx_baryon_zfp_cpu_r8_N1 exited rc=2 (e.g. >4 GiB chunk) — recorded in the CSV
+
+=== filter [zfpfilter_einspline37_zfp_cpu_r8_N4] : einspline37  (N=4, zfp_cpu_r8) ===
+[filter] backend=zfp id=32013 chunk_n=4
+[filter] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE) -- these MUST match the VOL run or the two are not comparable
+CHUNKINFO dataset=einspline37 chunk_n=4 nchunks_actual=4 chunk_elems=847553220 chunk_bytes=3390212880
+[ERR] zfp entry 'zfp_cpu_r8' declares neither zfp:rate nor an absolute bound; refusing to run it at accuracy=0
+[RECORDED FAILURE] einspline37/zfp_cpu_r8 N=4
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/20260805_125626_52394/results_filter_zfpfilter_einspline37_zfp_cpu_r8_N4.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/20260805_125626_52394/results_filter_ext_zfpfilter_einspline37_zfp_cpu_r8_N4.csv (1 failed configuration(s) recorded)
+  [time] einspline37 N=4 took 17s (rc=2)
+  [note] zfpfilter_einspline37_zfp_cpu_r8_N4 exited rc=2 (e.g. >4 GiB chunk) — recorded in the CSV
+
+=== filter [zfpfilter_miranda_zfp_cpu_r12_N1] : miranda  (N=1, zfp_cpu_r12) ===
+[filter] backend=zfp id=32013 chunk_n=1
+[filter] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE) -- these MUST match the VOL run or the two are not comparable
+CHUNKINFO dataset=miranda chunk_n=1 nchunks_actual=1 chunk_elems=37748736 chunk_bytes=301989888
+[ERR] zfp entry 'zfp_cpu_r12' declares neither zfp:rate nor an absolute bound; refusing to run it at accuracy=0
+[RECORDED FAILURE] miranda/zfp_cpu_r12 N=1
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/20260805_125626_52394/results_filter_zfpfilter_miranda_zfp_cpu_r12_N1.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/20260805_125626_52394/results_filter_ext_zfpfilter_miranda_zfp_cpu_r12_N1.csv (1 failed configuration(s) recorded)
+  [time] miranda N=1 took 1s (rc=2)
+  [note] zfpfilter_miranda_zfp_cpu_r12_N1 exited rc=2 (e.g. >4 GiB chunk) — recorded in the CSV
+
+=== filter [zfpfilter_ocean_temp_zfp_cpu_r12_N1] : ocean_temp  (N=1, zfp_cpu_r12) ===
+[filter] backend=zfp id=32013 chunk_n=1
+[filter] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE) -- these MUST match the VOL run or the two are not comparable
+CHUNKINFO dataset=ocean_temp chunk_n=1 nchunks_actual=1 chunk_elems=32280960 chunk_bytes=129123840
+[ERR] zfp entry 'zfp_cpu_r12' declares neither zfp:rate nor an absolute bound; refusing to run it at accuracy=0
+[RECORDED FAILURE] ocean_temp/zfp_cpu_r12 N=1
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/20260805_125626_52394/results_filter_zfpfilter_ocean_temp_zfp_cpu_r12_N1.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/20260805_125626_52394/results_filter_ext_zfpfilter_ocean_temp_zfp_cpu_r12_N1.csv (1 failed configuration(s) recorded)
+  [time] ocean_temp N=1 took 0s (rc=2)
+  [note] zfpfilter_ocean_temp_zfp_cpu_r12_N1 exited rc=2 (e.g. >4 GiB chunk) — recorded in the CSV
+
+=== filter [zfpfilter_scale-T_zfp_cpu_r12_N1] : scale-T  (N=1, zfp_cpu_r12) ===
+[filter] backend=zfp id=32013 chunk_n=1
+[filter] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE) -- these MUST match the VOL run or the two are not comparable
+CHUNKINFO dataset=scale-T chunk_n=1 nchunks_actual=1 chunk_elems=141120000 chunk_bytes=564480000
+[ERR] zfp entry 'zfp_cpu_r12' declares neither zfp:rate nor an absolute bound; refusing to run it at accuracy=0
+[RECORDED FAILURE] scale-T/zfp_cpu_r12 N=1
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/20260805_125626_52394/results_filter_zfpfilter_scale-T_zfp_cpu_r12_N1.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/20260805_125626_52394/results_filter_ext_zfpfilter_scale-T_zfp_cpu_r12_N1.csv (1 failed configuration(s) recorded)
+  [time] scale-T N=1 took 3s (rc=2)
+  [note] zfpfilter_scale-T_zfp_cpu_r12_N1 exited rc=2 (e.g. >4 GiB chunk) — recorded in the CSV
+
+=== filter [zfpfilter_s3d_zfp_cpu_r12_N1] : s3d  (N=1, zfp_cpu_r12) ===
+[filter] backend=zfp id=32013 chunk_n=1
+[filter] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE) -- these MUST match the VOL run or the two are not comparable
+CHUNKINFO dataset=s3d chunk_n=1 nchunks_actual=1 chunk_elems=125000000 chunk_bytes=1000000000
+[ERR] zfp entry 'zfp_cpu_r12' declares neither zfp:rate nor an absolute bound; refusing to run it at accuracy=0
+[RECORDED FAILURE] s3d/zfp_cpu_r12 N=1
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/20260805_125626_52394/results_filter_zfpfilter_s3d_zfp_cpu_r12_N1.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/20260805_125626_52394/results_filter_ext_zfpfilter_s3d_zfp_cpu_r12_N1.csv (1 failed configuration(s) recorded)
+  [time] s3d N=1 took 1s (rc=2)
+  [note] zfpfilter_s3d_zfp_cpu_r12_N1 exited rc=2 (e.g. >4 GiB chunk) — recorded in the CSV
+
+=== filter [zfpfilter_nyx_baryon_zfp_cpu_r12_N1] : nyx_baryon  (N=1, zfp_cpu_r12) ===
+[filter] backend=zfp id=32013 chunk_n=1
+[filter] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE) -- these MUST match the VOL run or the two are not comparable
+CHUNKINFO dataset=nyx_baryon chunk_n=1 nchunks_actual=1 chunk_elems=134217728 chunk_bytes=536870912
+[ERR] zfp entry 'zfp_cpu_r12' declares neither zfp:rate nor an absolute bound; refusing to run it at accuracy=0
+[RECORDED FAILURE] nyx_baryon/zfp_cpu_r12 N=1
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/20260805_125626_52394/results_filter_zfpfilter_nyx_baryon_zfp_cpu_r12_N1.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/20260805_125626_52394/results_filter_ext_zfpfilter_nyx_baryon_zfp_cpu_r12_N1.csv (1 failed configuration(s) recorded)
+  [time] nyx_baryon N=1 took 2s (rc=2)
+  [note] zfpfilter_nyx_baryon_zfp_cpu_r12_N1 exited rc=2 (e.g. >4 GiB chunk) — recorded in the CSV
+
+=== filter [zfpfilter_einspline37_zfp_cpu_r12_N4] : einspline37  (N=4, zfp_cpu_r12) ===
+[filter] backend=zfp id=32013 chunk_n=4
+[filter] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE) -- these MUST match the VOL run or the two are not comparable

@@ -1,0 +1,6 @@
+dataset,compressor,path,op,phase,ms,ratio,rmse
+miranda,zfp_1e6,filter,write,total,1602.6782,14.3257,
+miranda,zfp_1e6,filter,write,sync,131.6702,,
+miranda,zfp_1e6,filter,write,csync,71.3350,,
+miranda,zfp_1e6,filter,read,evict,5.8094,,
+miranda,zfp_1e6,filter,read,total,549.7881,,2.209912e-08

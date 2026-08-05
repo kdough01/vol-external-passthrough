@@ -1,0 +1,6 @@
+dataset,compressor,path,op,phase,ms,ratio,rmse
+einspline37,zfp_1e3,filter,write,total,100672.5583,2.4538,
+einspline37,zfp_1e3,filter,write,sync,129.4888,,
+einspline37,zfp_1e3,filter,write,csync,98.7546,,
+einspline37,zfp_1e3,filter,read,evict,0.2433,,
+einspline37,zfp_1e3,filter,read,total,121735.2395,,1.646625e-04

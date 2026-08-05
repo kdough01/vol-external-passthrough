@@ -1,0 +1,171 @@
+Job started on Wed Aug  5 13:01:00 CDT 2026
+Running on : gpu2
+Datasets   : miranda ocean_temp scale-T s3d nyx_baryon einspline37
+Bounds     : zfp_cpu_r4 zfp_cpu_r8 zfp_cpu_r12 zfp_cpu_r16
+Chunk plan : miranda=N1 ocean_temp=N1 scale-T=N1 s3d=N1 nyx_baryon=N1 einspline37=N4 
+Build dir  : build_zfpfilter
+Results    : /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/20260805_130100_52396
+           : (also reachable as /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/latest)
+
+=== Building (build_zfpfilter) ===
+Consolidate compiler generated dependencies of target dump_cuszp_opts
+[  6%] Built target dump_cuszp_opts
+Consolidate compiler generated dependencies of target hdf5_vol_passthrough
+[ 31%] Built target hdf5_vol_passthrough
+Consolidate compiler generated dependencies of target test_time_hurricane
+Consolidate compiler generated dependencies of target test_time_miranda
+Consolidate compiler generated dependencies of target test_ci
+Consolidate compiler generated dependencies of target new_h5api_ex
+Consolidate compiler generated dependencies of target test_cpu_write
+Consolidate compiler generated dependencies of target test_error_miranda
+Consolidate compiler generated dependencies of target bench_pressio_timing
+Consolidate compiler generated dependencies of target async_new_h5api_ex
+[ 37%] Built target test_time_hurricane
+Consolidate compiler generated dependencies of target bench_filter_timing
+Consolidate compiler generated dependencies of target bench_vol_timing
+[ 44%] Built target test_time_miranda
+[ 58%] Built target test_cpu_write
+[ 58%] Built target new_h5api_ex
+[ 72%] Built target test_error_miranda
+[ 72%] Built target test_ci
+[ 75%] Building CXX object tests/CMakeFiles/bench_pressio_timing.dir/bench_pressio_timing.cc.o
+[ 82%] Built target async_new_h5api_ex
+[ 86%] Building CXX object tests/CMakeFiles/bench_vol_timing.dir/bench_vol_timing.cc.o
+[ 89%] Building CXX object tests/CMakeFiles/bench_filter_timing.dir/bench_filter_timing.cc.o
+[ 93%] Linking CXX executable ../bin/bench_pressio_timing
+[ 93%] Built target bench_pressio_timing
+[ 96%] Linking CXX executable ../bin/bench_vol_timing
+[ 96%] Built target bench_vol_timing
+[100%] Linking CXX executable ../bin/bench_filter_timing
+[100%] Built target bench_filter_timing
+Binary     : build_zfpfilter/bin/bench_filter_timing
+filter plugins: libh5zzfp.so libhdf5sz3.so 
+
+=== zfp build used by the filter ===
+  libzfp -> /gpfs/fs1/home/kdougherty/spack/opt/spack/linux-zen2/zfp-0.5.5-vxzs7uhsw5mqg4tuqr47hztf75snu2qc/lib/libzfp.so.0.5.5
+  (H5Z-ZFP requires bsws=8. Run the VOL comparison with BENCH_ZFP64=0
+   so both paths use this same build.)
+h5 scratch: /lcrc/project/SDR/kdougherty/vol_bench_h5
+
+=== zfp filter availability ===
+  zfp: ok (rc=0)
+
+############ [1] zfp cd_values gate (miranda, abs 1e-6) ############
+
+=== filter [zfpfilter_miranda_zfp_1e6_N1] : miranda  (N=1, zfp_1e6) ===
+[filter] backend=zfp id=32013 chunk_n=1
+[filter] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE) -- these MUST match the VOL run or the two are not comparable
+CHUNKINFO dataset=miranda chunk_n=1 nchunks_actual=1 chunk_elems=37748736 chunk_bytes=301989888
+[zfp] zfp_1e6: FIXED ACCURACY 1.000e-06
+  miranda        zfp_1e6    N=1   C=  3.44 W=  1602.68 F=    0.25 S=  131.67 X=   0.29 S2=  71.34 | E=  5.81 O=  0.54 R=   549.79 ms  ratio= 14.33x  file=20.1 MiB  RMSE=2.210e-08 maxae=2.586e-07
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/20260805_130100_52396/results_filter_zfpfilter_miranda_zfp_1e6_N1.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/20260805_130100_52396/results_filter_ext_zfpfilter_miranda_zfp_1e6_N1.csv (0 failed configuration(s) recorded)
+  [time] miranda N=1 took 3s (rc=0)
+  *** FAIL maxae=549.788 thr=0.5361 ***
+  *** GATE FAILED — ratios below are INVALID until cd_values is fixed ***
+
+############ [2] zfp filter — all datasets ############
+
+=== filter [zfpfilter_miranda_zfp_cpu_r4_N1] : miranda  (N=1, zfp_cpu_r4) ===
+[filter] backend=zfp id=32013 chunk_n=1
+[filter] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE) -- these MUST match the VOL run or the two are not comparable
+CHUNKINFO dataset=miranda chunk_n=1 nchunks_actual=1 chunk_elems=37748736 chunk_bytes=301989888
+[zfp] zfp_cpu_r4: FIXED RATE 4.0 bits/value (expect ratio 16.00x)
+  miranda        zfp_cpu_r4 N=1   C=  1.15 W=  1847.32 F=    0.15 S=  232.96 X=   0.30 S2= 104.25 | E=  1.08 O=  0.29 R=   561.15 ms  ratio= 16.00x  file=18.0 MiB  RMSE=1.323e-04 maxae=1.232e-02
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/20260805_130100_52396/results_filter_zfpfilter_miranda_zfp_cpu_r4_N1.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/20260805_130100_52396/results_filter_ext_zfpfilter_miranda_zfp_cpu_r4_N1.csv (0 failed configuration(s) recorded)
+  [time] miranda N=1 took 4s (rc=0)
+
+=== filter [zfpfilter_ocean_temp_zfp_cpu_r4_N1] : ocean_temp  (N=1, zfp_cpu_r4) ===
+[filter] backend=zfp id=32013 chunk_n=1
+[filter] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE) -- these MUST match the VOL run or the two are not comparable
+CHUNKINFO dataset=ocean_temp chunk_n=1 nchunks_actual=1 chunk_elems=32280960 chunk_bytes=129123840
+[zfp] zfp_cpu_r4: FIXED RATE 4.0 bits/value (expect ratio 8.00x)
+  ocean_temp     zfp_cpu_r4 N=1   C=  1.01 W=  1022.04 F=    0.13 S=  199.90 X=   0.16 S2=  68.35 | E=  1.18 O=  0.27 R=   406.18 ms  ratio=  7.56x  file=16.3 MiB  RMSE=4.110e-03 maxae=3.760e-01
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/20260805_130100_52396/results_filter_zfpfilter_ocean_temp_zfp_cpu_r4_N1.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/20260805_130100_52396/results_filter_ext_zfpfilter_ocean_temp_zfp_cpu_r4_N1.csv (0 failed configuration(s) recorded)
+  [time] ocean_temp N=1 took 3s (rc=0)
+
+=== filter [zfpfilter_scale-T_zfp_cpu_r4_N1] : scale-T  (N=1, zfp_cpu_r4) ===
+[filter] backend=zfp id=32013 chunk_n=1
+[filter] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE) -- these MUST match the VOL run or the two are not comparable
+CHUNKINFO dataset=scale-T chunk_n=1 nchunks_actual=1 chunk_elems=141120000 chunk_bytes=564480000
+[zfp] zfp_cpu_r4: FIXED RATE 4.0 bits/value (expect ratio 8.00x)
+  scale-T        zfp_cpu_r4 N=1   C=  1.15 W=  4448.72 F=    0.16 S=  201.75 X=   0.21 S2=  90.09 | E=  3.13 O=  0.50 R=  1602.59 ms  ratio=  7.84x  file=68.7 MiB  RMSE=2.434e-05 maxae=1.459e-03
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/20260805_130100_52396/results_filter_zfpfilter_scale-T_zfp_cpu_r4_N1.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/20260805_130100_52396/results_filter_ext_zfpfilter_scale-T_zfp_cpu_r4_N1.csv (0 failed configuration(s) recorded)
+  [time] scale-T N=1 took 10s (rc=0)
+
+=== filter [zfpfilter_s3d_zfp_cpu_r4_N1] : s3d  (N=1, zfp_cpu_r4) ===
+[filter] backend=zfp id=32013 chunk_n=1
+[filter] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE) -- these MUST match the VOL run or the two are not comparable
+CHUNKINFO dataset=s3d chunk_n=1 nchunks_actual=1 chunk_elems=125000000 chunk_bytes=1000000000
+[zfp] zfp_cpu_r4: FIXED RATE 4.0 bits/value (expect ratio 16.00x)
+  s3d            zfp_cpu_r4 N=1   C=  1.20 W=  5094.97 F=    0.15 S=  206.04 X=   0.27 S2= 107.51 | E=  1.15 O=  0.48 R=  2068.07 ms  ratio= 16.00x  file=59.6 MiB  RMSE=5.735e-08 maxae=3.710e-06
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/20260805_130100_52396/results_filter_zfpfilter_s3d_zfp_cpu_r4_N1.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/20260805_130100_52396/results_filter_ext_zfpfilter_s3d_zfp_cpu_r4_N1.csv (0 failed configuration(s) recorded)
+  [time] s3d N=1 took 10s (rc=0)
+
+=== filter [zfpfilter_nyx_baryon_zfp_cpu_r4_N1] : nyx_baryon  (N=1, zfp_cpu_r4) ===
+[filter] backend=zfp id=32013 chunk_n=1
+[filter] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE) -- these MUST match the VOL run or the two are not comparable
+CHUNKINFO dataset=nyx_baryon chunk_n=1 nchunks_actual=1 chunk_elems=134217728 chunk_bytes=536870912
+[zfp] zfp_cpu_r4: FIXED RATE 4.0 bits/value (expect ratio 8.00x)
+  nyx_baryon     zfp_cpu_r4 N=1   C=  1.00 W=  3487.54 F=    0.14 S=  223.20 X=   0.15 S2=  92.80 | E=  0.21 O=  0.24 R=  1757.36 ms  ratio=  8.00x  file=64.0 MiB  RMSE=3.991e-03 maxae=3.861e-01
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/20260805_130100_52396/results_filter_zfpfilter_nyx_baryon_zfp_cpu_r4_N1.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/20260805_130100_52396/results_filter_ext_zfpfilter_nyx_baryon_zfp_cpu_r4_N1.csv (0 failed configuration(s) recorded)
+  [time] nyx_baryon N=1 took 11s (rc=0)
+
+=== filter [zfpfilter_einspline37_zfp_cpu_r4_N4] : einspline37  (N=4, zfp_cpu_r4) ===
+[filter] backend=zfp id=32013 chunk_n=4
+[filter] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE) -- these MUST match the VOL run or the two are not comparable
+CHUNKINFO dataset=einspline37 chunk_n=4 nchunks_actual=4 chunk_elems=847553220 chunk_bytes=3390212880
+[zfp] zfp_cpu_r4: FIXED RATE 4.0 bits/value (expect ratio 8.00x)
+  einspline37    zfp_cpu_r4 N=4   C=  1.24 W= 58960.62 F=    0.20 S=  114.55 X=   0.40 S2=  34.12 | E=  0.24 O=  0.49 R= 47237.18 ms  ratio=  8.00x  file=1616.6 MiB  RMSE=7.313e-01 maxae=4.800e+01
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/20260805_130100_52396/results_filter_zfpfilter_einspline37_zfp_cpu_r4_N4.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/20260805_130100_52396/results_filter_ext_zfpfilter_einspline37_zfp_cpu_r4_N4.csv (0 failed configuration(s) recorded)
+  [time] einspline37 N=4 took 149s (rc=0)
+
+=== filter [zfpfilter_miranda_zfp_cpu_r8_N1] : miranda  (N=1, zfp_cpu_r8) ===
+[filter] backend=zfp id=32013 chunk_n=1
+[filter] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE) -- these MUST match the VOL run or the two are not comparable
+CHUNKINFO dataset=miranda chunk_n=1 nchunks_actual=1 chunk_elems=37748736 chunk_bytes=301989888
+[zfp] zfp_cpu_r8: FIXED RATE 8.0 bits/value (expect ratio 8.00x)
+  miranda        zfp_cpu_r8 N=1   C=  1.14 W=  2084.96 F=    0.16 S=  444.99 X=   4.77 S2=  94.61 | E=  4.90 O=  0.75 R=   744.05 ms  ratio=  8.00x  file=36.0 MiB  RMSE=6.719e-06 maxae=6.823e-04
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/20260805_130100_52396/results_filter_zfpfilter_miranda_zfp_cpu_r8_N1.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/20260805_130100_52396/results_filter_ext_zfpfilter_miranda_zfp_cpu_r8_N1.csv (0 failed configuration(s) recorded)
+  [time] miranda N=1 took 4s (rc=0)
+
+=== filter [zfpfilter_ocean_temp_zfp_cpu_r8_N1] : ocean_temp  (N=1, zfp_cpu_r8) ===
+[filter] backend=zfp id=32013 chunk_n=1
+[filter] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE) -- these MUST match the VOL run or the two are not comparable
+CHUNKINFO dataset=ocean_temp chunk_n=1 nchunks_actual=1 chunk_elems=32280960 chunk_bytes=129123840
+[zfp] zfp_cpu_r8: FIXED RATE 8.0 bits/value (expect ratio 4.00x)
+  ocean_temp     zfp_cpu_r8 N=1   C=  1.04 W=  1214.56 F=    0.14 S=  266.82 X=   0.14 S2=  52.34 | E=  1.12 O=  0.27 R=   552.53 ms  ratio=  3.78x  file=32.6 MiB  RMSE=2.793e-04 maxae=2.552e-02
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/20260805_130100_52396/results_filter_zfpfilter_ocean_temp_zfp_cpu_r8_N1.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/20260805_130100_52396/results_filter_ext_zfpfilter_ocean_temp_zfp_cpu_r8_N1.csv (0 failed configuration(s) recorded)
+  [time] ocean_temp N=1 took 3s (rc=0)
+
+=== filter [zfpfilter_scale-T_zfp_cpu_r8_N1] : scale-T  (N=1, zfp_cpu_r8) ===
+[filter] backend=zfp id=32013 chunk_n=1
+[filter] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE) -- these MUST match the VOL run or the two are not comparable
+CHUNKINFO dataset=scale-T chunk_n=1 nchunks_actual=1 chunk_elems=141120000 chunk_bytes=564480000
+[zfp] zfp_cpu_r8: FIXED RATE 8.0 bits/value (expect ratio 4.00x)
+  scale-T        zfp_cpu_r8 N=1   C=  1.17 W=  5322.65 F=    0.16 S=  296.61 X=   0.24 S2= 177.60 | E=  1.10 O=  0.50 R=  2306.44 ms  ratio=  3.92x  file=137.3 MiB  RMSE=1.732e-06 maxae=1.001e-04
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/20260805_130100_52396/results_filter_zfpfilter_scale-T_zfp_cpu_r8_N1.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/20260805_130100_52396/results_filter_ext_zfpfilter_scale-T_zfp_cpu_r8_N1.csv (0 failed configuration(s) recorded)
+  [time] scale-T N=1 took 12s (rc=0)
+
+=== filter [zfpfilter_s3d_zfp_cpu_r8_N1] : s3d  (N=1, zfp_cpu_r8) ===
+[filter] backend=zfp id=32013 chunk_n=1
+[filter] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE) -- these MUST match the VOL run or the two are not comparable
+CHUNKINFO dataset=s3d chunk_n=1 nchunks_actual=1 chunk_elems=125000000 chunk_bytes=1000000000
+[zfp] zfp_cpu_r8: FIXED RATE 8.0 bits/value (expect ratio 8.00x)
+  s3d            zfp_cpu_r8 N=1   C=  1.12 W=  6266.58 F=    0.16 S=  226.33 X=   0.34 S2=  54.10 | E=  1.11 O=  0.49 R=  2791.91 ms  ratio=  8.00x  file=119.2 MiB  RMSE=1.568e-09 maxae=1.264e-07
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/20260805_130100_52396/results_filter_zfpfilter_s3d_zfp_cpu_r8_N1.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/20260805_130100_52396/results_filter_ext_zfpfilter_s3d_zfp_cpu_r8_N1.csv (0 failed configuration(s) recorded)
+  [time] s3d N=1 took 11s (rc=0)
+
+=== filter [zfpfilter_nyx_baryon_zfp_cpu_r8_N1] : nyx_baryon  (N=1, zfp_cpu_r8) ===
+[filter] backend=zfp id=32013 chunk_n=1
+[filter] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE) -- these MUST match the VOL run or the two are not comparable
+CHUNKINFO dataset=nyx_baryon chunk_n=1 nchunks_actual=1 chunk_elems=134217728 chunk_bytes=536870912
+[zfp] zfp_cpu_r8: FIXED RATE 8.0 bits/value (expect ratio 4.00x)
+  nyx_baryon     zfp_cpu_r8 N=1   C=  1.01 W=  4199.03 F=    0.14 S=  246.59 X=   0.18 S2=  38.21 | E=  1.64 O=  0.26 R=  2277.30 ms  ratio=  4.00x  file=128.0 MiB  RMSE=2.611e-04 maxae=2.497e-02
+wrote /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/20260805_130100_52396/results_filter_zfpfilter_nyx_baryon_zfp_cpu_r8_N1.csv and /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/filter_results/20260805_130100_52396/results_filter_ext_zfpfilter_nyx_baryon_zfp_cpu_r8_N1.csv (0 failed configuration(s) recorded)
+  [time] nyx_baryon N=1 took 11s (rc=0)
+
+=== filter [zfpfilter_einspline37_zfp_cpu_r8_N4] : einspline37  (N=4, zfp_cpu_r8) ===
+[filter] backend=zfp id=32013 chunk_n=4
+[filter] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE) -- these MUST match the VOL run or the two are not comparable
+CHUNKINFO dataset=einspline37 chunk_n=4 nchunks_actual=4 chunk_elems=847553220 chunk_bytes=3390212880
+[zfp] zfp_cpu_r8: FIXED RATE 8.0 bits/value (expect ratio 4.00x)

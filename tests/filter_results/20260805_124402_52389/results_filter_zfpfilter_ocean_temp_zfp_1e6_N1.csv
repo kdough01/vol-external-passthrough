@@ -1,0 +1,6 @@
+dataset,compressor,path,op,phase,ms,ratio,rmse
+ocean_temp,zfp_1e6,filter,write,total,1492.0027,1.5708,
+ocean_temp,zfp_1e6,filter,write,sync,157.7781,,
+ocean_temp,zfp_1e6,filter,write,csync,126.7120,,
+ocean_temp,zfp_1e6,filter,read,evict,1.0840,,
+ocean_temp,zfp_1e6,filter,read,total,869.4722,,7.737601e-10

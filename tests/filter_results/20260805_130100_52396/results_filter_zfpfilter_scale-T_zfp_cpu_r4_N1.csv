@@ -1,0 +1,6 @@
+dataset,compressor,path,op,phase,ms,ratio,rmse
+scale-T,zfp_cpu_r4,filter,write,total,4448.7167,7.8400,
+scale-T,zfp_cpu_r4,filter,write,sync,201.7534,,
+scale-T,zfp_cpu_r4,filter,write,csync,90.0891,,
+scale-T,zfp_cpu_r4,filter,read,evict,3.1308,,
+scale-T,zfp_cpu_r4,filter,read,total,1602.5909,,2.433547e-05

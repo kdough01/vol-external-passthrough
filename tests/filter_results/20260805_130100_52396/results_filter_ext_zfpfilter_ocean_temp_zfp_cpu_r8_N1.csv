@@ -1,0 +1,2 @@
+dataset,compressor,codec_kind,chunk_n,rep,logical_bytes,stored_bytes,ratio,create_ms,write_ms,flush_ms,sync_ms,close_ms,csync_ms,evict_ms,open_ms,read_ms,rmse,abs_thresh,maxae,bound_ok
+ocean_temp,zfp_cpu_r8,cpu,1,0,129123840,34179840,3.7778,1.0377,1214.5623,0.1413,266.8150,0.1449,52.3406,1.1150,0.2667,552.5300,2.793029e-04,0.000000e+00,2.552462e-02,0

@@ -1,0 +1,6 @@
+dataset,compressor,path,op,phase,ms,ratio,rmse
+nyx_baryon,zfp_1e6,filter,write,total,5059.8365,1.7099,
+nyx_baryon,zfp_1e6,filter,write,sync,141.4425,,
+nyx_baryon,zfp_1e6,filter,write,csync,94.2114,,
+nyx_baryon,zfp_1e6,filter,read,evict,3.6533,,
+nyx_baryon,zfp_1e6,filter,read,total,3438.8528,,4.332273e-08
