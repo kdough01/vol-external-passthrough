@@ -1,3 +1,0 @@
-dataset,compressor,op,total_ms,stage_ms,compress_ms,container_ms,io_ms,pressio_call_ms,device_ms,vol_compress_ms,pressio_host_ms,residual_ms,residual_frac
-miranda_zfp_cpu_r8,zfp,write,1618.8628,0.0000,1458.0288,0.1220,156.5816,1437.1661,0.0000,20.8627,1437.1661,4.1304,0.002551
-miranda_zfp_cpu_r8,zfp,read,702.4392,0.0000,655.4639,0.0000,23.0767,0.0000,0.0000,655.4639,0.0000,23.8986,0.034022
