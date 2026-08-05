@@ -1,0 +1,10 @@
+dataset,compressor,path,op,phase,ms,ratio,rmse
+scale-T,zfp_cpu_r12,vol,write,total,5672.2577,2.1778,
+scale-T,zfp_cpu_r12,vol,write,flush,106.4360,,
+scale-T,zfp_cpu_r12,vol,write,sync,141.0891,,
+scale-T,zfp_cpu_r12,vol,write,close,0.2072,,
+scale-T,zfp_cpu_r12,vol,write,csync,124.1653,,
+scale-T,zfp_cpu_r12,vol,read,evict,1.2842,,
+scale-T,zfp_cpu_r12,vol,read,total,3286.0599,,1.222624e-07
+/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_scale-T_zfp_cpu_r12_vol_N8.h5,ALL,vol,write,file,6045.3149,2.1778,
+/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_scale-T_zfp_cpu_r12_vol_N8.h5,ALL,vol,read,file,3286.4807,,
