@@ -29,7 +29,7 @@ mkdir -p "$RESULTS"
 ln -sfn "$RESULTS" "$WORK/filter_results/latest"
 
 BUILD="build_${TAG}"
-BIN="$BUILD/tests/bench_filter_timing"
+BIN=""          # resolved after the build -- CMake links to $BUILD/bin, not tests/
 CIFILE="$RESULTS/chunkinfo_${TAG}.csv"
 printf 'dataset,chunk_n,nchunks_actual,chunk_elems,chunk_bytes\n' > "$CIFILE"
 
@@ -78,8 +78,26 @@ cmake -S . -B "$BUILD" \
 env PATH="$CLEAN_PATH" LD_LIBRARY_PATH="$GCC_LIB" cmake --build "$BUILD" -j16 \
   || { echo "ERROR: build failed -- refusing to run a stale binary"; exit 1; }
 
+# ---------------------------------------------------------------------------
+# Locate the binary. CMake's RUNTIME_OUTPUT_DIRECTORY puts executables in
+# $BUILD/bin; $BUILD/tests holds only Makefiles. Hardcoding tests/ meant $BIN
+# did not exist, and `[ src -nt missing ]` is TRUE in bash -- so the staleness
+# guard fired on a build that had just succeeded.
+# ---------------------------------------------------------------------------
+for d in "$BUILD/bin" "$BUILD/tests" "$BUILD"; do
+    if [ -x "$d/bench_filter_timing" ]; then BIN="$d/bench_filter_timing"; break; fi
+done
+if [ -z "$BIN" ]; then
+    echo "ERROR: bench_filter_timing not found after a successful build. Looked in:"
+    echo "  $BUILD/bin  $BUILD/tests  $BUILD"
+    find "$BUILD" -type f -perm -u+x -name 'bench_*' 2>/dev/null
+    exit 1
+fi
+echo "Binary     : $BIN"
+
 if [ tests/bench_filter_timing.cc -nt "$BIN" ]; then
-    echo "ERROR: $BIN is older than its source"; exit 1
+    echo "ERROR: $BIN is older than its source -- refusing to run a stale binary"
+    exit 1
 fi
 
 # ---------------------------------------------------------------------------
@@ -108,7 +126,7 @@ fi
 
 # Record which zfp the filter is linked against. If this is NOT bsws=8, or if
 # it differs from the zfp the VOL comparison run used, the ratios are not
-# comparable
+# comparable and this line is the evidence.
 echo ""
 echo "=== zfp build used by the filter ==="
 ZFPSO=$(readlink -f "$LP_VIEW/lib/libzfp.so" 2>/dev/null)
@@ -201,9 +219,6 @@ else
     echo "SKIP_GATE=1 — skipping the zfp cd_values gate (ratios unverified)"
 fi
 
-# ===========================================================================
-# [2] All datasets, one chunk each (einspline37: 4).
-# ===========================================================================
 echo ""
 echo "############ [2] zfp filter — all datasets ############"
 for comp in $BOUNDS; do
