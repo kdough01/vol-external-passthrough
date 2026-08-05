@@ -1,1 +1,10 @@
 dataset,compressor,path,op,phase,ms,ratio,rmse
+einspline37,sz3_1e3,vol,write,total,116950.0044,3.3787,
+einspline37,sz3_1e3,vol,write,flush,1.3456,,
+einspline37,sz3_1e3,vol,write,sync,148.7631,,
+einspline37,sz3_1e3,vol,write,close,0.2903,,
+einspline37,sz3_1e3,vol,write,csync,61.7698,,
+einspline37,sz3_1e3,vol,read,evict,0.2186,,
+einspline37,sz3_1e3,vol,read,total,139346.0536,,5.741519e-04
+/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_qmc_sz3_1e3.h5,ALL,vol,write,file,117163.3288,3.3787,
+/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_qmc_sz3_1e3.h5,ALL,vol,read,file,139346.4464,,
