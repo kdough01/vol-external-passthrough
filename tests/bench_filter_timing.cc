@@ -4,7 +4,12 @@
 #include <cstring>
 #include <cmath>
 #include <cfloat>
+#include <ctime>
+#include <cerrno>
 #include <string>
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/stat.h>
 #include <hdf5_sz3/H5Z_SZ3.hpp>
 
 #define BENCH_CONFIG_ENABLE_HDF5
@@ -25,7 +30,6 @@
 
 #include <execinfo.h>
 #include <csignal>
-#include <unistd.h>
 
 static void bench_crash_handler(int sig) {
     void *bt[64];
@@ -33,6 +37,86 @@ static void bench_crash_handler(int sig) {
     fprintf(stderr, "\n*** caught signal %d ***\n", sig);
     backtrace_symbols_fd(bt, n, STDERR_FILENO);
     _exit(128 + sig);
+}
+
+/* ------------------------------------------------------------------------
+ * DURABILITY INSTRUMENTATION -- must match bench_vol_timing.cpp exactly, or
+ * the filter and VOL numbers are not comparable.
+ *
+ * H5Dwrite reaches HDF5's cache; H5Fflush reaches the OS page cache. Only
+ * fsync() puts the bytes on the device. Without it, write_ms measures memory
+ * and the filter would appear far faster than the VOL, which does fsync.
+ *
+ * Wall clock, not CPU clock: fsync blocks in the kernel waiting on device
+ * completion, which a CPU-time clock does not see at all.
+ * --------------------------------------------------------------------- */
+static inline double bench_wall_now_ms(void) {
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return (double)ts.tv_sec * 1.0e3 + (double)ts.tv_nsec * 1.0e-6;
+}
+
+struct BenchWallTimer {
+    double t0;
+    void   start()   { t0 = bench_wall_now_ms(); }
+    double stop_ms() { return bench_wall_now_ms() - t0; }
+};
+
+static int bench_env_int(const char *name, int dflt) {
+    const char *s = std::getenv(name);
+    if (!s || !*s) return dflt;
+    return std::atoi(s);
+}
+static int bench_do_fsync(void)     { return bench_env_int("BENCH_FSYNC", 1) != 0; }
+static int bench_do_dropcache(void) { return bench_env_int("BENCH_DROP_CACHE", 1) != 0; }
+static int bench_do_syncdir(void)   { return bench_env_int("BENCH_SYNC_DIR", 1) != 0; }
+
+/* fsync the file's data to the device. A second read-only descriptor is fine:
+ * fsync acts on the inode, not on the descriptor's write history, so it
+ * flushes everything HDF5 wrote through its own fd. sync_dir also fsyncs the
+ * containing directory so the newly created dirent is durable. */
+static double bench_fsync_path(const char *path, int sync_dir) {
+    BenchWallTimer t; t.start();
+
+    int fd = ::open(path, O_RDONLY);
+    if (fd < 0) {
+        std::fprintf(stderr, "[warn] fsync open failed %s: %s\n",
+                     path, std::strerror(errno));
+        return 0.0;
+    }
+    if (::fsync(fd) != 0)
+        std::fprintf(stderr, "[warn] fsync failed %s: %s\n",
+                     path, std::strerror(errno));
+    ::close(fd);
+
+    if (sync_dir) {
+        char dir[1024];
+        std::snprintf(dir, sizeof(dir), "%s", path);
+        char *slash = std::strrchr(dir, '/');
+        if (slash) { if (slash == dir) dir[1] = '\0'; else *slash = '\0'; }
+        else       { std::snprintf(dir, sizeof(dir), "."); }
+        int dfd = ::open(dir, O_RDONLY | O_DIRECTORY);
+        if (dfd >= 0) { (void)::fsync(dfd); ::close(dfd); }
+    }
+    return t.stop_ms();
+}
+
+/* Evict the file from the page cache so the read phase touches the device.
+ * POSIX_FADV_DONTNEED only drops CLEAN pages, hence the fsync first. Best
+ * effort: on Lustre/GPFS, client-side caching is filesystem-managed and some
+ * pages may survive. */
+static double bench_evict_path(const char *path) {
+    BenchWallTimer t; t.start();
+
+    int fd = ::open(path, O_RDONLY);
+    if (fd < 0) return 0.0;
+    (void)::fsync(fd);
+    if (posix_fadvise(fd, 0, 0, POSIX_FADV_DONTNEED) != 0)
+        std::fprintf(stderr, "[warn] fadvise DONTNEED failed %s: %s\n",
+                     path, std::strerror(errno));
+    ::close(fd);
+
+    return t.stop_ms();
 }
 
 typedef enum {
@@ -70,12 +154,29 @@ static int backend_codec_matched(filter_backend_t b) {
     return b != FILTER_DEFLATE;
 }
 
-/* Identical to bench_vol_timing.cc's XCSV_HEADER so the two merge directly. */
+/* Identical to bench_vol_timing.cpp's XCSV_HEADER so the two merge directly.
+ * 21 fields: sync_ms / csync_ms / evict_ms were added with the durability
+ * instrumentation and are inserted AFTER flush_ms, so any consumer indexing
+ * by position must be updated (abs_thresh=19, maxae=20, bound_ok=21). */
 static const char *XCSV_HEADER =
     "dataset,compressor,codec_kind,chunk_n,rep,"
     "logical_bytes,stored_bytes,ratio,"
-    "create_ms,write_ms,flush_ms,close_ms,open_ms,read_ms,"
+    "create_ms,write_ms,flush_ms,sync_ms,close_ms,csync_ms,"
+    "evict_ms,open_ms,read_ms,"
     "rmse,abs_thresh,maxae,bound_ok\n";
+
+/* A rep=-1 failure row, in the same 21-field layout. */
+static void xcsv_failure_row(FILE *xcsv, const char *dataset, const char *comp,
+                             const char *kind, int chunk_n,
+                             unsigned long long logical) {
+    std::fprintf(xcsv,
+        "%s,%s,%s,%d,-1,%llu,0,0,"
+        "-1,-1,-1,-1,-1,-1,"
+        "-1,-1,-1,"
+        "-1,-1,-1,0\n",
+        dataset, comp, kind, chunk_n, logical);
+    std::fflush(xcsv);
+}
 
 typedef struct { double min, max, mean, rmse, maxae; } bench_stats;
 
@@ -230,10 +331,9 @@ static int run_one(const bench_dataset_t *din, filter_backend_t backend,
     void *hbuf = bench_load_field(din, &d, &raw);   /* resolves HDF5-sourced dims */
     if (!hbuf) {
         std::fprintf(stderr, "[skip] %s: load failed\n", din->name);
-        std::fprintf(xcsv, "%s,%s,cpu,%d,-1,0,0,0,-1,-1,-1,-1,-1,-1,-1,-1,-1,0\n",
-                     din->name, (backend == FILTER_DEFLATE) ? "deflate" : c->name,
-                     chunk_n);
-        std::fflush(xcsv);
+        xcsv_failure_row(xcsv, din->name,
+                         (backend == FILTER_DEFLATE) ? "deflate" : c->name,
+                         "cpu", chunk_n, 0ULL);
         return -1;
     }
 
@@ -275,7 +375,12 @@ static int run_one(const bench_dataset_t *din, filter_backend_t backend,
     const double abs_bound = (backend == FILTER_SZ3 || backend == FILTER_ZFP)
                                  ? bench_abs_threshold(c, &d, range) : 0.0;
 
-    double create_ms = 0, write_ms = 0, flush_ms = 0, close_ms = 0;
+    const int do_fsync = bench_do_fsync();
+    const int do_evict = bench_do_dropcache();
+    const int do_sdir  = bench_do_syncdir();
+
+    double create_ms = 0, write_ms = 0, flush_ms = 0, sync_ms = 0;
+    double close_ms = 0, csync_ms = 0, evict_ms = 0;
     double open_ms = 0, read_ms = 0;
     unsigned long long stored = 0, filesize = 0;
     int rc = 0;
@@ -304,25 +409,36 @@ static int run_one(const bench_dataset_t *din, filter_backend_t backend,
         herr_t wret = H5Dwrite(dset, ntype, H5S_ALL, H5S_ALL, H5P_DEFAULT, hbuf);
         write_ms = wt.stop_ms();
 
-        BenchCpuTimer ft; ft.start();
+        /* H5Fflush only reaches the OS page cache; the fsync below is what
+         * forces the bytes to the device. Identical treatment to the VOL. */
+        BenchWallTimer ft; ft.start();
         (void)H5Fflush(file, H5F_SCOPE_LOCAL);
         flush_ms = ft.stop_ms();
+
+        if (do_fsync) sync_ms = bench_fsync_path(h5path, do_sdir);
 
         stored = (unsigned long long)H5Dget_storage_size(dset);  /* == VOL metric */
         H5Dclose(dset); H5Pclose(dcpl); H5Sclose(space);
 
-        BenchCpuTimer clt; clt.start();
+        BenchWallTimer clt; clt.start();
         H5Fclose(file);
         close_ms = clt.stop_ms();
+
+        /* H5Fclose can emit superblock/metadata updates after the flush, so the
+         * file is not durable until this second fsync returns. */
+        if (do_fsync) csync_ms = bench_fsync_path(h5path, do_sdir);
 
         if (wret < 0) { std::fprintf(stderr, "[ERR] H5Dwrite %s\n", d.name); rc = -1; goto cleanup; }
     }
 
-    /* ---------------- READ ---------------- */
+    /* ---------------- READ (cold cache) ---------------- */
     {
         std::memset(rbuf, 0, raw);
 
-        BenchCpuTimer ot; ot.start();
+        /* Not counted in the read total: cache teardown, not read cost. */
+        if (do_evict) evict_ms = bench_evict_path(h5path);
+
+        BenchWallTimer ot; ot.start();
         hid_t file = H5Fopen(h5path, H5F_ACC_RDONLY, H5P_DEFAULT);
         open_ms = ot.stop_ms();
         if (file < 0) { std::fprintf(stderr, "[ERR] H5Fopen %s\n", h5path); rc = -1; goto cleanup; }
@@ -355,24 +471,29 @@ static int run_one(const bench_dataset_t *din, filter_backend_t backend,
                          d.name, cname, st.maxae, thr);
 
         bench_csv_row(csv, d.name, cname, "filter", "write", "total", write_ms, ratio, -1.0);
+        bench_csv_row(csv, d.name, cname, "filter", "write", "sync",  sync_ms, -1.0, -1.0);
+        bench_csv_row(csv, d.name, cname, "filter", "write", "csync", csync_ms, -1.0, -1.0);
+        bench_csv_row(csv, d.name, cname, "filter", "read",  "evict", evict_ms, -1.0, -1.0);
         bench_csv_row(csv, d.name, cname, "filter", "read",  "total", read_ms, -1.0, st.rmse);
 
         std::fprintf(xcsv,
             "%s,%s,%s,%d,%d,%llu,%llu,%.4f,"
             "%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,"
+            "%.4f,%.4f,%.4f,"
             "%.6e,%.6e,%.6e,%d\n",
             d.name, cname, kind, chunk_n, 0,
             (unsigned long long)raw, stored, ratio,
-            create_ms, write_ms, flush_ms, close_ms, open_ms, read_ms,
+            create_ms, write_ms, flush_ms, sync_ms, close_ms, csync_ms,
+            evict_ms, open_ms, read_ms,
             st.rmse, thr, st.maxae, bound_ok);
         std::fflush(xcsv);
 
-        std::printf("  %-14s %-10s N=%-3d C=%6.2f W=%9.2f F=%8.2f X=%7.2f | "
-                    "O=%6.2f R=%9.2f ms  ratio=%6.2fx  file=%.1f MiB  "
-                    "RMSE=%.3e maxae=%.3e\n",
+        std::printf("  %-14s %-10s N=%-3d C=%6.2f W=%9.2f F=%8.2f S=%8.2f "
+                    "X=%7.2f S2=%7.2f | E=%6.2f O=%6.2f R=%9.2f ms  "
+                    "ratio=%6.2fx  file=%.1f MiB  RMSE=%.3e maxae=%.3e\n",
                     d.name, cname, chunk_n, create_ms, write_ms, flush_ms,
-                    close_ms, open_ms, read_ms, ratio,
-                    filesize / (1024.0 * 1024.0), st.rmse, st.maxae);
+                    sync_ms, close_ms, csync_ms, evict_ms, open_ms, read_ms,
+                    ratio, filesize / (1024.0 * 1024.0), st.rmse, st.maxae);
         std::fflush(stdout);
     }
 
@@ -381,10 +502,8 @@ cleanup:
      * unsupported configuration IS a result: einspline37 as a single chunk
      * exceeds HDF5's 4 GiB limit, which the VOL container has no equivalent of. */
     if (rc != 0) {
-        std::fprintf(xcsv,
-            "%s,%s,%s,%d,-1,%llu,0,0,-1,-1,-1,-1,-1,-1,-1,-1,-1,0\n",
-            d.name, cname, kind, chunk_n, (unsigned long long)raw);
-        std::fflush(xcsv);
+        xcsv_failure_row(xcsv, d.name, cname, kind, chunk_n,
+                         (unsigned long long)raw);
         std::fprintf(stderr, "[RECORDED FAILURE] %s/%s N=%d\n", d.name, cname, chunk_n);
     }
     std::free(rbuf);
@@ -427,6 +546,11 @@ int main(int argc, char **argv) {
 
     std::fprintf(stderr, "[filter] backend=%s id=%d chunk_n=%d\n",
                  backend_name(backend), (int)backend_fid(backend), chunk_n);
+    std::fprintf(stderr,
+        "[filter] durability: fsync=%d sync_dir=%d drop_cache=%d "
+        "(BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE) -- these MUST match "
+        "the VOL run or the two are not comparable\n",
+        bench_do_fsync(), bench_do_syncdir(), bench_do_dropcache());
     if (H5Zfilter_avail(backend_fid(backend)) <= 0)
         std::fprintf(stderr, "WARNING: filter %d (%s) not available. Set "
                              "HDF5_PLUGIN_PATH, and H5Z_%s_ID if the id differs.\n",
