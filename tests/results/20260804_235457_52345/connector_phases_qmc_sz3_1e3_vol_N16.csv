@@ -1,0 +1,2 @@
+dataset,compressor,op,total_ms,stage_ms,compress_ms,container_ms,io_ms,pressio_call_ms,device_ms,vol_compress_ms,pressio_host_ms,residual_ms,residual_frac
+einspline37_sz3_1e3,sz3,write,113352.7377,0.0000,110723.5812,0.2637,2297.0154,108246.0243,0.0000,2477.5570,108246.0243,331.8773,0.002928
