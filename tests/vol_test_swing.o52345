@@ -4427,3 +4427,25 @@ RANGE einspline37    min=-2.125822e+01 max=2.036857e+01 range=4.162679e+01 xform
 [chunk-out] 'sz3' rank=1 1695106440 -> 1323965092 B (1.28x), cap 1907060281 B
 [chunk-out] 'sz3' rank=1 1695106440 -> 1324874985 B (1.28x), cap 1907060281 B
 [chunk-out] 'sz3' rank=1 1695106440 -> 1332029692 B (1.27x), cap 1907060281 B
+[VOL timing] UNACCOUNTED 8161.310 ms of 147949.576 ms (5.5%) dset=einspline37_sz3_1e6 comp=sz3 -- a timer is missing
+
+=== einspline37 (12932.6 MiB, float, raw) ===
+Info: 0x55d30c5542e0
+  einspline37_sz3_1e6          C=   6.02 W=197214.34 F=  258.03 S=    44.71 X=    0.24 S2=  28.37 | E=   0.18 O=   0.35 R=147953.36 ms  ratio=  1.27x  RMSE=2.849e-07 maxae=1.000e-06
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=6.02 write=197214.34 flush=258.03 sync=44.71 close=0.24 csync=28.37 => write_total=197551.71 ms | evict=0.18 open=0.35 read=147953.36 => read_total=147953.71 ms | ratio=1.27x ===
+
+=== VOL timing [qmc_sz3_1e6_vol_N16] : einspline37 (chunking: vol, N=16) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_qmc_sz3_1e6_vol_N16.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_235457_52345/results_vol_qmc_sz3_1e6_vol_N16.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_235457_52345/results_ext_qmc_sz3_1e6_vol_N16.csv only=einspline37 comp=sz3_1e6 verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 953.0 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
