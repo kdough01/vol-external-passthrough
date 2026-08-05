@@ -48,6 +48,22 @@ zfp64_log() { printf '[zfp64] %s\n' "$*" >&2; }
 # ZFP64_PROBE can name any ELF object that pulls in libzfp; the built VOL
 # connector is preferred when present because it is the exact object whose
 # binding we care about.
+# Which libzfp does the loader actually pick for $1?
+#
+# ldd prints two different shapes and both must be handled:
+#   DT_NEEDED resolution :  libzfp.so.0 => /path/libzfp.so.0 (0x...)   -> $3
+#   LD_PRELOAD injection :  /path/libzfp.so.0 (0x...)                  -> $1
+# Reading $3 unconditionally returns empty for the preload case, which reads
+# as "unresolved" when in fact the preload is exactly what we wanted.
+# Prefer whichever line yields an absolute path.
+zfp64_resolved_zfp() {
+    ldd "$1" 2>/dev/null | awk '
+        /libzfp/ {
+            p = ($2 == "=>") ? $3 : $1
+            if (p ~ /^\//) { print p; exit }
+        }'
+}
+
 zfp64_probe_target() {
     local c
     if [ -n "${ZFP64_PROBE:-}" ] && [ -e "$ZFP64_PROBE" ]; then
@@ -149,13 +165,13 @@ zfp64_apply() {
     # silently keep the bsws=8 build.
     export LD_LIBRARY_PATH="$GCC_LIB:$libdir:$LP_VIEW/lib64:$LP_VIEW/lib"
 
-    resolved=$(ldd "$lp" 2>/dev/null | awk '/libzfp/{print $3; exit}')
+    resolved=$(zfp64_resolved_zfp "$lp")
     case "$resolved" in
         "$prefix"/*) zfp64_log "resolved via LD_LIBRARY_PATH -> $resolved" ;;
         *)
             zfp64_log "LD_LIBRARY_PATH insufficient (got: ${resolved:-none}); using LD_PRELOAD"
             export LD_PRELOAD="$lib${LD_PRELOAD:+:$LD_PRELOAD}"
-            resolved=$(ldd "$lp" 2>/dev/null | awk '/libzfp/{print $3; exit}')
+            resolved=$(zfp64_resolved_zfp "$lp")
             ;;
     esac
 
