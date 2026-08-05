@@ -3943,3 +3943,243 @@ nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        y
 MemAvailable: 949.9 GiB (needGiB is hbuf+rbuf only; the connector needs more)
 6/6 dataset paths readable
 RANGE einspline37    min=-2.125822e+01 max=2.036857e+01 range=4.162679e+01 xform=none
+
+=== einspline37 (12932.6 MiB, float, raw) ===
+Info: 0x5577bfcc3430
+  einspline37_sz3_1e6          C=   1.31 W=204582.60 F=  637.38 S=    68.41 X=    0.25 S2= 154.08 | E=   0.22 O=   0.34 R=157980.02 ms  ratio=  1.27x  RMSE=2.848e-07 maxae=1.000e-06
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.31 write=204582.60 flush=637.38 sync=68.41 close=0.25 csync=154.08 => write_total=205444.04 ms | evict=0.22 open=0.34 read=157980.02 => read_total=157980.36 ms | ratio=1.27x ===
+
+=== VOL timing [miranda_sz3_1e6_vol_N8] : miranda (chunking: vol, N=8) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_miranda_sz3_1e6_vol_N8.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_215108_52319/results_vol_miranda_sz3_1e6_vol_N8.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_215108_52319/results_ext_miranda_sz3_1e6_vol_N8.csv only=miranda comp=sz3_1e6 verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 949.9 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE miranda        min=9.999878e-01 max=3.000046e+00 range=2.000058e+00 xform=none
+[chunk] sz3        N=8   -> 8 chunks x 37748736 B (36.000 MiB, 4718592 elems, 32 slices of 147456 elems) total=301989888 B
+[VOL RAGGED] dataset 0 'sz3': clean split, 8 x 37748736 B, no ragged tail
+[chunk-out] 'sz3' rank=3 37748736 -> 185 B (204047.22x), cap 42532864 B
+[chunk-out] 'sz3' rank=3 37748736 -> 553 B (68261.73x), cap 42532864 B
+[chunk-out] 'sz3' rank=3 37748736 -> 23342 B (1617.20x), cap 42532864 B
+[chunk-out] 'sz3' rank=3 37748736 -> 5248606 B (7.19x), cap 42532864 B
+[chunk-out] 'sz3' rank=3 37748736 -> 7609268 B (4.96x), cap 42532864 B
+[chunk-out] 'sz3' rank=3 37748736 -> 1200462 B (31.45x), cap 42532864 B
+[chunk-out] 'sz3' rank=3 37748736 -> 1234 B (30590.55x), cap 42532864 B
+[chunk-out] 'sz3' rank=3 37748736 -> 569 B (66342.24x), cap 42532864 B
+
+=== miranda (288.0 MiB, double, raw) ===
+Info: 0x556de04dd3c0
+  miranda_sz3_1e6              C=   1.67 W=  1044.92 F=    0.33 S=   116.50 X=    0.26 S2= 131.81 | E=   1.15 O=   0.30 R=   858.43 ms  ratio= 21.44x  RMSE=3.197e-07 maxae=1.000e-06
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.67 write=1044.92 flush=0.33 sync=116.50 close=0.26 csync=131.81 => write_total=1295.48 ms | evict=1.15 open=0.30 read=858.43 => read_total=858.73 ms | ratio=21.44x ===
+
+=== VOL timing [miranda_sz3_1e6_vol_N16] : miranda (chunking: vol, N=16) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_miranda_sz3_1e6_vol_N16.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_215108_52319/results_vol_miranda_sz3_1e6_vol_N16.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_215108_52319/results_ext_miranda_sz3_1e6_vol_N16.csv only=miranda comp=sz3_1e6 verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 949.9 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE miranda        min=9.999878e-01 max=3.000046e+00 range=2.000058e+00 xform=none
+[chunk] sz3        N=16  -> 16 chunks x 18874368 B (18.000 MiB, 2359296 elems, 16 slices of 147456 elems) total=301989888 B
+[VOL RAGGED] dataset 0 'sz3': clean split, 16 x 18874368 B, no ragged tail
+[chunk-out] 'sz3' rank=3 18874368 -> 178 B (106035.78x), cap 21299200 B
+[chunk-out] 'sz3' rank=3 18874368 -> 543 B (34759.43x), cap 21299200 B
+[chunk-out] 'sz3' rank=3 18874368 -> 546 B (34568.44x), cap 21299200 B
+[chunk-out] 'sz3' rank=3 18874368 -> 598 B (31562.49x), cap 21299200 B
+[chunk-out] 'sz3' rank=3 18874368 -> 736 B (25644.52x), cap 21299200 B
+[chunk-out] 'sz3' rank=3 18874368 -> 23051 B (818.81x), cap 21299200 B
+[chunk-out] 'sz3' rank=3 18874368 -> 1682591 B (11.22x), cap 21299200 B
+[chunk-out] 'sz3' rank=3 18874368 -> 3940361 B (4.79x), cap 21299200 B
+[chunk-out] 'sz3' rank=3 18874368 -> 4093533 B (4.61x), cap 21299200 B
+[chunk-out] 'sz3' rank=3 18874368 -> 3932370 B (4.80x), cap 21299200 B
+[chunk-out] 'sz3' rank=3 18874368 -> 1188716 B (15.88x), cap 21299200 B
+[chunk-out] 'sz3' rank=3 18874368 -> 30237 B (624.21x), cap 21299200 B
+[chunk-out] 'sz3' rank=3 18874368 -> 1196 B (15781.24x), cap 21299200 B
+[chunk-out] 'sz3' rank=3 18874368 -> 601 B (31404.94x), cap 21299200 B
+[chunk-out] 'sz3' rank=3 18874368 -> 560 B (33704.23x), cap 21299200 B
+[chunk-out] 'sz3' rank=3 18874368 -> 525 B (35951.18x), cap 21299200 B
+
+=== miranda (288.0 MiB, double, raw) ===
+Info: 0x555e100fc2f0
+  miranda_sz3_1e6              C=   1.11 W=  1098.03 F=    0.35 S=   125.38 X=    0.19 S2= 133.41 | E=   1.09 O=   0.49 R=   675.89 ms  ratio= 20.27x  RMSE=2.955e-07 maxae=1.000e-06
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.11 write=1098.03 flush=0.35 sync=125.38 close=0.19 csync=133.41 => write_total=1358.47 ms | evict=1.09 open=0.49 read=675.89 => read_total=676.38 ms | ratio=20.27x ===
+
+=== VOL timing [scale-T_sz3_1e6_vol_N8] : scale-T (chunking: vol, N=8) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_scale-T_sz3_1e6_vol_N8.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_215108_52319/results_vol_scale-T_sz3_1e6_vol_N8.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_215108_52319/results_ext_scale-T_sz3_1e6_vol_N8.csv only=scale-T comp=sz3_1e6 verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 949.9 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE scale-T        min=5.209023e+00 max=5.754571e+00 range=5.455480e-01 xform=log1p
+[chunk] sz3        N=8   -> 8 chunks x 74880000 B (71.411 MiB, 18720000 elems, 13 slices of 1440000 elems) total=564480000 B  [RAGGED: final chunk is short]
+[VOL RAGGED] dataset 0 'sz3': 7 chunks of 74880000 B + a FINAL chunk of 40320000 B (53.8% of a full chunk). total=564480000 elem=4. The last chunk has a different length from the rest -- rule it out before blaming the codec.
+[chunk-out] 'sz3' rank=3 74880000 -> 17375863 B (4.31x), cap 84305536 B
+[chunk-out] 'sz3' rank=3 74880000 -> 16108117 B (4.65x), cap 84305536 B
+[chunk-out] 'sz3' rank=3 74880000 -> 16676115 B (4.49x), cap 84305536 B
+[chunk-out] 'sz3' rank=3 74880000 -> 16926245 B (4.42x), cap 84305536 B
+[chunk-out] 'sz3' rank=3 74880000 -> 15651847 B (4.78x), cap 84305536 B
+[chunk-out] 'sz3' rank=3 74880000 -> 15734756 B (4.76x), cap 84305536 B
+[chunk-out] 'sz3' rank=3 74880000 -> 18304288 B (4.09x), cap 84305536 B
+[chunk-out] 'sz3' rank=3 40320000 -> 12073163 B (3.34x), cap 45425536 B
+[FAIL] scale-T_sz3_1e6              maxae=4.768372e-06 exceeds 2x configured bound 1.000000e-06
+
+=== scale-T (538.3 MiB, float, raw, transformed) ===
+Info: 0x5625bbcb72d0
+  scale-T_sz3_1e6              C=   1.28 W=  4748.12 F=  107.79 S=    56.53 X=    0.23 S2=  48.26 | E=   1.09 O=   0.60 R=  4299.05 ms  ratio=  4.38x  RMSE=6.442e-07 maxae=4.768e-06 (log-space)
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.28 write=4748.12 flush=107.79 sync=56.53 close=0.23 csync=48.26 => write_total=4962.20 ms | evict=1.09 open=0.60 read=4299.05 => read_total=4299.65 ms | ratio=4.38x ===
+
+=== VOL timing [scale-T_sz3_1e6_vol_N16] : scale-T (chunking: vol, N=16) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_scale-T_sz3_1e6_vol_N16.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_215108_52319/results_vol_scale-T_sz3_1e6_vol_N16.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_215108_52319/results_ext_scale-T_sz3_1e6_vol_N16.csv only=scale-T comp=sz3_1e6 verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 949.9 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE scale-T        min=5.209023e+00 max=5.754571e+00 range=5.455480e-01 xform=log1p
+[chunk] sz3        N=16  -> 14 chunks x 40320000 B (38.452 MiB, 10080000 elems, 7 slices of 1440000 elems) total=564480000 B
+[VOL RAGGED] dataset 0 'sz3': clean split, 14 x 40320000 B, no ragged tail
+[chunk-out] 'sz3' rank=3 40320000 -> 10579598 B (3.81x), cap 45425536 B
+[chunk-out] 'sz3' rank=3 40320000 -> 9096056 B (4.43x), cap 45425536 B
+[chunk-out] 'sz3' rank=3 40320000 -> 9252695 B (4.36x), cap 45425536 B
+[chunk-out] 'sz3' rank=3 40320000 -> 9418441 B (4.28x), cap 45425536 B
+[chunk-out] 'sz3' rank=3 40320000 -> 9503537 B (4.24x), cap 45425536 B
+[chunk-out] 'sz3' rank=3 40320000 -> 9706909 B (4.15x), cap 45425536 B
+[chunk-out] 'sz3' rank=3 40320000 -> 9776363 B (4.12x), cap 45425536 B
+[chunk-out] 'sz3' rank=3 40320000 -> 9570083 B (4.21x), cap 45425536 B
+[chunk-out] 'sz3' rank=3 40320000 -> 8848203 B (4.56x), cap 45425536 B
+[chunk-out] 'sz3' rank=3 40320000 -> 9113777 B (4.42x), cap 45425536 B
+[chunk-out] 'sz3' rank=3 40320000 -> 8764671 B (4.60x), cap 45425536 B
+[chunk-out] 'sz3' rank=3 40320000 -> 9810409 B (4.11x), cap 45425536 B
+[chunk-out] 'sz3' rank=3 40320000 -> 10561921 B (3.82x), cap 45425536 B
+[chunk-out] 'sz3' rank=3 40320000 -> 12073163 B (3.34x), cap 45425536 B
+[FAIL] scale-T_sz3_1e6              maxae=5.245209e-06 exceeds 2x configured bound 1.000000e-06
+
+=== scale-T (538.3 MiB, float, raw, transformed) ===
+Info: 0x55f3fb265540
+  scale-T_sz3_1e6              C=   1.17 W=  4756.73 F=   94.75 S=   295.26 X=    0.22 S2=  49.00 | E=   0.22 O=   0.43 R=  4453.11 ms  ratio=  4.15x  RMSE=6.088e-07 maxae=5.245e-06 (log-space)
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.17 write=4756.73 flush=94.75 sync=295.26 close=0.22 csync=49.00 => write_total=5197.14 ms | evict=0.22 open=0.43 read=4453.11 => read_total=4453.54 ms | ratio=4.15x ===
+
+=== VOL timing [s3d_sz3_1e6_vol_N8] : s3d (chunking: vol, N=8) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_s3d_sz3_1e6_vol_N8.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_215108_52319/results_vol_s3d_sz3_1e6_vol_N8.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_215108_52319/results_ext_s3d_sz3_1e6_vol_N8.csv only=s3d comp=sz3_1e6 verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 949.9 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE s3d            min=-6.362436e-15 max=3.920002e-02 range=3.920002e-02 xform=none
+[chunk] sz3        N=8   -> 8 chunks x 126000000 B (120.163 MiB, 15750000 elems, 63 slices of 250000 elems) total=1000000000 B  [RAGGED: final chunk is short]
+[VOL RAGGED] dataset 0 'sz3': 7 chunks of 126000000 B + a FINAL chunk of 118000000 B (93.7% of a full chunk). total=1000000000 elem=8. The last chunk has a different length from the rest -- rule it out before blaming the codec.
+[chunk-out] 'sz3' rank=3 126000000 -> 607267 B (207.49x), cap 141815536 B
+[chunk-out] 'sz3' rank=3 126000000 -> 613192 B (205.48x), cap 141815536 B
+[chunk-out] 'sz3' rank=3 126000000 -> 571541 B (220.46x), cap 141815536 B
+[chunk-out] 'sz3' rank=3 126000000 -> 667886 B (188.65x), cap 141815536 B
+[chunk-out] 'sz3' rank=3 126000000 -> 641181 B (196.51x), cap 141815536 B
+[chunk-out] 'sz3' rank=3 126000000 -> 645882 B (195.08x), cap 141815536 B
+[chunk-out] 'sz3' rank=3 126000000 -> 552023 B (228.25x), cap 141815536 B
+[chunk-out] 'sz3' rank=3 118000000 -> 588787 B (200.41x), cap 132815536 B
+
+=== s3d (953.7 MiB, double, raw) ===
+Info: 0x5621a0bfc3b0
+  s3d_sz3_1e6                  C=   1.11 W=  3022.21 F=    0.32 S=    88.39 X=    0.22 S2=  54.72 | E=   1.10 O=   0.43 R=  2189.75 ms  ratio=204.59x  RMSE=2.869e-07 maxae=1.000e-06
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.11 write=3022.21 flush=0.32 sync=88.39 close=0.22 csync=54.72 => write_total=3166.97 ms | evict=1.10 open=0.43 read=2189.75 => read_total=2190.18 ms | ratio=204.59x ===
+
+=== VOL timing [s3d_sz3_1e6_vol_N16] : s3d (chunking: vol, N=16) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_s3d_sz3_1e6_vol_N16.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_215108_52319/results_vol_s3d_sz3_1e6_vol_N16.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_215108_52319/results_ext_s3d_sz3_1e6_vol_N16.csv only=s3d comp=sz3_1e6 verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 949.9 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE s3d            min=-6.362436e-15 max=3.920002e-02 range=3.920002e-02 xform=none
+[chunk] sz3        N=16  -> 16 chunks x 64000000 B (61.035 MiB, 8000000 elems, 32 slices of 250000 elems) total=1000000000 B  [RAGGED: final chunk is short]
+[VOL RAGGED] dataset 0 'sz3': 15 chunks of 64000000 B + a FINAL chunk of 40000000 B (62.5% of a full chunk). total=1000000000 elem=8. The last chunk has a different length from the rest -- rule it out before blaming the codec.
+[chunk-out] 'sz3' rank=3 64000000 -> 324089 B (197.48x), cap 72065536 B
+[chunk-out] 'sz3' rank=3 64000000 -> 336290 B (190.31x), cap 72065536 B
+[chunk-out] 'sz3' rank=3 64000000 -> 353726 B (180.93x), cap 72065536 B
+[chunk-out] 'sz3' rank=3 64000000 -> 353657 B (180.97x), cap 72065536 B
+[chunk-out] 'sz3' rank=3 64000000 -> 399811 B (160.08x), cap 72065536 B
+[chunk-out] 'sz3' rank=3 64000000 -> 388331 B (164.81x), cap 72065536 B
+[chunk-out] 'sz3' rank=3 64000000 -> 390545 B (163.87x), cap 72065536 B
+[chunk-out] 'sz3' rank=3 64000000 -> 395745 B (161.72x), cap 72065536 B
+[chunk-out] 'sz3' rank=3 64000000 -> 370255 B (172.85x), cap 72065536 B
+[chunk-out] 'sz3' rank=3 64000000 -> 389692 B (164.23x), cap 72065536 B
+[chunk-out] 'sz3' rank=3 64000000 -> 368330 B (173.76x), cap 72065536 B
+[chunk-out] 'sz3' rank=3 64000000 -> 385807 B (165.89x), cap 72065536 B
+[chunk-out] 'sz3' rank=3 64000000 -> 369492 B (173.21x), cap 72065536 B
+[chunk-out] 'sz3' rank=3 64000000 -> 354296 B (180.64x), cap 72065536 B
+[chunk-out] 'sz3' rank=3 64000000 -> 355604 B (179.98x), cap 72065536 B
+[chunk-out] 'sz3' rank=3 40000000 -> 218363 B (183.18x), cap 45065536 B
+
+=== s3d (953.7 MiB, double, raw) ===
+Info: 0x5595c6d342e0
+  s3d_sz3_1e6                  C=   1.07 W=  2859.69 F=    0.35 S=   103.98 X=    0.22 S2=  57.92 | E=   2.38 O=   0.43 R=  1870.08 ms  ratio=173.79x  RMSE=3.121e-07 maxae=1.000e-06
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.07 write=2859.69 flush=0.35 sync=103.98 close=0.22 csync=57.92 => write_total=3023.24 ms | evict=2.38 open=0.43 read=1870.08 => read_total=1870.52 ms | ratio=173.79x ===
+
+=== VOL timing [nyx_baryon_sz3_1e6_vol_N8] : nyx_baryon (chunking: vol, N=8) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_nyx_baryon_sz3_1e6_vol_N8.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_215108_52319/results_vol_nyx_baryon_sz3_1e6_vol_N8.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_215108_52319/results_ext_nyx_baryon_sz3_1e6_vol_N8.csv only=nyx_baryon comp=sz3_1e6 verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 949.9 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE nyx_baryon     min=5.637747e-02 max=1.166017e+01 range=1.160379e+01 xform=log1p
+[chunk] sz3        N=8   -> 8 chunks x 67108864 B (64.000 MiB, 16777216 elems, 64 slices of 262144 elems) total=536870912 B
+[VOL RAGGED] dataset 0 'sz3': clean split, 8 x 67108864 B, no ragged tail
