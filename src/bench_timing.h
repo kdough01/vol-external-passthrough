@@ -17,12 +17,6 @@
 extern "C" {
 #endif
 
-static inline double bench_now_ms(void) {
-    struct timespec ts;
-    clock_gettime(CLOCK_MONOTONIC, &ts);
-    return (double)ts.tv_sec * 1.0e3 + (double)ts.tv_nsec * 1.0e-6;
-}
-
 typedef enum {
     BENCH_PHASE_TOTAL    = 0, /* end-to-end H5Dwrite / H5Dread wall time     */
     BENCH_PHASE_COMPRESS = 1, /* (de)compressor only: CPU codec or GPU codec */

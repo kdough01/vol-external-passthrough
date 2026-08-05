@@ -222,6 +222,7 @@ herr_t H5VL_pass_through_ext_decompress_pressio(compression_ctx *ctx, const void
 
 int H5VL_pass_through_ext_compressor_available(const char *compressor_id);
 int H5VL_pass_through_ext_buf_is_device(const void *p);
+void H5VL_pass_through_ext_cuda_warmup(void);
 
 /* Destroy Functions */
 void config_params_destroy(config_params *p);
