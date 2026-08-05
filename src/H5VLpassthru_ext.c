@@ -2306,6 +2306,9 @@ H5VL_pass_through_ext_dataset_read(
             rreq.dset_name     = dset_name;
             rreq.u             = u;
 
+            ctx->pressio_call_ms = 0.0;
+            ctx->device_ms       = 0.0;
+
             herr_t rc;
             switch (plan.kind) {
             case VOL_CONT_PRESSIO:     rc = vol_read_pressio(&rreq, &t);     break;
@@ -2347,8 +2350,17 @@ H5VL_pass_through_ext_dataset_read(
             continue;
         }
 
-        vol_timing_emit(dset_name, ctx->compressor_id, "read",
-                        bench_now_ms() - _d0, t.decomp_ms, t.io_ms);
+        {
+            vol_write_timing_t rt;
+            memset(&rt, 0, sizeof(rt));
+            rt.total_ms        = bench_now_ms() - _d0;
+            rt.compress_ms     = t.decomp_ms;
+            rt.io_ms           = t.io_ms;
+            rt.pressio_call_ms = ctx->pressio_call_ms;
+            rt.device_ms       = ctx->device_ms;
+            vol_timing_finalize(&rt, dset_name, ctx->compressor_id, 0.03);
+            vol_timing_emit_ex(dset_name, ctx->compressor_id, "read", &rt);
+        }
     }
 
     return ret_val;
