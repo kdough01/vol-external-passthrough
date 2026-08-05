@@ -303,8 +303,8 @@ declare -A DATASET=(
 # "zfp_cpu_r" matches nothing -- every name must be spelled out in full.
 # ===========================================================================
 CHUNK_COUNTS="8 16"
-# noop cuszp_1e3 cuszp_1e6 sz3_1e3 sz3_1e6 zfp_1e3 zfp_1e6
-SWEEP_COMPS="zfp_cpu_r4 zfp_cpu_r8 zfp_cpu_r12 zfp_cpu_r16 zfp_gpu_r4 zfp_gpu_r8 zfp_gpu_r12 zfp_gpu_r16"
+# noop cuszp_1e3 cuszp_1e6 sz3_1e3 sz3_1e6 zfp_cpu_r4 zfp_cpu_r8 zfp_cpu_r12 zfp_cpu_r16 zfp_gpu_r4 zfp_gpu_r8 zfp_gpu_r12 zfp_gpu_r16
+SWEEP_COMPS="szx"
 # scale-T s3d nyx_baryon ocean_temp qmc
 SWEEP_GROUPS="miranda"
 
@@ -326,6 +326,7 @@ for comp in $SWEEP_COMPS; do
         run_vol_group "$g" "${DATASET[$g]}" "$comp" "" ""
     done
 
+    # vol pressio
     for mode in vol pressio; do
         # the VOL rejects noop under pressio chunking by design — skip, don't fail
         if [ "$comp" = "noop" ] && [ "$mode" = "pressio" ]; then
@@ -373,10 +374,10 @@ if [ -n "${VOL_NSYS:-}" ] && command -v nsys >/dev/null 2>&1; then
     nsys stats --report cuda_gpu_mem_size_sum "$RESULTS/vol_cuszp.nsys-rep" 2>/dev/null | head -20
 fi
 
-echo ""
-echo "=== [6] Filter (deflate) timing ==="
-"$BIN"/bench_filter_timing --deflate \
-    --h5 "$WORK/bench_filter.h5" --out "$RESULTS/results_filter.csv"
+# echo ""
+# echo "=== [6] Filter (deflate) timing ==="
+# "$BIN"/bench_filter_timing --deflate \
+#     --h5 "$WORK/bench_filter.h5" --out "$RESULTS/results_filter.csv"
 
 # ===========================================================================
 # STEP 7 -- zfp CPU/GPU pair invariant.

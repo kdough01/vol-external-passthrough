@@ -483,6 +483,16 @@ static const bench_compressor_t BENCH_COMPRESSORS[] = {
       BENCH_CPU_CODEC, 0, BENCH_BOUND_ABS, 1e-6, NULL,
       "ZFP serial fixed-accuracy 1e-6 (CPU only; no CUDA equivalent)." },
 
+      { "szx_1e3", "szx",
+      "{\"pressio:abs\":1e-3}",
+      BENCH_CPU_CODEC, 0, BENCH_BOUND_ABS, 1e-3, NULL,
+      "SZx ultra-fast error-bounded, abs 1e-3. Matches sz3_1e3 / cuszp_1e3." },
+
+    { "szx_1e6", "szx",
+      "{\"pressio:abs\":1e-6}",
+      BENCH_CPU_CODEC, 0, BENCH_BOUND_ABS, 1e-6, NULL,
+      "SZx ultra-fast error-bounded, abs 1e-6. Matches sz3_1e6 / cuszp_1e6." },
+
     /* --- JSON-path chunking (N chunks via opts_json; do NOT set VOL_COMP_* env).
      *     chunk_n=8 divides every static dataset. noop+pressio is omitted:
      *     rejected by the VOL by design. --- */
@@ -522,6 +532,24 @@ static const bench_compressor_t BENCH_COMPRESSORS[] = {
        "\"vol:chunking_mode\":\"pressio\",\"vol:chunk_n\":8}",
       BENCH_CPU_CODEC, 0, BENCH_BOUND_ABS, 1e-6, NULL,
       "sz3 1e-6, pressio chunking via opts_json." },
+
+    { "szx_1e3_vjson", "szx",
+      "{\"pressio:abs\":1e-3,\"vol:chunking_mode\":\"vol\",\"vol:chunk_n\":8}",
+      BENCH_CPU_CODEC, 0, BENCH_BOUND_ABS, 1e-3, NULL,
+      "szx 1e-3, VOL chunking via opts_json." },
+      { "szx_1e3_vjson", "szx",
+      "{\"pressio:abs\":1e-3,\"vol:chunking_mode\":\"pressio\",\"vol:chunk_n\":8}",
+      BENCH_CPU_CODEC, 0, BENCH_BOUND_ABS, 1e-3, NULL,
+      "szx 1e-3, VOL chunking via opts_json." },
+
+      { "szx_1e6_vjson", "szx",
+      "{\"pressio:abs\":1e-3,\"vol:chunking_mode\":\"vol\",\"vol:chunk_n\":8}",
+      BENCH_CPU_CODEC, 0, BENCH_BOUND_ABS, 1e-6, NULL,
+      "szx 1e-6, VOL chunking via opts_json." },
+      { "szx_1e6_vjson", "szx",
+      "{\"pressio:abs\":1e-3,\"vol:chunking_mode\":\"pressio\",\"vol:chunk_n\":8}",
+      BENCH_CPU_CODEC, 0, BENCH_BOUND_ABS, 1e-6, NULL,
+      "szx 1e-6, VOL chunking via opts_json." },
 
     { "cuszp_1e3_vjson", "cuszp",
       "{\"pressio:abs\":1e-3,\"cuszp:mode_str\":\"outlier\","
