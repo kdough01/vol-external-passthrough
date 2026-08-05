@@ -4422,3 +4422,8 @@ RANGE einspline37    min=-2.125822e+01 max=2.036857e+01 range=4.162679e+01 xform
 [chunk-out] 'sz3' rank=1 1695106440 -> 1333197646 B (1.27x), cap 1907060281 B
 [chunk-out] 'sz3' rank=1 1695106440 -> 1324098101 B (1.28x), cap 1907060281 B
 [chunk-out] 'sz3' rank=1 1695106440 -> 1323987123 B (1.28x), cap 1907060281 B
+[chunk-out] 'sz3' rank=1 1695106440 -> 1337459525 B (1.27x), cap 1907060281 B
+[chunk-out] 'sz3' rank=1 1695106440 -> 1337954477 B (1.27x), cap 1907060281 B
+[chunk-out] 'sz3' rank=1 1695106440 -> 1323965092 B (1.28x), cap 1907060281 B
+[chunk-out] 'sz3' rank=1 1695106440 -> 1324874985 B (1.28x), cap 1907060281 B
+[chunk-out] 'sz3' rank=1 1695106440 -> 1332029692 B (1.27x), cap 1907060281 B
