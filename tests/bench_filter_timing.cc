@@ -295,32 +295,43 @@ static hid_t make_dcpl(const bench_dataset_t *d, filter_backend_t backend,
         break;
     }
 
-    case FILTER_ZFP: {
+case FILTER_ZFP: {
 #ifdef VOL_HAVE_H5ZZFP
         size_t       cd_nelmts = 10;
         unsigned int cd_values[10] = {0};
         double       rate = bench_zfp_rate_from_json(c);
 
         if (rate > 0.0) {
-            /* Fixed-rate, matching the VOL's zfp_*_rN entries. Compressed size
-             * is analytic (rate bits per value), so the filter and the VOL MUST
-             * report the same ratio: 64/rate for f64, 32/rate for f32. Any
-             * difference is a bug, not a result. */
             H5Pset_zfp_rate_cdata(rate, cd_nelmts, cd_values);
+            std::fprintf(stderr, "[zfp] %s: FIXED RATE %.1f bits/value "
+                         "(expect ratio %.2fx)\n",
+                         c ? c->name : "?", rate,
+                         (d->dtype == BENCH_F64 ? 64.0 : 32.0) / rate);
         } else if (abs_bound > 0.0) {
             H5Pset_zfp_accuracy_cdata(abs_bound, cd_nelmts, cd_values);
+            std::fprintf(stderr, "[zfp] %s: FIXED ACCURACY %.3e\n",
+                         c ? c->name : "?", abs_bound);
         } else {
-            /* Neither: running at accuracy=0 would be near-lossless and would
-             * NOT be what the VOL did. Fail loudly instead. */
-            std::fprintf(stderr, "[ERR] zfp entry '%s' has neither zfp:rate nor "
-                         "an absolute bound -- refusing to run at accuracy=0\n",
-                         c ? c->name : "?");
+            std::fprintf(stderr,
+                "[ERR] zfp entry '%s' declares neither zfp:rate nor an "
+                "absolute bound; refusing to run it at accuracy=0\n",
+                c ? c->name : "?");
             H5Pclose(dcpl);
             return H5I_INVALID_HID;
         }
         H5Pset_filter(dcpl, backend_fid(backend), H5Z_FLAG_MANDATORY,
                       (unsigned)cd_nelmts, cd_values);
 #else
+        (void)abs_bound;
+        std::fprintf(stderr,
+            "[ERR] H5Zzfp_plugin.h not found at build time -- cannot set zfp "
+            "rate or accuracy, so filter rows would not be comparable to the "
+            "VOL. Add the H5Z-ZFP include dir to the build and rebuild.\n");
+        H5Pclose(dcpl);
+        return H5I_INVALID_HID;
+#endif
+        break;
+    }
 
     default: {
         unsigned cd[1] = { 0 };
