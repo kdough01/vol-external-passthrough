@@ -78,7 +78,23 @@ ls build/ || { echo "Build failed"; exit 1; }
 echo "--- build/tests/ ---"
 ls build/tests/ || { echo "No tests/ in build"; exit 1; }
 
-export LD_LIBRARY_PATH=${GCC_LIB}:${LP_VIEW}/lib64:${LP_VIEW}/lib
+# ===========================================================================
+# RUNTIME ENVIRONMENT
+#
+# zfp64_preamble.sh sets LD_LIBRARY_PATH (and LD_PRELOAD if the binaries carry
+# DT_RPATH rather than DT_RUNPATH) so libpressio binds to zfp@0.5.5 bsws=64
+# instead of the env's bsws=8 build. zfp's CUDA backend requires a 64-bit bit
+# stream word size; with bsws=8 the cuda execution policy is unavailable.
+#
+# It also sets BENCH_FSYNC / BENCH_DROP_CACHE / BENCH_SYNC_DIR so write_ms and
+# read_ms measure the device rather than the page cache.
+#
+# DO NOT export LD_LIBRARY_PATH after this point -- that is what silently
+# reverts the swap.
+# ===========================================================================
+# export BENCH_ZFP_SMOKE=1     # uncomment for a standalone GPU zfp check first
+source "$PBS_O_WORKDIR/zfp64_preamble.sh"
+
 export HDF5_USE_FILE_LOCKING=FALSE
 
 PLUGIN_DIR="$(pwd)/build"
@@ -108,12 +124,10 @@ else
     echo "$STREAM_KEYS"
 fi
 
+XCSV_HEADER_21="dataset,compressor,codec_kind,chunk_n,rep,logical_bytes,stored_bytes,ratio,create_ms,write_ms,flush_ms,sync_ms,close_ms,csync_ms,evict_ms,open_ms,read_ms,rmse,abs_thresh,maxae,bound_ok"
+
 # ===========================================================================
 # run_vol_group TAG SEL COMP MODE NCHUNKS
-#   MODE:    "" = native (default), "vol", "pressio"
-#   NCHUNKS: chunk count for vol/pressio; "" = single chunk
-# Env vars override any vol:* keys in opts_json, so the *_?json JSON-path runs
-# must be launched with MODE="" and NCHUNKS="".
 # ===========================================================================
 run_vol_group () {
     local tag="$1"; local sel="$2"; local comp="$3"; local mode="$4"; local nchunks="$5"
@@ -123,9 +137,6 @@ run_vol_group () {
     local xcsv="$RESULTS/results_ext_${label}.csv"
     local pcsv="$RESULTS/connector_phases_${label}.csv"
 
-    # bench_vol_timing writes ONE FILE PER REPETITION, derived from $h5:
-    #   <base>_<comp>_r<N>.h5 and <base>_warmup.h5
-    # It unlinks them itself; this glob only cleans up after a killed run.
     rm -f "$H5DIR"/bench_"${label}"*.h5 "$pcsv"
     echo ""
     echo "=== VOL timing [$label] : $sel (chunking: ${mode:-native}${nchunks:+, N=${nchunks}}) ==="
@@ -150,11 +161,9 @@ run_vol_group () {
 
     if [ $rc -ne 0 ]; then
         # Record the failure AS A ROW so a missing run shows up as missing in the
-        # plots rather than silently vanishing. Column order must match
-        # XCSV_HEADER in bench_vol_timing.cc (18 fields).
-        [ -f "$xcsv" ] || printf '%s\n' \
-          "dataset,compressor,codec_kind,chunk_n,rep,logical_bytes,stored_bytes,ratio,create_ms,write_ms,flush_ms,close_ms,open_ms,read_ms,rmse,abs_thresh,maxae,bound_ok" > "$xcsv"
-        printf '%s,%s,NA,0,-1,0,0,0,-1,-1,-1,-1,-1,-1,-1,-1,-1,0\n' "$sel" "$comp" >> "$xcsv"
+        # plots rather than silently vanishing. 21 fields, matching XCSV_HEADER.
+        [ -f "$xcsv" ] || printf '%s\n' "$XCSV_HEADER_21" > "$xcsv"
+        printf '%s,%s,NA,0,-1,0,0,0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0\n' "$sel" "$comp" >> "$xcsv"
         if [ $rc -eq 137 ]; then
             echo "  [FAIL] $label KILLED BY TIMEOUT (${VOL_TIMEOUT:-1800}s) — recorded as rep=-1"
         else
@@ -168,19 +177,12 @@ declare -A DATASET=(
   [miranda]=miranda   [ocean_temp]=ocean_temp  [qmc]=einspline37
   [scale-T]=scale-T   [s3d]=s3d                [nyx_baryon]=nyx_baryon )
 
-# ===========================================================================
-# STEP 1 -- noop gate.
-#
-# noop has no device work, so device_ms must be exactly 0.0 and the residual
-# near zero. If noop is not clean, the instrumentation is wrong and nothing
-# downstream is worth reading. Run this before the sweep, every time.
-# ===========================================================================
 # echo ""
 # echo "=== [1] noop instrumentation gate (miranda) ==="
-# BENCH_REPS=2 BENCH_VERIFY=1 VOL_TIMING_STRICT=1 \
+# BENCH_VERIFY=1 VOL_TIMING_STRICT=1 \
 #     run_vol_group gate "miranda" "noop" "" ""
 
-# GATE_CSV="$RESULTS/connector_phases_gate_noop_native.csv"
+# GATE_CSV="$RESULTS/connector_phases_gate_noop.csv"
 # if [ -f "$GATE_CSV" ]; then
 #     echo "--- gate phases ---"
 #     column -t -s, "$GATE_CSV"
@@ -197,40 +199,46 @@ declare -A DATASET=(
 # ===========================================================================
 # STEP 2 -- Initialisation vs steady-state.
 #
-# Every measurement used to be a cold process (one dataset x one compressor),
-# so a single H5Dwrite absorbed CUDA context creation, cuSZp module load, the
-# first cudaMalloc, and libpressio plugin construction -- all one-time, all
-# invariant to the error bound. Compare r0 against r1..r3 here:
-#   r0 >> r1~r3  -> you were reporting initialisation as VOL overhead
-#   all equal    -> the cost is per-write; the compress-path fixes are the target
+# Every measurement is a cold process (one dataset x one compressor), so a
+# single H5Dwrite absorbs CUDA context creation, cuSZp module load, the first
+# cudaMalloc, and libpressio plugin construction -- all one-time, all invariant
+# to the error bound. Requires a repetition loop in bench_vol_timing to be
+# meaningful; see the BENCH_REPS note in run_vol_group.
 # ===========================================================================
 # echo ""
-# echo "=== [2] repetition diagnostic (miranda x cuszp, 4 reps) ==="
+# echo "=== [2] repetition diagnostic (miranda x cuszp) ==="
 # for comp in cuszp_1e3 cuszp_1e6; do
-#     BENCH_REPS=4 run_vol_group reps "miranda" "$comp" "" ""
+#     run_vol_group reps "miranda" "$comp" "" ""
 # done
-
+#
 # echo ""
 # echo "--- per-rep timings (look for r0 as an outlier) ---"
 # for f in "$RESULTS"/results_ext_reps_*.csv; do
 #     [ -f "$f" ] || continue
 #     echo "== $(basename "$f") =="
 #     awk -F, 'NR==1{next} {
-#         printf "  rep %-3s create=%8.2f write=%10.2f flush=%9.2f close=%9.2f open=%8.2f read=%10.2f ratio=%6.2f\n",
-#                $5,$9,$10,$11,$12,$13,$14,$8 }' "$f"
+#         printf "  rep %-3s create=%8.2f write=%10.2f flush=%9.2f sync=%9.2f close=%9.2f csync=%8.2f | evict=%8.2f open=%8.2f read=%10.2f ratio=%6.2f\n",
+#                $5,$9,$10,$11,$12,$13,$14,$15,$16,$17,$8 }' "$f"
 # done
 
-# ===========================================================================
-# STEP 3 -- The sweep.
-# ===========================================================================
 CHUNK_COUNTS="8 16"
-# noop cuszp_1e3 cuszp_1e6 sz3_1e3 sz3_1e6
-SWEEP_COMPS="zfp_cpu_r zfp_gpu_r"
+# noop cuszp_1e3 cuszp_1e6 sz3_1e3 sz3_1e6 zfp_1e3 zfp_1e6
+SWEEP_COMPS="zfp_cpu_r4 zfp_cpu_r8 zfp_cpu_r12 zfp_cpu_r16 zfp_gpu_r4 zfp_gpu_r8 zfp_gpu_r12 zfp_gpu_r16"
 # scale-T s3d nyx_baryon ocean_temp qmc
 SWEEP_GROUPS="miranda"
 
+# If the bsws=64 swap did not take, the GPU zfp rows would be invalid or would
+# simply fail. Drop them rather than burning walltime producing garbage.
+if [ "${BENCH_ZFP64:-1}" = "0" ]; then
+    echo ""
+    echo "!!! GPU zfp unavailable (bsws=64 swap not applied) -- dropping zfp_gpu_* from the sweep"
+    SWEEP_COMPS="zfp_cpu_r4 zfp_cpu_r8 zfp_cpu_r12 zfp_cpu_r16"
+fi
+
 echo ""
 echo "=== [3] full sweep ==="
+echo "    compressors: $SWEEP_COMPS"
+echo "    datasets:    $SWEEP_GROUPS"
 for comp in $SWEEP_COMPS; do
     # native baseline (the default path)
     for g in $SWEEP_GROUPS; do
@@ -252,11 +260,6 @@ for comp in $SWEEP_COMPS; do
     done
 done
 
-# ---------------------------------------------------------------------------
-# JSON-path validation: chunking selected via opts_json with NO env override.
-# Exercises DCPL JSON -> parse at ctx create -> _VOL_OPTIONS_JSON snapshot ->
-# replay+parse at dataset_open.
-# ---------------------------------------------------------------------------
 echo ""
 echo "=== [4] JSON-path chunking selection (no VOL_COMP_* env set) ==="
 for comp in sz3_1e3_vjson sz3_1e3_pjson cuszp_1e3_vjson cuszp_1e3_pjson; do
@@ -273,11 +276,11 @@ if [ -n "${VOL_NSYS:-}" ] && command -v nsys >/dev/null 2>&1; then
     echo "=== [5] nsys trace (miranda x cuszp_1e3) ==="
     env HDF5_VOL_CONNECTOR="pass_through_ext under_vol=0;under_info={}" \
         HDF5_PLUGIN_PATH="$PLUGIN_DIR" \
-        BENCH_ONLY=miranda BENCH_COMP=cuszp_1e3 BENCH_REPS=2 \
+        BENCH_ONLY=miranda BENCH_COMP=cuszp_1e3 \
         nsys profile --trace=cuda,nvtx -o "$RESULTS/vol_cuszp" --force-overwrite true \
             ./build/tests/bench_vol_timing "$H5DIR/bench_nsys.h5" \
                 "$RESULTS/results_vol_nsys.csv" "$RESULTS/results_ext_nsys.csv"
-    rm -f "$H5DIR/bench_nsys.h5"
+    rm -f "$H5DIR"/bench_nsys*.h5
     echo "--- kernel/memcpy stream assignment (Strm column) ---"
     nsys stats --report cuda_gpu_trace "$RESULTS/vol_cuszp.nsys-rep" 2>/dev/null | head -40
     echo "--- transfer byte totals (HtoD should be ~dataset size, DtoH ~compressed) ---"
@@ -289,13 +292,36 @@ echo "=== [6] Filter (deflate) timing ==="
 ./build/tests/bench_filter_timing --deflate \
     --h5 "$WORK/bench_filter.h5" --out "$RESULTS/results_filter.csv"
 
-# ===========================================================================
-# SUMMARIES
-#
-# The old script wrote ignore_connector_phases_*.csv but globbed
-# connector_phases_*.csv, so every summary block below matched nothing. Both
-# now use $RESULTS with no prefix.
-# ===========================================================================
+echo ""
+echo "=== [7] zfp CPU/GPU pair invariant (stored_bytes must match EXACTLY) ==="
+awk -F, '
+FNR==1 { f=FILENAME; sub(/.*results_ext_/,"",f); sub(/\.csv$/,"",f); next }
+$2 ~ /^zfp_(cpu|gpu)_r[0-9]+$/ && $5 != "-1" {
+    side = ($2 ~ /^zfp_cpu_/) ? "cpu" : "gpu"
+    key  = f; gsub(/zfp_(cpu|gpu)_/, "zfp_", key)
+    bytes[key SUBSEP side] = $7
+    rmse[key SUBSEP side]  = $18
+    keys[key] = 1
+}
+END {
+    n = 0; bad = 0
+    for (k in keys) {
+        c = bytes[k SUBSEP "cpu"]; g = bytes[k SUBSEP "gpu"]
+        if (c == "" || g == "") { printf "  [SKIP] %-40s incomplete pair\n", k; continue }
+        n++
+        if (c == g)
+            printf "  [OK]   %-40s stored=%-12s rmse cpu=%s gpu=%s\n",
+                   k, c, rmse[k SUBSEP "cpu"], rmse[k SUBSEP "gpu"]
+        else {
+            bad++
+            printf "  [BAD]  %-40s cpu=%-12s gpu=%-12s <-- ABI swap suspect, DISCARD GPU ROWS\n",
+                   k, c, g
+        }
+    }
+    if (n == 0) print "  (no complete zfp pairs found)"
+    printf "  %d pair(s) checked, %d mismatched\n", n, bad
+}' "$RESULTS"/results_ext_*.csv 2>/dev/null
+
 echo ""
 echo "=== connector phase breakdown (per label) ==="
 for pcsv in "$RESULTS"/connector_phases_*.csv; do
@@ -317,13 +343,21 @@ for pcsv in "$RESULTS"/connector_phases_*.csv; do
 done
 
 echo ""
+echo "=== durability / cache phases (write path, from xcsv) ==="
+echo "dataset                compressor       create    write    flush     sync    close    csync  |    evict     open     read"
+awk -F, 'FNR==1{next} $5!="-1" {
+    printf "%-22s %-16s %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f  | %8.2f %8.2f %8.2f\n",
+           $1,$2,$9,$10,$11,$12,$13,$14,$15,$16,$17 }' \
+    "$RESULTS"/results_ext_*.csv 2>/dev/null
+
+echo ""
 echo "=== runs that FAILED or TIMED OUT (rep=-1) ==="
 awk -F, 'FNR>1 && $5=="-1" {print FILENAME": "$1" "$2}' \
     "$RESULTS"/results_ext_*.csv 2>/dev/null || echo "(none)"
 
 echo ""
-echo "=== fidelity failures (bound_ok=0, excluding failed runs) ==="
-awk -F, 'FNR>1 && $5!="-1" && $18=="0" {print $1" "$2" maxae="$17" thr="$16}' \
+echo "=== fidelity failures (bound_ok=0; -1 means no bound to check, not a failure) ==="
+awk -F, 'FNR>1 && $5!="-1" && $21=="0" {print $1" "$2" maxae="$20" thr="$19}' \
     "$RESULTS"/results_ext_*.csv 2>/dev/null || echo "(none)"
 
 echo ""
