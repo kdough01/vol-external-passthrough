@@ -39,11 +39,26 @@
 
 zfp64_log() { printf '[zfp64] %s\n' "$*" >&2; }
 
-# libpressio may land in lib64 or lib depending on the view; find it once.
-zfp64_libpressio() {
-    local d
-    for d in "$LP_VIEW/lib64" "$LP_VIEW/lib"; do
-        [ -e "$d/libpressio.so" ] && { printf '%s\n' "$d/libpressio.so"; return 0; }
+# Find something that links libzfp, to probe which libzfp the loader picks.
+#
+# NOTE: libpressio installs as liblibpressio.so -- the CMake project is named
+# "libpressio", so the SONAME gets a second "lib" prefix.  It may also land in
+# lib64 rather than lib.  Glob rather than guess.
+#
+# ZFP64_PROBE can name any ELF object that pulls in libzfp; the built VOL
+# connector is preferred when present because it is the exact object whose
+# binding we care about.
+zfp64_probe_target() {
+    local c
+    if [ -n "${ZFP64_PROBE:-}" ] && [ -e "$ZFP64_PROBE" ]; then
+        printf '%s\n' "$ZFP64_PROBE"; return 0
+    fi
+    for c in "$PWD/build/lib/libhdf5_vol_passthrough.so" \
+             "$PWD/build/libhdf5_vol_passthrough.so"; do
+        [ -e "$c" ] && { printf '%s\n' "$c"; return 0; }
+    done
+    for c in "$LP_VIEW"/lib64/lib*pressio*.so* "$LP_VIEW"/lib/lib*pressio*.so*; do
+        [ -e "$c" ] && { printf '%s\n' "$c"; return 0; }
     done
     return 1
 }
@@ -95,11 +110,18 @@ zfp64_smoke() {
 zfp64_apply() {
     local prefix libdir lib resolved lp
 
-    if ! lp=$(zfp64_libpressio); then
-        zfp64_log "ERROR: no libpressio.so under $LP_VIEW/{lib64,lib}"
+    if ! lp=$(zfp64_probe_target); then
+        zfp64_log "ERROR: no probe target found (no built VOL .so, and no"
+        zfp64_log "       lib*pressio*.so* under $LP_VIEW/{lib64,lib})."
+        zfp64_log "       Set ZFP64_PROBE to any object that links libzfp."
         return 1
     fi
-    zfp64_log "libpressio: $lp"
+    zfp64_log "probe target: $lp"
+
+    if ! ldd "$lp" 2>/dev/null | grep -q libzfp; then
+        zfp64_log "ERROR: $lp does not link libzfp -- wrong probe target."
+        return 1
+    fi
 
     prefix="${ZFP64_PREFIX:-}"
     if [ -z "$prefix" ] && command -v spack >/dev/null 2>&1; then
@@ -148,6 +170,7 @@ zfp64_apply() {
 
     # --- provenance for the job log / paper methods section ----------------
     zfp64_log "-------- zfp binding --------"
+    zfp64_log "  probe target     : $lp"
     zfp64_log "  env zfp (stock)  : $(readlink -f "$LP_VIEW/lib/libzfp.so" 2>/dev/null)"
     zfp64_log "  active zfp       : $(readlink -f "$resolved")"
     zfp64_log "  LD_PRELOAD       : ${LD_PRELOAD:-<unset>}"
