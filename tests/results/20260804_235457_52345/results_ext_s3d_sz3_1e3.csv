@@ -1,2 +1,2 @@
 dataset,compressor,codec_kind,chunk_n,rep,logical_bytes,stored_bytes,ratio,create_ms,write_ms,flush_ms,sync_ms,close_ms,csync_ms,evict_ms,open_ms,read_ms,rmse,abs_thresh,maxae,bound_ok
-miranda,cuszp_1e6,gpu,8,0,301989888,27061540,11.1594,1.1938,224.7830,0.2856,121.4619,0.1797,107.9279,1.0944,0.3044,796.4667,3.091485e-07,1.000000e-06,1.000000e-06,1
+s3d,sz3_1e3,cpu,1,0,1000000000,52096,19195.3317,1.1272,2507.4351,2.7080,116.3969,0.2181,41.1260,1.4878,0.4195,2077.9671,1.246576e-04,1.000000e-03,9.999531e-04,1

@@ -1,2 +1,2 @@
 dataset,compressor,codec_kind,chunk_n,rep,logical_bytes,stored_bytes,ratio,create_ms,write_ms,flush_ms,sync_ms,close_ms,csync_ms,evict_ms,open_ms,read_ms,rmse,abs_thresh,maxae,bound_ok
-miranda,cuszp_1e6,gpu,8,0,301989888,27061540,11.1594,1.1938,224.7830,0.2856,121.4619,0.1797,107.9279,1.0944,0.3044,796.4667,3.091485e-07,1.000000e-06,1.000000e-06,1
+nyx_baryon,cuszp_1e6,gpu,8,0,536870912,298003386,1.8016,0.9932,887.7734,79.6085,124.3959,0.1848,93.9904,1.1818,0.2681,1331.0920,5.783648e-07,1.000000e-06,1.907349e-06,1
