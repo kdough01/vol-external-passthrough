@@ -1,0 +1,3 @@
+dataset,compressor,op,total_ms,stage_ms,compress_ms,container_ms,io_ms,pressio_call_ms,device_ms,vol_compress_ms,pressio_host_ms,residual_ms,residual_frac
+nyx_baryon_zfp_cpu_r16,zfp,write,3992.5902,0.0000,3740.4761,0.0482,227.7636,3547.8112,0.0000,192.6649,3547.8112,24.3023,0.006087
+nyx_baryon_zfp_cpu_r16,zfp,read,3333.2658,0.0000,3030.7640,0.0000,152.6103,2630.5037,0.0000,400.2603,2630.5037,149.8914,0.044968
