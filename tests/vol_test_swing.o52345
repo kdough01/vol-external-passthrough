@@ -10422,3 +10422,397 @@ nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        y
 MemAvailable: 968.5 GiB (needGiB is hbuf+rbuf only; the connector needs more)
 6/6 dataset paths readable
 RANGE einspline37    min=-2.125822e+01 max=2.036857e+01 range=4.162679e+01 xform=none
+[VOL timing] UNACCOUNTED 7658.132 ms of 143790.178 ms (5.3%) dset=einspline37_zfp_cpu_r16 comp=zfp -- a timer is missing
+
+=== einspline37 (12932.6 MiB, float, raw) ===
+Info: 0x56195fbbb2b0
+  einspline37_zfp_cpu_r16      C=   1.19 W= 94710.42 F=  153.16 S=   186.00 X=    0.31 S2=  79.71 | E=   0.19 O=   0.37 R=143792.55 ms  ratio=  2.00x  RMSE=1.574e-04 maxae=1.352e-02
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.19 write=94710.42 flush=153.16 sync=186.00 close=0.31 csync=79.71 => write_total=95130.80 ms | evict=0.19 open=0.37 read=143792.55 => read_total=143792.92 ms | ratio=2.00x ===
+
+=== VOL timing [miranda_zfp_cpu_r16_vol_N8] : miranda (chunking: vol, N=8) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_miranda_zfp_cpu_r16_vol_N8.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_235457_52345/results_vol_miranda_zfp_cpu_r16_vol_N8.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_235457_52345/results_ext_miranda_zfp_cpu_r16_vol_N8.csv only=miranda comp=zfp_cpu_r16 verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 968.5 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE miranda        min=9.999878e-01 max=3.000046e+00 range=2.000058e+00 xform=none
+[chunk] zfp        N=8   -> 8 chunks x 37748736 B (36.000 MiB, 4718592 elems, 32 slices of 147456 elems) total=301989888 B
+[VOL RAGGED] dataset 0 'zfp': clean split, 8 x 37748736 B, no ragged tail
+[chunk-out] 'zfp' rank=3 37748736 -> 9437184 B (4.00x), cap 42532864 B
+[chunk-out] 'zfp' rank=3 37748736 -> 9437184 B (4.00x), cap 42532864 B
+[chunk-out] 'zfp' rank=3 37748736 -> 9437184 B (4.00x), cap 42532864 B
+[chunk-out] 'zfp' rank=3 37748736 -> 9437184 B (4.00x), cap 42532864 B
+[chunk-out] 'zfp' rank=3 37748736 -> 9437184 B (4.00x), cap 42532864 B
+[chunk-out] 'zfp' rank=3 37748736 -> 9437184 B (4.00x), cap 42532864 B
+[chunk-out] 'zfp' rank=3 37748736 -> 9437184 B (4.00x), cap 42532864 B
+[chunk-out] 'zfp' rank=3 37748736 -> 9437184 B (4.00x), cap 42532864 B
+
+=== miranda (288.0 MiB, double, raw) ===
+Info: 0x5649f81132d0
+  miranda_zfp_cpu_r16          C=   1.72 W=  1931.51 F=    0.30 S=   109.12 X=    0.21 S2=  33.94 | E=   2.44 O=   0.42 R=  1083.20 ms  ratio=  4.00x  RMSE=2.650e-08 maxae=2.833e-06
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.72 write=1931.51 flush=0.30 sync=109.12 close=0.21 csync=33.94 => write_total=2076.81 ms | evict=2.44 open=0.42 read=1083.20 => read_total=1083.62 ms | ratio=4.00x ===
+
+=== VOL timing [miranda_zfp_cpu_r16_vol_N16] : miranda (chunking: vol, N=16) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_miranda_zfp_cpu_r16_vol_N16.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_235457_52345/results_vol_miranda_zfp_cpu_r16_vol_N16.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_235457_52345/results_ext_miranda_zfp_cpu_r16_vol_N16.csv only=miranda comp=zfp_cpu_r16 verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 968.5 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE miranda        min=9.999878e-01 max=3.000046e+00 range=2.000058e+00 xform=none
+[chunk] zfp        N=16  -> 16 chunks x 18874368 B (18.000 MiB, 2359296 elems, 16 slices of 147456 elems) total=301989888 B
+[VOL RAGGED] dataset 0 'zfp': clean split, 16 x 18874368 B, no ragged tail
+[chunk-out] 'zfp' rank=3 18874368 -> 4718592 B (4.00x), cap 21299200 B
+[chunk-out] 'zfp' rank=3 18874368 -> 4718592 B (4.00x), cap 21299200 B
+[chunk-out] 'zfp' rank=3 18874368 -> 4718592 B (4.00x), cap 21299200 B
+[chunk-out] 'zfp' rank=3 18874368 -> 4718592 B (4.00x), cap 21299200 B
+[chunk-out] 'zfp' rank=3 18874368 -> 4718592 B (4.00x), cap 21299200 B
+[chunk-out] 'zfp' rank=3 18874368 -> 4718592 B (4.00x), cap 21299200 B
+[chunk-out] 'zfp' rank=3 18874368 -> 4718592 B (4.00x), cap 21299200 B
+[chunk-out] 'zfp' rank=3 18874368 -> 4718592 B (4.00x), cap 21299200 B
+[chunk-out] 'zfp' rank=3 18874368 -> 4718592 B (4.00x), cap 21299200 B
+[chunk-out] 'zfp' rank=3 18874368 -> 4718592 B (4.00x), cap 21299200 B
+[chunk-out] 'zfp' rank=3 18874368 -> 4718592 B (4.00x), cap 21299200 B
+[chunk-out] 'zfp' rank=3 18874368 -> 4718592 B (4.00x), cap 21299200 B
+[chunk-out] 'zfp' rank=3 18874368 -> 4718592 B (4.00x), cap 21299200 B
+[chunk-out] 'zfp' rank=3 18874368 -> 4718592 B (4.00x), cap 21299200 B
+[chunk-out] 'zfp' rank=3 18874368 -> 4718592 B (4.00x), cap 21299200 B
+[chunk-out] 'zfp' rank=3 18874368 -> 4718592 B (4.00x), cap 21299200 B
+
+=== miranda (288.0 MiB, double, raw) ===
+Info: 0x559d0d7ce3c0
+  miranda_zfp_cpu_r16          C=   1.08 W=  1891.48 F=    0.31 S=   155.23 X=    0.21 S2= 104.49 | E=   3.73 O=   0.66 R=   947.65 ms  ratio=  4.00x  RMSE=2.650e-08 maxae=2.833e-06
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.08 write=1891.48 flush=0.31 sync=155.23 close=0.21 csync=104.49 => write_total=2152.80 ms | evict=3.73 open=0.66 read=947.65 => read_total=948.32 ms | ratio=4.00x ===
+
+=== VOL timing [scale-T_zfp_cpu_r16_vol_N8] : scale-T (chunking: vol, N=8) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_scale-T_zfp_cpu_r16_vol_N8.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_235457_52345/results_vol_scale-T_zfp_cpu_r16_vol_N8.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_235457_52345/results_ext_scale-T_zfp_cpu_r16_vol_N8.csv only=scale-T comp=zfp_cpu_r16 verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 968.5 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE scale-T        min=5.209023e+00 max=5.754571e+00 range=5.455480e-01 xform=log1p
+[chunk] zfp        N=8   -> 8 chunks x 74880000 B (71.411 MiB, 18720000 elems, 13 slices of 1440000 elems) total=564480000 B  [RAGGED: final chunk is short]
+[VOL RAGGED] dataset 0 'zfp': 7 chunks of 74880000 B + a FINAL chunk of 40320000 B (53.8% of a full chunk). total=564480000 elem=4. The last chunk has a different length from the rest -- rule it out before blaming the codec.
+[chunk-out] 'zfp' rank=3 74880000 -> 46080000 B (1.62x), cap 84305536 B
+[chunk-out] 'zfp' rank=3 74880000 -> 46080000 B (1.62x), cap 84305536 B
+[chunk-out] 'zfp' rank=3 74880000 -> 46080000 B (1.62x), cap 84305536 B
+[chunk-out] 'zfp' rank=3 74880000 -> 46080000 B (1.62x), cap 84305536 B
+[chunk-out] 'zfp' rank=3 74880000 -> 46080000 B (1.62x), cap 84305536 B
+[chunk-out] 'zfp' rank=3 74880000 -> 46080000 B (1.62x), cap 84305536 B
+[chunk-out] 'zfp' rank=3 74880000 -> 46080000 B (1.62x), cap 84305536 B
+[chunk-out] 'zfp' rank=3 40320000 -> 23040000 B (1.75x), cap 45425536 B
+[VOL timing] UNACCOUNTED 197.816 ms of 3476.538 ms (5.7%) dset=scale-T_zfp_cpu_r16 comp=zfp -- a timer is missing
+
+=== scale-T (538.3 MiB, float, raw, transformed) ===
+Info: 0x555fc27ee220
+  scale-T_zfp_cpu_r16          C=   1.22 W=  5899.45 F=  122.53 S=   112.95 X=    0.20 S2=  96.42 | E=   3.40 O=   0.42 R=  3476.70 ms  ratio=  1.63x  RMSE=1.202e-09 maxae=4.768e-07 (log-space)
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.22 write=5899.45 flush=122.53 sync=112.95 close=0.20 csync=96.42 => write_total=6232.77 ms | evict=3.40 open=0.42 read=3476.70 => read_total=3477.12 ms | ratio=1.63x ===
+
+=== VOL timing [scale-T_zfp_cpu_r16_vol_N16] : scale-T (chunking: vol, N=16) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_scale-T_zfp_cpu_r16_vol_N16.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_235457_52345/results_vol_scale-T_zfp_cpu_r16_vol_N16.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_235457_52345/results_ext_scale-T_zfp_cpu_r16_vol_N16.csv only=scale-T comp=zfp_cpu_r16 verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 968.5 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE scale-T        min=5.209023e+00 max=5.754571e+00 range=5.455480e-01 xform=log1p
+[chunk] zfp        N=16  -> 14 chunks x 40320000 B (38.452 MiB, 10080000 elems, 7 slices of 1440000 elems) total=564480000 B
+[VOL RAGGED] dataset 0 'zfp': clean split, 14 x 40320000 B, no ragged tail
+[chunk-out] 'zfp' rank=3 40320000 -> 23040000 B (1.75x), cap 45425536 B
+[chunk-out] 'zfp' rank=3 40320000 -> 23040000 B (1.75x), cap 45425536 B
+[chunk-out] 'zfp' rank=3 40320000 -> 23040000 B (1.75x), cap 45425536 B
+[chunk-out] 'zfp' rank=3 40320000 -> 23040000 B (1.75x), cap 45425536 B
+[chunk-out] 'zfp' rank=3 40320000 -> 23040000 B (1.75x), cap 45425536 B
+[chunk-out] 'zfp' rank=3 40320000 -> 23040000 B (1.75x), cap 45425536 B
+[chunk-out] 'zfp' rank=3 40320000 -> 23040000 B (1.75x), cap 45425536 B
+[chunk-out] 'zfp' rank=3 40320000 -> 23040000 B (1.75x), cap 45425536 B
+[chunk-out] 'zfp' rank=3 40320000 -> 23040000 B (1.75x), cap 45425536 B
+[chunk-out] 'zfp' rank=3 40320000 -> 23040000 B (1.75x), cap 45425536 B
+[chunk-out] 'zfp' rank=3 40320000 -> 23040000 B (1.75x), cap 45425536 B
+[chunk-out] 'zfp' rank=3 40320000 -> 23040000 B (1.75x), cap 45425536 B
+[chunk-out] 'zfp' rank=3 40320000 -> 23040000 B (1.75x), cap 45425536 B
+[chunk-out] 'zfp' rank=3 40320000 -> 23040000 B (1.75x), cap 45425536 B
+[VOL timing] UNACCOUNTED 194.286 ms of 3434.278 ms (5.7%) dset=scale-T_zfp_cpu_r16 comp=zfp -- a timer is missing
+
+=== scale-T (538.3 MiB, float, raw, transformed) ===
+Info: 0x558061f63520
+  scale-T_zfp_cpu_r16          C=   1.15 W=  5666.96 F=  120.65 S=   108.96 X=    0.20 S2=  58.29 | E=   1.43 O=   0.43 R=  3434.44 ms  ratio=  1.75x  RMSE=1.394e-09 maxae=4.768e-07 (log-space)
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.15 write=5666.96 flush=120.65 sync=108.96 close=0.20 csync=58.29 => write_total=5956.20 ms | evict=1.43 open=0.43 read=3434.44 => read_total=3434.88 ms | ratio=1.75x ===
+
+=== VOL timing [s3d_zfp_cpu_r16_vol_N8] : s3d (chunking: vol, N=8) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_s3d_zfp_cpu_r16_vol_N8.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_235457_52345/results_vol_s3d_zfp_cpu_r16_vol_N8.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_235457_52345/results_ext_s3d_zfp_cpu_r16_vol_N8.csv only=s3d comp=zfp_cpu_r16 verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 968.5 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE s3d            min=-6.362436e-15 max=3.920002e-02 range=3.920002e-02 xform=none
+[chunk] zfp        N=8   -> 8 chunks x 126000000 B (120.163 MiB, 15750000 elems, 63 slices of 250000 elems) total=1000000000 B  [RAGGED: final chunk is short]
+[VOL RAGGED] dataset 0 'zfp': 7 chunks of 126000000 B + a FINAL chunk of 118000000 B (93.7% of a full chunk). total=1000000000 elem=8. The last chunk has a different length from the rest -- rule it out before blaming the codec.
+[chunk-out] 'zfp' rank=3 126000000 -> 32000000 B (3.94x), cap 141815536 B
+[chunk-out] 'zfp' rank=3 126000000 -> 32000000 B (3.94x), cap 141815536 B
+[chunk-out] 'zfp' rank=3 126000000 -> 32000000 B (3.94x), cap 141815536 B
+[chunk-out] 'zfp' rank=3 126000000 -> 32000000 B (3.94x), cap 141815536 B
+[chunk-out] 'zfp' rank=3 126000000 -> 32000000 B (3.94x), cap 141815536 B
+[chunk-out] 'zfp' rank=3 126000000 -> 32000000 B (3.94x), cap 141815536 B
+[chunk-out] 'zfp' rank=3 126000000 -> 32000000 B (3.94x), cap 141815536 B
+[chunk-out] 'zfp' rank=3 118000000 -> 30000000 B (3.93x), cap 132815536 B
+[VOL timing] UNACCOUNTED 495.968 ms of 4510.430 ms (11.0%) dset=s3d_zfp_cpu_r16 comp=zfp -- a timer is missing
+
+=== s3d (953.7 MiB, double, raw) ===
+Info: 0x560377b372c0
+  s3d_zfp_cpu_r16              C=   1.11 W=  5992.04 F=   96.70 S=   105.69 X=    0.21 S2=  59.61 | E=   1.07 O=   0.42 R=  4510.59 ms  ratio=  3.94x  RMSE=2.634e-11 maxae=5.236e-09
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.11 write=5992.04 flush=96.70 sync=105.69 close=0.21 csync=59.61 => write_total=6255.37 ms | evict=1.07 open=0.42 read=4510.59 => read_total=4511.01 ms | ratio=3.94x ===
+
+=== VOL timing [s3d_zfp_cpu_r16_vol_N16] : s3d (chunking: vol, N=16) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_s3d_zfp_cpu_r16_vol_N16.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_235457_52345/results_vol_s3d_zfp_cpu_r16_vol_N16.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_235457_52345/results_ext_s3d_zfp_cpu_r16_vol_N16.csv only=s3d comp=zfp_cpu_r16 verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 968.5 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE s3d            min=-6.362436e-15 max=3.920002e-02 range=3.920002e-02 xform=none
+[chunk] zfp        N=16  -> 16 chunks x 64000000 B (61.035 MiB, 8000000 elems, 32 slices of 250000 elems) total=1000000000 B  [RAGGED: final chunk is short]
+[VOL RAGGED] dataset 0 'zfp': 15 chunks of 64000000 B + a FINAL chunk of 40000000 B (62.5% of a full chunk). total=1000000000 elem=8. The last chunk has a different length from the rest -- rule it out before blaming the codec.
+[chunk-out] 'zfp' rank=3 64000000 -> 16000000 B (4.00x), cap 72065536 B
+[chunk-out] 'zfp' rank=3 64000000 -> 16000000 B (4.00x), cap 72065536 B
+[chunk-out] 'zfp' rank=3 64000000 -> 16000000 B (4.00x), cap 72065536 B
+[chunk-out] 'zfp' rank=3 64000000 -> 16000000 B (4.00x), cap 72065536 B
+[chunk-out] 'zfp' rank=3 64000000 -> 16000000 B (4.00x), cap 72065536 B
+[chunk-out] 'zfp' rank=3 64000000 -> 16000000 B (4.00x), cap 72065536 B
+[chunk-out] 'zfp' rank=3 64000000 -> 16000000 B (4.00x), cap 72065536 B
+[chunk-out] 'zfp' rank=3 64000000 -> 16000000 B (4.00x), cap 72065536 B
+[chunk-out] 'zfp' rank=3 64000000 -> 16000000 B (4.00x), cap 72065536 B
+[chunk-out] 'zfp' rank=3 64000000 -> 16000000 B (4.00x), cap 72065536 B
+[chunk-out] 'zfp' rank=3 64000000 -> 16000000 B (4.00x), cap 72065536 B
+[chunk-out] 'zfp' rank=3 64000000 -> 16000000 B (4.00x), cap 72065536 B
+[chunk-out] 'zfp' rank=3 64000000 -> 16000000 B (4.00x), cap 72065536 B
+[chunk-out] 'zfp' rank=3 64000000 -> 16000000 B (4.00x), cap 72065536 B
+[chunk-out] 'zfp' rank=3 64000000 -> 16000000 B (4.00x), cap 72065536 B
+[chunk-out] 'zfp' rank=3 40000000 -> 10000000 B (4.00x), cap 45065536 B
+[VOL timing] UNACCOUNTED 509.350 ms of 4473.078 ms (11.4%) dset=s3d_zfp_cpu_r16 comp=zfp -- a timer is missing
+
+=== s3d (953.7 MiB, double, raw) ===
+Info: 0x560e0ca02210
+  s3d_zfp_cpu_r16              C=   1.11 W=  5939.22 F=  122.54 S=    91.94 X=    0.20 S2= 134.33 | E=   0.17 O=   0.42 R=  4473.24 ms  ratio=  4.00x  RMSE=5.312e-12 maxae=6.187e-10
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.11 write=5939.22 flush=122.54 sync=91.94 close=0.20 csync=134.33 => write_total=6289.34 ms | evict=0.17 open=0.42 read=4473.24 => read_total=4473.65 ms | ratio=4.00x ===
+
+=== VOL timing [nyx_baryon_zfp_cpu_r16_vol_N8] : nyx_baryon (chunking: vol, N=8) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_nyx_baryon_zfp_cpu_r16_vol_N8.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_235457_52345/results_vol_nyx_baryon_zfp_cpu_r16_vol_N8.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_235457_52345/results_ext_nyx_baryon_zfp_cpu_r16_vol_N8.csv only=nyx_baryon comp=zfp_cpu_r16 verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 968.4 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE nyx_baryon     min=5.637747e-02 max=1.166017e+01 range=1.160379e+01 xform=log1p
+[chunk] zfp        N=8   -> 8 chunks x 67108864 B (64.000 MiB, 16777216 elems, 64 slices of 262144 elems) total=536870912 B
+[VOL RAGGED] dataset 0 'zfp': clean split, 8 x 67108864 B, no ragged tail
+[chunk-out] 'zfp' rank=3 67108864 -> 33554432 B (2.00x), cap 75563008 B
+[chunk-out] 'zfp' rank=3 67108864 -> 33554432 B (2.00x), cap 75563008 B
+[chunk-out] 'zfp' rank=3 67108864 -> 33554432 B (2.00x), cap 75563008 B
+[chunk-out] 'zfp' rank=3 67108864 -> 33554432 B (2.00x), cap 75563008 B
+[chunk-out] 'zfp' rank=3 67108864 -> 33554432 B (2.00x), cap 75563008 B
+[chunk-out] 'zfp' rank=3 67108864 -> 33554432 B (2.00x), cap 75563008 B
+[chunk-out] 'zfp' rank=3 67108864 -> 33554432 B (2.00x), cap 75563008 B
+[chunk-out] 'zfp' rank=3 67108864 -> 33554432 B (2.00x), cap 75563008 B
+[VOL timing] UNACCOUNTED 254.130 ms of 3366.488 ms (7.5%) dset=nyx_baryon_zfp_cpu_r16 comp=zfp -- a timer is missing
+
+=== nyx_baryon (512.0 MiB, float, hdf5, transformed) ===
+Info: 0x55cedab887a0
+  nyx_baryon_zfp_cpu_r16       C=   0.97 W=  3965.17 F=   83.11 S=   100.94 X=    0.16 S2=  26.11 | E=   1.27 O=   0.39 R=  3366.65 ms  ratio=  2.00x  RMSE=1.020e-06 maxae=1.040e-04 (log-space)
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=0.97 write=3965.17 flush=83.11 sync=100.94 close=0.16 csync=26.11 => write_total=4176.47 ms | evict=1.27 open=0.39 read=3366.65 => read_total=3367.04 ms | ratio=2.00x ===
+
+=== VOL timing [nyx_baryon_zfp_cpu_r16_vol_N16] : nyx_baryon (chunking: vol, N=16) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_nyx_baryon_zfp_cpu_r16_vol_N16.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_235457_52345/results_vol_nyx_baryon_zfp_cpu_r16_vol_N16.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_235457_52345/results_ext_nyx_baryon_zfp_cpu_r16_vol_N16.csv only=nyx_baryon comp=zfp_cpu_r16 verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 968.4 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE nyx_baryon     min=5.637747e-02 max=1.166017e+01 range=1.160379e+01 xform=log1p
+[chunk] zfp        N=16  -> 16 chunks x 33554432 B (32.000 MiB, 8388608 elems, 32 slices of 262144 elems) total=536870912 B
+[VOL RAGGED] dataset 0 'zfp': clean split, 16 x 33554432 B, no ragged tail
+[chunk-out] 'zfp' rank=3 33554432 -> 16777216 B (2.00x), cap 37814272 B
+[chunk-out] 'zfp' rank=3 33554432 -> 16777216 B (2.00x), cap 37814272 B
+[chunk-out] 'zfp' rank=3 33554432 -> 16777216 B (2.00x), cap 37814272 B
+[chunk-out] 'zfp' rank=3 33554432 -> 16777216 B (2.00x), cap 37814272 B
+[chunk-out] 'zfp' rank=3 33554432 -> 16777216 B (2.00x), cap 37814272 B
+[chunk-out] 'zfp' rank=3 33554432 -> 16777216 B (2.00x), cap 37814272 B
+[chunk-out] 'zfp' rank=3 33554432 -> 16777216 B (2.00x), cap 37814272 B
+[chunk-out] 'zfp' rank=3 33554432 -> 16777216 B (2.00x), cap 37814272 B
+[chunk-out] 'zfp' rank=3 33554432 -> 16777216 B (2.00x), cap 37814272 B
+[chunk-out] 'zfp' rank=3 33554432 -> 16777216 B (2.00x), cap 37814272 B
+[chunk-out] 'zfp' rank=3 33554432 -> 16777216 B (2.00x), cap 37814272 B
+[chunk-out] 'zfp' rank=3 33554432 -> 16777216 B (2.00x), cap 37814272 B
+[chunk-out] 'zfp' rank=3 33554432 -> 16777216 B (2.00x), cap 37814272 B
+[chunk-out] 'zfp' rank=3 33554432 -> 16777216 B (2.00x), cap 37814272 B
+[chunk-out] 'zfp' rank=3 33554432 -> 16777216 B (2.00x), cap 37814272 B
+[chunk-out] 'zfp' rank=3 33554432 -> 16777216 B (2.00x), cap 37814272 B
+[VOL timing] UNACCOUNTED 292.176 ms of 3392.907 ms (8.6%) dset=nyx_baryon_zfp_cpu_r16 comp=zfp -- a timer is missing
+
+=== nyx_baryon (512.0 MiB, float, hdf5, transformed) ===
+Info: 0x5637376135e0
+  nyx_baryon_zfp_cpu_r16       C=   0.98 W=  4302.56 F=  204.91 S=    74.32 X=    0.16 S2=  26.01 | E=   4.53 O=   0.39 R=  3393.07 ms  ratio=  2.00x  RMSE=1.020e-06 maxae=1.040e-04 (log-space)
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=0.98 write=4302.56 flush=204.91 sync=74.32 close=0.16 csync=26.01 => write_total=4608.94 ms | evict=4.53 open=0.39 read=3393.07 => read_total=3393.45 ms | ratio=2.00x ===
+
+=== VOL timing [ocean_temp_zfp_cpu_r16_vol_N8] : ocean_temp (chunking: vol, N=8) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_ocean_temp_zfp_cpu_r16_vol_N8.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_235457_52345/results_vol_ocean_temp_zfp_cpu_r16_vol_N8.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_235457_52345/results_ext_ocean_temp_zfp_cpu_r16_vol_N8.csv only=ocean_temp comp=zfp_cpu_r16 verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 968.4 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE ocean_temp     min=4.445019e+00 max=1.072704e+01 range=6.282023e+00 xform=none
+[chunk] zfp        N=8   -> 8 chunks x 16140480 B (15.393 MiB, 4035120 elems, 3 slices of 1345040 elems) total=129123840 B
+[VOL RAGGED] dataset 0 'zfp': clean split, 8 x 16140480 B, no ragged tail
+[chunk-out] 'zfp' rank=3 16140480 -> 11393280 B (1.42x), cap 18223576 B
+[chunk-out] 'zfp' rank=3 16140480 -> 11393280 B (1.42x), cap 18223576 B
+[chunk-out] 'zfp' rank=3 16140480 -> 11393280 B (1.42x), cap 18223576 B
+[chunk-out] 'zfp' rank=3 16140480 -> 11393280 B (1.42x), cap 18223576 B
+[chunk-out] 'zfp' rank=3 16140480 -> 11393280 B (1.42x), cap 18223576 B
+[chunk-out] 'zfp' rank=3 16140480 -> 11393280 B (1.42x), cap 18223576 B
+[chunk-out] 'zfp' rank=3 16140480 -> 11393280 B (1.42x), cap 18223576 B
+[chunk-out] 'zfp' rank=3 16140480 -> 11393280 B (1.42x), cap 18223576 B
+
+=== ocean_temp (123.1 MiB, float, hdf5) ===
+Info: 0x5591e6a801b0
+  ocean_temp_zfp_cpu_r16       C=   0.91 W=  1631.38 F=  145.67 S=   144.27 X=    0.18 S2=  77.10 | E=   2.03 O=   0.41 R=   944.37 ms  ratio=  1.42x  RMSE=1.326e-06 maxae=1.364e-04
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=0.91 write=1631.38 flush=145.67 sync=144.27 close=0.18 csync=77.10 => write_total=1999.50 ms | evict=2.03 open=0.41 read=944.37 => read_total=944.78 ms | ratio=1.42x ===
+
+=== VOL timing [ocean_temp_zfp_cpu_r16_vol_N16] : ocean_temp (chunking: vol, N=16) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_ocean_temp_zfp_cpu_r16_vol_N16.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_235457_52345/results_vol_ocean_temp_zfp_cpu_r16_vol_N16.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_235457_52345/results_ext_ocean_temp_zfp_cpu_r16_vol_N16.csv only=ocean_temp comp=zfp_cpu_r16 verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 968.5 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE ocean_temp     min=4.445019e+00 max=1.072704e+01 range=6.282023e+00 xform=none
+[chunk] zfp        N=16  -> 12 chunks x 10760320 B (10.262 MiB, 2690080 elems, 2 slices of 1345040 elems) total=129123840 B
+[VOL RAGGED] dataset 0 'zfp': clean split, 12 x 10760320 B, no ragged tail
+[VOL WARN] 'zfp' EXPANDED a 10760320 byte chunk to 11393280 bytes (105.8824% of input). Headroom was 1410576 bytes.
+[VOL WARN] 'zfp' EXPANDED a 10760320 byte chunk to 11393280 bytes (105.8824% of input). Headroom was 1410576 bytes.
+[VOL WARN] 'zfp' EXPANDED a 10760320 byte chunk to 11393280 bytes (105.8824% of input). Headroom was 1410576 bytes.
+[VOL WARN] 'zfp' EXPANDED a 10760320 byte chunk to 11393280 bytes (105.8824% of input). Headroom was 1410576 bytes.
+[VOL WARN] 'zfp' EXPANDED a 10760320 byte chunk to 11393280 bytes (105.8824% of input). Headroom was 1410576 bytes.
+[VOL WARN] 'zfp' EXPANDED a 10760320 byte chunk to 11393280 bytes (105.8824% of input). Headroom was 1410576 bytes.
+[VOL WARN] 'zfp' EXPANDED a 10760320 byte chunk to 11393280 bytes (105.8824% of input). Headroom was 1410576 bytes.
+[VOL WARN] 'zfp' EXPANDED a 10760320 byte chunk to 11393280 bytes (105.8824% of input). Headroom was 1410576 bytes.
+[VOL WARN] 'zfp' EXPANDED a 10760320 byte chunk to 11393280 bytes (105.8824% of input). Headroom was 1410576 bytes.
+[VOL WARN] 'zfp' EXPANDED a 10760320 byte chunk to 11393280 bytes (105.8824% of input). Headroom was 1410576 bytes.
+[VOL WARN] 'zfp' EXPANDED a 10760320 byte chunk to 11393280 bytes (105.8824% of input). Headroom was 1410576 bytes.
+[VOL WARN] 'zfp' EXPANDED a 10760320 byte chunk to 11393280 bytes (105.8824% of input). Headroom was 1410576 bytes.
+[VOL timing] UNACCOUNTED 46.056 ms of 1355.261 ms (3.4%) dset=ocean_temp_zfp_cpu_r16 comp=zfp -- a timer is missing
+
+=== ocean_temp (123.1 MiB, float, hdf5) ===
+Info: 0x55a9248702b0
+  ocean_temp_zfp_cpu_r16       C=   0.96 W=  2402.73 F=   78.37 S=   126.41 X=    0.17 S2=  45.11 | E=   1.17 O=   0.41 R=  1355.39 ms  ratio=  0.94x  RMSE=5.961e-07 maxae=5.627e-05
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=0.96 write=2402.73 flush=78.37 sync=126.41 close=0.17 csync=45.11 => write_total=2653.77 ms | evict=1.17 open=0.41 read=1355.39 => read_total=1355.80 ms | ratio=0.94x ===
+
+=== VOL timing [qmc_zfp_cpu_r16_vol_N8] : einspline37 (chunking: vol, N=8) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_qmc_zfp_cpu_r16_vol_N8.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_235457_52345/results_vol_qmc_zfp_cpu_r16_vol_N8.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_235457_52345/results_ext_qmc_zfp_cpu_r16_vol_N8.csv only=einspline37 comp=zfp_cpu_r16 verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 968.5 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE einspline37    min=-2.125822e+01 max=2.036857e+01 range=4.162679e+01 xform=none
+[chunk] zfp        N=8   -> 8 chunks x 1695106440 B (1616.579 MiB, 423776610 elems, 423776610 slices of 1 elems) total=13560851520 B
+[VOL RAGGED] dataset 0 'zfp': clean split, 8 x 1695106440 B, no ragged tail
+[chunk-out] 'zfp' rank=1 1695106440 -> 847553224 B (2.00x), cap 1907060281 B
+[chunk-out] 'zfp' rank=1 1695106440 -> 847553224 B (2.00x), cap 1907060281 B
+[chunk-out] 'zfp' rank=1 1695106440 -> 847553224 B (2.00x), cap 1907060281 B
+[chunk-out] 'zfp' rank=1 1695106440 -> 847553224 B (2.00x), cap 1907060281 B
+[chunk-out] 'zfp' rank=1 1695106440 -> 847553224 B (2.00x), cap 1907060281 B
+[chunk-out] 'zfp' rank=1 1695106440 -> 847553224 B (2.00x), cap 1907060281 B
+[chunk-out] 'zfp' rank=1 1695106440 -> 847553224 B (2.00x), cap 1907060281 B
+[chunk-out] 'zfp' rank=1 1695106440 -> 847553224 B (2.00x), cap 1907060281 B
