@@ -3867,3 +3867,30 @@ RANGE einspline37    min=-2.125822e+01 max=2.036857e+01 range=4.162679e+01 xform
 [chunk] sz3        N=8   -> 8 chunks x 1695106440 B (1616.579 MiB, 423776610 elems, 423776610 slices of 1 elems) total=13560851520 B
 [chunk] pressio-mode chunking:size = [423776610] (pressio order, fastest first)
 [chunk] pressio-mode chunking:size = [423776610] (pressio order, fastest first)
+[VOL timing] UNACCOUNTED 4407.659 ms of 143360.359 ms (3.1%) dset=einspline37_sz3_1e3 comp=sz3 -- a timer is missing
+
+=== einspline37 (12932.6 MiB, float, raw) ===
+Info: 0x56482d6dc490
+  einspline37_sz3_1e3          C=   1.16 W=116552.09 F=    1.36 S=   197.04 X=    0.22 S2= 121.35 | E=   0.20 O=   0.39 R=143363.95 ms  ratio=  3.37x  RMSE=5.742e-04 maxae=1.000e-03
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.16 write=116552.09 flush=1.36 sync=197.04 close=0.22 csync=121.35 => write_total=116873.23 ms | evict=0.20 open=0.39 read=143363.95 => read_total=143364.35 ms | ratio=3.37x ===
+
+=== VOL timing [qmc_sz3_1e3_pressio_N16] : einspline37 (chunking: pressio, N=16) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_qmc_sz3_1e3_pressio_N16.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_235457_52345/results_vol_qmc_sz3_1e3_pressio_N16.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260804_235457_52345/results_ext_qmc_sz3_1e3_pressio_N16.csv only=einspline37 comp=sz3_1e3 verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 952.3 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE einspline37    min=-2.125822e+01 max=2.036857e+01 range=4.162679e+01 xform=none
+[chunk] sz3        N=16  -> 16 chunks x 847553220 B (808.290 MiB, 211888305 elems, 211888305 slices of 1 elems) total=13560851520 B
+[chunk] pressio-mode chunking:size = [211888305] (pressio order, fastest first)
+[chunk] pressio-mode chunking:size = [211888305] (pressio order, fastest first)
+[VOL timing] UNACCOUNTED 4666.168 ms of 145064.027 ms (3.2%) dset=einspline37_sz3_1e3 comp=sz3 -- a timer is missing
