@@ -161,7 +161,6 @@ if [ -z "$STREAM_KEYS" ]; then
     echo "*** NO STREAM OPTION FOUND for cuszp. ***"
     echo "*** device_ms from CUDA events will NOT be trustworthy.            ***"
     echo "*** Report host wall-clock only, and use nsys for device evidence. ***"
-    export VOL_COMP_GPU_EVENTS=0
 else
     echo "$STREAM_KEYS"
 fi
