@@ -1,2 +1,2 @@
 dataset,compressor,codec_kind,chunk_n,rep,logical_bytes,stored_bytes,ratio,create_ms,write_ms,flush_ms,sync_ms,close_ms,csync_ms,evict_ms,open_ms,read_ms,rmse,abs_thresh,maxae,bound_ok
-nyx_baryon,sz3_1e3,cpu,1,0,536870912,68416866,7.8471,0.9410,4338.5262,0.2665,134.8492,0.2277,29.4693,0.1844,0.2682,3466.4784,5.766349e-04,1.000000e-03,1.000285e-03,1
+ocean_temp,sz3_1e3,cpu,1,0,129123840,19884630,6.4937,1.0500,1116.3939,0.2424,113.5040,0.1833,44.3893,3.8590,0.2822,808.8781,5.701095e-04,1.000000e-03,9.999275e-04,1
