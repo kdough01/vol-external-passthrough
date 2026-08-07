@@ -101,12 +101,14 @@ int main(int argc, char **argv)
         int rc = pressio_compressor_decompress(c, in, out);
 
         size_t osz = 0;
-        void  *optr = pressio_data_ptr(out, &osz);
+        const float *rp = (const float *)pressio_data_ptr(out, &osz);
+        double r = -2.0;
+        if (!rc && rp && osz == n * sizeof(float))
+            r = rmse_of(orig.data(), rp, n);
 
         printf("%-8.4f %-12zu %-4d %-14.6e %-12s %s\n",
-               f, trunc, rc,
-               rc ? -1.0 : rmse_of(orig.data(), recon.data(), n),
-               (optr == recon.data()) ? "in-place" : "REALLOC",
+               f, trunc, rc, r,
+               (rp == recon.data()) ? "in-place" : "REALLOC",
                rc ? pressio_compressor_error_msg(c) : "");
 
         pressio_data_free(in);
