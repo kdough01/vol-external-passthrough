@@ -81,7 +81,7 @@ int main(int argc, char **argv)
 
     printf("%-8s %-12s %-4s %-14s %-12s %s\n",
            "frac", "bytes", "rc", "rmse", "wrote", "err");
-    for (double f = 0.0625; f <= 1.0001; f *= 2) {
+    for (double f = 1.0; f >= 0.0625; f /= 2) {
         size_t trunc = (size_t)((double)csize * f);
         if (trunc == 0) continue;
 
