@@ -30,7 +30,7 @@ int main(int argc, char **argv)
               (float)(sin(i * 0.05) * cos(j * 0.03) + 0.3 * sin(k * 0.07));
 
     struct pressio *lib = pressio_instance();
-    struct pressio_compressor *c = pressio_get_compressor(lib, "sperr");
+    struct pressio_compressor *c = pressio_get_compressor(lib, "mgard");
     if (!c) { fprintf(stderr, "sperr not available in this build\n"); return 1; }
 
     /* Dump the real option keys -- this is also the answer to "what are
