@@ -1,0 +1,2 @@
+dataset,compressor,codec_kind,chunk_n,rep,logical_bytes,stored_bytes,ratio,create_ms,write_ms,flush_ms,sync_ms,close_ms,csync_ms,evict_ms,open_ms,read_ms,rmse,abs_thresh,maxae,bound_ok
+scale-T,sz3_1e3,cpu,16,0,564480000,3163095,178.4581,1.3655,3077.7672,0.2920,168.5122,0.2572,52.9125,0.1998,0.3488,1262.9872,3.716667e-04,1.000000e-03,1.002312e-03,1
