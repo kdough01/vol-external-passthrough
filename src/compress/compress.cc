@@ -1413,7 +1413,7 @@ vol_transfer_decompress_chunk_impl(compression_ctx *ctx,
     output = is_gpu
         ? vol_new_output(out_dtype, out_ndims, out_dims, 1)
         : pressio_data_new_nonowning_domain(out_dtype, out, out_ndims,
-                                            out_dims, "malloc");
+                                            chunk_dims, "malloc");
     if (!input || !output) {
         H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
                 vol_err_class, maj_compression, min_decompress_failed,
