@@ -2211,7 +2211,6 @@ vol_decompress_pressio_impl(compression_ctx *ctx,
     printf("DECOMPRESS PRESSIO OK: id=%s out_bytes=%zu\n",
            ctx->compressor_id, out_bytes);
 #endif
-    }
 
     if (getenv("HDF5_VOL_PRESSIO_METRICS")) {
         struct pressio_options *results = pressio_compressor_get_metrics_results(w);

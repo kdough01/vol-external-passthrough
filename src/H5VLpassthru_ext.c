@@ -2325,7 +2325,6 @@ H5VL_pass_through_ext_dataset_read(
             rreq.want_layers   = want_layers;
             rreq.dset_name     = dset_name;
             rreq.u             = u;
-            rt.stage_ms        = t.serve_ms;
 
             ctx->pressio_call_ms = 0.0;
             ctx->device_ms       = 0.0;
@@ -2374,7 +2373,7 @@ H5VL_pass_through_ext_dataset_read(
         }
 
         /* ---------------- serve ---------------- */
-        if (vol_read_serve(ctx, mem_space_id[u], buf[u], u) < 0) {
+        if (!direct && vol_read_serve(ctx, mem_space_id[u], buf[u], u, &t) < 0) {
             ret_val = -1;
             continue;
         }
@@ -2385,6 +2384,7 @@ H5VL_pass_through_ext_dataset_read(
             rt.total_ms        = bench_now_ms() - _d0;
             rt.compress_ms     = t.decomp_ms;
             rt.io_ms           = t.io_ms;
+            rt.stage_ms        = t.serve_ms;
             rt.pressio_call_ms = ctx->pressio_call_ms;
             rt.device_ms       = ctx->device_ms;
             vol_timing_finalize(&rt, dset_name, ctx->compressor_id, 0.03);
