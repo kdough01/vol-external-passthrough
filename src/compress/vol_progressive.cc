@@ -145,8 +145,7 @@ H5VL_pass_through_ext_progressive_ratio(const compression_ctx *ctx)
     return v;
 }
 
-int
-H5VL_pass_through_ext_progressive_want(hid_t dxpl_id)
+herr_t H5Pset_vol_progressive_pct(hid_t dxpl, unsigned pct);
 {
     int want = 0;
 

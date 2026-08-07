@@ -1,20 +1,9 @@
-/* tests/probe_sperr_trunc.cc
+/* tests/probe_sperr_prog.cc
  *
- * Does a libpressio codec survive decompression from a truncated bitstream?
+ * libpressio compress -> sperr_trunc_3d -> libpressio decompress
  *
- *   usage: ./probe_trunc [compressor] [fraction] [abs_tolerance]
- *
- *     compressor     default "mgard"   (also: sperr, sz3, zfp, ...)
- *     fraction       run a single fraction in this process; omit to run the
- *                    full descending sweep 1.0 -> 0.0625
- *     abs_tolerance  default 1e-3
- *
- * Each truncated prefix is copied into its own exactly-sized allocation, so a
- * codec that reads its length from its own header will fault or error rather
- * than silently reading past the end into still-valid heap. Run one fraction
- * per process under ASAN to rule that out for good:
- *
- *   for f in 1.0 0.5 0.25 0.125 0.0625; do ./probe_trunc mgard $f; done
+ *   usage: ./probe_sperr_prog [pct] [abs_tolerance]
+ *          omit pct to sweep 100/50/25/12/6
  */
 #include <cstdio>
 #include <cstdlib>
@@ -22,6 +11,7 @@
 #include <cstring>
 #include <vector>
 #include <libpressio/libpressio.h>
+#include <SPERR_C_API.h>
 
 static double
 rmse_of(const float *a, const float *b, size_t n)
@@ -37,13 +27,11 @@ rmse_of(const float *a, const float *b, size_t n)
 int
 main(int argc, char **argv)
 {
-    const char  *cname = (argc > 1) ? argv[1] : "mgard";
-    const double abs_tol = (argc > 3) ? atof(argv[3]) : 1e-3;
+    const double abs_tol = (argc > 2) ? atof(argv[2]) : 1e-3;
 
-    /* 3D field; SPERR and MGARD both want 2D or 3D. */
     const size_t nx = 128, ny = 128, nz = 128;
     const size_t n  = nx * ny * nz;
-    size_t dims[3]  = { nx, ny, nz };      /* libpressio order: fastest first */
+    size_t dims[3]  = { nx, ny, nz };        /* libpressio order, fastest first */
 
     printf("supported: %s\n\n", pressio_supported_compressors());
 
@@ -55,30 +43,32 @@ main(int argc, char **argv)
                     (float)(sin(i * 0.05) * cos(j * 0.03) + 0.3 * sin(k * 0.07));
 
     struct pressio *lib = pressio_instance();
-    struct pressio_compressor *c = pressio_get_compressor(lib, cname);
-    if (!c) {
-        fprintf(stderr, "'%s' not available in this build\n", cname);
-        return 1;
-    }
+    struct pressio_compressor *c = pressio_get_compressor(lib, "sperr");
+    if (!c) { fprintf(stderr, "sperr not available\n"); return 1; }
 
-    /* Dump the real option keys -- also the answer to "what are this codec's
-     * knobs", which the docs do not cover for sperr or mgard. */
+    /* One chunk covering the whole volume: a truncated stream is then a plain
+     * prefix. Multi-chunk streams interleave, so the bytes needed would be
+     * strided instead. */
     {
-        struct pressio_options *o = pressio_compressor_get_options(c);
-        char *s = pressio_options_to_string(o);
-        printf("=== %s options ===\n%s\n\n", cname, s ? s : "(null)");
-        free(s);
+        struct pressio_options *o = pressio_options_new();
+        size_t cd[1] = { 3 };
+        uint64_t chunk[3] = { nx, ny, nz };
+        struct pressio_data *cdata =
+            pressio_data_new_nonowning(pressio_uint64_dtype, chunk, 1, cd);
+
+        pressio_options_set_double(o, "pressio:abs", abs_tol);
+        pressio_options_set_data(o, "sperr:chunks", cdata);
+        if (pressio_compressor_set_options(c, o))
+            fprintf(stderr, "set_options: %s\n", pressio_compressor_error_msg(c));
+        pressio_data_free(cdata);
         pressio_options_free(o);
     }
 
-    /* Loose enough that the codec actually compresses. An abs bound below
-     * float32's own precision (e.g. 1e-6 on O(1) data) makes codecs store
-     * essentially raw, leaving nothing meaningful to truncate. */
     {
-        struct pressio_options *o = pressio_options_new();
-        pressio_options_set_double(o, "pressio:abs", abs_tol);
-        if (pressio_compressor_set_options(c, o))
-            fprintf(stderr, "set_options: %s\n", pressio_compressor_error_msg(c));
+        struct pressio_options *o = pressio_compressor_get_options(c);
+        char *s = pressio_options_to_string(o);
+        printf("=== sperr options ===\n%s\n\n", s ? s : "(null)");
+        free(s);
         pressio_options_free(o);
     }
 
@@ -94,63 +84,76 @@ main(int argc, char **argv)
 
     size_t csize = 0;
     void  *cbuf  = pressio_data_ptr(comp, &csize);
-    printf("compressor=%s abs=%g\n", cname, abs_tol);
-    printf("compressed %zu B -> %zu B (%.2fx)\n",
+    printf("compressed %zu B -> %zu B (%.2fx), abs=%g\n",
            n * sizeof(float), csize,
-           (double)(n * sizeof(float)) / (double)csize);
+           (double)(n * sizeof(float)) / (double)csize, abs_tol);
 
-    /* Reference: RMSE of an all-zero field. Any result equal to this means the
-     * codec wrote nothing, not that it reconstructed badly. */
     {
         std::vector<float> z(n, 0.0f);
         printf("reference rmse(zeros vs orig) = %.6e\n\n",
                rmse_of(orig.data(), z.data(), n));
     }
 
-    std::vector<double> fracs;
-    if (argc > 2) fracs.push_back(atof(argv[2]));
-    else for (double f = 1.0; f >= 0.0625; f /= 2) fracs.push_back(f);
+    std::vector<unsigned> pcts;
+    if (argc > 1) pcts.push_back((unsigned)atoi(argv[1]));
+    else { pcts.push_back(100); pcts.push_back(50); pcts.push_back(25);
+           pcts.push_back(12);  pcts.push_back(6); }
 
-    printf("%-8s %-12s %-4s %-14s %-10s %s\n",
-           "frac", "bytes", "rc", "rmse", "wrote", "err");
+    printf("%-6s %-12s %-12s %-5s %-5s %-14s %-10s %s\n",
+           "pct", "fed_bytes", "trunc_bytes", "trc", "rc", "rmse", "wrote", "err");
 
-    for (size_t idx = 0; idx < fracs.size(); idx++) {
-        double f = fracs[idx];
-        size_t trunc = (size_t)((double)csize * f);
-        if (trunc == 0) continue;
+    for (size_t idx = 0; idx < pcts.size(); idx++) {
+        unsigned pct = pcts[idx];
 
-        /* Exact-size copy: nothing valid lives past the end. */
-        void *chunk = malloc(trunc);
-        if (!chunk) { fprintf(stderr, "oom\n"); return 1; }
-        memcpy(chunk, cbuf, trunc);
+        /* Simulate the VOL read: only a prefix of the stream is available,
+         * in its own exactly-sized allocation. Over-read slightly, the way
+         * vol_container_plan will, since sperr_trunc_3d tolerates a stream
+         * longer than it needs but not shorter. */
+        size_t fed = (csize * pct) / 100 + 4096;
+        if (fed > csize) fed = csize;
 
-        size_t cd[1] = { trunc };
-        struct pressio_data *in =
-            pressio_data_new_nonowning(pressio_byte_dtype, chunk, 1, cd);
-        struct pressio_data *out =
-            pressio_data_new_nonowning(pressio_float_dtype, recon.data(), 3, dims);
+        void *prefix = malloc(fed);
+        if (!prefix) { fprintf(stderr, "oom\n"); return 1; }
+        memcpy(prefix, cbuf, fed);
 
-        memset(recon.data(), 0, n * sizeof(float));
-        int rc = pressio_compressor_decompress(c, in, out);
+        void  *ts   = NULL;
+        size_t tlen = 0;
+        int trc = sperr_trunc_3d(prefix, fed, pct, &ts, &tlen);
 
-        /* Read from wherever the codec actually wrote -- several plugins
-         * replace the output buffer instead of filling the one they are given,
-         * in which case `recon` is untouched and measuring it is meaningless. */
-        size_t osz = 0;
-        const float *rp = (const float *)pressio_data_ptr(out, &osz);
-        double r = -2.0;
-        if (!rc && rp && osz == n * sizeof(float))
-            r = rmse_of(orig.data(), rp, n);
+        int    rc = -1;
+        double r  = -2.0;
+        const float *rp = NULL;
 
-        printf("%-8.4f %-12zu %-4d %-14.6e %-10s %s\n",
-               f, trunc, rc, r,
-               (rp == recon.data()) ? "in-place" : "REALLOC",
-               rc ? pressio_compressor_error_msg(c) : "");
+        if (trc == 0 && ts && tlen) {
+            size_t cd[1] = { tlen };
+            struct pressio_data *in =
+                pressio_data_new_nonowning(pressio_byte_dtype, ts, 1, cd);
+            struct pressio_data *out =
+                pressio_data_new_nonowning(pressio_float_dtype, recon.data(), 3, dims);
+
+            memset(recon.data(), 0, n * sizeof(float));
+            rc = pressio_compressor_decompress(c, in, out);
+
+            size_t osz = 0;
+            rp = (const float *)pressio_data_ptr(out, &osz);
+            if (!rc && rp && osz == n * sizeof(float))
+                r = rmse_of(orig.data(), rp, n);
+
+            printf("%-6u %-12zu %-12zu %-5d %-5d %-14.6e %-10s %s\n",
+                   pct, fed, tlen, trc, rc, r,
+                   (rp == recon.data()) ? "in-place" : "REALLOC",
+                   rc ? pressio_compressor_error_msg(c) : "");
+
+            pressio_data_free(in);
+            pressio_data_free(out);
+        } else {
+            printf("%-6u %-12zu %-12zu %-5d %-5s %-14s %-10s %s\n",
+                   pct, fed, tlen, trc, "-", "-", "-", "sperr_trunc_3d failed");
+        }
+
         fflush(stdout);
-
-        pressio_data_free(in);
-        pressio_data_free(out);
-        free(chunk);
+        free(ts);
+        free(prefix);
     }
 
     pressio_data_free(input);
