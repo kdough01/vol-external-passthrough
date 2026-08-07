@@ -118,7 +118,7 @@ main(int argc, char **argv)
 
         void  *ts   = NULL;
         size_t tlen = 0;
-        int trc = sperr_trunc_3d(prefix, fed, pct, &ts, &tlen);
+        int trc = C_API::sperr_trunc_3d(prefix, fed, pct, &ts, &tlen);
 
         int    rc = -1;
         double r  = -2.0;
