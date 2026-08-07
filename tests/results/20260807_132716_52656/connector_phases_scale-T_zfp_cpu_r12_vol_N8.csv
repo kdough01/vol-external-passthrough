@@ -1,0 +1,3 @@
+dataset,compressor,op,total_ms,stage_ms,compress_ms,container_ms,io_ms,pressio_call_ms,device_ms,vol_compress_ms,pressio_host_ms,residual_ms,residual_frac
+scale-T_zfp_cpu_r12,zfp,write,5531.0172,0.0000,5271.1093,0.2253,236.5192,5268.9917,0.0000,2.1177,5268.9917,23.1634,0.004188
+scale-T_zfp_cpu_r12,zfp,read,2613.0471,0.0000,2450.6255,0.0000,140.7054,2450.2545,0.0000,0.3710,2450.2545,21.7162,0.008311
