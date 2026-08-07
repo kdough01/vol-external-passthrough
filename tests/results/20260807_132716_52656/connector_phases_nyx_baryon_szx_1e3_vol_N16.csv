@@ -1,0 +1,3 @@
+dataset,compressor,op,total_ms,stage_ms,compress_ms,container_ms,io_ms,pressio_call_ms,device_ms,vol_compress_ms,pressio_host_ms,residual_ms,residual_frac
+nyx_baryon_szx_1e3,szx,write,1290.7376,0.0000,1060.0925,0.2526,207.9105,1056.9815,0.0000,3.1110,1056.9815,22.4821,0.017418
+nyx_baryon_szx_1e3,szx,read,1160.2973,0.0000,1013.3283,0.0000,126.7990,804.7193,0.0000,208.6091,804.7193,20.1699,0.017383

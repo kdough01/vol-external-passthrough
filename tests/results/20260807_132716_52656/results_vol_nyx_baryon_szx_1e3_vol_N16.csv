@@ -1,0 +1,10 @@
+dataset,compressor,path,op,phase,ms,ratio,rmse
+nyx_baryon,szx_1e3,vol,write,total,1291.1828,2.3343,
+nyx_baryon,szx_1e3,vol,write,flush,138.8019,,
+nyx_baryon,szx_1e3,vol,write,sync,99.8529,,
+nyx_baryon,szx_1e3,vol,write,close,0.1681,,
+nyx_baryon,szx_1e3,vol,write,csync,118.0520,,
+nyx_baryon,szx_1e3,vol,read,evict,1.2629,,
+nyx_baryon,szx_1e3,vol,read,total,1160.4214,,2.011786e-04
+/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_nyx_baryon_szx_1e3_vol_N16.h5,ALL,vol,write,file,1649.0665,2.3343,
+/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_nyx_baryon_szx_1e3_vol_N16.h5,ALL,vol,read,file,1160.7306,,
