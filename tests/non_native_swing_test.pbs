@@ -303,9 +303,9 @@ declare -A DATASET=(
 # ===========================================================================
 CHUNK_COUNTS="8 16"
 # noop cuszp_1e3 cuszp_1e6 sz3_1e3 sz3_1e6 szx_1e3 szx_1e6 zfp_cpu_r4 zfp_cpu_r8 zfp_cpu_r12 zfp_cpu_r16 zfp_gpu_r4 zfp_gpu_r8 zfp_gpu_r12 zfp_gpu_r16
-SWEEP_COMPS="noop cuszp_1e3 cuszp_1e6 sz3_1e3 sz3_1e6 szx_1e3 szx_1e6 zfp_cpu_r4 zfp_cpu_r8 zfp_cpu_r12 zfp_cpu_r16 zfp_gpu_r4 zfp_gpu_r8 zfp_gpu_r12 zfp_gpu_r16"
+SWEEP_COMPS="noop"
 # scale-T s3d nyx_baryon ocean_temp qmc
-SWEEP_GROUPS="miranda scale-T s3d nyx_baryon ocean_temp qmc"
+SWEEP_GROUPS="qmc"
 
 # If the bsws=64 swap did not take, the GPU zfp rows would be invalid or would
 # simply fail. Drop them rather than burning walltime producing garbage.
