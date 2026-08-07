@@ -45,9 +45,11 @@ int main(int argc, char **argv)
 
     /* High quality so there is a long stream to truncate. If pressio:abs is
      * not honoured, switch to sperr's own rate/quality key from the dump. */
+    /* Loose enough that MGARD actually compresses. 1e-6 on O(1) float32
+     * data is below the type's own precision -- it stores raw. */
     {
         struct pressio_options *o = pressio_options_new();
-        pressio_options_set_double(o, "pressio:abs", 1e-6);
+        pressio_options_set_double(o, "pressio:abs", 1e-3);
         if (pressio_compressor_set_options(c, o))
             fprintf(stderr, "set_options: %s\n", pressio_compressor_error_msg(c));
         pressio_options_free(o);
@@ -69,26 +71,47 @@ int main(int argc, char **argv)
            n * sizeof(float), csize, (double)(n * sizeof(float)) / (double)csize);
 
     printf("%-8s %-12s %-4s %-14s %s\n", "frac", "bytes", "rc", "rmse", "note");
+    /* Reference: RMSE of an all-zero field, so "wrote nothing" is
+     * distinguishable from "wrote something wrong". */
+    {
+        std::vector<float> z(n, 0.0f);
+        printf("reference rmse(zeros vs orig) = %.6e\n\n",
+               rmse_of(orig.data(), z.data(), n));
+    }
+
+    printf("%-8s %-12s %-4s %-14s %-12s %s\n",
+           "frac", "bytes", "rc", "rmse", "wrote", "err");
     for (double f = 0.0625; f <= 1.0001; f *= 2) {
         size_t trunc = (size_t)((double)csize * f);
         if (trunc == 0) continue;
-        size_t cd[1] = { trunc };
 
+        /* Exact-size copy. Nothing valid lives past the end, so a codec that
+         * reads its length from its own header will fault or garbage rather
+         * than silently succeeding. */
+        void *chunk = malloc(trunc);
+        memcpy(chunk, cbuf, trunc);
+
+        size_t cd[1] = { trunc };
         struct pressio_data *in =
-            pressio_data_new_nonowning(pressio_byte_dtype, cbuf, 1, cd);
+            pressio_data_new_nonowning(pressio_byte_dtype, chunk, 1, cd);
         struct pressio_data *out =
             pressio_data_new_nonowning(pressio_float_dtype, recon.data(), 3, dims);
 
         memset(recon.data(), 0, n * sizeof(float));
         int rc = pressio_compressor_decompress(c, in, out);
 
-        printf("%-8.4f %-12zu %-4d %-14s %s\n", f, trunc, rc,
-               rc ? "-" : "see below",
+        size_t osz = 0;
+        void  *optr = pressio_data_ptr(out, &osz);
+
+        printf("%-8.4f %-12zu %-4d %-14.6e %-12s %s\n",
+               f, trunc, rc,
+               rc ? -1.0 : rmse_of(orig.data(), recon.data(), n),
+               (optr == recon.data()) ? "in-place" : "REALLOC",
                rc ? pressio_compressor_error_msg(c) : "");
-        if (!rc) printf("         rmse=%.6e\n", rmse_of(orig.data(), recon.data(), n));
 
         pressio_data_free(in);
         pressio_data_free(out);
+        free(chunk);
     }
 
     pressio_data_free(input);
