@@ -38,6 +38,7 @@
 /* pressio-chunked container: [magic][uint64 csize][uint64 chunk_elems][payload] */
 #define VOL_PRESSIO_MAGIC     0x564F4C5052534F31ULL   /* "VOLPRSO1" */
 #define VOL_PRESSIO_HDR_WORDS 3
+#define VOL_NATIVE_HDR_WORDS 2
 
 /* Pass-through VOL connector info */
 typedef struct H5VL_pass_through_ext_info_t {

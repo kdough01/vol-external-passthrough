@@ -2506,7 +2506,8 @@ static herr_t
 vol_write_native(const vol_write_req_t *req, vol_write_timing_t *t)
 {
     compression_ctx *ctx = req->ctx;
-    const size_t hdr_bytes = 2 * sizeof(uint64_t);   /* magic + csize */
+    uint64_t nhdr[VOL_NATIVE_HDR_WORDS];       /* magic + csize */
+    const size_t hdr_bytes = sizeof(nhdr);
     void    *blob = NULL;
     uint64_t clen = 0;
     herr_t   rc;
@@ -2514,7 +2515,7 @@ vol_write_native(const vol_write_req_t *req, vol_write_timing_t *t)
     vol_write_reset_timers(ctx, t);
     double _c0 = bench_now_ms();
     rc = H5VL_pass_through_ext_compress_native(ctx, req->comp_src,
-                                               req->total_bytes, hdr_bytes,
+                                               req->total_bytes, 0,
                                                &blob, &clen);
     vol_write_capture_timers(ctx, t, _c0);
 
@@ -2527,15 +2528,21 @@ vol_write_native(const vol_write_req_t *req, vol_write_timing_t *t)
         return -1;
     }
 
-    {
-        double _h0 = bench_now_ms();
-        uint64_t *hdr = (uint64_t *)blob;
-        hdr[0] = VOL_NATIVE_MAGIC;
-        hdr[1] = clen;
-        t->container_ms += bench_now_ms() - _h0;
-    }
+    const hsize_t total = (hsize_t)(hdr_bytes + clen);
 
-    rc = vol_write_whole(req, blob, (hsize_t)(hdr_bytes + clen), t);
+    if (vol_write_set_extent(req, total, t) < 0) { free(blob); return -1; }
+
+    double _h0 = bench_now_ms();
+    nhdr[0] = VOL_NATIVE_MAGIC;
+    nhdr[1] = clen;
+    t->container_ms += bench_now_ms() - _h0;
+
+    if (vol_write_at(req, nhdr, 0, (hsize_t)hdr_bytes, total, t) < 0) {
+        free(blob);
+        return -1;
+    }
+    rc = vol_write_at(req, blob, (hsize_t)hdr_bytes, (hsize_t)clen, total, t);
+
     free(blob);
     return rc;
 }
