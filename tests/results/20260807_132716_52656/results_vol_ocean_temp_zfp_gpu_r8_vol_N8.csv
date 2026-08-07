@@ -1,0 +1,10 @@
+dataset,compressor,path,op,phase,ms,ratio,rmse
+ocean_temp,zfp_gpu_r8,vol,write,total,203.6759,2.8333,
+ocean_temp,zfp_gpu_r8,vol,write,flush,0.2865,,
+ocean_temp,zfp_gpu_r8,vol,write,sync,141.7728,,
+ocean_temp,zfp_gpu_r8,vol,write,close,0.1528,,
+ocean_temp,zfp_gpu_r8,vol,write,csync,124.8509,,
+ocean_temp,zfp_gpu_r8,vol,read,evict,6.4140,,
+ocean_temp,zfp_gpu_r8,vol,read,total,86.3259,,3.320599e-04
+/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_ocean_temp_zfp_gpu_r8_vol_N8.h5,ALL,vol,write,file,471.7778,2.8333,
+/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_ocean_temp_zfp_gpu_r8_vol_N8.h5,ALL,vol,read,file,86.6637,,

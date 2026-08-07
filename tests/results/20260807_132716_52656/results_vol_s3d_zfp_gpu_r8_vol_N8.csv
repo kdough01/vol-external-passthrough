@@ -1,0 +1,10 @@
+dataset,compressor,path,op,phase,ms,ratio,rmse
+s3d,zfp_gpu_r8,vol,write,total,377.4124,7.8740,
+s3d,zfp_gpu_r8,vol,write,flush,108.4215,,
+s3d,zfp_gpu_r8,vol,write,sync,122.0565,,
+s3d,zfp_gpu_r8,vol,write,close,0.1986,,
+s3d,zfp_gpu_r8,vol,write,csync,148.8415,,
+s3d,zfp_gpu_r8,vol,read,evict,1.1898,,
+s3d,zfp_gpu_r8,vol,read,total,320.6995,,8.118701e-09
+/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_s3d_zfp_gpu_r8_vol_N8.h5,ALL,vol,write,file,758.1238,7.8740,
+/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_s3d_zfp_gpu_r8_vol_N8.h5,ALL,vol,read,file,321.0468,,

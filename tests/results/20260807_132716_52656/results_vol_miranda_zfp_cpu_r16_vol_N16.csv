@@ -1,0 +1,10 @@
+dataset,compressor,path,op,phase,ms,ratio,rmse
+miranda,zfp_cpu_r16,vol,write,total,1926.4820,4.0000,
+miranda,zfp_cpu_r16,vol,write,flush,0.3204,,
+miranda,zfp_cpu_r16,vol,write,sync,139.1288,,
+miranda,zfp_cpu_r16,vol,write,close,0.2993,,
+miranda,zfp_cpu_r16,vol,write,csync,110.2095,,
+miranda,zfp_cpu_r16,vol,read,evict,6.6964,,
+miranda,zfp_cpu_r16,vol,read,total,807.1669,,2.650153e-08
+/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_miranda_zfp_cpu_r16_vol_N16.h5,ALL,vol,write,file,2177.6522,4.0000,
+/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_miranda_zfp_cpu_r16_vol_N16.h5,ALL,vol,read,file,807.6295,,

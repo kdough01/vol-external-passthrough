@@ -1,0 +1,3 @@
+dataset,compressor,op,total_ms,stage_ms,compress_ms,container_ms,io_ms,pressio_call_ms,device_ms,vol_compress_ms,pressio_host_ms,residual_ms,residual_frac
+s3d_zfp_gpu_r4,zfp,write,421.2725,0.0000,230.5377,0.1299,184.0832,180.5477,0.0000,49.9900,180.5477,6.5218,0.015481
+s3d_zfp_gpu_r4,zfp,read,346.4600,0.0000,305.2278,0.0000,35.7990,304.5659,0.0000,0.6619,304.5659,5.4332,0.015682
