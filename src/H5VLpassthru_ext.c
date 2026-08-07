@@ -1945,7 +1945,7 @@ typedef struct {
     size_t                   u;
 } vol_read_req_t;
 
-typedef struct { double io_ms, decomp_ms; } vol_read_timing_t;
+typedef struct { double io_ms, decomp_ms, serve_ms; } vol_read_timing_t;
 
 /* =========================================================================
  * PATH 1 -- NATIVE:  [magic][csize][payload]
@@ -2160,16 +2160,10 @@ vol_read_passthrough(H5VL_pass_through_ext_t *d, void *under,
 
 /* =========================================================================
  * SERVE -- hand this read's bytes out of the decompressed buffer.
- *
- * KNOWN LIMITATION, PRESERVED AS-IS: this uses mem_space only for the SIZE
- * and a running cursor for the POSITION -- file_space is not consulted. A
- * hyperslab read of the middle of the array therefore returns the FIRST bytes,
- * and a re-read after the cursor is exhausted returns nothing, both silently.
- * Correct for the one-H5S_ALL-read-per-open pattern the benchmarks use.
- * Fix this before claiming partial spatial reads work end to end.
  * ========================================================================= */
 static herr_t
-vol_read_serve(compression_ctx *ctx, hid_t mem_space_id, void *dst, size_t u)
+vol_read_serve(compression_ctx *ctx, hid_t mem_space_id, void *dst, size_t u,
+               vol_read_timing_t *t)
 {
     size_t want;
 
@@ -2197,7 +2191,9 @@ vol_read_serve(compression_ctx *ctx, hid_t mem_space_id, void *dst, size_t u)
 #endif
 
     if (want > 0) {
+        double _s0 = bench_now_ms();
         memcpy(dst, (char *)ctx->decomp_buf + ctx->read_served, want);
+        t->serve_ms += bench_now_ms() - _s0;
         ctx->read_served += want;
     }
     return 0;
@@ -2214,7 +2210,7 @@ H5VL_pass_through_ext_dataset_read(
     herr_t ret_val = 0;
 
     for (size_t u = 0; u < count; u++) {
-        vol_read_timing_t t = {0.0, 0.0};
+        vol_read_timing_t t = {0.0, 0.0, 0.0};
         double _d0 = bench_now_ms();
 
         H5VL_pass_through_ext_t *d = (H5VL_pass_through_ext_t *)dset[u];
@@ -2246,13 +2242,32 @@ H5VL_pass_through_ext_dataset_read(
         }
 
         const size_t total_bytes = vol_logical_nbytes(ctx);
+        int direct = 0;
 
         /* ---------------- load + decode, once per open ---------------- */
         if (!ctx->decomp_buf) {
             vol_read_plan_t plan;
             unsigned char  *cbuf = NULL;
+            void           *decode_dst = NULL;
             const int want_layers =
                 H5VL_pass_through_ext_progressive_want(plist_id);
+
+            {
+                const size_t esz = pressio_dtype_size(ctx->dtype);
+                size_t mem_bytes = total_bytes, file_bytes = total_bytes;
+                hssize_t np;
+
+                if (mem_space_id[u] != H5S_ALL) {
+                    np = H5Sget_select_npoints(mem_space_id[u]);
+                    mem_bytes = (np < 0) ? 0 : (size_t)np * esz;
+                }
+                if (file_space_id[u] != H5S_ALL) {
+                    np = H5Sget_select_npoints(file_space_id[u]);
+                    file_bytes = (np < 0) ? 0 : (size_t)np * esz;
+                }
+                direct = (mem_bytes  == total_bytes) &&
+                         (file_bytes == total_bytes);
+            }
 
             /* PHASE 1: header + directory, then decide which byte ranges this
              * request actually needs. PHASE 2: read only those. */
@@ -2280,16 +2295,21 @@ H5VL_pass_through_ext_dataset_read(
                         100.0 * (double)plan.bytes_needed /
                                 (double)plan.cont_bytes);
 
-            ctx->decomp_buf = malloc(total_bytes);
-            if (!ctx->decomp_buf) {
-                H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
-                        vol_err_class, maj_compression, min_decompress_failed,
-                        "out of memory allocating %zu byte decompress buffer "
-                        "for dataset %zu", total_bytes, u);
-                free(cbuf);
-                vol_read_plan_free(&plan);
-                ret_val = -1;
-                continue;
+            if (direct) {
+                decode_dst = buf[u];
+            } else {
+                ctx->decomp_buf = malloc(total_bytes);
+                if (!ctx->decomp_buf) {
+                    H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                            vol_err_class, maj_compression, min_decompress_failed,
+                            "out of memory allocating %zu byte decompress buffer "
+                            "for dataset %zu", total_bytes, u);
+                    free(cbuf);
+                    vol_read_plan_free(&plan);
+                    ret_val = -1;
+                    continue;
+                }
+                decode_dst = ctx->decomp_buf;
             }
 
             vol_read_req_t rreq;
@@ -2300,11 +2320,12 @@ H5VL_pass_through_ext_dataset_read(
             rreq.file_space_id = file_space_id[u];
             rreq.cbuf          = cbuf;
             rreq.cont_bytes    = (size_t)plan.cont_bytes;
-            rreq.dst           = ctx->decomp_buf;
+            rreq.dst           = decode_dst;
             rreq.total_bytes   = total_bytes;
             rreq.want_layers   = want_layers;
             rreq.dset_name     = dset_name;
             rreq.u             = u;
+            rt.stage_ms        = t.serve_ms;
 
             ctx->pressio_call_ms = 0.0;
             ctx->device_ms       = 0.0;
@@ -2340,8 +2361,16 @@ H5VL_pass_through_ext_dataset_read(
                 continue;
             }
 
-            ctx->decomp_size = total_bytes;
-            ctx->read_served = 0;
+            if (!direct) {
+                ctx->decomp_size = total_bytes;
+                ctx->read_served = 0;
+            }
+        }
+
+        /* ---------------- serve ---------------- */
+        if (!direct && vol_read_serve(ctx, mem_space_id[u], buf[u], u, &t) < 0) {
+            ret_val = -1;
+            continue;
         }
 
         /* ---------------- serve ---------------- */
