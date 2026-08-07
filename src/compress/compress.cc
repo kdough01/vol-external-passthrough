@@ -1374,6 +1374,29 @@ done:
     return ret_val;
 }
 
+herr_t
+H5VL_pass_through_ext_transfer_compress_chunk(compression_ctx *ctx,
+                                              const void *data, size_t nbytes,
+                                              void **out_cbuf, uint64_t *out_csize)
+{
+    try {
+        H5VL_pass_through_ext_cuda_warmup();
+        return vol_transfer_compress_chunk_impl(ctx, data, nbytes,
+                                                out_cbuf, out_csize);
+    } catch (const std::exception &e) {
+        H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                vol_err_class, maj_compression, min_compress_failed,
+                "chunk compress for '%s' threw: %s",
+                ctx ? ctx->compressor_id : "?", e.what());
+        return -1;
+    } catch (...) {
+        H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                vol_err_class, maj_compression, min_compress_failed,
+                "chunk compress for '%s' threw a non-standard exception",
+                ctx ? ctx->compressor_id : "?");
+        return -1;
+    }
+}
 
 /* ========================================================================
  * 3. DECOMPRESS ONE VOL-LEVEL CHUNK
