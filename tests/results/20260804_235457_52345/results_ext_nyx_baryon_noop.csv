@@ -1,2 +1,0 @@
-dataset,compressor,codec_kind,chunk_n,rep,logical_bytes,stored_bytes,ratio,create_ms,write_ms,flush_ms,sync_ms,close_ms,csync_ms,evict_ms,open_ms,read_ms,rmse,abs_thresh,maxae,bound_ok
-nyx_baryon,noop,cpu,1,0,536870912,536870928,1.0000,1.8350,1093.0014,87.2342,63.5745,0.2556,30.7764,5.2785,0.2706,691.5797,0.000000e+00,0.000000e+00,0.000000e+00,1

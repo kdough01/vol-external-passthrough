@@ -1,3 +1,0 @@
-dataset,compressor,op,total_ms,stage_ms,compress_ms,container_ms,io_ms,pressio_call_ms,device_ms,vol_compress_ms,pressio_host_ms,residual_ms,residual_frac
-nyx_baryon_cuszp_1e3,cuszp,write,364.8827,0.0000,192.9976,0.1248,158.7726,99.0347,99.1805,93.9629,-0.1458,12.9877,0.035594
-nyx_baryon_cuszp_1e3,cuszp,read,487.5802,0.0000,347.8771,0.0000,69.1471,38.9142,39.0272,308.9629,-0.1130,70.5560,0.144706

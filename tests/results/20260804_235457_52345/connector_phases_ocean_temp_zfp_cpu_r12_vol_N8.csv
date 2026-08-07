@@ -1,3 +1,0 @@
-dataset,compressor,op,total_ms,stage_ms,compress_ms,container_ms,io_ms,pressio_call_ms,device_ms,vol_compress_ms,pressio_host_ms,residual_ms,residual_frac
-ocean_temp_zfp_cpu_r12,zfp,write,1516.9647,0.0000,1342.1270,0.1305,165.8017,1303.3020,0.0000,38.8250,1303.3020,8.9055,0.005871
-ocean_temp_zfp_cpu_r12,zfp,read,799.4568,0.0000,744.2104,0.0000,39.2652,675.4218,0.0000,68.7886,675.4218,15.9811,0.019990

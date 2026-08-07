@@ -1,3 +1,0 @@
-dataset,compressor,op,total_ms,stage_ms,compress_ms,container_ms,io_ms,pressio_call_ms,device_ms,vol_compress_ms,pressio_host_ms,residual_ms,residual_frac
-scale-T_noop,noop,write,1402.1753,0.0000,634.9751,0.1428,713.1674,290.6148,0.0000,344.3603,290.6148,53.8900,0.038433
-scale-T_noop,noop,read,686.0236,0.0000,281.1168,0.0000,308.1294,0.0000,0.0000,281.1168,0.0000,96.7774,0.141070

@@ -1,4 +1,0 @@
-dataset,compressor,codec_kind,chunk_n,rep,logical_bytes,stored_bytes,ratio,create_ms,write_ms,flush_ms,close_ms,open_ms,read_ms,rmse,abs_thresh,maxae,bound_ok
-miranda,zfp_gpu_r,NA,0,-1,0,0,0,-1,-1,-1,-1,-1,-1,-1,-1,-1,0
-miranda,zfp_gpu_r,NA,0,-1,0,0,0,-1,-1,-1,-1,-1,-1,-1,-1,-1,0
-miranda,zfp_gpu_r,NA,0,-1,0,0,0,-1,-1,-1,-1,-1,-1,-1,-1,-1,0

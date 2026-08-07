@@ -1,2 +1,0 @@
-dataset,compressor,codec_kind,chunk_n,rep,logical_bytes,stored_bytes,ratio,create_ms,write_ms,flush_ms,sync_ms,close_ms,csync_ms,evict_ms,open_ms,read_ms,rmse,abs_thresh,maxae,bound_ok
-scale-T,szx_1e3,cpu,16,0,564480000,105971008,5.3267,1.1200,1213.5469,48.7336,105.0332,0.1993,84.0778,6.0291,0.3383,1302.5981,2.134786e-04,1.000000e-03,9.999275e-04,1

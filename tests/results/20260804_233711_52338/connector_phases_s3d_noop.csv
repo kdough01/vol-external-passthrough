@@ -1,3 +1,0 @@
-dataset,compressor,op,total_ms,stage_ms,compress_ms,container_ms,io_ms,pressio_call_ms,device_ms,vol_compress_ms,pressio_host_ms,residual_ms,residual_frac
-s3d_noop,noop,write,1667.9679,0.0000,1221.1677,0.0586,361.7983,626.5708,0.0000,594.5969,626.5708,84.9432,0.050926
-s3d_noop,noop,read,1342.3153,0.0000,641.4858,0.0000,554.9855,0.0000,0.0000,641.4858,0.0000,145.8440,0.108651

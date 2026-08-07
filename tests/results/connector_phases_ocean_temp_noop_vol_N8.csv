@@ -1,3 +1,0 @@
-dataset,compressor,op,total_ms,stage_ms,compress_ms,container_ms,io_ms,pressio_call_ms,device_ms,vol_compress_ms,pressio_host_ms,residual_ms,residual_frac
-ocean_temp_noop,noop,write,288.2805,0.0000,94.9406,15.2158,178.0734,23.5057,0.0000,71.4349,23.5057,0.0507,0.000176
-ocean_temp_noop,noop,read,163.4881,0.0000,66.2937,0.0000,75.4448,0.0000,0.0000,66.2937,0.0000,21.7496,0.133035

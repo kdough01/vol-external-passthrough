@@ -1,3 +1,0 @@
-dataset,compressor,op,total_ms,stage_ms,compress_ms,container_ms,io_ms,pressio_call_ms,device_ms,vol_compress_ms,pressio_host_ms,residual_ms,residual_frac
-ocean_temp_cuszp_1e3,cuszp,write,231.7128,0.0000,87.2682,0.0708,139.6893,50.0043,50.0684,37.2639,-0.0641,4.6845,0.020217
-ocean_temp_cuszp_1e3,cuszp,read,127.7233,0.0000,95.5712,0.0000,20.5116,17.5749,17.6550,77.9963,-0.0801,11.6405,0.091139

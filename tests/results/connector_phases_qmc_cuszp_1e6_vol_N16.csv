@@ -1,3 +1,0 @@
-dataset,compressor,op,total_ms,stage_ms,compress_ms,container_ms,io_ms,pressio_call_ms,device_ms,vol_compress_ms,pressio_host_ms,residual_ms,residual_frac
-einspline37_cuszp_1e6,cuszp,write,11715.8119,0.0000,7878.1196,683.2698,3154.3608,2773.3221,0.0000,5104.7975,2773.3221,0.0618,0.000005
-einspline37_cuszp_1e6,cuszp,read,15224.7781,0.0000,8169.9533,0.0000,4750.1077,0.0000,0.0000,8169.9533,0.0000,2304.7170,0.151379

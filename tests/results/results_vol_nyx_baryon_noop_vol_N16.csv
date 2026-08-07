@@ -1,7 +1,0 @@
-dataset,compressor,path,op,phase,ms,ratio,rmse
-nyx_baryon,noop,vol,write,total,984.0392,1.0000,
-nyx_baryon,noop,vol,write,flush,147.0398,,
-nyx_baryon,noop,vol,write,close,0.2493,,
-nyx_baryon,noop,vol,read,total,650.7261,,0.000000e+00
-/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_nyx_baryon_noop_vol_N16.h5,ALL,vol,write,file,1132.3436,1.0000,
-/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_nyx_baryon_noop_vol_N16.h5,ALL,vol,read,file,651.0925,,

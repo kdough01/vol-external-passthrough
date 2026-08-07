@@ -1,0 +1,6 @@
+dataset,compressor,path,op,phase,ms,ratio,rmse
+ocean_temp,zfp_cpu_r12,filter,write,total,1406.4936,2.5185,
+ocean_temp,zfp_cpu_r12,filter,write,sync,247.2229,,
+ocean_temp,zfp_cpu_r12,filter,write,csync,64.9895,,
+ocean_temp,zfp_cpu_r12,filter,read,evict,1.1797,,
+ocean_temp,zfp_cpu_r12,filter,read,total,670.9614,,1.751554e-05

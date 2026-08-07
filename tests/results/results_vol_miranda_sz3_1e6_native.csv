@@ -1,7 +1,0 @@
-dataset,compressor,path,op,phase,ms,ratio,rmse
-miranda,sz3_1e6,vol,write,total,1878.7159,8.7273,
-miranda,sz3_1e6,vol,write,flush,0.2914,,
-miranda,sz3_1e6,vol,write,close,0.2546,,
-miranda,sz3_1e6,vol,read,total,1072.6333,,2.708514e-07
-/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_miranda_sz3_1e6_native.h5,ALL,vol,write,file,1880.8601,8.7273,
-/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_miranda_sz3_1e6_native.h5,ALL,vol,read,file,1073.0606,,

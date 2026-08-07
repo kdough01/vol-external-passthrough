@@ -1,2 +1,0 @@
-dataset,compressor,codec_kind,chunk_n,rep,logical_bytes,stored_bytes,ratio,create_ms,write_ms,flush_ms,sync_ms,close_ms,csync_ms,evict_ms,open_ms,read_ms,rmse,abs_thresh,maxae,bound_ok
-miranda,zfp_gpu_r16,gpu,16,0,301989888,75497624,4.0000,1.1312,289.8640,0.4949,159.7378,0.1693,238.1287,5.7895,0.3004,415.4156,2.650153e-08,0.000000e+00,2.833496e-06,-1

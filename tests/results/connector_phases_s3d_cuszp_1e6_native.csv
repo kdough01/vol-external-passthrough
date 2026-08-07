@@ -1,3 +1,0 @@
-dataset,compressor,op,total_ms,stage_ms,compress_ms,container_ms,io_ms,pressio_call_ms,device_ms,vol_compress_ms,pressio_host_ms,residual_ms,residual_frac
-s3d_cuszp_1e6,cuszp,write,848.9352,0.0000,778.5412,0.0575,64.4185,89.9246,0.0000,688.6166,89.9246,5.9180,0.006971
-s3d_cuszp_1e6,cuszp,read,887.6558,0.0000,548.2602,0.0000,36.8322,0.0000,0.0000,548.2602,0.0000,302.5635,0.340857

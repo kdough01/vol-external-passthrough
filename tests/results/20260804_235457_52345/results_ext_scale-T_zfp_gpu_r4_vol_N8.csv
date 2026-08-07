@@ -1,2 +1,0 @@
-dataset,compressor,codec_kind,chunk_n,rep,logical_bytes,stored_bytes,ratio,create_ms,write_ms,flush_ms,sync_ms,close_ms,csync_ms,evict_ms,open_ms,read_ms,rmse,abs_thresh,maxae,bound_ok
-scale-T,zfp_gpu_r4,gpu,8,0,564480000,86400088,6.5333,1.1946,377.6940,125.6177,190.4075,0.2498,54.1879,2.1639,0.3017,1069.7632,2.583714e-05,0.000000e+00,1.458645e-03,-1

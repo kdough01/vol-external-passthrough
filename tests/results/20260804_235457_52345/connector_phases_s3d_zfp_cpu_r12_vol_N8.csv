@@ -1,3 +1,0 @@
-dataset,compressor,op,total_ms,stage_ms,compress_ms,container_ms,io_ms,pressio_call_ms,device_ms,vol_compress_ms,pressio_host_ms,residual_ms,residual_frac
-s3d_zfp_cpu_r12,zfp,write,5343.1419,0.0000,5100.6723,0.1706,224.4867,4981.3987,0.0000,119.2736,4981.3987,17.8124,0.003334
-s3d_zfp_cpu_r12,zfp,read,3925.6533,0.0000,3409.9282,0.0000,106.8008,2786.1351,0.0000,623.7931,2786.1351,408.9243,0.104167

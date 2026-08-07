@@ -1,3 +1,0 @@
-dataset,compressor,op,total_ms,stage_ms,compress_ms,container_ms,io_ms,pressio_call_ms,device_ms,vol_compress_ms,pressio_host_ms,residual_ms,residual_frac
-ocean_temp_sz3_1e3,sz3,write,1132.6418,0.0000,1027.9049,0.0956,104.5932,1018.8820,0.0000,9.0228,1018.8820,0.0482,0.000043
-ocean_temp_sz3_1e3,sz3,read,743.9478,0.0000,723.0039,0.0000,12.1004,0.0000,0.0000,723.0039,0.0000,8.8436,0.011887

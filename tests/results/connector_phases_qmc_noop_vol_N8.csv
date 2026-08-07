@@ -1,3 +1,0 @@
-dataset,compressor,op,total_ms,stage_ms,compress_ms,container_ms,io_ms,pressio_call_ms,device_ms,vol_compress_ms,pressio_host_ms,residual_ms,residual_frac
-einspline37_noop,noop,write,23523.8008,0.0000,17721.5969,1126.6019,4675.5478,9777.1535,0.0000,7944.4435,9777.1535,0.0541,0.000002
-einspline37_noop,noop,read,17004.4425,0.0000,6831.0138,0.0000,7773.1519,0.0000,0.0000,6831.0138,0.0000,2400.2768,0.141156

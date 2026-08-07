@@ -1,3 +1,0 @@
-dataset,compressor,op,total_ms,stage_ms,compress_ms,container_ms,io_ms,pressio_call_ms,device_ms,vol_compress_ms,pressio_host_ms,residual_ms,residual_frac
-s3d_zfp_gpu_r8,zfp,write,450.9200,0.0000,280.4875,0.0381,159.3832,208.5756,0.0000,71.9119,208.5756,11.0112,0.024419
-s3d_zfp_gpu_r8,zfp,read,1625.1396,0.0000,1484.0918,0.0000,68.7469,901.7584,0.0000,582.3334,901.7584,72.3009,0.044489

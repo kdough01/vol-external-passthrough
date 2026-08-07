@@ -1,7 +1,0 @@
-dataset,compressor,path,op,phase,ms,ratio,rmse
-scale-T,noop,vol,write,total,978.6893,1.0000,
-scale-T,noop,vol,write,flush,93.1757,,
-scale-T,noop,vol,write,close,0.7075,,
-scale-T,noop,vol,read,total,748.6427,,0.000000e+00
-/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_scale-T_noop_vol_N16.h5,ALL,vol,write,file,1073.7136,1.0000,
-/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_scale-T_noop_vol_N16.h5,ALL,vol,read,file,749.0435,,

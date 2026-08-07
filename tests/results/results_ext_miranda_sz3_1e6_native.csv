@@ -1,2 +1,0 @@
-dataset,compressor,codec_kind,chunk_n,rep,logical_bytes,stored_bytes,ratio,create_ms,write_ms,flush_ms,close_ms,open_ms,read_ms,rmse,abs_thresh,maxae,bound_ok
-miranda,sz3_1e6,cpu,1,0,301989888,34603008,8.7273,1.5983,1878.7159,0.2914,0.2546,0.4273,1072.6333,2.708514e-07,1.000000e-06,9.999999e-07,1
