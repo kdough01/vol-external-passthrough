@@ -1411,7 +1411,7 @@ vol_transfer_decompress_chunk_impl(compression_ctx *ctx,
 
     /* CPU codecs decompress straight into the caller's buffer */
     output = is_gpu
-        ? vol_new_output(out_dtype, out_ndims, out_dims, 1)
+        ? vol_new_output(out_dtype, out_ndims, chunk_dims, 1)
         : pressio_data_new_nonowning_domain(out_dtype, out, out_ndims,
                                             chunk_dims, "malloc");
     if (!input || !output) {
