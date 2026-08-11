@@ -1,0 +1,3 @@
+dataset,compressor,op,total_ms,stage_ms,compress_ms,container_ms,io_ms,pressio_call_ms,device_ms,transfer_ms,vol_compress_ms,pressio_host_ms,residual_ms,residual_frac
+miranda_sz3_1e3,sz3,write,760.7204,0.0000,757.4190,0.0951,3.1568,755.5593,0.0000,0.0000,1.8597,755.5593,0.0495,0.000065
+miranda_sz3_1e3,sz3,read,227.3646,0.0000,226.7635,0.0000,0.5838,226.5548,0.0000,0.0000,0.2087,226.5548,0.0173,0.000076
