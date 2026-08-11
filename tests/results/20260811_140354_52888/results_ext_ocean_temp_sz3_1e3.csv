@@ -1,2 +1,2 @@
 dataset,compressor,codec_kind,chunk_n,rep,logical_bytes,stored_bytes,ratio,create_ms,write_ms,flush_ms,sync_ms,close_ms,csync_ms,evict_ms,open_ms,read_ms,rmse,abs_thresh,maxae,bound_ok
-scale-T,sz3_1e3,cpu,1,0,564480000,2222155,254.0237,1.2497,2600.8457,0.2449,123.4964,0.2262,50.1276,1.2478,0.3067,792.9817,3.688738e-04,1.000000e-03,9.999275e-04,1
+ocean_temp,sz3_1e3,cpu,1,0,129123840,19884630,6.4937,0.8996,984.9845,0.2544,122.6668,0.1511,49.2015,1.1485,0.4809,625.5031,5.701095e-04,1.000000e-03,9.999275e-04,1
