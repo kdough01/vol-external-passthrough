@@ -1539,8 +1539,8 @@ vol_transfer_compress_chunk_impl(compression_ctx *ctx,
         if (in_ndims == 0) return -1;          /* error already pushed */
     }
 
-    is_gpu = vol_is_gpu_codec(ctx->compressor_id);
-    cap    = nbytes + nbytes / 8 + (1u << 16);
+    is_gpu      = vol_is_gpu_codec(ctx->compressor_id);
+    cap         = nbytes + nbytes / 8 + (1u << 16);
     out_dims[0] = cap;
 
     input = pressio_data_new_nonowning_domain(in_dtype, (void *)data,
@@ -1552,13 +1552,11 @@ vol_transfer_compress_chunk_impl(compression_ctx *ctx,
         /* libpressio ALLOCATES AND OWNS the device output. Handing it a
          * nonowning cudamalloc buffer inverts the ownership contract: plugins
          * that call make_writeable() on their output free the pointer we are
-         * still holding, and the pool then hands out a dangling device
-         * pointer on the next write. */
-        struct pressio_data *d =
-            pressio_data_new_empty(pressio_byte_dtype, 1, out_dims);
-        if (d) vol_make_device_resident(d);
-        return d;
-    }
+         * still holding, and we would then hand out a dangling device pointer
+         * on the next chunk. */
+        output = pressio_data_new_empty(pressio_byte_dtype, 1, out_dims);
+        if (output) vol_make_device_resident(output);
+    } else
 #endif
     {
         /* Host codecs mostly ignore this and allocate their own, which
@@ -1598,6 +1596,8 @@ vol_transfer_compress_chunk_impl(compression_ctx *ctx,
         goto done;
     }
 
+    /* Migrates a device result host-side via the domain manager, then steals
+     * the host buffer. Caller owns and frees what comes back. */
     frc = vol_fetch_result_owned(ctx, output, &base, &csize);
     if (frc != 0) {
         H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
@@ -1608,29 +1608,49 @@ vol_transfer_compress_chunk_impl(compression_ctx *ctx,
         goto done;
     }
 
-    /* Only meaningful when we supplied a fixed-size buffer. */
+    /* Truncation check only applies when WE supplied a fixed-size buffer. If
+     * the codec allocated its own it sized it itself, and a legitimate
+     * expansion past cap is not a truncation. */
     if (!ctx->codec_ignores_output && !is_gpu && csize >= cap) {
         H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
                 vol_err_class, maj_compression, min_compress_failed,
                 "compressor '%s' filled the entire %zu byte output buffer for a "
                 "%zu byte chunk -- the result is truncated and would decode to "
-                "garbage", ctx->compressor_id, cap, nbytes);
+                "garbage. Increase the headroom in "
+                "vol_transfer_compress_chunk_impl",
+                ctx->compressor_id, cap, nbytes);
         free(base);
         ret_val = -1;
         goto done;
     }
+
     if (csize >= nbytes)
         fprintf(stderr,
             "[VOL WARN] '%s' EXPANDED a %zu byte chunk to %zu bytes (%.4f%% of "
-            "input).\n", ctx->compressor_id, nbytes, csize,
-            100.0 * (double)csize / (double)nbytes);
+            "input). Headroom was %zu bytes.\n",
+            ctx->compressor_id, nbytes, csize,
+            100.0 * (double)csize / (double)nbytes, cap - nbytes);
     else if (getenv("VOL_COMP_CHUNK_LOG"))
-        fprintf(stderr, "[chunk-out] '%s' rank=%zu %zu -> %zu B (%.2fx)\n",
+        fprintf(stderr, "[chunk-out] '%s' rank=%zu %zu -> %zu B (%.2fx), cap %zu B\n",
                 ctx->compressor_id, in_ndims, nbytes, csize,
-                (double)nbytes / (double)csize);
+                (double)nbytes / (double)csize, cap);
 
     *out_cbuf  = base;      /* CALLER OWNS AND FREES THIS */
     *out_csize = (uint64_t)csize;
+
+#ifdef ENABLE_EXT_PASSTHRU_LOGGING
+    printf("COMPRESS CHUNK OK: id=%s comp_size=%zu original_nbytes=%zu\n",
+           ctx->compressor_id, csize, nbytes);
+#endif
+
+    if (getenv("HDF5_VOL_PRESSIO_METRICS")) {
+        struct pressio_options *results =
+            pressio_compressor_get_metrics_results(ctx->compressor);
+        char *str = pressio_options_to_string(results);
+        printf("[VOL METRICS] compress chunk '%s':\n%s\n", ctx->compressor_id, str);
+        free(str);
+        pressio_options_free(results);
+    }
 
 done:
     if (input)  pressio_data_free(input);
