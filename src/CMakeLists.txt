@@ -43,8 +43,9 @@ target_include_directories(hdf5_vol_passthrough
     ${LIBPRESSIO_INCLUDE_DIRS}
 )
 
-find_package(SPERR REQUIRED)
-target_link_libraries(hdf5_vol_passthrough PRIVATE SPERR::SPERR)
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(SPERR REQUIRED IMPORTED_TARGET SPERR)
+target_link_libraries(hdf5_vol_passthrough PRIVATE PkgConfig::SPERR)
 
 # ---- Link dependencies ----
 target_link_libraries(hdf5_vol_passthrough PRIVATE
