@@ -1,0 +1,3 @@
+dataset,compressor,op,total_ms,stage_ms,compress_ms,container_ms,io_ms,pressio_call_ms,device_ms,vol_compress_ms,pressio_host_ms,residual_ms,residual_frac
+scale-T_cuszp_1e3,cuszp,write,312.6246,0.0000,166.3003,0.0582,146.2268,139.7100,139.7366,26.5903,-0.0266,0.0394,0.000126
+scale-T_cuszp_1e3,cuszp,read,370.8180,0.0000,357.4005,0.0000,13.4000,357.0334,357.0734,0.3671,-0.0400,0.0175,0.000047

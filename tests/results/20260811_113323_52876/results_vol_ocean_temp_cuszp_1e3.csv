@@ -1,0 +1,10 @@
+dataset,compressor,path,op,phase,ms,ratio,rmse
+ocean_temp,cuszp_1e3,vol,write,total,133.3911,1.0000,
+ocean_temp,cuszp_1e3,vol,write,flush,0.1477,,
+ocean_temp,cuszp_1e3,vol,write,sync,166.4096,,
+ocean_temp,cuszp_1e3,vol,write,close,0.1176,,
+ocean_temp,cuszp_1e3,vol,write,csync,95.6797,,
+ocean_temp,cuszp_1e3,vol,read,evict,1.2313,,
+ocean_temp,cuszp_1e3,vol,read,total,20.5693,,0.000000e+00
+/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_ocean_temp_cuszp_1e3.h5,ALL,vol,write,file,396.6070,1.0000,
+/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_ocean_temp_cuszp_1e3.h5,ALL,vol,read,file,20.8102,,

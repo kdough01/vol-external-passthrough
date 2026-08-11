@@ -1,0 +1,2 @@
+dataset,compressor,codec_kind,chunk_n,rep,logical_bytes,stored_bytes,ratio,create_ms,write_ms,flush_ms,sync_ms,close_ms,csync_ms,evict_ms,open_ms,read_ms,rmse,abs_thresh,maxae,bound_ok
+einspline37,noop,cpu,16,0,13560851520,13560851520,1.0000,1.1225,3724.0049,0.2006,166.8120,0.3625,63.1420,0.2410,0.4750,4391.6182,0.000000e+00,0.000000e+00,0.000000e+00,1

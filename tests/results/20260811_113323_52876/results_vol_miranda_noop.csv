@@ -1,0 +1,10 @@
+dataset,compressor,path,op,phase,ms,ratio,rmse
+miranda,noop,vol,write,total,161.0269,1.0000,
+miranda,noop,vol,write,flush,0.2426,,
+miranda,noop,vol,write,sync,162.9860,,
+miranda,noop,vol,write,close,0.2676,,
+miranda,noop,vol,write,csync,25.9240,,
+miranda,noop,vol,read,evict,2.0430,,
+miranda,noop,vol,read,total,47.9964,,0.000000e+00
+/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_miranda_noop.h5,ALL,vol,write,file,358.9497,1.0000,
+/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_miranda_noop.h5,ALL,vol,read,file,48.4822,,

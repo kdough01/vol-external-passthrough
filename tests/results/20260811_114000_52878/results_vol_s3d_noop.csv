@@ -1,0 +1,10 @@
+dataset,compressor,path,op,phase,ms,ratio,rmse
+s3d,noop,vol,write,total,1506.4815,1.0000,
+s3d,noop,vol,write,flush,90.3744,,
+s3d,noop,vol,write,sync,193.4764,,
+s3d,noop,vol,write,close,0.1951,,
+s3d,noop,vol,write,csync,94.8552,,
+s3d,noop,vol,read,evict,1.2359,,
+s3d,noop,vol,read,total,567.1068,,0.000000e+00
+/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_s3d_noop.h5,ALL,vol,write,file,1886.5440,1.0000,
+/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_s3d_noop.h5,ALL,vol,read,file,567.5278,,
