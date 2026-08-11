@@ -3422,3 +3422,60 @@ RANGE einspline37    min=-2.125822e+01 max=2.036857e+01 range=4.162679e+01 xform
 [chunk-out] 'sz3' rank=1 847553220 -> 250326556 B (3.39x)
 [chunk-out] 'sz3' rank=1 847553220 -> 245394134 B (3.45x)
 [chunk-out] 'sz3' rank=1 847553220 -> 247697487 B (3.42x)
+[chunk-out] 'sz3' rank=1 847553220 -> 247537780 B (3.42x)
+[chunk-out] 'sz3' rank=1 847553220 -> 245476021 B (3.45x)
+[chunk-out] 'sz3' rank=1 847553220 -> 250317796 B (3.39x)
+[chunk-out] 'sz3' rank=1 847553220 -> 254335248 B (3.33x)
+[chunk-out] 'sz3' rank=1 847553220 -> 253608837 B (3.34x)
+[chunk-out] 'sz3' rank=1 847553220 -> 250174075 B (3.39x)
+[chunk-out] 'sz3' rank=1 847553220 -> 252024581 B (3.36x)
+[chunk-out] 'sz3' rank=1 847553220 -> 252835528 B (3.35x)
+
+=== einspline37 (12932.6 MiB, float, raw) ===
+Info: 0x55c1946a8b90
+  einspline37_sz3_1e3          C=   1.79 W= 99479.60 F=  118.25 S=   119.01 X=    0.35 S2=  55.01 | E=   0.23 O=   0.41 R=109261.76 ms  ratio=  3.38x  RMSE=5.742e-04 maxae=1.000e-03
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.79 write=99479.60 flush=118.25 sync=119.01 close=0.35 csync=55.01 => write_total=99774.01 ms | evict=0.23 open=0.41 read=109261.76 => read_total=109262.18 ms | ratio=3.38x ===
+
+=== VOL timing [miranda_sz3_1e3_pressio_N8] : miranda (chunking: pressio, N=8) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_miranda_sz3_1e3_pressio_N8.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260811_114000_52878/results_vol_miranda_sz3_1e3_pressio_N8.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260811_114000_52878/results_ext_miranda_sz3_1e3_pressio_N8.csv only=miranda comp=sz3_1e3 verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 837.3 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE miranda        min=9.999878e-01 max=3.000046e+00 range=2.000058e+00 xform=none
+[chunk] sz3        N=8   -> 8 chunks x 37748736 B (36.000 MiB, 4718592 elems, 32 slices of 147456 elems) total=301989888 B
+[chunk] pressio-mode chunking:size = [384,384,32] (pressio order, fastest first)
+[chunk] pressio-mode chunking:size = [384,384,32] (pressio order, fastest first)
+
+=== miranda (288.0 MiB, double, raw) ===
+Info: 0x561588b69bb0
+  miranda_sz3_1e3              C=   1.56 W=   794.67 F=    0.32 S=   111.18 X=    0.18 S2=  45.44 | E=   1.25 O=   0.31 R=   321.35 ms  ratio=159.59x  RMSE=2.790e-04 maxae=1.000e-03
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.56 write=794.67 flush=0.32 sync=111.18 close=0.18 csync=45.44 => write_total=953.34 ms | evict=1.25 open=0.31 read=321.35 => read_total=321.65 ms | ratio=159.59x ===
+
+=== VOL timing [miranda_sz3_1e3_pressio_N16] : miranda (chunking: pressio, N=16) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_miranda_sz3_1e3_pressio_N16.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260811_114000_52878/results_vol_miranda_sz3_1e3_pressio_N16.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260811_114000_52878/results_ext_miranda_sz3_1e3_pressio_N16.csv only=miranda comp=sz3_1e3 verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 837.3 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE miranda        min=9.999878e-01 max=3.000046e+00 range=2.000058e+00 xform=none
+[chunk] sz3        N=16  -> 16 chunks x 18874368 B (18.000 MiB, 2359296 elems, 16 slices of 147456 elems) total=301989888 B
+[chunk] pressio-mode chunking:size = [384,384,16] (pressio order, fastest first)
