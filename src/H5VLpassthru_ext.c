@@ -2798,46 +2798,6 @@ vol_write_shared(const vol_write_req_t *req, vol_write_timing_t *t)
 }
 
 /* =========================================================================
- * PATH 5 -- PROGRESSIVE
- *
- * L residual layers, coarse to fine. Reading n < L layers reconstructs the
- * full extent at reduced fidelity. Also a single write: the layers are
- * assembled into one container.
- * ========================================================================= */
-static herr_t
-vol_write_progressive(const vol_write_req_t *req, vol_write_timing_t *t)
-{
-    compression_ctx *ctx = req->ctx;
-    void    *container = NULL;
-    uint64_t total     = 0;
-    herr_t   rc;
-
-    const int    nlayers = H5VL_pass_through_ext_progressive_layers(ctx);
-    const double ratio   = H5VL_pass_through_ext_progressive_ratio(ctx);
-
-    vol_write_reset_timers(ctx, t);
-    double _c0 = bench_now_ms();
-    rc = H5VL_pass_through_ext_compress_progressive(ctx, req->comp_src,
-                                                    req->total_bytes,
-                                                    nlayers, ratio,
-                                                    &container, &total);
-    vol_write_capture_timers(ctx, t, _c0);
-
-    if (rc < 0) {
-        H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
-                vol_err_class, maj_compression, min_compress_failed,
-                "progressive compression failed for dataset %zu "
-                "compressor='%s'", req->u, ctx->compressor_id);
-        free(container);
-        return -1;
-    }
-
-    rc = vol_write_whole(req, container, (hsize_t)total, t);
-    free(container);
-    return rc;
-}
-
-/* =========================================================================
  * PATH 0 -- NO COMPRESSION
  *
  * Straight passthrough. Reached only when no compression context exists and
@@ -3044,7 +3004,6 @@ H5VL_pass_through_ext_dataset_write(
         case VOL_CHUNKING_PRESSIO:     rc = vol_write_pressio(&wreq, &t);     break;
         case VOL_CHUNKING_VOL:         rc = vol_write_vol(&wreq, &t);         break;
         case VOL_CHUNKING_SHARED:      rc = vol_write_shared(&wreq, &t);      break;
-        case VOL_CHUNKING_PROGRESSIVE: rc = vol_write_progressive(&wreq, &t); break;
         case VOL_CHUNKING_NONE:
         default:                       rc = vol_write_native(&wreq, &t);      break;
         }
