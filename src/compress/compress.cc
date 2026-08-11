@@ -1539,7 +1539,7 @@ vol_transfer_compress_chunk_impl(compression_ctx *ctx,
         goto done;
     }
 
-    frc = vol_fetch_result_pooled(ctx, output, own_base, hdr_reserve,
+    frc = vol_fetch_result_pooled(ctx, output, own_base, 0,
                                   &base, &csize);
     if (frc != 0) {
         H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
