@@ -3383,3 +3383,9 @@ RANGE einspline37    min=-2.125822e+01 max=2.036857e+01 range=4.162679e+01 xform
 [chunk] sz3        N=8   -> 8 chunks x 1695106440 B (1616.579 MiB, 423776610 elems, 423776610 slices of 1 elems) total=13560851520 B
 [VOL RAGGED] dataset 0 'sz3': clean split, 8 x 1695106440 B, no ragged tail
 [chunk-out] 'sz3' rank=1 1695106440 -> 505465438 B (3.35x)
+[chunk-out] 'sz3' rank=1 1695106440 -> 504118631 B (3.36x)
+[chunk-out] 'sz3' rank=1 1695106440 -> 504034673 B (3.36x)
+[chunk-out] 'sz3' rank=1 1695106440 -> 495949748 B (3.42x)
+[chunk-out] 'sz3' rank=1 1695106440 -> 495601708 B (3.42x)
+[chunk-out] 'sz3' rank=1 1695106440 -> 504032168 B (3.36x)
+[chunk-out] 'sz3' rank=1 1695106440 -> 504574067 B (3.36x)
