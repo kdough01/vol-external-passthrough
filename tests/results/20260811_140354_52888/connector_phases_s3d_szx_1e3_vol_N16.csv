@@ -1,0 +1,3 @@
+dataset,compressor,op,total_ms,stage_ms,compress_ms,container_ms,io_ms,pressio_call_ms,device_ms,transfer_ms,vol_compress_ms,pressio_host_ms,residual_ms,residual_frac
+s3d_szx_1e3,szx,write,596.3586,0.0000,478.7424,0.1291,117.4016,471.4709,0.0000,0.0000,7.2714,471.4709,0.0856,0.000143
+s3d_szx_1e3,szx,read,378.3350,0.0000,353.2452,0.0000,25.0322,278.5436,0.0000,0.0000,74.7016,278.5436,0.0576,0.000152
