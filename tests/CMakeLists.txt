@@ -81,10 +81,6 @@ target_link_options(bench_filter_timing PRIVATE -rdynamic)
 add_executable(dump_cuszp_opts dump_cuszp_opts.cc)
 target_link_libraries(dump_cuszp_opts PRIVATE LibPressio::libpressio)
 
-add_executable(probe_sperr_trunc probe_sperr_trunc.cc)
-target_include_directories(probe_sperr_trunc PRIVATE ${SPERR_INCLUDE_DIR})
-target_link_libraries(probe_sperr_trunc PRIVATE LibPressio::libpressio ${SPERR_LIBRARY})
-
 if(USE_CUDA)
     foreach(cuda_target bench_pressio_timing bench_vol_timing)
         target_include_directories(${cuda_target} PRIVATE ${CUDAToolkit_INCLUDE_DIRS})
