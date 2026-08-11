@@ -397,10 +397,10 @@ done:
     return 0;
 }
 
-herr_t
-vol_container_fetch(void *under, hid_t under_vol_id, hid_t plist_id,
-                    compression_ctx *ctx,
-                    vol_read_plan_t *plan, unsigned char **out_cbuf)
+herr_t vol_container_fetch(void *under, hid_t under_vol_id, hid_t plist_id,
+                           compression_ctx *ctx,
+                           const vol_read_plan_t *plan,
+                           unsigned char **out_cbuf)
 {
     if (!plan || !out_cbuf || !ctx) return -1;
     *out_cbuf = NULL;

@@ -81,6 +81,7 @@ void  H5VL_pass_through_ext_release_buffers(compression_ctx *ctx);
 void *H5VL_pass_through_ext_reserve_decomp(compression_ctx *ctx, size_t nbytes);
 void *H5VL_pass_through_ext_reserve_container(compression_ctx *ctx, size_t nbytes);
 void *H5VL_pass_through_ext_reserve_arena(compression_ctx *ctx, size_t nbytes);
+void *H5VL_pass_through_ext_reserve_chunk_hdr(compression_ctx *ctx, size_t nbytes);
 #ifdef __cplusplus
 }
 #endif

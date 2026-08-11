@@ -210,6 +210,14 @@ H5VL_pass_through_ext_reserve_arena(compression_ctx *ctx, size_t nbytes)
     return vol_buf_reserve(&ctx->chunk_arena, nbytes, VOL_BUF_HOST);
 }
 
+void *
+H5VL_pass_through_ext_reserve_chunk_hdr(compression_ctx *ctx, size_t nbytes)
+{
+    if (!ctx) return NULL;
+    vol_bufpool_init();
+    return vol_buf_reserve(&ctx->chunk_arena, nbytes, VOL_BUF_HOST);
+}
+
 /* Codecs that receive a 1-D flattened byte stream instead of a typed,
  * shaped view. Lossless byte-oriented codecs only — shape-aware codecs
  * (roibin, sz3, zfp, cusz) must keep their dims. */

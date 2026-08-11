@@ -43,6 +43,7 @@ herr_t vol_container_plan(void *under, hid_t under_vol_id, hid_t plist_id,
                           vol_read_plan_t *plan);
 
 herr_t vol_container_fetch(void *under, hid_t under_vol_id, hid_t plist_id,
+                           compression_ctx *ctx,
                            const vol_read_plan_t *plan,
                            unsigned char **out_cbuf);
 

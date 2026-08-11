@@ -2747,8 +2747,7 @@ vol_write_vol(const vol_write_req_t *req, vol_write_timing_t *t)
 
         double _h0 = bench_now_ms();
         /* Pooled: the only VOL-owned buffer on this path. */
-        hdr = (uint64_t *)vol_buf_reserve(&ctx->chunk_arena, hdr_bytes,
-                                          VOL_BUF_HOST);
+        hdr = (uint64_t *)H5VL_pass_through_ext_reserve_chunk_hdr(ctx, hdr_bytes);
         if (!hdr) {
             t->container_ms += bench_now_ms() - _h0;
             H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
