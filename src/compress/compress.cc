@@ -498,17 +498,16 @@ vol_reserve_comp_output(compression_ctx *ctx, size_t cap, int is_gpu,
 
 #ifdef USE_CUDA
     if (is_gpu) {
-        void *d = vol_buf_reserve(&ctx->comp_out, cap, VOL_BUF_DEVICE);
-        if (!d) return NULL;
-        /* Nonowning over pooled device memory: if the codec respects it we
-         * get an in-place write and cudaMalloc never runs again after the
-         * first call. If it doesn't, we fall through to the D2H path below
-         * from wherever the codec put its output. */
-        return pressio_data_new_nonowning_domain(pressio_byte_dtype, d,
-                                                 1, dims, "cudamalloc");
+        /* libpressio ALLOCATES AND OWNS the device output. Handing it a
+         * nonowning cudamalloc buffer inverts the ownership contract: plugins
+         * that call make_writeable() on their output free the pointer we are
+         * still holding, and the pool then hands out a dangling device
+         * pointer on the next write. */
+        struct pressio_data *d =
+            pressio_data_new_empty(pressio_byte_dtype, 1, dims);
+        if (d) vol_make_device_resident(d);
+        return d;
     }
-#else
-    (void)is_gpu;
 #endif
 
     base = vol_buf_reserve(&ctx->comp_out, hdr_reserve + cap, VOL_BUF_HOST);
@@ -541,52 +540,59 @@ vol_fetch_result_pooled(compression_ctx *ctx, struct pressio_data *result,
     size_t sz  = 0;
     void  *src = pressio_data_ptr(result, &sz);
     void  *dst = NULL;
-    int    dev = 0;
 
     *out_base = NULL;
     *out_size = 0;
-
     if (!src || sz == 0) return -1;
 
-    /* ---- CASE 1: wrote in place in our pooled buffer ---- */
+    /* ---- CASE 1: codec wrote into the pooled buffer we gave it ---- */
     if (own_base && src == (void *)((char *)own_base + hdr_reserve)) {
         *out_base = own_base;
         *out_size = sz;
         return 0;
     }
 
-    dev = H5VL_pass_through_ext_buf_is_device(src);
+    /* ---- Device result: let libpressio bring it home ----
+     * domain_manager knows the source domain, selects the transport, and
+     * orders against the codec's stream. Do not hand-roll cudaMemcpyAsync
+     * here -- we cannot order against a stream we were never given. */
+    if (H5VL_pass_through_ext_buf_is_device(src)) {
+        double _t0 = bench_now_ms();
+        vol_make_host_resident(result);
+        ctx->transfer_ms += bench_now_ms() - _t0;
 
-    /* ---- CASE 2: adopt the codec's own host buffer ----
-     * Requires hdr_reserve == 0, because an adopted buffer has no room in
-     * front of it for a container header. Every caller passes 0 now. */
-    if (!dev && hdr_reserve == 0 && vol_is_malloc_domain(result)) {
+        src = pressio_data_ptr(result, &sz);   /* it MOVED -- re-read both */
+        if (!src || sz == 0) return -1;
+    }
+
+    /* ---- CASE 2: adopt the host buffer ----
+     * Reached both by CPU codecs that allocate their own output and by GPU
+     * codecs whose result we just migrated. Either way, zero further copies. */
+    if (hdr_reserve == 0 && vol_is_malloc_domain(result)) {
         (void)static_cast<pressio_data *>(result)->release();
 
-        free(ctx->adopted_buf);        /* the one from the PREVIOUS write */
+        free(ctx->adopted_buf);          /* the one from the PREVIOUS write */
         ctx->adopted_buf = src;
-        ctx->codec_ignores_output = 1; /* stop reserving comp_out for it */
+        ctx->codec_ignores_output = 1;
 
         if (getenv("VOL_COMP_COPY_LOG"))
-            fprintf(stderr, "[copy] '%s' allocated its own %zu B output; "
-                            "adopted (no copy)\n", ctx->compressor_id, sz);
+            fprintf(stderr, "[copy] '%s' %zu B output adopted (no copy)\n",
+                    ctx->compressor_id, sz);
 
         *out_base = src;
         *out_size = sz;
         return 0;
     }
 
-    /* ---- CASE 3: one copy into pooled host memory ---- */
-    vol_make_host_resident(result);
-
-    /* Host result we could not adopt. Should be rare; if VOL_COMP_COPY_LOG
-     * shows this firing every write, find out which condition failed --
-     * a full memcpy here is exactly the 8 s regression this file fixes. */
+    /* ---- CASE 3: unadoptable host buffer. Should be rare. ---- */
     if (getenv("VOL_COMP_COPY_LOG"))
         fprintf(stderr, "[copy] '%s' UNADOPTABLE host output, %zu B copy "
                         "(hdr_reserve=%zu domain=%s)\n",
                 ctx->compressor_id, sz, hdr_reserve,
                 pressio_data_domain_id(result));
+
+    dst = vol_buf_reserve(&ctx->comp_stage, hdr_reserve + sz, VOL_BUF_HOST);
+    if (!dst) return -2;
     {
         double _t0 = bench_now_ms();
         memcpy((char *)dst + hdr_reserve, src, sz);
@@ -618,59 +624,35 @@ vol_fetch_result_owned(compression_ctx *ctx, struct pressio_data *result,
 
     if (!src || sz == 0) return -1;
 
-    if (!H5VL_pass_through_ext_buf_is_device(src)) {
-        if (vol_is_malloc_domain(result)) {
-            (void)static_cast<pressio_data *>(result)->release();
-            *out_base = src;
-            *out_size = sz;
-            return 0;
-        }
-        {
-            void *dst = malloc(sz);
-            if (!dst) return -2;
-            memcpy(dst, src, sz);
-            *out_base = dst;
-            *out_size = sz;
-            return 0;
-        }
+    /* Device result: let libpressio bring it home. The domain manager knows
+     * the source domain, selects the transport, and orders against the
+     * codec's own stream -- which is exactly what a hand-rolled
+     * cudaMemcpyAsync on ctx->stream cannot do. */
+    if (H5VL_pass_through_ext_buf_is_device(src)) {
+        double _t0 = bench_now_ms();
+        vol_make_host_resident(result);
+        ctx->transfer_ms += bench_now_ms() - _t0;
+
+        src = pressio_data_ptr(result, &sz);   /* it MOVED -- re-read both */
+        if (!src || sz == 0) return -1;
     }
 
-#ifdef USE_CUDA
+    /* Host-resident either way now. Steal it if the caller can free() it. */
+    if (vol_is_malloc_domain(result)) {
+        (void)static_cast<pressio_data *>(result)->release();
+        *out_base = src;
+        *out_size = sz;
+        return 0;
+    }
+
     {
         void *dst = malloc(sz);
         if (!dst) return -2;
-
-        if (!ctx->cuda_stream_ok) {
-            if (cudaDeviceSynchronize() != cudaSuccess) {
-                cudaGetLastError();
-                free(dst);
-                return -3;
-            }
-        }
-
-        double      _t0  = bench_now_ms();
-        cudaError_t cerr = cudaMemcpyAsync(dst, src, sz, cudaMemcpyDeviceToHost,
-                                           (cudaStream_t)ctx->stream);
-        if (cerr == cudaSuccess)
-            cerr = vol_stream_barrier(ctx, min_compress_failed);
-        ctx->transfer_ms += bench_now_ms() - _t0;
-
-        if (cerr != cudaSuccess) {
-            H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
-                    vol_err_class, maj_compression, min_compress_failed,
-                    "device-to-host copy of %zu chunk bytes failed for '%s': %s",
-                    sz, ctx->compressor_id, cudaGetErrorString(cerr));
-            free(dst);
-            return -3;
-        }
+        memcpy(dst, src, sz);
         *out_base = dst;
         *out_size = sz;
         return 0;
     }
-#else
-    (void)ctx;
-    return -1;
-#endif
 }
 
 /* Move the codec's output into the caller's buffer. 
@@ -1567,20 +1549,16 @@ vol_transfer_compress_chunk_impl(compression_ctx *ctx,
 
 #ifdef USE_CUDA
     if (is_gpu) {
-        /* Pooled: sized at the first chunk, reused by every later one, so
-         * cudaMalloc runs once per dataset instead of once per chunk. */
-        void *d = vol_buf_reserve(&ctx->comp_out, cap, VOL_BUF_DEVICE);
-        if (!d) {
-            H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
-                    vol_err_class, maj_compression, min_compress_failed,
-                    "out of device memory reserving %zu B for a chunk of '%s'",
-                    cap, ctx->compressor_id);
-            ret_val = -1;
-            goto done;
-        }
-        output = pressio_data_new_nonowning_domain(pressio_byte_dtype, d,
-                                                   1, out_dims, "cudamalloc");
-    } else
+        /* libpressio ALLOCATES AND OWNS the device output. Handing it a
+         * nonowning cudamalloc buffer inverts the ownership contract: plugins
+         * that call make_writeable() on their output free the pointer we are
+         * still holding, and the pool then hands out a dangling device
+         * pointer on the next write. */
+        struct pressio_data *d =
+            pressio_data_new_empty(pressio_byte_dtype, 1, out_dims);
+        if (d) vol_make_device_resident(d);
+        return d;
+    }
 #endif
     {
         /* Host codecs mostly ignore this and allocate their own, which
