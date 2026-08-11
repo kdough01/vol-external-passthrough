@@ -69,6 +69,13 @@ if [ -z "$LP_CMAKE_DIR" ]; then
 fi
 echo "LibPressio cmake dir: $LP_CMAKE_DIR"
 
+# SPERR ships no CMake config -- only share/pkgconfig/SPERR.pc -- so it is
+# located by explicit prefix. Cannot use `spack location` here: this job never
+# activates the env, and CLEAN_PATH strips spack-env from PATH.
+SPERR_PREFIX="${SPERR_PREFIX:-/gpfs/fs1/home/kdougherty/spack/opt/spack/linux-zen2/sperr-0.8.2-qsqz7rfwktbmkju43ucbrmtpiyn6wyb6}"
+[ -d "$SPERR_PREFIX/include" ] || { echo "ERROR: bad SPERR_PREFIX: $SPERR_PREFIX"; exit 1; }
+echo "SPERR prefix: $SPERR_PREFIX"
+
 CLEAN_PATH=$(echo "$PATH" | tr ':' '\n' | grep -v spack-env | tr '\n' ':')
 
 echo ""
@@ -82,6 +89,7 @@ cmake -S . -B build \
     -DUSE_CUDA=ON \
     -DCMAKE_PREFIX_PATH="$LP_VIEW" \
     -DLibPressio_DIR="$LP_CMAKE_DIR" \
+    -DSPERR_PREFIX="$SPERR_PREFIX" \
     -Wno-dev
 
 echo "=== compiler flags in effect ==="
