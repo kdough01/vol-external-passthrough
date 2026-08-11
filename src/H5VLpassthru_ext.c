@@ -235,6 +235,7 @@ hid_t min_compress_failed    = H5I_INVALID_HID;
 hid_t min_decompress_failed  = H5I_INVALID_HID;
 hid_t maj_config             = H5I_INVALID_HID;
 hid_t min_config_missing     = H5I_INVALID_HID;
+hid_t min_invalid_option = H5I_INVALID_HID;
 
 /*******************/
 /* Local variables */
