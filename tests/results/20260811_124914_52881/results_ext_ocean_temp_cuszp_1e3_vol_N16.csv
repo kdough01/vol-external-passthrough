@@ -1,2 +1,2 @@
 dataset,compressor,codec_kind,chunk_n,rep,logical_bytes,stored_bytes,ratio,create_ms,write_ms,flush_ms,sync_ms,close_ms,csync_ms,evict_ms,open_ms,read_ms,rmse,abs_thresh,maxae,bound_ok
-scale-T,cuszp_1e3,gpu,1,0,564480000,45344000,12.4488,1.1213,214.1549,0.2711,153.3022,0.2212,86.5469,1.5573,0.3191,95.0567,5.773690e-04,1.000000e-03,1.000404e-03,1
+ocean_temp,cuszp_1e3,gpu,16,0,129123840,34835474,3.7067,0.9038,163.6549,0.2980,117.4014,0.1502,45.0604,2.2203,0.4065,46.0237,5.772823e-04,1.000000e-03,1.000404e-03,1
