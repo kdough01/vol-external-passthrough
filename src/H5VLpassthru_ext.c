@@ -218,7 +218,6 @@ size_t H5VL_pass_through_ext_chunk_bytes(const compression_ctx *ctx, size_t tota
 void   H5VL_pass_through_ext_parse_chunking_opts(compression_ctx *ctx, struct pressio_options *opts);
 herr_t H5VL_pass_through_ext_compress_pressio(compression_ctx *ctx, const void *data, size_t nbytes, size_t chunk_bytes_req, size_t hdr_reserve, void **out_cbuf, uint64_t *out_csize, uint64_t *out_chunk_elems);
 herr_t H5VL_pass_through_ext_decompress_pressio(compression_ctx *ctx, const void *cbuf, size_t csize, uint64_t chunk_elems, void *out, size_t out_bytes);
-herr_t H5VL_pass_through_ext_compress_chunk_into(compression_ctx *ctx, const void *data, size_t nbytes, void *dst, size_t dst_cap, uint64_t *out_csize);
 
 int H5VL_pass_through_ext_compressor_available(const char *compressor_id);
 int H5VL_pass_through_ext_buf_is_device(const void *p);
@@ -2318,7 +2317,7 @@ H5VL_pass_through_ext_dataset_read(
                 continue;
             }
             if (vol_container_fetch(under, d->under_vol_id, plist_id,
-                                    &plan, &cbuf) < 0) {
+                                    ctx, &plan, &cbuf) < 0) {
                 t.io_ms += bench_now_ms() - _io0;
                 vol_read_plan_free(&plan);
                 ret_val = -1;
@@ -2344,7 +2343,6 @@ H5VL_pass_through_ext_dataset_read(
                             vol_err_class, maj_compression, min_decompress_failed,
                             "out of memory reserving %zu byte decompress buffer "
                             "for dataset %zu", total_bytes, u);
-                    free(cbuf);
                     vol_read_plan_free(&plan);
                     ret_val = -1;
                     continue;
@@ -2362,8 +2360,8 @@ H5VL_pass_through_ext_dataset_read(
             rreq.cont_bytes    = (size_t)plan.cont_bytes;
             rreq.dst           = decode_dst;
             rreq.total_bytes   = total_bytes;
-            rreq.want_pct    = want_pct;
-            rreq.avail_bytes = plan.bytes_needed;
+            rreq.want_pct      = want_pct;
+            rreq.avail_bytes   = plan.bytes_needed;
             rreq.dset_name     = dset_name;
             rreq.u             = u;
 
@@ -2387,7 +2385,6 @@ H5VL_pass_through_ext_dataset_read(
                 break;
             }
 
-            free(cbuf);
             vol_read_plan_free(&plan);
 
             if (rc < 0) {
@@ -2421,7 +2418,7 @@ H5VL_pass_through_ext_dataset_read(
             rt.stage_ms        = t.serve_ms;
             rt.pressio_call_ms = ctx->pressio_call_ms;
             rt.device_ms       = ctx->device_ms;
-            rt.transfer_ms     = ctx->transfer_ms;   /* CHANGED */
+            rt.transfer_ms     = ctx->transfer_ms;
             vol_timing_finalize(&rt, dset_name, ctx->compressor_id, 0.03);
             vol_timing_emit_ex(dset_name, ctx->compressor_id, "read", &rt);
         }
@@ -2552,8 +2549,7 @@ vol_write_reset_timers(compression_ctx *ctx, vol_write_timing_t *t)
 }
 
 static void
-vol_write_capture_timers(compression_ctx *ctx, vol_write_timing_t *t,
-                         double c0)
+vol_write_capture_timers(compression_ctx *ctx, vol_write_timing_t *t, double c0)
 {
     t->compress_ms     = bench_now_ms() - c0;
     t->pressio_call_ms = ctx->pressio_call_ms;
@@ -2572,7 +2568,8 @@ static herr_t
 vol_write_native(const vol_write_req_t *req, vol_write_timing_t *t)
 {
     compression_ctx *ctx = req->ctx;
-    const size_t hdr_bytes = VOL_NATIVE_HDR_WORDS * sizeof(uint64_t);
+    uint64_t nhdr[VOL_NATIVE_HDR_WORDS];       /* magic + csize */
+    const size_t hdr_bytes = sizeof(nhdr);
     void    *blob = NULL;
     uint64_t clen = 0;
     herr_t   rc;
@@ -2580,7 +2577,7 @@ vol_write_native(const vol_write_req_t *req, vol_write_timing_t *t)
     vol_write_reset_timers(ctx, t);
     double _c0 = bench_now_ms();
     rc = H5VL_pass_through_ext_compress_native(ctx, req->comp_src,
-                                               req->total_bytes, hdr_bytes,
+                                               req->total_bytes, 0,
                                                &blob, &clen);
     vol_write_capture_timers(ctx, t, _c0);
 
@@ -2594,13 +2591,18 @@ vol_write_native(const vol_write_req_t *req, vol_write_timing_t *t)
 
     const hsize_t total = (hsize_t)(hdr_bytes + clen);
 
+    if (vol_write_set_extent(req, total, t) < 0) return -1;
+
     double _h0 = bench_now_ms();
-    uint64_t *nhdr = (uint64_t *)blob;
     nhdr[0] = VOL_NATIVE_MAGIC;
     nhdr[1] = clen;
     t->container_ms += bench_now_ms() - _h0;
 
-    return vol_write_whole(req, blob, total, t);
+    if (vol_write_at(req, nhdr, 0, (hsize_t)hdr_bytes, total, t) < 0)
+        return -1;
+
+    /* blob is owned by ctx (pooled or adopted). Do NOT free it. */
+    return vol_write_at(req, blob, (hsize_t)hdr_bytes, (hsize_t)clen, total, t);
 }
 
 /* =========================================================================
@@ -2619,7 +2621,8 @@ static herr_t
 vol_write_pressio(const vol_write_req_t *req, vol_write_timing_t *t)
 {
     compression_ctx *ctx = req->ctx;
-    const size_t hdr_bytes = VOL_PRESSIO_HDR_WORDS * sizeof(uint64_t);
+    uint64_t phdr[VOL_PRESSIO_HDR_WORDS];
+    const size_t hdr_bytes = sizeof(phdr);
     void    *blob        = NULL;
     uint64_t clen        = 0;
     uint64_t chunk_elems = 0;
@@ -2632,7 +2635,7 @@ vol_write_pressio(const vol_write_req_t *req, vol_write_timing_t *t)
     double _c0 = bench_now_ms();
     rc = H5VL_pass_through_ext_compress_pressio(ctx, req->comp_src,
                                                 req->total_bytes,
-                                                chunk_bytes_req, hdr_bytes,
+                                                chunk_bytes_req, 0,
                                                 &blob, &clen, &chunk_elems);
     vol_write_capture_timers(ctx, t, _c0);
 
@@ -2646,14 +2649,19 @@ vol_write_pressio(const vol_write_req_t *req, vol_write_timing_t *t)
 
     const hsize_t total = (hsize_t)(hdr_bytes + clen);
 
+    if (vol_write_set_extent(req, total, t) < 0) return -1;
+
     double _h0 = bench_now_ms();
-    uint64_t *phdr = (uint64_t *)blob;
     phdr[0] = VOL_PRESSIO_MAGIC;
     phdr[1] = clen;
     phdr[2] = chunk_elems;
     t->container_ms += bench_now_ms() - _h0;
 
-    return vol_write_whole(req, blob, total, t);
+    if (vol_write_at(req, phdr, 0, (hsize_t)hdr_bytes, total, t) < 0)
+        return -1;
+
+    /* blob is owned by ctx. Do NOT free it. */
+    return vol_write_at(req, blob, (hsize_t)hdr_bytes, (hsize_t)clen, total, t);
 }
 
 /* =========================================================================
@@ -2675,14 +2683,10 @@ vol_write_vol(const vol_write_req_t *req, vol_write_timing_t *t)
     const size_t nchunks    = (req->total_bytes + chunk_bytes - 1) / chunk_bytes;
     const size_t tail_bytes = req->total_bytes - (nchunks - 1) * chunk_bytes;
 
-    const size_t hdr_words = VOL_CHUNK_HDR_WORDS + nchunks;
-    const size_t hdr_bytes = hdr_words * sizeof(uint64_t);
-
-    unsigned char *arena = NULL;
-    uint64_t      *hdr   = NULL;
-    size_t         need  = 0;
-    size_t         poff  = hdr_bytes;
-    herr_t         rc    = 0;
+    void    **chunk_bufs = NULL;
+    uint64_t *csizes     = NULL;
+    uint64_t *hdr        = NULL;
+    herr_t    rc         = 0;
 
     /* RAGGED TAIL IS ALWAYS REPORTED. */
     if (tail_bytes != chunk_bytes) {
@@ -2700,61 +2704,87 @@ vol_write_vol(const vol_write_req_t *req, vol_write_timing_t *t)
             "no ragged tail\n", req->u, ctx->compressor_id, nchunks, chunk_bytes);
     }
 
-    need = hdr_bytes + req->total_bytes + req->total_bytes / 8
-         + nchunks * (size_t)(1u << 16);
-
-    arena = (unsigned char *)H5VL_pass_through_ext_reserve_arena(ctx, need);
-    if (!arena) {
+    /* Small -- nchunks pointers and nchunks counts. Not worth pooling. */
+    chunk_bufs = (void **)calloc(nchunks, sizeof(void *));
+    csizes     = (uint64_t *)malloc(nchunks * sizeof(uint64_t));
+    if (!chunk_bufs || !csizes) {
         H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
                 vol_err_class, maj_compression, min_compress_failed,
-                "out of memory reserving a %zu byte chunk arena (%zu chunks) "
-                "for dataset %zu", need, nchunks, req->u);
+                "out of memory allocating chunk table (%zu chunks) for "
+                "dataset %zu", nchunks, req->u);
+        free(chunk_bufs); free(csizes);
         return -1;
     }
-    hdr = (uint64_t *)arena;
 
     vol_write_reset_timers(ctx, t);
-    {
-        double _c0 = bench_now_ms();
-
-        for (size_t k = 0; k < nchunks && rc >= 0; k++) {
-            size_t   coff = k * chunk_bytes;
-            size_t   clen = (req->total_bytes - coff < chunk_bytes)
-                                ? (req->total_bytes - coff) : chunk_bytes;
-            uint64_t csize_k = 0;
-
-            rc = H5VL_pass_through_ext_compress_chunk_into(
-                     ctx, (const char *)req->comp_src + coff, clen,
-                     arena + poff, need - poff, &csize_k);
-            if (rc < 0) break;
-
-            /* Table entry written straight into the reserved header words. */
-            hdr[VOL_CHUNK_HDR_WORDS + k] = csize_k;
-            poff += (size_t)csize_k;
-        }
-
-        vol_write_capture_timers(ctx, t, _c0);
+    double _c0 = bench_now_ms();
+    for (size_t k = 0; k < nchunks && rc >= 0; k++) {
+        size_t coff = k * chunk_bytes;
+        size_t clen = (req->total_bytes - coff < chunk_bytes)
+                          ? (req->total_bytes - coff) : chunk_bytes;
+        rc = H5VL_pass_through_ext_transfer_compress_chunk(
+                 ctx, (const char *)req->comp_src + coff, clen,
+                 &chunk_bufs[k], &csizes[k]);
     }
+    vol_write_capture_timers(ctx, t, _c0);
 
     if (rc < 0) {
         H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
                 vol_err_class, maj_compression, min_compress_failed,
                 "chunked compression failed for dataset %zu compressor='%s'",
                 req->u, ctx->compressor_id);
-        return -1;
+        goto done;
     }
 
     {
-        const hsize_t total = (hsize_t)poff;
+        const size_t hdr_words = VOL_CHUNK_HDR_WORDS + nchunks;
+        const size_t hdr_bytes = hdr_words * sizeof(uint64_t);
+        uint64_t payload_bytes = 0;
+        for (size_t k = 0; k < nchunks; k++) payload_bytes += csizes[k];
+        const hsize_t total = (hsize_t)(hdr_bytes + payload_bytes);
+
+        if (vol_write_set_extent(req, total, t) < 0) { rc = -1; goto done; }
 
         double _h0 = bench_now_ms();
+        /* Pooled: the only VOL-owned buffer on this path. */
+        hdr = (uint64_t *)vol_buf_reserve(&ctx->chunk_arena, hdr_bytes,
+                                          VOL_BUF_HOST);
+        if (!hdr) {
+            t->container_ms += bench_now_ms() - _h0;
+            H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
+                    vol_err_class, maj_compression, min_compress_failed,
+                    "out of memory reserving a %zu byte header, dataset %zu",
+                    hdr_bytes, req->u);
+            rc = -1; goto done;
+        }
         hdr[0] = VOL_CHUNK_MAGIC;
         hdr[1] = (uint64_t)nchunks;
         hdr[2] = (uint64_t)chunk_bytes;
+        memcpy(&hdr[VOL_CHUNK_HDR_WORDS], csizes, nchunks * sizeof(uint64_t));
         t->container_ms += bench_now_ms() - _h0;
 
-        return vol_write_whole(req, arena, total, t);
+        if (vol_write_at(req, hdr, 0, (hsize_t)hdr_bytes, total, t) < 0) {
+            rc = -1; goto done;
+        }
+
+        hsize_t poff = (hsize_t)hdr_bytes;
+        for (size_t k = 0; k < nchunks; k++) {
+            if (vol_write_at(req, chunk_bufs[k], poff, (hsize_t)csizes[k],
+                             total, t) < 0) {
+                rc = -1;
+                break;
+            }
+            free(chunk_bufs[k]);
+            chunk_bufs[k] = NULL;
+            poff += (hsize_t)csizes[k];
+        }
     }
+
+done:
+    if (chunk_bufs) for (size_t k = 0; k < nchunks; k++) free(chunk_bufs[k]);
+    free(chunk_bufs);
+    free(csizes);
+    return rc;
 }
 
 /* =========================================================================

@@ -399,27 +399,31 @@ done:
 
 herr_t
 vol_container_fetch(void *under, hid_t under_vol_id, hid_t plist_id,
-                    const vol_read_plan_t *plan, unsigned char **out_cbuf)
+                    compression_ctx *ctx,
+                    vol_read_plan_t *plan, unsigned char **out_cbuf)
 {
-    if (!plan || !out_cbuf) return -1;
+    if (!plan || !out_cbuf || !ctx) return -1;
     *out_cbuf = NULL;
 
-    unsigned char *buf = (unsigned char *)calloc(1, (size_t)plan->cont_bytes);
+    unsigned char *buf = (unsigned char *)
+        H5VL_pass_through_ext_reserve_container(ctx, (size_t)plan->cont_bytes);
     if (!buf) {
         H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
                 vol_err_class, maj_compression, min_decompress_failed,
-                "out of memory allocating a %llu byte container buffer",
+                "out of memory reserving a %llu byte container buffer",
                 (unsigned long long)plan->cont_bytes);
         return -1;
     }
+
+    if (plan->partial)
+        memset(buf, 0, (size_t)plan->cont_bytes);
 
     for (size_t i = 0; i < plan->nranges; i++) {
         if (vol_container_read_range(under, under_vol_id, plist_id,
                                      plan->cont_bytes,
                                      plan->ranges[i].off, plan->ranges[i].len,
                                      buf + plan->ranges[i].off) < 0) {
-            free(buf);
-            return -1;
+            return -1;      /* buf is pooled: do NOT free */
         }
     }
 

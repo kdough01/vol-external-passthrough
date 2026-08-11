@@ -64,7 +64,9 @@ typedef struct compression_ctx {
     vol_buf_t chunk_arena;   /* VOL-chunked: header + all payloads, contiguous */
     vol_buf_t cont_in;       /* read side: fetched container bytes             */
     vol_buf_t decomp;        /* read side: decompressed logical buffer         */
-    
+
+    void *adopted_buf;
+    int   codec_ignores_output;    
 } compression_ctx;
 
 #ifdef __cplusplus
