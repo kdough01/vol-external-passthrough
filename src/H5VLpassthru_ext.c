@@ -817,6 +817,7 @@ H5VL_pass_through_ext_init(hid_t vipl_id)
     min_decompress_failed  = H5Ecreate_msg(vol_err_class, H5E_MINOR, "Decompression failed");
     min_config_missing = H5Ecreate_msg(vol_err_class, H5E_MINOR, "Configuration missing or invalid");
     maj_config = H5Ecreate_msg(vol_err_class, H5E_MAJOR, "Configuration");
+    min_invalid_option = H5Ecreate_msg(vol_err_class, H5E_MINOR, "Invalid option")
     if(vol_err_class < 0 || maj_compression < 0 || min_compressor_unavail < 0 ||
         min_compress_failed < 0 || min_decompress_failed < 0)
         return(-1);
@@ -1942,7 +1943,8 @@ typedef struct {
     size_t                   cont_bytes;
     void                    *dst;             /* == ctx->decomp_buf       */
     size_t                   total_bytes;     /* logical size             */
-    int                      want_layers;     /* progressive, 0 = all     */
+    size_t                   avail_bytes;     /* bytes actually fetched   */
+    unsigned                 want_pct;        /* progressive, 100 = full  */
     const char              *dset_name;
     size_t                   u;
 } vol_read_req_t;
@@ -2312,8 +2314,8 @@ H5VL_pass_through_ext_dataset_read(
             vol_read_plan_t plan;
             unsigned char  *cbuf = NULL;
             void           *decode_dst = NULL;
-            const int want_layers =
-                H5VL_pass_through_ext_progressive_want(plist_id);
+            const unsigned want_pct =
+                H5VL_pass_through_ext_progressive_pct(plist_id);
 
             {
                 const size_t esz = pressio_dtype_size(ctx->dtype);
@@ -2336,7 +2338,7 @@ H5VL_pass_through_ext_dataset_read(
              * request actually needs. PHASE 2: read only those. */
             double _io0 = bench_now_ms();
             if (vol_container_plan(under, d->under_vol_id, plist_id, ctx,
-                                   file_space_id[u], want_layers, &plan) < 0) {
+                                   file_space_id[u], want_pct, &plan) < 0) {
                 t.io_ms += bench_now_ms() - _io0;
                 ret_val = -1;
                 continue;
@@ -2386,7 +2388,8 @@ H5VL_pass_through_ext_dataset_read(
             rreq.cont_bytes    = (size_t)plan.cont_bytes;
             rreq.dst           = decode_dst;
             rreq.total_bytes   = total_bytes;
-            rreq.want_layers   = want_layers;
+            rreq.want_pct    = want_pct;
+            rreq.avail_bytes = plan.bytes_needed;
             rreq.dset_name     = dset_name;
             rreq.u             = u;
 

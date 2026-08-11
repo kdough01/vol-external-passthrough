@@ -9,6 +9,7 @@ extern hid_t min_compressor_unavail;
 extern hid_t min_compress_failed;
 extern hid_t min_decompress_failed;
 extern hid_t min_config_missing;
+extern hid_t min_invalid_option;
 extern hid_t maj_config;
 
 #endif

@@ -31,14 +31,15 @@ typedef struct {
 
     /* decode hints, filled according to kind */
     uint64_t nchunks, chunk_bytes;      /* CHUNKED / SHARED      */
-    uint64_t nlayers, want_layers;      /* PROGRESSIVE           */
+    uint64_t nlayers;                   /* PROGRESSIVE           */
+    unsigned want_pct;                  /* PROGRESSIVE: 1..100   */
     uint64_t pressio_chunk_elems;       /* PRESSIO               */
     int      partial;                   /* 1 if anything was skipped */
 } vol_read_plan_t;
 
 herr_t vol_container_plan(void *under, hid_t under_vol_id, hid_t plist_id,
                           const compression_ctx *ctx,
-                          hid_t file_space_id, int want_layers,
+                          hid_t file_space_id, unsigned want_pct,
                           vol_read_plan_t *plan);
 
 herr_t vol_container_fetch(void *under, hid_t under_vol_id, hid_t plist_id,
