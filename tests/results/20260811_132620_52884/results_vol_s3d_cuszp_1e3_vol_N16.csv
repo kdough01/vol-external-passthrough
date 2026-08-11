@@ -1,0 +1,10 @@
+dataset,compressor,path,op,phase,ms,ratio,rmse
+s3d,cuszp_1e3,vol,write,total,398.3146,46.1917,
+s3d,cuszp_1e3,vol,write,flush,0.2697,,
+s3d,cuszp_1e3,vol,write,sync,169.7196,,
+s3d,cuszp_1e3,vol,write,close,0.1782,,
+s3d,cuszp_1e3,vol,write,csync,74.5803,,
+s3d,cuszp_1e3,vol,read,evict,1.0837,,
+s3d,cuszp_1e3,vol,read,total,172.6869,,4.898672e-04
+/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_s3d_cuszp_1e3_vol_N16.h5,ALL,vol,write,file,644.1081,46.1917,
+/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_s3d_cuszp_1e3_vol_N16.h5,ALL,vol,read,file,172.9971,,
