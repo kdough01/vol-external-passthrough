@@ -1,0 +1,10 @@
+dataset,compressor,path,op,phase,ms,ratio,rmse
+einspline37,zfp_gpu_r4,vol,write,total,3747.9178,8.0000,
+einspline37,zfp_gpu_r4,vol,write,flush,190.6343,,
+einspline37,zfp_gpu_r4,vol,write,sync,107.2049,,
+einspline37,zfp_gpu_r4,vol,write,close,0.1699,,
+einspline37,zfp_gpu_r4,vol,write,csync,69.7429,,
+einspline37,zfp_gpu_r4,vol,read,evict,0.2130,,
+einspline37,zfp_gpu_r4,vol,read,total,3732.2862,,7.299897e-01
+/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_qmc_zfp_gpu_r4_vol_N8.h5,ALL,vol,write,file,4116.8641,8.0000,
+/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_qmc_zfp_gpu_r4_vol_N8.h5,ALL,vol,read,file,3732.7813,,

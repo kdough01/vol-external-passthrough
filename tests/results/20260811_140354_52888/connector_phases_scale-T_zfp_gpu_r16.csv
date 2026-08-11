@@ -1,0 +1,3 @@
+dataset,compressor,op,total_ms,stage_ms,compress_ms,container_ms,io_ms,pressio_call_ms,device_ms,transfer_ms,vol_compress_ms,pressio_host_ms,residual_ms,residual_frac
+scale-T_zfp_gpu_r16,zfp,write,436.0454,0.0000,214.2541,0.0768,221.7060,61.1006,0.0000,152.1222,1.0313,61.1006,0.0086,0.000020
+scale-T_zfp_gpu_r16,zfp,read,619.5315,0.0000,461.9363,0.0000,157.5832,461.8496,0.0000,0.0000,0.0867,461.8496,0.0120,0.000019

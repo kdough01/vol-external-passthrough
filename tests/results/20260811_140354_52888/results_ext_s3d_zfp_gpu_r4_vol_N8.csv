@@ -1,0 +1,2 @@
+dataset,compressor,codec_kind,chunk_n,rep,logical_bytes,stored_bytes,ratio,create_ms,write_ms,flush_ms,sync_ms,close_ms,csync_ms,evict_ms,open_ms,read_ms,rmse,abs_thresh,maxae,bound_ok
+s3d,zfp_gpu_r4,gpu,8,0,1000000000,63500088,15.7480,1.0953,319.7765,0.2989,128.8807,0.1599,147.4751,1.3930,0.3557,286.4129,2.727136e-07,0.000000e+00,4.284444e-05,-1

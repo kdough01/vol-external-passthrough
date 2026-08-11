@@ -1,0 +1,2 @@
+dataset,compressor,codec_kind,chunk_n,rep,logical_bytes,stored_bytes,ratio,create_ms,write_ms,flush_ms,sync_ms,close_ms,csync_ms,evict_ms,open_ms,read_ms,rmse,abs_thresh,maxae,bound_ok
+einspline37,zfp_cpu_r12,cpu,16,0,13560851520,5085319576,2.6667,1.0608,80698.1957,95.1265,203.9389,0.2246,75.5585,0.2160,0.3990,105038.2677,2.510880e-03,0.000000e+00,2.043114e-01,-1

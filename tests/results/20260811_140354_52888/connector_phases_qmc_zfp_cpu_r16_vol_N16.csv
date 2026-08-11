@@ -1,0 +1,3 @@
+dataset,compressor,op,total_ms,stage_ms,compress_ms,container_ms,io_ms,pressio_call_ms,device_ms,transfer_ms,vol_compress_ms,pressio_host_ms,residual_ms,residual_frac
+einspline37_zfp_cpu_r16,zfp,write,89578.3591,0.0000,86105.6772,0.2878,3472.2962,86044.3045,0.0000,0.0000,61.3728,86044.3045,0.0979,0.000001
+einspline37_zfp_cpu_r16,zfp,read,124272.9340,0.0000,121315.8644,0.0000,2957.0260,121314.2667,0.0000,0.0000,1.5976,121314.2667,0.0437,0.000000

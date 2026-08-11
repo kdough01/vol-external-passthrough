@@ -1,0 +1,2 @@
+dataset,compressor,codec_kind,chunk_n,rep,logical_bytes,stored_bytes,ratio,create_ms,write_ms,flush_ms,sync_ms,close_ms,csync_ms,evict_ms,open_ms,read_ms,rmse,abs_thresh,maxae,bound_ok
+miranda,zfp_cpu_r16,cpu,8,0,301989888,75497560,4.0000,1.8917,1863.9435,0.4061,197.2653,0.1961,94.3393,3.1830,0.4260,743.8196,2.650153e-08,0.000000e+00,2.833496e-06,-1
