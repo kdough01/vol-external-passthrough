@@ -772,3 +772,260 @@ RANGE s3d            min=-6.362436e-15 max=3.920002e-02 range=3.920002e-02 xform
 [VOL WARN] 'noop' EXPANDED a 64000000 byte chunk to 64000000 bytes (100.0000% of input).
 [VOL WARN] 'noop' EXPANDED a 64000000 byte chunk to 64000000 bytes (100.0000% of input).
 [VOL WARN] 'noop' EXPANDED a 40000000 byte chunk to 40000000 bytes (100.0000% of input).
+
+=== s3d (953.7 MiB, double, raw) ===
+Info: 0x563638e7dbd0
+  s3d_noop                     C=   1.09 W=   992.02 F=   78.01 S=   115.73 X=    0.21 S2= 113.52 | E=   1.06 O=   0.44 R=   742.79 ms  ratio=  1.00x  RMSE=0.000e+00 maxae=0.000e+00
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.09 write=992.02 flush=78.01 sync=115.73 close=0.21 csync=113.52 => write_total=1300.57 ms | evict=1.06 open=0.44 read=742.79 => read_total=743.24 ms | ratio=1.00x ===
+
+=== VOL timing [nyx_baryon_noop_vol_N8] : nyx_baryon (chunking: vol, N=8) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_nyx_baryon_noop_vol_N8.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260811_124914_52881/results_vol_nyx_baryon_noop_vol_N8.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260811_124914_52881/results_ext_nyx_baryon_noop_vol_N8.csv only=nyx_baryon comp=noop verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 837.2 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE nyx_baryon     min=5.637747e-02 max=1.166017e+01 range=1.160379e+01 xform=log1p
+[chunk] noop       N=8   -> 8 chunks x 67108864 B (64.000 MiB, 16777216 elems, 64 slices of 262144 elems) total=536870912 B
+[VOL RAGGED] dataset 0 'noop': clean split, 8 x 67108864 B, no ragged tail
+[VOL WARN] 'noop' EXPANDED a 67108864 byte chunk to 67108864 bytes (100.0000% of input).
+[VOL WARN] 'noop' EXPANDED a 67108864 byte chunk to 67108864 bytes (100.0000% of input).
+[VOL WARN] 'noop' EXPANDED a 67108864 byte chunk to 67108864 bytes (100.0000% of input).
+[VOL WARN] 'noop' EXPANDED a 67108864 byte chunk to 67108864 bytes (100.0000% of input).
+[VOL WARN] 'noop' EXPANDED a 67108864 byte chunk to 67108864 bytes (100.0000% of input).
+[VOL WARN] 'noop' EXPANDED a 67108864 byte chunk to 67108864 bytes (100.0000% of input).
+[VOL WARN] 'noop' EXPANDED a 67108864 byte chunk to 67108864 bytes (100.0000% of input).
+[VOL WARN] 'noop' EXPANDED a 67108864 byte chunk to 67108864 bytes (100.0000% of input).
+
+=== nyx_baryon (512.0 MiB, float, hdf5, transformed) ===
+Info: 0x560ed0e2ffa0
+  nyx_baryon_noop              C=   0.93 W=   539.33 F=  141.61 S=    92.88 X=    0.14 S2=  93.64 | E=   2.34 O=   0.29 R=   386.58 ms  ratio=  1.00x  RMSE=0.000e+00 maxae=0.000e+00 (log-space)
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=0.93 write=539.33 flush=141.61 sync=92.88 close=0.14 csync=93.64 => write_total=868.54 ms | evict=2.34 open=0.29 read=386.58 => read_total=386.86 ms | ratio=1.00x ===
+
+=== VOL timing [nyx_baryon_noop_vol_N16] : nyx_baryon (chunking: vol, N=16) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_nyx_baryon_noop_vol_N16.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260811_124914_52881/results_vol_nyx_baryon_noop_vol_N16.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260811_124914_52881/results_ext_nyx_baryon_noop_vol_N16.csv only=nyx_baryon comp=noop verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 837.2 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE nyx_baryon     min=5.637747e-02 max=1.166017e+01 range=1.160379e+01 xform=log1p
+[chunk] noop       N=16  -> 16 chunks x 33554432 B (32.000 MiB, 8388608 elems, 32 slices of 262144 elems) total=536870912 B
+[VOL RAGGED] dataset 0 'noop': clean split, 16 x 33554432 B, no ragged tail
+[VOL WARN] 'noop' EXPANDED a 33554432 byte chunk to 33554432 bytes (100.0000% of input).
+[VOL WARN] 'noop' EXPANDED a 33554432 byte chunk to 33554432 bytes (100.0000% of input).
+[VOL WARN] 'noop' EXPANDED a 33554432 byte chunk to 33554432 bytes (100.0000% of input).
+[VOL WARN] 'noop' EXPANDED a 33554432 byte chunk to 33554432 bytes (100.0000% of input).
+[VOL WARN] 'noop' EXPANDED a 33554432 byte chunk to 33554432 bytes (100.0000% of input).
+[VOL WARN] 'noop' EXPANDED a 33554432 byte chunk to 33554432 bytes (100.0000% of input).
+[VOL WARN] 'noop' EXPANDED a 33554432 byte chunk to 33554432 bytes (100.0000% of input).
+[VOL WARN] 'noop' EXPANDED a 33554432 byte chunk to 33554432 bytes (100.0000% of input).
+[VOL WARN] 'noop' EXPANDED a 33554432 byte chunk to 33554432 bytes (100.0000% of input).
+[VOL WARN] 'noop' EXPANDED a 33554432 byte chunk to 33554432 bytes (100.0000% of input).
+[VOL WARN] 'noop' EXPANDED a 33554432 byte chunk to 33554432 bytes (100.0000% of input).
+[VOL WARN] 'noop' EXPANDED a 33554432 byte chunk to 33554432 bytes (100.0000% of input).
+[VOL WARN] 'noop' EXPANDED a 33554432 byte chunk to 33554432 bytes (100.0000% of input).
+[VOL WARN] 'noop' EXPANDED a 33554432 byte chunk to 33554432 bytes (100.0000% of input).
+[VOL WARN] 'noop' EXPANDED a 33554432 byte chunk to 33554432 bytes (100.0000% of input).
+[VOL WARN] 'noop' EXPANDED a 33554432 byte chunk to 33554432 bytes (100.0000% of input).
+
+=== nyx_baryon (512.0 MiB, float, hdf5, transformed) ===
+Info: 0x560acfc8ff50
+  nyx_baryon_noop              C=   1.12 W=   539.23 F=  381.20 S=   125.61 X=    0.20 S2=  37.58 | E=   1.32 O=   0.28 R=   330.30 ms  ratio=  1.00x  RMSE=0.000e+00 maxae=0.000e+00 (log-space)
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.12 write=539.23 flush=381.20 sync=125.61 close=0.20 csync=37.58 => write_total=1084.95 ms | evict=1.32 open=0.28 read=330.30 => read_total=330.58 ms | ratio=1.00x ===
+
+=== VOL timing [ocean_temp_noop_vol_N8] : ocean_temp (chunking: vol, N=8) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_ocean_temp_noop_vol_N8.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260811_124914_52881/results_vol_ocean_temp_noop_vol_N8.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260811_124914_52881/results_ext_ocean_temp_noop_vol_N8.csv only=ocean_temp comp=noop verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 837.2 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE ocean_temp     min=4.445019e+00 max=1.072704e+01 range=6.282023e+00 xform=none
+[chunk] noop       N=8   -> 8 chunks x 16140480 B (15.393 MiB, 4035120 elems, 3 slices of 1345040 elems) total=129123840 B
+[VOL RAGGED] dataset 0 'noop': clean split, 8 x 16140480 B, no ragged tail
+[VOL WARN] 'noop' EXPANDED a 16140480 byte chunk to 16140480 bytes (100.0000% of input).
+[VOL WARN] 'noop' EXPANDED a 16140480 byte chunk to 16140480 bytes (100.0000% of input).
+[VOL WARN] 'noop' EXPANDED a 16140480 byte chunk to 16140480 bytes (100.0000% of input).
+[VOL WARN] 'noop' EXPANDED a 16140480 byte chunk to 16140480 bytes (100.0000% of input).
+[VOL WARN] 'noop' EXPANDED a 16140480 byte chunk to 16140480 bytes (100.0000% of input).
+[VOL WARN] 'noop' EXPANDED a 16140480 byte chunk to 16140480 bytes (100.0000% of input).
+[VOL WARN] 'noop' EXPANDED a 16140480 byte chunk to 16140480 bytes (100.0000% of input).
+[VOL WARN] 'noop' EXPANDED a 16140480 byte chunk to 16140480 bytes (100.0000% of input).
+
+=== ocean_temp (123.1 MiB, float, hdf5) ===
+Info: 0x563aa0448a10
+  ocean_temp_noop              C=   0.93 W=   257.24 F=   86.62 S=   121.14 X=    0.12 S2= 126.37 | E=   0.19 O=   0.28 R=    74.58 ms  ratio=  1.00x  RMSE=0.000e+00 maxae=0.000e+00
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=0.93 write=257.24 flush=86.62 sync=121.14 close=0.12 csync=126.37 => write_total=592.42 ms | evict=0.19 open=0.28 read=74.58 => read_total=74.86 ms | ratio=1.00x ===
+
+=== VOL timing [ocean_temp_noop_vol_N16] : ocean_temp (chunking: vol, N=16) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_ocean_temp_noop_vol_N16.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260811_124914_52881/results_vol_ocean_temp_noop_vol_N16.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260811_124914_52881/results_ext_ocean_temp_noop_vol_N16.csv only=ocean_temp comp=noop verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 837.2 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE ocean_temp     min=4.445019e+00 max=1.072704e+01 range=6.282023e+00 xform=none
+[chunk] noop       N=16  -> 12 chunks x 10760320 B (10.262 MiB, 2690080 elems, 2 slices of 1345040 elems) total=129123840 B
+[VOL RAGGED] dataset 0 'noop': clean split, 12 x 10760320 B, no ragged tail
+[VOL WARN] 'noop' EXPANDED a 10760320 byte chunk to 10760320 bytes (100.0000% of input).
+[VOL WARN] 'noop' EXPANDED a 10760320 byte chunk to 10760320 bytes (100.0000% of input).
+[VOL WARN] 'noop' EXPANDED a 10760320 byte chunk to 10760320 bytes (100.0000% of input).
+[VOL WARN] 'noop' EXPANDED a 10760320 byte chunk to 10760320 bytes (100.0000% of input).
+[VOL WARN] 'noop' EXPANDED a 10760320 byte chunk to 10760320 bytes (100.0000% of input).
+[VOL WARN] 'noop' EXPANDED a 10760320 byte chunk to 10760320 bytes (100.0000% of input).
+[VOL WARN] 'noop' EXPANDED a 10760320 byte chunk to 10760320 bytes (100.0000% of input).
+[VOL WARN] 'noop' EXPANDED a 10760320 byte chunk to 10760320 bytes (100.0000% of input).
+[VOL WARN] 'noop' EXPANDED a 10760320 byte chunk to 10760320 bytes (100.0000% of input).
+[VOL WARN] 'noop' EXPANDED a 10760320 byte chunk to 10760320 bytes (100.0000% of input).
+[VOL WARN] 'noop' EXPANDED a 10760320 byte chunk to 10760320 bytes (100.0000% of input).
+[VOL WARN] 'noop' EXPANDED a 10760320 byte chunk to 10760320 bytes (100.0000% of input).
+
+=== ocean_temp (123.1 MiB, float, hdf5) ===
+Info: 0x55f4556a5930
+  ocean_temp_noop              C=   0.93 W=   217.63 F=  113.33 S=   160.62 X=    0.12 S2=  93.60 | E=   2.26 O=   0.29 R=    82.62 ms  ratio=  1.00x  RMSE=0.000e+00 maxae=0.000e+00
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=0.93 write=217.63 flush=113.33 sync=160.62 close=0.12 csync=93.60 => write_total=586.22 ms | evict=2.26 open=0.29 read=82.62 => read_total=82.91 ms | ratio=1.00x ===
+
+=== VOL timing [qmc_noop_vol_N8] : einspline37 (chunking: vol, N=8) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_qmc_noop_vol_N8.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260811_124914_52881/results_vol_qmc_noop_vol_N8.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260811_124914_52881/results_ext_qmc_noop_vol_N8.csv only=einspline37 comp=noop verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 837.2 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE einspline37    min=-2.125822e+01 max=2.036857e+01 range=4.162679e+01 xform=none
+[chunk] noop       N=8   -> 8 chunks x 1695106440 B (1616.579 MiB, 423776610 elems, 423776610 slices of 1 elems) total=13560851520 B
+[VOL RAGGED] dataset 0 'noop': clean split, 8 x 1695106440 B, no ragged tail
+[VOL WARN] 'noop' EXPANDED a 1695106440 byte chunk to 1695106440 bytes (100.0000% of input).
+[VOL WARN] 'noop' EXPANDED a 1695106440 byte chunk to 1695106440 bytes (100.0000% of input).
+[VOL WARN] 'noop' EXPANDED a 1695106440 byte chunk to 1695106440 bytes (100.0000% of input).
+[VOL WARN] 'noop' EXPANDED a 1695106440 byte chunk to 1695106440 bytes (100.0000% of input).
+[VOL WARN] 'noop' EXPANDED a 1695106440 byte chunk to 1695106440 bytes (100.0000% of input).
+[VOL WARN] 'noop' EXPANDED a 1695106440 byte chunk to 1695106440 bytes (100.0000% of input).
+[VOL WARN] 'noop' EXPANDED a 1695106440 byte chunk to 1695106440 bytes (100.0000% of input).
+[VOL WARN] 'noop' EXPANDED a 1695106440 byte chunk to 1695106440 bytes (100.0000% of input).
+
+=== einspline37 (12932.6 MiB, float, raw) ===
+Info: 0x55eca0ca8b20
+  einspline37_noop             C=   1.08 W= 14648.87 F=  482.67 S=   118.15 X=    0.26 S2=  69.23 | E=   0.19 O=   0.34 R= 10649.85 ms  ratio=  1.00x  RMSE=0.000e+00 maxae=0.000e+00
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.08 write=14648.87 flush=482.67 sync=118.15 close=0.26 csync=69.23 => write_total=15320.26 ms | evict=0.19 open=0.34 read=10649.85 => read_total=10650.19 ms | ratio=1.00x ===
+
+=== VOL timing [qmc_noop_vol_N16] : einspline37 (chunking: vol, N=16) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_qmc_noop_vol_N16.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260811_124914_52881/results_vol_qmc_noop_vol_N16.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260811_124914_52881/results_ext_qmc_noop_vol_N16.csv only=einspline37 comp=noop verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 837.2 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE einspline37    min=-2.125822e+01 max=2.036857e+01 range=4.162679e+01 xform=none
+[chunk] noop       N=16  -> 16 chunks x 847553220 B (808.290 MiB, 211888305 elems, 211888305 slices of 1 elems) total=13560851520 B
+[VOL RAGGED] dataset 0 'noop': clean split, 16 x 847553220 B, no ragged tail
+[VOL WARN] 'noop' EXPANDED a 847553220 byte chunk to 847553220 bytes (100.0000% of input).
+[VOL WARN] 'noop' EXPANDED a 847553220 byte chunk to 847553220 bytes (100.0000% of input).
+[VOL WARN] 'noop' EXPANDED a 847553220 byte chunk to 847553220 bytes (100.0000% of input).
+[VOL WARN] 'noop' EXPANDED a 847553220 byte chunk to 847553220 bytes (100.0000% of input).
+[VOL WARN] 'noop' EXPANDED a 847553220 byte chunk to 847553220 bytes (100.0000% of input).
+[VOL WARN] 'noop' EXPANDED a 847553220 byte chunk to 847553220 bytes (100.0000% of input).
+[VOL WARN] 'noop' EXPANDED a 847553220 byte chunk to 847553220 bytes (100.0000% of input).
+[VOL WARN] 'noop' EXPANDED a 847553220 byte chunk to 847553220 bytes (100.0000% of input).
+[VOL WARN] 'noop' EXPANDED a 847553220 byte chunk to 847553220 bytes (100.0000% of input).
+[VOL WARN] 'noop' EXPANDED a 847553220 byte chunk to 847553220 bytes (100.0000% of input).
+[VOL WARN] 'noop' EXPANDED a 847553220 byte chunk to 847553220 bytes (100.0000% of input).
+[VOL WARN] 'noop' EXPANDED a 847553220 byte chunk to 847553220 bytes (100.0000% of input).
+[VOL WARN] 'noop' EXPANDED a 847553220 byte chunk to 847553220 bytes (100.0000% of input).
+[VOL WARN] 'noop' EXPANDED a 847553220 byte chunk to 847553220 bytes (100.0000% of input).
+[VOL WARN] 'noop' EXPANDED a 847553220 byte chunk to 847553220 bytes (100.0000% of input).
+[VOL WARN] 'noop' EXPANDED a 847553220 byte chunk to 847553220 bytes (100.0000% of input).
+
+=== einspline37 (12932.6 MiB, float, raw) ===
+Info: 0x556c99e0fb30
+  einspline37_noop             C=   1.19 W= 14429.34 F=  830.15 S=   174.89 X=    2.16 S2=  71.47 | E=   0.19 O=   0.33 R=  9466.81 ms  ratio=  1.00x  RMSE=0.000e+00 maxae=0.000e+00
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.19 write=14429.34 flush=830.15 sync=174.89 close=2.16 csync=71.47 => write_total=15509.20 ms | evict=0.19 open=0.33 read=9466.81 => read_total=9467.13 ms | ratio=1.00x ===
+
+=== skip: noop x pressio (rejected by the VOL by design) ===
+
+=== VOL timing [miranda_cuszp_1e3] : miranda (chunking: native) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_miranda_cuszp_1e3.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260811_124914_52881/results_vol_miranda_cuszp_1e3.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260811_124914_52881/results_ext_miranda_cuszp_1e3.csv only=miranda comp=cuszp_1e3 verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 837.2 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE miranda        min=9.999878e-01 max=3.000046e+00 range=2.000058e+00 xform=none
+
+=== miranda (288.0 MiB, double, raw) ===
+Info: 0x55ced8becb20
+  miranda_cuszp_1e3            C=   1.16 W=    53.07 F=    0.35 S=   173.36 X=    0.20 S2= 169.81 | E=   2.72 O=   0.44 R=    47.26 ms  ratio= 21.06x  RMSE=2.720e-04 maxae=1.000e-03
+[dbg main] done: 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.16 write=53.07 flush=0.35 sync=173.36 close=0.20 csync=169.81 => write_total=397.95 ms | evict=2.72 open=0.44 read=47.26 => read_total=47.69 ms | ratio=21.06x ===
+
+=== VOL timing [scale-T_cuszp_1e3] : scale-T (chunking: native) ===
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_scale-T_cuszp_1e3.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260811_124914_52881/results_vol_scale-T_cuszp_1e3.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/20260811_124914_52881/results_ext_scale-T_cuszp_1e3.csv only=scale-T comp=cuszp_1e3 verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 837.2 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
