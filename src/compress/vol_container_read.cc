@@ -171,17 +171,18 @@ vol_read_plan_free(vol_read_plan_t *plan)
 herr_t
 vol_container_plan(void *under, hid_t under_vol_id, hid_t plist_id,
                    const compression_ctx *ctx,
-                   hid_t file_space_id, int want_layers,
+                   hid_t file_space_id, unsigned want_pct,
                    vol_read_plan_t *plan)
 {
     unsigned char  hdr[4096];
-    unsigned char *dir = NULL;      /* directory / csize table, if larger */
+    unsigned char *dir = NULL;
     uint64_t       cont_bytes = 0;
     range_list     rl;
     herr_t         ret = 0;
 
     if (!plan) return -1;
     memset(plan, 0, sizeof(*plan));
+    plan->want_pct = 100;
 
     if (container_size(under, under_vol_id, plist_id, &cont_bytes) < 0 ||
         cont_bytes < sizeof(uint64_t)) {
@@ -192,7 +193,6 @@ vol_container_plan(void *under, hid_t under_vol_id, hid_t plist_id,
     }
     plan->cont_bytes = cont_bytes;
 
-    /* ---- PHASE 1: a small prefix covers every fixed header we define ---- */
     const uint64_t probe = (cont_bytes < sizeof(hdr)) ? cont_bytes
                                                       : (uint64_t)sizeof(hdr);
     if (vol_container_read_range(under, under_vol_id, plist_id, cont_bytes,
@@ -201,21 +201,44 @@ vol_container_plan(void *under, hid_t under_vol_id, hid_t plist_id,
 
     plan->magic = get64(hdr, 0);
 
-    /* ---- dispatch ---- */
     if (plan->magic == VOL_NATIVE_MAGIC) {
-        /* One sequential libpressio stream: no independently decodable
-         * sub-unit exists, so the whole payload is required. */
         plan->kind = VOL_CONT_NATIVE;
-        ret = rl.add(0, cont_bytes);
+
+        const uint64_t hdr2  = 2 * sizeof(uint64_t);
+        const uint64_t csize = (probe >= hdr2) ? get64(hdr, 1) : 0;
+
+        /* Reduced-fidelity read. Only codecs with an embedded bitstream can
+         * do this; for anyone else we silently fetch everything rather than
+         * hand back a field the caller thinks is approximate but is garbage. */
+        if (want_pct >= 1 && want_pct < 100 && csize > 0 && ctx &&
+            vol_codec_is_progressive(ctx->compressor_id)) {
+
+            uint64_t need = hdr2 + (csize * (uint64_t)want_pct) / 100
+                                 + VOL_SPERR_SLACK;
+            if (need > hdr2 + csize) need = hdr2 + csize;
+            if (need > cont_bytes)   need = cont_bytes;
+
+            plan->want_pct = want_pct;
+            plan->partial  = (need < cont_bytes);
+            ret = rl.add(0, need);
+        } else {
+            if (want_pct >= 1 && want_pct < 100 && ctx &&
+                !vol_codec_is_progressive(ctx->compressor_id))
+                fprintf(stderr,
+                    "[VOL] progressive read requested at %u%% but compressor "
+                    "'%s' has no embedded bitstream; reading at full fidelity\n",
+                    want_pct, ctx->compressor_id);
+            ret = rl.add(0, cont_bytes);
+        }
 
     } else if (plan->magic == VOL_PRESSIO_MAGIC) {
-        /* Chunked inside libpressio's own format; decompress() wants it all. */
         plan->kind = VOL_CONT_PRESSIO;
         if (probe >= 3 * sizeof(uint64_t))
             plan->pressio_chunk_elems = get64(hdr, 2);
         ret = rl.add(0, cont_bytes);
 
     } else if (plan->magic == VOL_CHUNK_MAGIC) {
+        /* ---- unchanged from your version ---- */
         plan->kind = VOL_CONT_CHUNKED;
         if (probe < VOL_CHUNK_HDR_WORDS * sizeof(uint64_t)) {
             H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
@@ -242,7 +265,6 @@ vol_container_plan(void *under, hid_t under_vol_id, hid_t plist_id,
         const uint64_t table_bytes = nchunks * sizeof(uint64_t);
         const uint64_t payload_off = table_off + table_bytes;
 
-        /* header + csize table are always needed */
         if (rl.add(0, payload_off) < 0) { ret = -1; goto done; }
 
         dir = (unsigned char *)malloc(table_bytes);
@@ -274,6 +296,7 @@ vol_container_plan(void *under, hid_t under_vol_id, hid_t plist_id,
         }
 
     } else if (plan->magic == VOL_SHARED_MAGIC) {
+        /* ---- unchanged from your version ---- */
         plan->kind = VOL_CONT_SHARED;
         const uint64_t nregions = get64(hdr, 2);
         plan->nchunks     = get64(hdr, 3);
@@ -293,12 +316,10 @@ vol_container_plan(void *under, hid_t under_vol_id, hid_t plist_id,
             if (vol_container_read_range(under, under_vol_id, plist_id,
                                          cont_bytes, probe, dir_end - probe,
                                          hdr + probe) < 0)
-                return -1;      /* dir_end <= 4096 given nregions <= 1024 */
+                return -1;
         }
         if (rl.add(0, dir_end) < 0) { ret = -1; goto done; }
 
-        /* Shared metadata + chunk table are ALWAYS needed: every chunk
-         * references the shared region, and the table gives the offsets. */
         uint64_t payload_off = 0, payload_len = 0, table_off = 0;
         for (uint64_t r = 0; r < nregions; r++) {
             size_t w = VOL_SHARED_HDR_WORDS + r * VOL_SHARED_DIR_WORDS;
@@ -346,53 +367,6 @@ vol_container_plan(void *under, hid_t under_vol_id, hid_t plist_id,
             if (rl.add(payload_off, payload_len) < 0) { ret = -1; goto done; }
         }
 
-    } else if (plan->magic == VOL_PROGRESSIVE_MAGIC) {
-        plan->kind = VOL_CONT_PROGRESSIVE;
-        const uint64_t nregions = get64(hdr, 2);
-        const uint64_t nlayers  = get64(hdr, 3);
-        plan->nlayers = nlayers;
-
-        const uint64_t dir_bytes =
-            nregions * VOL_SHARED_DIR_WORDS * sizeof(uint64_t);
-        const uint64_t dir_end =
-            VOL_PROGRESSIVE_HDR_WORDS * sizeof(uint64_t) + dir_bytes;
-        if (nregions == 0 || nregions > 1024 || dir_end > cont_bytes) {
-            H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
-                    vol_err_class, maj_compression, min_decompress_failed,
-                    "implausible progressive directory (%llu regions)",
-                    (unsigned long long)nregions);
-            return -1;
-        }
-        if (dir_end > probe) {
-            if (vol_container_read_range(under, under_vol_id, plist_id,
-                                         cont_bytes, probe, dir_end - probe,
-                                         hdr + probe) < 0)
-                return -1;
-        }
-        if (rl.add(0, dir_end) < 0) { ret = -1; goto done; }
-
-        uint64_t want = (want_layers > 0 && (uint64_t)want_layers < nlayers)
-                            ? (uint64_t)want_layers : nlayers;
-        plan->want_layers = want;
-        plan->partial     = (want < nlayers);
-
-        /* The metadata region holds the per-layer bounds; the decoder needs
-         * it to configure each layer's decode. Always fetch it. */
-        for (uint64_t r = 0; r < nregions; r++) {
-            size_t w = VOL_PROGRESSIVE_HDR_WORDS + r * VOL_SHARED_DIR_WORDS;
-            uint64_t kind  = get64(hdr, w);
-            uint64_t flags = get64(hdr, w + 1);
-            uint64_t off   = get64(hdr, w + 2);
-            uint64_t len   = get64(hdr, w + 3);
-            if (off + len > cont_bytes) { ret = -1; goto done; }
-
-            if (kind == VOL_REGION_SHARED_META) {
-                if (rl.add(off, len) < 0) { ret = -1; goto done; }
-            } else if (kind == VOL_REGION_LAYER && flags < want) {
-                if (rl.add(off, len) < 0) { ret = -1; goto done; }
-            }
-        }
-
     } else {
         H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
                 vol_err_class, maj_compression, min_decompress_failed,
@@ -413,8 +387,9 @@ done:
 
     if (getenv("VOL_READ_PLAN_LOG"))
         fprintf(stderr,
-            "[read-plan] kind=%d ranges=%zu need=%llu/%llu bytes (%.1f%%)%s\n",
-            (int)plan->kind, plan->nranges,
+            "[read-plan] kind=%d pct=%u ranges=%zu need=%llu/%llu bytes "
+            "(%.1f%%)%s\n",
+            (int)plan->kind, plan->want_pct, plan->nranges,
             (unsigned long long)plan->bytes_needed,
             (unsigned long long)plan->cont_bytes,
             100.0 * (double)plan->bytes_needed / (double)plan->cont_bytes,

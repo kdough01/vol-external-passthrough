@@ -28,6 +28,7 @@ typedef struct {
 
     double pressio_call_ms;/* wall around pressio_compressor_compress()         */
     double device_ms;      /* CUDA event window (0.0 for CPU codecs)            */
+    double transfer_ms;
 
     double total_ms;       /* wall clock, whole per-dataset loop body           */
     double residual_ms;    /* total - (stage+compress+container+io); want ~0    */

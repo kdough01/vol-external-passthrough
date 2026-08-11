@@ -1,47 +1,32 @@
 #ifndef VOL_PROGRESSIVE_H
 #define VOL_PROGRESSIVE_H
 
-#include <stddef.h>
-#include <stdint.h>
 #include "hdf5.h"
-#include "metadata_structs.h"
-#include "vol_shared_meta.h"
+#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define VOL_PROGRESSIVE_MAGIC     ((uint64_t)0x564F4C5052473031ULL)
-#define VOL_PROGRESSIVE_VERSION   ((uint64_t)1)
-#define VOL_PROGRESSIVE_HDR_WORDS 8
+/* Extra bytes fetched beyond the nominal percentage. sperr_trunc_3d tolerates
+ * a stream longer than it needs but fails if it is short, and the exact
+ * requirement depends on SPERR's internal header layout. Over-read a little. */
+#define VOL_SPERR_SLACK 4096
 
-#define VOL_PROGRESSIVE_DEFAULT_LAYERS 4
-#define VOL_PROGRESSIVE_DEFAULT_RATIO  8.0
-#define VOL_PROGRESSIVE_MAX_LAYERS     16
+/* Request a reduced-fidelity read: pct is 1..100, 100 means full fidelity. */
+herr_t   H5Pset_vol_progressive_pct(hid_t dxpl_id, unsigned pct);
 
-herr_t H5VL_pass_through_ext_compress_progressive(compression_ctx *ctx,
-                                                  const void *data, size_t nbytes,
-                                                  int nlayers, double ratio,
-                                                  void **out_container,
-                                                  uint64_t *out_total);
+/* Resolve the request off a DXPL. Returns 100 when unset. */
+unsigned H5VL_pass_through_ext_progressive_pct(hid_t dxpl_id);
 
-herr_t H5VL_pass_through_ext_decompress_progressive(compression_ctx *ctx,
-                                                    const void *cbuf,
-                                                    size_t cont_bytes,
-                                                    void *out, size_t out_bytes,
-                                                    int want_layers,
-                                                    double *out_achieved_bound);
+/* Rewrite a truncated SPERR bitstream so libpressio can decode it.
+ * `stream` need only be long enough for the requested percentage.
+ * *out is allocated here and must be free()d by the caller. */
+herr_t   vol_sperr_truncate(const void *stream, size_t stream_len,
+                            unsigned pct, void **out, size_t *out_len);
 
-/* Geometry probe without decoding. */
-herr_t H5VL_pass_through_ext_progressive_probe(const void *cbuf, size_t cont_bytes,
-                                               uint64_t *out_nlayers,
-                                               uint64_t *out_total_bytes);
-
-int H5VL_pass_through_ext_progressive_want(hid_t dxpl_id);
-
-/* Layer count / ratio for the WRITE side, from ctx options then environment. */
-int    H5VL_pass_through_ext_progressive_layers(const compression_ctx *ctx);
-double H5VL_pass_through_ext_progressive_ratio(const compression_ctx *ctx);
+/* True when this codec supports reduced-fidelity reads. */
+int      vol_codec_is_progressive(const char *compressor_id);
 
 #ifdef __cplusplus
 }
