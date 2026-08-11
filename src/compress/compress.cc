@@ -577,47 +577,7 @@ vol_fetch_result_pooled(compression_ctx *ctx, struct pressio_data *result,
     }
 
     /* ---- CASE 3: one copy into pooled host memory ---- */
-    dst = vol_buf_reserve(&ctx->comp_stage, hdr_reserve + sz,
-                          dev ? VOL_BUF_PINNED : VOL_BUF_HOST);
-    if (!dst) return -2;
-
-#ifdef USE_CUDA
-    if (dev) {
-        if (!ctx->cuda_stream_ok) {
-            if (cudaDeviceSynchronize() != cudaSuccess) {
-                cudaGetLastError();
-                H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
-                        vol_err_class, maj_compression, min_compress_failed,
-                        "pre-D2H device barrier failed for '%s'",
-                        ctx->compressor_id);
-                return -3;
-            }
-        }
-
-        double      _t0  = bench_now_ms();
-        cudaError_t cerr = cudaMemcpyAsync((char *)dst + hdr_reserve, src, sz,
-                                           cudaMemcpyDeviceToHost,
-                                           (cudaStream_t)ctx->stream);
-        if (cerr == cudaSuccess)
-            cerr = vol_stream_barrier(ctx, min_compress_failed);
-        ctx->transfer_ms += bench_now_ms() - _t0;
-
-        if (cerr != cudaSuccess) {
-            H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
-                    vol_err_class, maj_compression, min_compress_failed,
-                    "device-to-host copy of %zu compressed bytes failed "
-                    "for '%s': %s", sz, ctx->compressor_id,
-                    cudaGetErrorString(cerr));
-            return -3;
-        }
-
-        *out_base = dst;
-        *out_size = sz;
-        return 0;
-    }
-#else
-    (void)dev;
-#endif
+    vol_make_host_resident(result);
 
     /* Host result we could not adopt. Should be rare; if VOL_COMP_COPY_LOG
      * shows this firing every write, find out which condition failed --
