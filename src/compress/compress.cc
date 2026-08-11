@@ -199,6 +199,11 @@ vol_bufpool_init(void)
 /* Helpers */
 extern "C" int H5VL_pass_through_ext_buf_is_device(const void *p);
 extern "C" int H5VL_pass_through_ext_compressor_available(const char *compressor_id);
+extern "C" void *
+H5VL_pass_through_ext_reserve_arena(compression_ctx *ctx, size_t nbytes)
+{
+    return vol_buf_reserve(&ctx->chunk_arena, nbytes, VOL_BUF_HOST);
+}
 
 /* Codecs that receive a 1-D flattened byte stream instead of a typed,
  * shaped view. Lossless byte-oriented codecs only — shape-aware codecs

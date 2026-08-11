@@ -817,7 +817,7 @@ H5VL_pass_through_ext_init(hid_t vipl_id)
     min_decompress_failed  = H5Ecreate_msg(vol_err_class, H5E_MINOR, "Decompression failed");
     min_config_missing = H5Ecreate_msg(vol_err_class, H5E_MINOR, "Configuration missing or invalid");
     maj_config = H5Ecreate_msg(vol_err_class, H5E_MAJOR, "Configuration");
-    min_invalid_option = H5Ecreate_msg(vol_err_class, H5E_MINOR, "Invalid option")
+    min_invalid_option = H5Ecreate_msg(vol_err_class, H5E_MINOR, "Invalid option");
     if(vol_err_class < 0 || maj_compression < 0 || min_compressor_unavail < 0 ||
         min_compress_failed < 0 || min_decompress_failed < 0)
         return(-1);
@@ -2174,33 +2174,6 @@ vol_read_shared(const vol_read_req_t *req, vol_read_timing_t *t)
 }
 
 /* =========================================================================
- * PATH 5 -- PROGRESSIVE
- *
- * Decodes and sums the first `want_layers` residual layers. The value MUST be
- * the same one the read plan used: if the plan fetched only n layers and the
- * decoder is asked for more, it would sum zeroed memory and silently return a
- * wrong field. The dispatcher computes it once and passes it to both.
- * ========================================================================= */
-static herr_t
-vol_read_progressive(const vol_read_req_t *req, vol_read_timing_t *t)
-{
-    double achieved = 0.0;
-
-    double _c0 = bench_now_ms();
-    herr_t rc = H5VL_pass_through_ext_decompress_progressive(
-                    req->ctx, req->cbuf, req->cont_bytes,
-                    req->dst, req->total_bytes,
-                    req->want_layers, &achieved);
-    t->decomp_ms += bench_now_ms() - _c0;
-
-    if (rc >= 0 && req->want_layers > 0)
-        fprintf(stderr, "[VOL] dataset '%s' read at REDUCED fidelity: "
-                        "%d layer(s), bound ~%.3e\n",
-                req->dset_name, req->want_layers, achieved);
-    return rc;
-}
-
-/* =========================================================================
  * PATH 0 -- NO COMPRESSION
  * ========================================================================= */
 static herr_t
@@ -2402,7 +2375,6 @@ H5VL_pass_through_ext_dataset_read(
             case VOL_CONT_PRESSIO:     rc = vol_read_pressio(&rreq, &t);     break;
             case VOL_CONT_CHUNKED:     rc = vol_read_vol(&rreq, &t);         break;
             case VOL_CONT_SHARED:      rc = vol_read_shared(&rreq, &t);      break;
-            case VOL_CONT_PROGRESSIVE: rc = vol_read_progressive(&rreq, &t); break;
             case VOL_CONT_NATIVE:      rc = vol_read_native(&rreq, &t);      break;
             default:
                 H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
@@ -2730,8 +2702,7 @@ vol_write_vol(const vol_write_req_t *req, vol_write_timing_t *t)
     need = hdr_bytes + req->total_bytes + req->total_bytes / 8
          + nchunks * (size_t)(1u << 16);
 
-    arena = (unsigned char *)vol_buf_reserve(&ctx->chunk_arena, need,
-                                             VOL_BUF_HOST);
+    arena = (unsigned char *)H5VL_pass_through_ext_reserve_arena(ctx, need);
     if (!arena) {
         H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
                 vol_err_class, maj_compression, min_compress_failed,

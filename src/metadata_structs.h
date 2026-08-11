@@ -50,6 +50,7 @@ typedef struct compression_ctx {
     uint64_t                   chunk_wrapper_elems; /* chunk size wrapper was built with */
     double pressio_call_ms;
     double device_ms;        /* CUDA event time; was named compress_ms      */
+    double transfer_ms;
 
     void  *ev_start;         /* cudaEvent_t, created once, opaque here      */
     void  *ev_stop;          /* cudaEvent_t                                 */
@@ -77,6 +78,7 @@ void  H5VL_pass_through_ext_release_buffers(compression_ctx *ctx);
 
 void *H5VL_pass_through_ext_reserve_decomp(compression_ctx *ctx, size_t nbytes);
 void *H5VL_pass_through_ext_reserve_container(compression_ctx *ctx, size_t nbytes);
+void *H5VL_pass_through_ext_reserve_arena(compression_ctx *ctx, size_t nbytes);
 #ifdef __cplusplus
 }
 #endif
