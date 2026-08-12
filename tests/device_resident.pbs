@@ -1,23 +1,40 @@
 #!/bin/bash
 #PBS -N g2_device_resident
 #PBS -l select=1:ncpus=16:ngpus=1:mpiprocs=1:mem=128gb
-#PBS -l walltime=03:00:00
+#PBS -l walltime=06:00:00
 #PBS -j oe
 #PBS -A SDR
 #PBS -q gpu
 
-DATASET="${BENCH_DATASET:-nyx_baryon}"
-COMP="${BENCH_COMP:-cuszp_1e3}"
-REPS="${BENCH_REPS:-7}"
+DATASETS="miranda scale-T s3d nyx_baryon ocean_temp qmc"
+COMP="zfp_gpu_r4 zfp_gpu_r8 zfp_gpu_r12 zfp_gpu_r16"
 
-cd $PBS_O_WORKDIR/..
+# nsys is a diagnostic, not a measurement: one dataset, one rate, both arms.
+# Set RUN_NSYS=0 to skip it entirely once the HtoD delta has been confirmed.
+RUN_NSYS="${RUN_NSYS:-1}"
+NSYS_DATASET="${NSYS_DATASET:-miranda}"
+NSYS_COMP="${NSYS_COMP:-zfp_gpu_r8}"
+
+# Must match the geometry the rest of the figure was generated with, or the
+# device bar is not comparable to the bars beside it. See the note at the end.
+CHUNKING="${VOL_COMP_CHUNKING:-none}"
+
+ARM_TIMEOUT="${ARM_TIMEOUT:-7200}"     # per arm, seconds; 2h of a 6h walltime
+
+cd "$PBS_O_WORKDIR/.." || exit 1
 WORK="$(pwd)"
 BUILD="build_g2"
-PROF="$WORK/nsys_g2"
-mkdir -p "$PROF"
+
+STAMP="$(date +%Y%m%d_%H%M%S)_${PBS_JOBID%%.*}"
+RES="$WORK/devres_results/$STAMP"
+PROF="$RES/nsys"
+mkdir -p "$RES" "$PROF" || { echo "ERROR: cannot create $RES"; exit 1; }
 
 echo "Job started on $(date)   host=$(hostname)"
-echo "dataset=$DATASET comp=$COMP reps=$REPS"
+echo "datasets=$DATASETS"
+echo "comp=$COMP"
+echo "chunking=$CHUNKING"
+echo "results -> $RES"
 nvidia-smi --query-gpu=name,memory.total --format=csv,noheader
 
 module load gcc/11.4.0
@@ -61,9 +78,11 @@ cmake -S . -B "$BUILD" \
     -DUSE_CUDA=ON -DCMAKE_PREFIX_PATH="$LP_VIEW" \
     -DLibPressio_DIR="$LP_CMAKE_DIR" \
     -DBUILD_EXAMPLES=OFF -Wno-dev \
-    > build_g2.log 2>&1 || { echo "cmake failed"; tail -30 build_g2.log; exit 1; }
+    > "$RES/build.log" 2>&1 || { echo "cmake failed"; tail -30 "$RES/build.log"; exit 1; }
 env PATH="$CLEAN_PATH" LD_LIBRARY_PATH="$GCC_LIB" cmake --build "$BUILD" -j16 \
-    || { echo "build failed -- refusing to run a stale binary"; exit 1; }
+    >> "$RES/build.log" 2>&1 \
+    || { echo "build failed -- refusing to run a stale binary";
+         tail -40 "$RES/build.log"; exit 1; }
 
 # The root CMakeLists sets CMAKE_RUNTIME_OUTPUT_DIRECTORY=${CMAKE_BINARY_DIR}/bin
 # and LIBRARY_OUTPUT_DIRECTORY=${CMAKE_BINARY_DIR}/lib -- NOT the per-subdir
@@ -76,53 +95,100 @@ VOL_CONNECTOR="${VOL_CONNECTOR:-pass_through_ext under_vol=0;under_info={}}"
 H5DIR="${VOL_H5DIR:-/lcrc/project/SDR/$USER/vol_bench_h5}"
 mkdir -p "$H5DIR" || { echo "ERROR: cannot create $H5DIR"; exit 1; }
 
-# bench_vol_timing has no --help; probe the binary for the env-var string the
-# device-staging block introduces. Absent => the edit was never applied.
-if ! strings "$BIN" 2>/dev/null | grep -q BENCH_DEVICE_INPUT; then
+# bench_vol_timing has no --help; probe the binary for the env-var strings the
+# staging block introduces. Absent => the source edit was never applied and
+# both arms would run identically -- a null result that looks like a real one.
+MISSING=""
+for sym in BENCH_DEVICE_INPUT BENCH_HOST_STAGED BENCH_STAGING_CSV; do
+    strings "$BIN" 2>/dev/null | grep -q "$sym" || MISSING="$MISSING $sym"
+done
+if [ -n "$MISSING" ]; then
     echo ""
-    echo ">>> WARNING: BENCH_DEVICE_INPUT not found in $BIN."
-    echo ">>> Both arms will run host-staged and the figure will show no"
-    echo ">>> difference -- a null result that looks real. Add the device"
-    echo ">>> staging block to bench_vol_timing.cc first."
+    echo ">>> ERROR: $BIN is missing:$MISSING"
+    echo ">>> Apply the staging block to bench_vol_timing.cc first. Without it"
+    echo ">>> both arms run host-staged, the bars come out identical, and the"
+    echo ">>> figure reports a savings of zero that is an artefact."
+    exit 1
 fi
 
+# ---------------------------------------------------------------- one arm --
+# The harness loops over datasets x compressors internally, so this is called
+# ONCE per arm. BENCH_ONLY / BENCH_COMP take space-separated lists (see
+# name_selected(), which treats ',' and ' ' as boundaries).
+#
+# COPY_LOG and GPU_EVENTS are deliberately OFF: both add work inside the timed
+# H5Dwrite. Turn them on only for the diagnostic pass below.
 run_arm () {
-    local arm="$1" rep="$2"
+    local arm="$1"
     local dev=""
-    [ "$arm" = "device" ] && dev="BENCH_DEVICE_INPUT=1"
-    [ "$arm" = "host"   ] && dev="BENCH_HOST_STAGED=1"
+    case "$arm" in
+        device) dev="BENCH_DEVICE_INPUT=1" ;;
+        host)   dev="BENCH_HOST_STAGED=1"  ;;
+        *)      echo "run_arm: bad arm '$arm'"; return 1 ;;
+    esac
 
     echo ""
-    echo "--- [$arm] rep=$rep ---"
-    local OUT
-    OUT=$(env HDF5_PLUGIN_PATH="$VOL_PLUGIN_PATH" \
-              HDF5_VOL_CONNECTOR="$VOL_CONNECTOR" \
-              BENCH_ONLY="$DATASET" BENCH_COMP="$COMP" \
-              VOL_COMP_CHUNKING=none \
-              VOL_COMP_COPY_LOG=1 VOL_COMP_GPU_EVENTS=1 \
-              ${dev:+$dev} \
-              timeout --signal=KILL 1800 \
-              "$BIN" "$H5DIR/g2_${arm}.h5" /dev/null /dev/null 2>&1)
-    echo "$OUT"
+    echo "############ arm=$arm ############"
+    local t0 rc
+    t0=$(date +%s)
 
-    local line w r d2h
-    line=$(echo "$OUT" | grep -m1 'ratio=')
-    w=$(echo   "$line" | grep -oP 'W=\s*\K[0-9.]+')
-    r=$(echo   "$line" | grep -oP 'R=\s*\K[0-9.]+')
-    d2h=$(echo "$OUT"  | grep -m1 -oP 'd2h_ms=\K[0-9.]+')
-    printf 'RESULT\t%s\t%s\t%s\t%s\t%s\n' \
-           "$arm" "$rep" "${w:-0}" "${r:-0}" "${d2h:-0}"
+    env HDF5_PLUGIN_PATH="$VOL_PLUGIN_PATH" \
+        HDF5_VOL_CONNECTOR="$VOL_CONNECTOR" \
+        BENCH_ONLY="$DATASETS" BENCH_COMP="$COMP" \
+        VOL_COMP_CHUNKING="$CHUNKING" \
+        BENCH_STAGING_CSV="$RES/staging_${arm}.csv" \
+        $dev \
+        timeout --signal=KILL "$ARM_TIMEOUT" \
+        "$BIN" "$H5DIR/g2_${arm}.h5" \
+               "$RES/results_vol_${arm}.csv" \
+               "$RES/results_vol_ext_${arm}.csv" \
+        2>&1 | tee "$RES/arm_${arm}.log"
+    rc=${PIPESTATUS[0]}
+
+    echo "arm=$arm exit=$rc elapsed=$(( $(date +%s) - t0 ))s"
+    [ "$rc" = 137 ] && echo ">>> arm=$arm hit the ${ARM_TIMEOUT}s timeout -- raise ARM_TIMEOUT"
+
+    # Fidelity is the only thing that proves the device pointer was handled
+    # correctly by the connector. A device buffer wrapped as host memory either
+    # segfaults or compresses the wrong bytes; both surface here.
+    local nfail
+    nfail=$(grep -c '^\[FAIL\]' "$RES/arm_${arm}.log" 2>/dev/null || echo 0)
+    if [ "$nfail" -gt 0 ]; then
+        echo ""
+        echo ">>> arm=$arm produced $nfail [FAIL] fidelity line(s). Do NOT plot"
+        echo ">>> these timings -- the connector is not reading the buffer it"
+        echo ">>> was handed. First few:"
+        grep -m5 '^\[FAIL\]' "$RES/arm_${arm}.log" | sed 's/^/    /'
+    fi
+    return 0
 }
 
 echo ""
 echo "############ [1] timing arms ############"
-for r in $(seq 1 "$REPS"); do
-    run_arm device "$r"
-    run_arm host   "$r"
-done
+run_arm host
+run_arm device
 
+# --------------------------------------------------------------- summary ---
 echo ""
-echo "############ [2] nsys profiles ############"
+echo "############ [2] row counts ############"
+for arm in host device; do
+    f="$RES/results_vol_ext_${arm}.csv"
+    if [ -f "$f" ]; then
+        printf '  %-7s %s rows (%s failure rows)\n' "$arm" \
+            "$(( $(wc -l < "$f") - 1 ))" \
+            "$(awk -F, 'NR>1 && $5==-1' "$f" | wc -l)"
+    else
+        echo "  $arm  MISSING -- arm did not complete"
+    fi
+done
+echo ""
+echo "  app-side D2H of the uncompressed field (host arm only):"
+[ -f "$RES/staging_host.csv" ] && sed 's/^/    /' "$RES/staging_host.csv"
+
+# ------------------------------------------------------------------ nsys ---
+if [ "$RUN_NSYS" = "1" ]; then
+echo ""
+echo "############ [3] nsys profiles ($NSYS_DATASET / $NSYS_COMP) ############"
 
 profile_arm () {
     local arm="$1"
@@ -135,18 +201,20 @@ profile_arm () {
     echo "--- nsys [$arm] ---"
     env HDF5_PLUGIN_PATH="$VOL_PLUGIN_PATH" \
         HDF5_VOL_CONNECTOR="$VOL_CONNECTOR" \
-        BENCH_ONLY="$DATASET" BENCH_COMP="$COMP" \
-        VOL_COMP_CHUNKING=none ${dev:+$dev} \
+        BENCH_ONLY="$NSYS_DATASET" BENCH_COMP="$NSYS_COMP" \
+        VOL_COMP_CHUNKING="$CHUNKING" \
+        VOL_COMP_COPY_LOG=1 VOL_COMP_GPU_EVENTS=1 \
+        $dev \
     nsys profile \
         --trace=cuda,nvtx,osrt \
         --cuda-memory-usage=true \
         --force-overwrite=true \
         -o "$out" \
-        "$BIN" "$H5DIR/g2_prof_${arm}.h5" /dev/null /dev/null \
+        "$BIN" "$H5DIR/g2_prof_${arm}.h5" \
+               "$PROF/prof_${arm}.csv" "$PROF/prof_ext_${arm}.csv" \
         > "$out.stdout" 2>&1
     echo "  wrote $out.nsys-rep"
 
-    echo "  --- GPU memory transfers ---"
     rm -f "$out.sqlite"
     echo "  --- transfers / sizes / kernels ---"
     nsys stats --force-export=true --format table \
@@ -156,18 +224,26 @@ profile_arm () {
         "$out.nsys-rep" 2>&1 | sed 's/^/    /'
 }
 
-profile_arm device
 profile_arm host
+profile_arm device
+fi
 
 echo ""
 echo "############ HOW TO READ IT ############"
 echo "  [CUDA memcpy HtoD] on the host arm should be ~= the logical dataset"
-echo "  size. On the device arm it should be ~0 for the input. That delta is"
-echo "  the overhead a filter cannot avoid, because H5Z only ever sees host"
-echo "  bytes."
+echo "  size (the connector re-uploading what the app just downloaded). On the"
+echo "  device arm the input HtoD should be ~0. That delta is the overhead a"
+echo "  filter cannot avoid, because H5Z only ever sees host bytes."
 echo ""
-echo "  If BOTH arms show the same HtoD, BENCH_DEVICE_INPUT is not wired up"
-echo "  and the run proves nothing -- fix the benchmark, not the plot."
+echo "  If BOTH arms show the same HtoD, the VOL is not honouring the device"
+echo "  pointer -- it is staging through host memory internally. Fix the"
+echo "  connector, not the plot."
 echo ""
+echo "  CHUNKING: this ran with VOL_COMP_CHUNKING=$CHUNKING. The rest of the"
+echo "  figure uses VOL config 'native' for every dataset except qmc, which"
+echo "  uses vol_N8. If '$CHUNKING' is not the same geometry, the device bar is"
+echo "  not comparable to the bars beside it -- rerun with the matching value."
+echo ""
+echo "results in: $RES"
 echo "profiles in: $PROF   (open .nsys-rep in the Nsight Systems GUI)"
 echo "Job finished on $(date)"
