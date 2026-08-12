@@ -848,20 +848,29 @@ int main(int argc, char **argv) {
              * caused it. Without the sync the error surfaces at whatever CUDA
              * call happens next, which can be several compressors later or in
              * an entirely different dataset. Costs one sync per measurement,
-             * outside every timed region. */
-            if (dev_mode || host_mode) {
-                cudaError_t serr = cudaDeviceSynchronize();
-                if (serr != cudaSuccess) {
-                    std::fprintf(stderr,
-                        "[FATAL] CUDA fault during %s / %s: %s\n"
-                        "[FATAL] This is the measurement that broke the context. "
-                        "Re-run exactly this pair under compute-sanitizer.\n",
-                        rz.name, c->name, cudaGetErrorString(serr));
-                    std::fflush(stderr);
-                    std::free(rbuf); std::free(hbuf);
-                    std::fclose(csv); std::fclose(xcsv); staging_close();
-                    return 3;
-                }
+             * outside every timed region.
+             *
+             * Deliberately NOT guarded on dev_mode/host_mode. The connector
+             * runs GPU kernels in every arm, including the control arm where
+             * the harness itself touches no CUDA. Guarding this check on the
+             * staging arms meant a control-arm pass only ever proved "exit
+             * status 0", which does not rule out a fault at all -- an out of
+             * bounds write that lands on mapped memory corrupts silently and
+             * the process still exits clean. If the control arm is going to be
+             * the thing that exonerates or implicates the staging change, it
+             * has to be held to the same standard as the arms it is compared
+             * against. */
+            cudaError_t serr = cudaDeviceSynchronize();
+            if (serr != cudaSuccess) {
+                std::fprintf(stderr,
+                    "[FATAL] CUDA fault during %s / %s (arm=%s): %s\n"
+                    "[FATAL] This is the measurement that broke the context. "
+                    "Re-run exactly this pair under compute-sanitizer.\n",
+                    rz.name, c->name, arm_name, cudaGetErrorString(serr));
+                std::fflush(stderr);
+                std::free(rbuf); std::free(hbuf);
+                std::fclose(csv); std::fclose(xcsv); staging_close();
+                return 3;
             }
 #endif
         }
