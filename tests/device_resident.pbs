@@ -7,19 +7,18 @@
 #PBS -q gpu
 
 DATASETS="miranda scale-T s3d nyx_baryon ocean_temp qmc"
-COMP="zfp_gpu_r4 zfp_gpu_r8 zfp_gpu_r12 zfp_gpu_r16"
+RATES="zfp_gpu_r4 zfp_gpu_r8 zfp_gpu_r12 zfp_gpu_r16"
 
-# nsys is a diagnostic, not a measurement: one dataset, one rate, both arms.
-# Set RUN_NSYS=0 to skip it entirely once the HtoD delta has been confirmed.
-RUN_NSYS="${RUN_NSYS:-1}"
-NSYS_DATASET="${NSYS_DATASET:-miranda}"
-NSYS_COMP="${NSYS_COMP:-zfp_gpu_r8}"
+# Control first, deliberately. See above.
+ARMS="${ARMS:-none host device}"
+
+PER_RATE="${PER_RATE:-0}"          # 1 => one process per (arm, dataset, rate)
+RUN_SANITIZER="${RUN_SANITIZER:-1}" # re-run failed pairs under compute-sanitizer
+PAIR_TIMEOUT="${PAIR_TIMEOUT:-1800}"
 
 # Must match the geometry the rest of the figure was generated with, or the
-# device bar is not comparable to the bars beside it. See the note at the end.
+# device bar is not comparable to the bars beside it.
 CHUNKING="${VOL_COMP_CHUNKING:-none}"
-
-ARM_TIMEOUT="${ARM_TIMEOUT:-7200}"     # per arm, seconds; 2h of a 6h walltime
 
 cd "$PBS_O_WORKDIR/.." || exit 1
 WORK="$(pwd)"
@@ -27,13 +26,10 @@ BUILD="build_g2"
 
 STAMP="$(date +%Y%m%d_%H%M%S)_${PBS_JOBID%%.*}"
 RES="$WORK/devres_results/$STAMP"
-PROF="$RES/nsys"
-mkdir -p "$RES" "$PROF" || { echo "ERROR: cannot create $RES"; exit 1; }
+mkdir -p "$RES/logs" || { echo "ERROR: cannot create $RES"; exit 1; }
 
 echo "Job started on $(date)   host=$(hostname)"
-echo "datasets=$DATASETS"
-echo "comp=$COMP"
-echo "chunking=$CHUNKING"
+echo "arms=$ARMS  per_rate=$PER_RATE  chunking=$CHUNKING"
 echo "results -> $RES"
 nvidia-smi --query-gpu=name,memory.total --format=csv,noheader
 
@@ -84,9 +80,6 @@ env PATH="$CLEAN_PATH" LD_LIBRARY_PATH="$GCC_LIB" cmake --build "$BUILD" -j16 \
     || { echo "build failed -- refusing to run a stale binary";
          tail -40 "$RES/build.log"; exit 1; }
 
-# The root CMakeLists sets CMAKE_RUNTIME_OUTPUT_DIRECTORY=${CMAKE_BINARY_DIR}/bin
-# and LIBRARY_OUTPUT_DIRECTORY=${CMAKE_BINARY_DIR}/lib -- NOT the per-subdir
-# defaults.
 BIN="$BUILD/bin/bench_vol_timing"
 VOL_PLUGIN_PATH="${VOL_PLUGIN_PATH:-$WORK/$BUILD/lib}"
 VOL_CONNECTOR="${VOL_CONNECTOR:-pass_through_ext under_vol=0;under_info={}}"
@@ -95,155 +88,166 @@ VOL_CONNECTOR="${VOL_CONNECTOR:-pass_through_ext under_vol=0;under_info={}}"
 H5DIR="${VOL_H5DIR:-/lcrc/project/SDR/$USER/vol_bench_h5}"
 mkdir -p "$H5DIR" || { echo "ERROR: cannot create $H5DIR"; exit 1; }
 
-# bench_vol_timing has no --help; probe the binary for the env-var strings the
-# staging block introduces. Absent => the source edit was never applied and
-# both arms would run identically -- a null result that looks like a real one.
 MISSING=""
 for sym in BENCH_DEVICE_INPUT BENCH_HOST_STAGED BENCH_STAGING_CSV; do
     strings "$BIN" 2>/dev/null | grep -q "$sym" || MISSING="$MISSING $sym"
 done
 if [ -n "$MISSING" ]; then
     echo ""
-    echo ">>> ERROR: $BIN is missing:$MISSING"
-    echo ">>> Apply the staging block to bench_vol_timing.cc first. Without it"
-    echo ">>> both arms run host-staged, the bars come out identical, and the"
-    echo ">>> figure reports a savings of zero that is an artefact."
+    echo ">>> ERROR: $BIN is missing:$MISSING -- apply the staging block first."
     exit 1
 fi
 
-# ---------------------------------------------------------------- one arm --
-# The harness loops over datasets x compressors internally, so this is called
-# ONCE per arm. BENCH_ONLY / BENCH_COMP take space-separated lists (see
-# name_selected(), which treats ',' and ' ' as boundaries).
-#
-# COPY_LOG and GPU_EVENTS are deliberately OFF: both add work inside the timed
-# H5Dwrite. Turn them on only for the diagnostic pass below.
-run_arm () {
-    local arm="$1"
+MANIFEST="$RES/manifest.csv"
+echo "arm,dataset,rate,exit,signal,note" > "$MANIFEST"
+FAILED="$RES/failed_pairs.txt"
+: > "$FAILED"
+
+decode_exit () {
+    case "$1" in
+        0)   echo "ok"            ;;
+        3)   echo "CUDA_FAULT"    ;;   # harness caught it and named the pair
+        134) echo "SIGABRT"       ;;
+        137) echo "SIGKILL/timeout" ;;
+        139) echo "SIGSEGV"       ;;
+        *)   echo "exit_$1"       ;;
+    esac
+}
+
+# ------------------------------------------------------------- one process --
+# arm=none is the control: no env var, so the harness never touches CUDA and
+# wbuf is hbuf exactly as in the historical runs.
+run_one () {
+    local arm="$1" ds="$2" rates="$3" slug="$4"
     local dev=""
     case "$arm" in
         device) dev="BENCH_DEVICE_INPUT=1" ;;
         host)   dev="BENCH_HOST_STAGED=1"  ;;
-        *)      echo "run_arm: bad arm '$arm'"; return 1 ;;
+        none)   dev=""                     ;;
+        *)      echo "run_one: bad arm '$arm'"; return 1 ;;
     esac
 
-    echo ""
-    echo "############ arm=$arm ############"
-    local t0 rc
-    t0=$(date +%s)
+    local log="$RES/logs/${arm}_${slug}.log"
+    local rc
 
     env HDF5_PLUGIN_PATH="$VOL_PLUGIN_PATH" \
         HDF5_VOL_CONNECTOR="$VOL_CONNECTOR" \
-        BENCH_ONLY="$DATASETS" BENCH_COMP="$COMP" \
+        BENCH_ONLY="$ds" BENCH_COMP="$rates" \
         VOL_COMP_CHUNKING="$CHUNKING" \
-        BENCH_STAGING_CSV="$RES/staging_${arm}.csv" \
+        BENCH_STAGING_CSV="$RES/staging_${arm}_${slug}.csv" \
         $dev \
-        timeout --signal=KILL "$ARM_TIMEOUT" \
-        "$BIN" "$H5DIR/g2_${arm}.h5" \
-               "$RES/results_vol_${arm}.csv" \
-               "$RES/results_vol_ext_${arm}.csv" \
-        2>&1 | tee "$RES/arm_${arm}.log"
-    rc=${PIPESTATUS[0]}
+        timeout --signal=KILL "$PAIR_TIMEOUT" \
+        "$BIN" "$H5DIR/g2_${arm}_${slug}.h5" \
+               "$RES/results_vol_${arm}_${slug}.csv" \
+               "$RES/results_vol_ext_${arm}_${slug}.csv" \
+        > "$log" 2>&1
+    rc=$?
 
-    echo "arm=$arm exit=$rc elapsed=$(( $(date +%s) - t0 ))s"
-    [ "$rc" = 137 ] && echo ">>> arm=$arm hit the ${ARM_TIMEOUT}s timeout -- raise ARM_TIMEOUT"
+    local what; what=$(decode_exit "$rc")
+    printf '  %-7s %-12s %-24s %s\n' "$arm" "$ds" "$rates" "$what"
 
-    # Fidelity is the only thing that proves the device pointer was handled
-    # correctly by the connector. A device buffer wrapped as host memory either
-    # segfaults or compresses the wrong bytes; both surface here.
-    local nfail
-    nfail=$(grep -c '^\[FAIL\]' "$RES/arm_${arm}.log" 2>/dev/null || echo 0)
-    if [ "$nfail" -gt 0 ]; then
-        echo ""
-        echo ">>> arm=$arm produced $nfail [FAIL] fidelity line(s). Do NOT plot"
-        echo ">>> these timings -- the connector is not reading the buffer it"
-        echo ">>> was handed. First few:"
-        grep -m5 '^\[FAIL\]' "$RES/arm_${arm}.log" | sed 's/^/    /'
+    # grep -c prints "0" and exits 1 on no match -- never chain `|| echo 0`.
+    local nfail; nfail=$(grep -c '^\[FAIL\]' "$log"); nfail=${nfail:-0}
+    local note=""
+    [ "$nfail" -gt 0 ] && note="${nfail}_fidelity_FAIL"
+
+    printf '%s,%s,%s,%d,%s,%s\n' "$arm" "$ds" "$rates" "$rc" "$what" "$note" \
+        >> "$MANIFEST"
+
+    if [ "$rc" != 0 ]; then
+        echo "$arm $ds $rates" >> "$FAILED"
+        echo "    last 12 lines of $log:"
+        tail -12 "$log" | sed 's/^/      /'
+        # The harness prints the exact pair on a caught CUDA fault.
+        grep -m2 '^\[FATAL\]' "$log" | sed 's/^/    /'
     fi
-    return 0
+    if [ "$nfail" -gt 0 ]; then
+        echo "    $nfail [FAIL] fidelity line(s) -- timings not usable:"
+        grep -m3 '^\[FAIL\]' "$log" | sed 's/^/      /'
+    fi
 }
 
 echo ""
-echo "############ [1] timing arms ############"
-run_arm host
-run_arm device
+echo "############ measurement passes ############"
+for arm in $ARMS; do
+    echo ""
+    echo "--- arm=$arm ---"
+    for ds in $DATASETS; do
+        if [ "$PER_RATE" = "1" ]; then
+            for r in $RATES; do
+                run_one "$arm" "$ds" "$r" "${ds}_${r}"
+            done
+        else
+            run_one "$arm" "$ds" "$RATES" "$ds"
+        fi
+    done
+
+    # The control arm is decisive: stop and say so rather than burning two more
+    # passes on a configuration that is already known to be broken.
+    if [ "$arm" = "none" ] && [ -s "$FAILED" ]; then
+        echo ""
+        echo ">>> The CONTROL arm failed. That arm sets no env var and hands"
+        echo ">>> H5Dwrite the loader's own host buffer -- it is the historical"
+        echo ">>> configuration. The device-resident change is not implicated."
+        echo ">>> Fix the connector before interpreting anything else."
+        echo ">>> Continuing anyway so the other arms are on the record."
+    fi
+done
+
+# ------------------------------------------------------------- sanitizer ----
+if [ "$RUN_SANITIZER" = "1" ] && [ -s "$FAILED" ]; then
+echo ""
+echo "############ compute-sanitizer on failed pairs ############"
+if ! command -v compute-sanitizer >/dev/null 2>&1; then
+    echo "  compute-sanitizer not on PATH (module load cuda provides it) -- skipped"
+else
+    # One rate at a time under the sanitizer: it is 10-100x slower, so the full
+    # rate set per dataset will not finish. CUDA_LAUNCH_BLOCKING makes the
+    # report point at the launching call rather than wherever the async error
+    # happened to surface.
+    while read -r arm ds rates; do
+        r=$(echo "$rates" | awk '{print $1}')
+        dev=""
+        [ "$arm" = "device" ] && dev="BENCH_DEVICE_INPUT=1"
+        [ "$arm" = "host"   ] && dev="BENCH_HOST_STAGED=1"
+        out="$RES/logs/sanitizer_${arm}_${ds}_${r}.log"
+        echo ""
+        echo "--- compute-sanitizer $arm / $ds / $r ---"
+        env HDF5_PLUGIN_PATH="$VOL_PLUGIN_PATH" \
+            HDF5_VOL_CONNECTOR="$VOL_CONNECTOR" \
+            BENCH_ONLY="$ds" BENCH_COMP="$r" \
+            VOL_COMP_CHUNKING="$CHUNKING" \
+            CUDA_LAUNCH_BLOCKING=1 \
+            $dev \
+        timeout --signal=KILL 3600 \
+        compute-sanitizer --tool memcheck --leak-check no --print-limit 20 \
+            "$BIN" "$H5DIR/g2_san.h5" "$RES/logs/san_${arm}_${ds}.csv" \
+                   "$RES/logs/san_ext_${arm}_${ds}.csv" \
+            > "$out" 2>&1
+        echo "  wrote $out"
+        grep -m20 -E '========= (Invalid|Program hit|Address)' "$out" \
+            | sed 's/^/    /' || echo "    (no memcheck findings in $out)"
+    done < "$FAILED"
+fi
+fi
 
 # --------------------------------------------------------------- summary ---
 echo ""
-echo "############ [2] row counts ############"
-for arm in host device; do
-    f="$RES/results_vol_ext_${arm}.csv"
-    if [ -f "$f" ]; then
-        printf '  %-7s %s rows (%s failure rows)\n' "$arm" \
-            "$(( $(wc -l < "$f") - 1 ))" \
-            "$(awk -F, 'NR>1 && $5==-1' "$f" | wc -l)"
-    else
-        echo "  $arm  MISSING -- arm did not complete"
-    fi
-done
-echo ""
-echo "  app-side D2H of the uncompressed field (host arm only):"
-[ -f "$RES/staging_host.csv" ] && sed 's/^/    /' "$RES/staging_host.csv"
-
-# ------------------------------------------------------------------ nsys ---
-if [ "$RUN_NSYS" = "1" ]; then
-echo ""
-echo "############ [3] nsys profiles ($NSYS_DATASET / $NSYS_COMP) ############"
-
-profile_arm () {
-    local arm="$1"
-    local dev=""
-    [ "$arm" = "device" ] && dev="BENCH_DEVICE_INPUT=1"
-    [ "$arm" = "host"   ] && dev="BENCH_HOST_STAGED=1"
-    local out="$PROF/g2_${arm}"
-
-    echo ""
-    echo "--- nsys [$arm] ---"
-    env HDF5_PLUGIN_PATH="$VOL_PLUGIN_PATH" \
-        HDF5_VOL_CONNECTOR="$VOL_CONNECTOR" \
-        BENCH_ONLY="$NSYS_DATASET" BENCH_COMP="$NSYS_COMP" \
-        VOL_COMP_CHUNKING="$CHUNKING" \
-        VOL_COMP_COPY_LOG=1 VOL_COMP_GPU_EVENTS=1 \
-        $dev \
-    nsys profile \
-        --trace=cuda,nvtx,osrt \
-        --cuda-memory-usage=true \
-        --force-overwrite=true \
-        -o "$out" \
-        "$BIN" "$H5DIR/g2_prof_${arm}.h5" \
-               "$PROF/prof_${arm}.csv" "$PROF/prof_ext_${arm}.csv" \
-        > "$out.stdout" 2>&1
-    echo "  wrote $out.nsys-rep"
-
-    rm -f "$out.sqlite"
-    echo "  --- transfers / sizes / kernels ---"
-    nsys stats --force-export=true --format table \
-        --report cuda_gpu_mem_time_sum \
-        --report cuda_gpu_mem_size_sum \
-        --report cuda_gpu_kern_sum \
-        "$out.nsys-rep" 2>&1 | sed 's/^/    /'
-}
-
-profile_arm host
-profile_arm device
-fi
+echo "############ manifest ############"
+column -s, -t < "$MANIFEST"
 
 echo ""
 echo "############ HOW TO READ IT ############"
-echo "  [CUDA memcpy HtoD] on the host arm should be ~= the logical dataset"
-echo "  size (the connector re-uploading what the app just downloaded). On the"
-echo "  device arm the input HtoD should be ~0. That delta is the overhead a"
-echo "  filter cannot avoid, because H5Z only ever sees host bytes."
-echo ""
-echo "  If BOTH arms show the same HtoD, the VOL is not honouring the device"
-echo "  pointer -- it is staging through host memory internally. Fix the"
-echo "  connector, not the plot."
-echo ""
-echo "  CHUNKING: this ran with VOL_COMP_CHUNKING=$CHUNKING. The rest of the"
-echo "  figure uses VOL config 'native' for every dataset except qmc, which"
-echo "  uses vol_N8. If '$CHUNKING' is not the same geometry, the device bar is"
-echo "  not comparable to the bars beside it -- rerun with the matching value."
+echo "  1. Look at arm=none first. If it is clean and host/device are not, the"
+echo "     staging change is implicated. If it fails too, the connector was"
+echo "     already broken on this matrix and this experiment is blocked."
+echo "  2. exit=3 means the harness caught the CUDA fault itself and printed"
+echo "     the exact dataset/compressor pair on a [FATAL] line. Start there."
+echo "  3. A cudaMalloc 'illegal memory access' is NOT an allocation failure."
+echo "     It is a sticky context error from an earlier kernel. The harness now"
+echo "     detects that and stops instead of blaming the next dataset."
+echo "  4. Any [FAIL] fidelity line invalidates that pair's timings regardless"
+echo "     of exit status."
 echo ""
 echo "results in: $RES"
-echo "profiles in: $PROF   (open .nsys-rep in the Nsight Systems GUI)"
 echo "Job finished on $(date)"

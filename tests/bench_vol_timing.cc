@@ -732,6 +732,26 @@ int main(int argc, char **argv) {
         float h2d_setup_ms = 0.0f, d2h_ms = 0.0f;
 
         if (dev_mode || host_mode) {
+            /* A CUDA context that has taken an illegal memory access returns
+             * that same error from EVERY subsequent call, so a poisoned context
+             * makes the next cudaMalloc look like an allocation failure and the
+             * remaining datasets look like they were skipped for memory. Check
+             * for the sticky error first and stop the run: nothing after this
+             * point can produce a valid measurement, and limping on buries the
+             * real fault under a pile of misleading [ERR] lines. */
+            cudaError_t sticky = cudaGetLastError();
+            if (sticky != cudaSuccess) {
+                std::fprintf(stderr,
+                    "[FATAL] CUDA context is poisoned before %s: %s\n"
+                    "[FATAL] The fault occurred during the PREVIOUS dataset, not "
+                    "here. Re-run that one under compute-sanitizer to get the "
+                    "kernel and the offending address.\n",
+                    rz.name, cudaGetErrorString(sticky));
+                std::free(rbuf); std::free(hbuf);
+                std::fclose(csv); std::fclose(xcsv); staging_close();
+                return 3;
+            }
+
             cudaError_t cerr = cudaMalloc(&dbuf, raw);
             if (cerr != cudaSuccess) {
                 std::fprintf(stderr, "[ERR] cudaMalloc %.1f MiB failed for %s: %s\n",
@@ -822,6 +842,28 @@ int main(int argc, char **argv) {
             if (!name_selected(only_cmp, c->name)) continue;
             run_pair(h5base, &rz, c, hbuf, wbuf, rbuf, raw,
                      measured_range, csv, xcsv, &acc);
+
+#ifdef USE_CUDA
+            /* Attribute an asynchronous fault to the (dataset, compressor) that
+             * caused it. Without the sync the error surfaces at whatever CUDA
+             * call happens next, which can be several compressors later or in
+             * an entirely different dataset. Costs one sync per measurement,
+             * outside every timed region. */
+            if (dev_mode || host_mode) {
+                cudaError_t serr = cudaDeviceSynchronize();
+                if (serr != cudaSuccess) {
+                    std::fprintf(stderr,
+                        "[FATAL] CUDA fault during %s / %s: %s\n"
+                        "[FATAL] This is the measurement that broke the context. "
+                        "Re-run exactly this pair under compute-sanitizer.\n",
+                        rz.name, c->name, cudaGetErrorString(serr));
+                    std::fflush(stderr);
+                    std::free(rbuf); std::free(hbuf);
+                    std::fclose(csv); std::fclose(xcsv); staging_close();
+                    return 3;
+                }
+            }
+#endif
         }
 
 #ifdef USE_CUDA
