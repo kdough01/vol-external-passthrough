@@ -1,0 +1,2 @@
+dataset,compressor,codec_kind,chunk_n,rep,logical_bytes,stored_bytes,ratio,create_ms,write_ms,flush_ms,sync_ms,close_ms,csync_ms,evict_ms,open_ms,read_ms,rmse,abs_thresh,maxae,bound_ok
+ocean_temp,cuszp_1e6,gpu,8,0,129123840,75974966,1.6996,0.9031,207.6113,0.2780,117.0343,0.1307,88.2803,2.9248,0.2816,73.2609,7.317529e-07,1.000000e-06,1.907349e-06,1

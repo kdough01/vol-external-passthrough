@@ -1,0 +1,3 @@
+dataset,compressor,op,total_ms,stage_ms,compress_ms,container_ms,io_ms,pressio_call_ms,device_ms,transfer_ms,vol_compress_ms,pressio_host_ms,residual_ms,residual_frac
+ocean_temp_zfp_gpu_r16,zfp,write,268.8219,0.0000,122.1685,0.1250,146.4585,42.6687,42.7461,74.3384,5.1614,-0.0774,0.0699,0.000260
+ocean_temp_zfp_gpu_r16,zfp,read,180.8654,0.0000,152.1635,0.0000,28.6834,151.5165,151.6004,0.0000,0.6470,-0.0840,0.0186,0.000103
