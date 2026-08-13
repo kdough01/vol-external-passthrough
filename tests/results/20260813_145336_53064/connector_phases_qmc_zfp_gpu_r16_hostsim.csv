@@ -1,2 +1,0 @@
-dataset,compressor,op,total_ms,stage_ms,compress_ms,container_ms,io_ms,pressio_call_ms,device_ms,transfer_ms,vol_compress_ms,pressio_host_ms,residual_ms,residual_frac,h2d_ms
-einspline37_zfp_gpu_r16,zfp,write_failed,2061.3817,0.0000,2061.3710,0.0000,0.0000,7.3368,133.8957,0.0000,2054.0342,-126.5589,-1926.2814,-0.934461,1926.292

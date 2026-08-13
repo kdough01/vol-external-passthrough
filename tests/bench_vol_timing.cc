@@ -97,19 +97,25 @@ typedef struct {
     bench_arm_t arm;
 } bench_wsrc;
 
-/* write_wall_ms appended as column 22. Appending keeps every existing
- * positional index in the PBS awk blocks valid. */
+/* write_wall_ms (22) and d2h_ms (23) appended. Appending keeps every existing
+ * positional index in the PBS awk blocks valid.
+ *
+ * d2h_ms is the rtrip arm's device->host copy, timed separately so the
+ * transfer breakout is MEASURED rather than inferred from arm differences.
+ * It is a subset of write_ms / write_wall_ms, not an addition to them.
+ * 0 in devres and hostsim, which perform no D2H of the input. */
 static const char *XCSV_HEADER =
     "dataset,compressor,codec_kind,chunk_n,rep,"
     "logical_bytes,stored_bytes,ratio,"
     "create_ms,write_ms,flush_ms,sync_ms,close_ms,csync_ms,"
     "evict_ms,open_ms,read_ms,"
-    "rmse,abs_thresh,maxae,bound_ok,write_wall_ms\n";
+    "rmse,abs_thresh,maxae,bound_ok,write_wall_ms,d2h_ms\n";
 
 typedef struct {
     double create_ms, write_ms, flush_ms, sync_ms, close_ms, csync_ms;
     double evict_ms, open_ms, read_ms;
     double write_wall_ms;
+    double d2h_ms;          /* rtrip only; subset of write_ms */
     unsigned long long stored;
 } rep_timing;
 
@@ -146,13 +152,13 @@ static void xcsv_row(FILE *fp, const char *dset, const bench_compressor_t *c,
         "%s,%s,%s,%d,%d,%llu,%llu,%.4f,"
         "%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,"
         "%.4f,%.4f,%.4f,"
-        "%.6e,%.6e,%.6e,%d,%.4f\n",
+        "%.6e,%.6e,%.6e,%d,%.4f,%.4f\n",
         dset, c->name, bench_codec_kind_name(c->kind), chunk_n, rep,
         logical, t->stored, ratio,
         t->create_ms, t->write_ms, t->flush_ms, t->sync_ms,
         t->close_ms, t->csync_ms,
         t->evict_ms, t->open_ms, t->read_ms,
-        rmse, abs_thresh, maxae, bound_ok, t->write_wall_ms);
+        rmse, abs_thresh, maxae, bound_ok, t->write_wall_ms, t->d2h_ms);
     std::fflush(fp);
 }
 
@@ -370,6 +376,7 @@ typedef struct {
     double             write_ms, flush_ms, sync_ms, close_ms, csync_ms;
     double             create_ms, evict_ms, open_ms, read_ms;
     double             write_wall_ms;
+    double             d2h_ms;
     size_t             raw_bytes;
     unsigned long long storage;
     int                n;
@@ -426,6 +433,11 @@ static int run_rep(const char *path, const char *dsname,
          * moves it back H2D inside the codec, so the array crosses PCIe
          * twice. */
         if (ws->arm == BENCH_ARM_RTRIP && ws->stage_host && ws->stage_dev) {
+            /* Timed separately so the transfer breakout is measured rather
+             * than inferred from arm-to-arm differences. Still inside the
+             * write timers -- d2h_ms is a SUBSET of write_ms, not an
+             * addition to it. */
+            BenchWallTimer dt; dt.start();
             cudaError_t ce = cudaMemcpy(ws->stage_host, ws->stage_dev,
                                         ws->nbytes, cudaMemcpyDeviceToHost);
             if (ce != cudaSuccess) {
@@ -436,6 +448,7 @@ static int run_rep(const char *path, const char *dsname,
                 return -1;
             }
             cudaDeviceSynchronize();
+            t->d2h_ms = dt.stop_ms();
             src = ws->stage_host;
         }
 #endif
@@ -588,6 +601,7 @@ static void run_pair(const char *h5base,
 
         bench_csv_row(csv, d->name, c->name, "vol", "write", "total", t.write_ms, ratio, -1.0);
         bench_csv_row(csv, d->name, c->name, "vol", "write", "wall",  t.write_wall_ms, -1.0, -1.0);
+        bench_csv_row(csv, d->name, c->name, "vol", "write", "d2h",   t.d2h_ms,   -1.0, -1.0);
         bench_csv_row(csv, d->name, c->name, "vol", "write", "flush", t.flush_ms, -1.0, -1.0);
         bench_csv_row(csv, d->name, c->name, "vol", "write", "sync",  t.sync_ms,  -1.0, -1.0);
         bench_csv_row(csv, d->name, c->name, "vol", "write", "close", t.close_ms, -1.0, -1.0);
@@ -605,6 +619,7 @@ static void run_pair(const char *h5base,
             acc->evict_ms  += t.evict_ms;
             acc->open_ms   += t.open_ms;   acc->read_ms  += t.read_ms;
             acc->write_wall_ms += t.write_wall_ms;
+            acc->d2h_ms        += t.d2h_ms;
             acc->raw_bytes += raw_bytes;   acc->storage  += t.stored;
             acc->n         += 1;
         }
