@@ -20,16 +20,96 @@
 #include "bench_timing.h"
 #include "miranda.h"
 
+/* ------------------------------------------------------------------ *
+ * RESIDENCY ARMS -- selected with BENCH_ARM.
+ *
+ *   devres   H5Dwrite receives a cudaMalloc'd pointer. The VOL tags it
+ *            "cudamalloc" and leaves it there; the codec compresses in place
+ *            and only the compressed output crosses PCIe. THIS IS THE REAL
+ *            GPU-SIMULATION CASE. The copy that populates the device buffer
+ *            runs once per dataset, OUTSIDE every timer, because a real
+ *            simulation would already have produced those bytes on the GPU.
+ *
+ *   rtrip    Same device buffer, but the application copies it back to the
+ *            host and hands HDF5 a host pointer. libpressio then moves it to
+ *            the device again inside the codec. Both crossings land inside
+ *            write_ms. This is what you would pay WITHOUT the passthrough
+ *            keeping device data device-resident -- a counterfactual, not
+ *            something that happens in production.
+ *
+ *   hostsim  Plain malloc'd buffer, as this harness has always done. One H2D
+ *            inside the codec, no D2H of the input. A CPU simulation feeding
+ *            a GPU compressor.
+ *
+ * The read path stays host-resident in all three arms so read_ms remains
+ * comparable across them.
+ * ------------------------------------------------------------------ */
+typedef enum {
+    BENCH_ARM_HOSTSIM = 0,
+    BENCH_ARM_DEVRES,
+    BENCH_ARM_RTRIP
+} bench_arm_t;
+
+static const char *bench_arm_name(bench_arm_t a) {
+    switch (a) {
+        case BENCH_ARM_DEVRES: return "devres";
+        case BENCH_ARM_RTRIP:  return "rtrip";
+        default:               return "hostsim";
+    }
+}
+
+static bench_arm_t bench_arm(void) {
+    static int cached = -1;
+    if (cached >= 0) return (bench_arm_t)cached;
+
+    const char *e = std::getenv("BENCH_ARM");
+    if (e && *e) {
+        if      (!std::strcmp(e, "devres"))  cached = BENCH_ARM_DEVRES;
+        else if (!std::strcmp(e, "rtrip"))   cached = BENCH_ARM_RTRIP;
+        else if (!std::strcmp(e, "hostsim")) cached = BENCH_ARM_HOSTSIM;
+        else {
+            std::fprintf(stderr, "[bench] unknown BENCH_ARM='%s' (expected "
+                         "devres|rtrip|hostsim) -- falling back to hostsim\n", e);
+            cached = BENCH_ARM_HOSTSIM;
+        }
+    } else {
+        cached = BENCH_ARM_HOSTSIM;
+    }
+
+    /* The old switches did something subtly different -- BENCH_HOST_STAGED
+     * performed its D2H OUTSIDE the write timer, so it did not measure the
+     * round trip. Refuse to silently reinterpret them. */
+    if (std::getenv("BENCH_DEVICE_INPUT") || std::getenv("BENCH_HOST_STAGED"))
+        std::fprintf(stderr, "[bench] WARNING: BENCH_DEVICE_INPUT / "
+                     "BENCH_HOST_STAGED are no longer honoured. Use "
+                     "BENCH_ARM=devres|rtrip|hostsim. Currently arm=%s\n",
+                     bench_arm_name((bench_arm_t)cached));
+
+    return (bench_arm_t)cached;
+}
+
+/* What H5Dwrite receives, plus the staging the arm requires. */
+typedef struct {
+    const void *wbuf;        /* pointer handed to H5Dwrite (host OR device) */
+    void       *stage_host;  /* rtrip: host landing buffer, else NULL */
+    const void *stage_dev;   /* rtrip: device source, else NULL */
+    size_t      nbytes;
+    bench_arm_t arm;
+} bench_wsrc;
+
+/* write_wall_ms appended as column 22. Appending keeps every existing
+ * positional index in the PBS awk blocks valid. */
 static const char *XCSV_HEADER =
     "dataset,compressor,codec_kind,chunk_n,rep,"
     "logical_bytes,stored_bytes,ratio,"
     "create_ms,write_ms,flush_ms,sync_ms,close_ms,csync_ms,"
     "evict_ms,open_ms,read_ms,"
-    "rmse,abs_thresh,maxae,bound_ok\n";
+    "rmse,abs_thresh,maxae,bound_ok,write_wall_ms\n";
 
 typedef struct {
     double create_ms, write_ms, flush_ms, sync_ms, close_ms, csync_ms;
     double evict_ms, open_ms, read_ms;
+    double write_wall_ms;
     unsigned long long stored;
 } rep_timing;
 
@@ -66,13 +146,13 @@ static void xcsv_row(FILE *fp, const char *dset, const bench_compressor_t *c,
         "%s,%s,%s,%d,%d,%llu,%llu,%.4f,"
         "%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,"
         "%.4f,%.4f,%.4f,"
-        "%.6e,%.6e,%.6e,%d\n",
+        "%.6e,%.6e,%.6e,%d,%.4f\n",
         dset, c->name, bench_codec_kind_name(c->kind), chunk_n, rep,
         logical, t->stored, ratio,
         t->create_ms, t->write_ms, t->flush_ms, t->sync_ms,
         t->close_ms, t->csync_ms,
         t->evict_ms, t->open_ms, t->read_ms,
-        rmse, abs_thresh, maxae, bound_ok);
+        rmse, abs_thresh, maxae, bound_ok, t->write_wall_ms);
     std::fflush(fp);
 }
 
@@ -289,15 +369,19 @@ static void derive_path(const char *base, const char *suffix,
 typedef struct {
     double             write_ms, flush_ms, sync_ms, close_ms, csync_ms;
     double             create_ms, evict_ms, open_ms, read_ms;
+    double             write_wall_ms;
     size_t             raw_bytes;
     unsigned long long storage;
     int                n;
 } bench_file_acc;
 
+/* NOTE: ws->wbuf may be a DEVICE pointer in the devres arm. Nothing in this
+ * function may dereference it on the host. Fidelity checks live in run_pair
+ * and use hbuf, which is always host-resident. */
 static int run_rep(const char *path, const char *dsname,
                    const bench_dataset_t *d, const bench_compressor_t *c,
                    const char *oj, hid_t space, hid_t ntype,
-                   const void *hbuf, void *rbuf, size_t raw_bytes,
+                   const bench_wsrc *ws, void *rbuf, size_t raw_bytes,
                    rep_timing *t) {
     std::memset(t, 0, sizeof(*t));
 
@@ -324,9 +408,41 @@ static int run_rep(const char *path, const char *dsname,
             return -1;
         }
 
-        BenchCpuTimer wt; wt.start();
-        herr_t wret = H5Dwrite(dset, ntype, H5S_ALL, H5S_ALL, H5P_DEFAULT, hbuf);
-        t->write_ms = wt.stop_ms();
+        const void *src = ws->wbuf;
+
+        /* Both clocks around the same region. write_ms is CPU time, which is
+         * what every previous sweep reported; but a PCIe copy and a blocking
+         * CUDA sync spend their time off-CPU, so CPU time can under-report
+         * them badly depending on the device sync policy. write_wall_ms is
+         * the honest number for the residency comparison -- if the two
+         * disagree, trust the wall clock. */
+        BenchCpuTimer  wt;  wt.start();
+        BenchWallTimer wwt; wwt.start();
+
+#ifdef USE_CUDA
+        /* rtrip: the application copies device -> host before handing HDF5 a
+         * host pointer. INSIDE the timer, because this is exactly the cost
+         * that keeping device data device-resident avoids. libpressio then
+         * moves it back H2D inside the codec, so the array crosses PCIe
+         * twice. */
+        if (ws->arm == BENCH_ARM_RTRIP && ws->stage_host && ws->stage_dev) {
+            cudaError_t ce = cudaMemcpy(ws->stage_host, ws->stage_dev,
+                                        ws->nbytes, cudaMemcpyDeviceToHost);
+            if (ce != cudaSuccess) {
+                std::fprintf(stderr, "[ERR] rtrip D2H failed for %s: %s\n",
+                             dsname, cudaGetErrorString(ce));
+                cudaGetLastError();
+                H5Dclose(dset); H5Pclose(dcpl); H5Fclose(file);
+                return -1;
+            }
+            cudaDeviceSynchronize();
+            src = ws->stage_host;
+        }
+#endif
+
+        herr_t wret = H5Dwrite(dset, ntype, H5S_ALL, H5S_ALL, H5P_DEFAULT, src);
+        t->write_ms      = wt.stop_ms();
+        t->write_wall_ms = wwt.stop_ms();
 
         /* H5Dwrite only reaches HDF5's cache; H5Fflush only reaches the OS
          * page cache.  The fsync below is what actually forces the bytes to
@@ -356,7 +472,10 @@ static int run_rep(const char *path, const char *dsname,
         }
     }
 
-    /* ---------------- READ PHASE (fresh open, cold cache) ---------------- */
+    /* ---------------- READ PHASE (fresh open, cold cache) ----------------
+     * Host-resident in every arm. Reading into a device buffer would make
+     * read_ms incomparable across arms for no gain -- the residency question
+     * is about the write path. */
     {
         std::memset(rbuf, 0, raw_bytes);
 
@@ -395,7 +514,7 @@ static int run_rep(const char *path, const char *dsname,
 
 static void run_pair(const char *h5base,
                      const bench_dataset_t *d, const bench_compressor_t *c,
-                     const void *hbuf, const void *wbuf, void *rbuf,
+                     const void *hbuf, const bench_wsrc *ws, void *rbuf,
                      size_t raw_bytes, double measured_range,
                      FILE *csv, FILE *xcsv, bench_file_acc *acc) {
     const bool   dbg     = std::getenv("BENCH_DEBUG") != NULL;
@@ -418,9 +537,10 @@ static void run_pair(const char *h5base,
 
     if (dbg)
         std::fprintf(stderr,
-            "[dbg run_pair] %s_%s rank=%d nelem=%zu xform=%s pressio_id=%s "
-            "chunk_n=%d abs_thresh=%.3e opts=%s\n",
-            d->name, c->name, d->rank, nelem, bench_xform_name(d->xform),
+            "[dbg run_pair] %s_%s arm=%s rank=%d nelem=%zu xform=%s "
+            "pressio_id=%s chunk_n=%d abs_thresh=%.3e opts=%s\n",
+            d->name, c->name, bench_arm_name(ws->arm), d->rank, nelem,
+            bench_xform_name(d->xform),
             c->pressio_id ? c->pressio_id : "(null)", chunk_n, thr,
             oj ? oj : "(default)");
 
@@ -433,13 +553,14 @@ static void run_pair(const char *h5base,
         std::snprintf(dsname, sizeof(dsname), "%s_%s", d->name, c->name);
 
         if (run_rep(path, dsname, d, c, oj, space, ntype,
-                    wbuf, rbuf, raw_bytes, &t) != 0) {
+                    ws, rbuf, raw_bytes, &t) != 0) {
             if (!bench_keep_h5()) std::remove(path);
             if (space != H5I_INVALID_HID) H5Sclose(space);
             return;
         }
 
-        /* ---------------- FIDELITY ---------------- */
+        /* ---------------- FIDELITY ----------------
+         * Always against hbuf. ws->wbuf may be device memory. */
         bench_stats st = bench_compute_stats(hbuf, rbuf, nelem, d->dtype,
                                              BENCH_XFORM_NONE);
 
@@ -466,6 +587,7 @@ static void run_pair(const char *h5base,
         const double ratio = t.stored ? (double)raw_bytes / (double)t.stored : 0.0;
 
         bench_csv_row(csv, d->name, c->name, "vol", "write", "total", t.write_ms, ratio, -1.0);
+        bench_csv_row(csv, d->name, c->name, "vol", "write", "wall",  t.write_wall_ms, -1.0, -1.0);
         bench_csv_row(csv, d->name, c->name, "vol", "write", "flush", t.flush_ms, -1.0, -1.0);
         bench_csv_row(csv, d->name, c->name, "vol", "write", "sync",  t.sync_ms,  -1.0, -1.0);
         bench_csv_row(csv, d->name, c->name, "vol", "write", "close", t.close_ms, -1.0, -1.0);
@@ -482,15 +604,17 @@ static void run_pair(const char *h5base,
             acc->close_ms  += t.close_ms;  acc->csync_ms += t.csync_ms;
             acc->evict_ms  += t.evict_ms;
             acc->open_ms   += t.open_ms;   acc->read_ms  += t.read_ms;
+            acc->write_wall_ms += t.write_wall_ms;
             acc->raw_bytes += raw_bytes;   acc->storage  += t.stored;
             acc->n         += 1;
         }
 
-        std::printf("  %-28s C=%7.2f W=%9.2f F=%8.2f S=%9.2f X=%8.2f S2=%7.2f | "
-                    "E=%7.2f O=%7.2f R=%9.2f ms  ratio=%6.2fx  "
-                    "RMSE=%.3e maxae=%.3e%s\n",
-                    dsname, t.create_ms, t.write_ms, t.flush_ms, t.sync_ms,
-                    t.close_ms, t.csync_ms,
+        std::printf("  %-28s [%s] C=%7.2f W=%9.2f (wall %9.2f) F=%8.2f S=%9.2f "
+                    "X=%8.2f S2=%7.2f | E=%7.2f O=%7.2f R=%9.2f ms  "
+                    "ratio=%6.2fx  RMSE=%.3e maxae=%.3e%s\n",
+                    dsname, bench_arm_name(ws->arm),
+                    t.create_ms, t.write_ms, t.write_wall_ms, t.flush_ms,
+                    t.sync_ms, t.close_ms, t.csync_ms,
                     t.evict_ms, t.open_ms, t.read_ms, ratio, st.rmse, st.maxae,
                     (d->xform != BENCH_XFORM_NONE) ? " (log-space)" : "");
         std::fflush(stdout);
@@ -518,6 +642,7 @@ int main(int argc, char **argv) {
     const char *only     = std::getenv("BENCH_ONLY");
     const char *only_cmp = std::getenv("BENCH_COMP");
     const bool  dbg      = std::getenv("BENCH_DEBUG") != NULL;
+    const bench_arm_t arm = bench_arm();
 
     char xcsv_default[512];
     if (!xcsvpath || !*xcsvpath) {
@@ -525,11 +650,20 @@ int main(int argc, char **argv) {
         xcsvpath = xcsv_default;
     }
 
+#ifndef USE_CUDA
+    if (arm != BENCH_ARM_HOSTSIM) {
+        std::fprintf(stderr, "[bench] FATAL: BENCH_ARM=%s requires a "
+                     "USE_CUDA=ON build. Rebuild or use hostsim.\n",
+                     bench_arm_name(arm));
+        return 2;
+    }
+#endif
+
     std::fprintf(stderr,
         "[dbg main] h5base=%s csv=%s xcsv=%s only=%s comp=%s "
-        "verify=%d keep_h5=%d debug=%d\n",
+        "arm=%s verify=%d keep_h5=%d debug=%d\n",
         h5base, csvpath, xcsvpath, only ? only : "(all)",
-        only_cmp ? only_cmp : "(all)",
+        only_cmp ? only_cmp : "(all)", bench_arm_name(arm),
         bench_verify(), bench_keep_h5(), (int)dbg);
     std::fprintf(stderr,
         "[dbg main] durability: fsync=%d sync_dir=%d drop_cache=%d "
@@ -566,12 +700,14 @@ int main(int argc, char **argv) {
         }
 
         if (d->src != BENCH_SRC_HDF5 && mem_avail) {
-            size_t need = 2 * bench_num_bytes(d);
+            /* rtrip needs a third host buffer for the D2H landing zone. */
+            size_t nbuf = (arm == BENCH_ARM_RTRIP) ? 3 : 2;
+            size_t need = nbuf * bench_num_bytes(d);
             if (need > (size_t)(0.9 * (double)mem_avail)) {
                 std::fprintf(stderr,
-                    "[SKIP] %s needs %.1f GiB for hbuf+rbuf but only %.1f GiB "
-                    "available -- raise the job's mem= request\n",
-                    d->name, bench_gib(need), bench_gib(mem_avail));
+                    "[SKIP] %s needs %.1f GiB for %zu host buffers but only "
+                    "%.1f GiB available -- raise the job's mem= request\n",
+                    d->name, bench_gib(need), nbuf, bench_gib(mem_avail));
                 n_skip++; continue;
             }
         }
@@ -614,63 +750,80 @@ int main(int argc, char **argv) {
             continue;
         }
 
-        const void *wbuf = hbuf;
-#ifdef USE_CUDA
-        void *dbuf = NULL;      /* the application's device-resident field */
-        void *sbuf = NULL;      /* host copy the filter path would require */
-        const int dev_mode  = (std::getenv("BENCH_DEVICE_INPUT") != NULL);
-        const int host_mode = (std::getenv("BENCH_HOST_STAGED")  != NULL);
+        /* ---------------- ARM SETUP ---------------- */
+        bench_wsrc ws;
+        std::memset(&ws, 0, sizeof(ws));
+        ws.wbuf   = hbuf;          /* hostsim default */
+        ws.nbytes = raw;
+        ws.arm    = arm;
 
-        if (dev_mode || host_mode) {
+#ifdef USE_CUDA
+        void *dbuf = NULL;   /* the simulation's device-resident field */
+        void *sbuf = NULL;   /* rtrip: host landing zone for the D2H     */
+
+        if (arm == BENCH_ARM_DEVRES || arm == BENCH_ARM_RTRIP) {
             if (cudaMalloc(&dbuf, raw) != cudaSuccess) {
-                std::fprintf(stderr, "[ERR] cudaMalloc %.1f MiB failed for %s\n",
+                std::fprintf(stderr, "[ERR] cudaMalloc %.1f MiB failed for %s "
+                             "-- SKIPPING (refusing to fall back to a host "
+                             "buffer and mislabel the arm)\n",
                              raw / (1024.0 * 1024.0), rz.name);
-                std::free(rbuf); std::free(hbuf); continue;
+                cudaGetLastError();
+                std::free(rbuf); std::free(hbuf); n_skip++; continue;
             }
-            cudaMemcpy(dbuf, hbuf, raw, cudaMemcpyHostToDevice);
+            /* Population is OUTSIDE every timer: a real simulation would
+             * already have produced these bytes on the device. Charging our
+             * staging copy to the write would measure a harness artifact. */
+            if (cudaMemcpy(dbuf, hbuf, raw,
+                           cudaMemcpyHostToDevice) != cudaSuccess) {
+                std::fprintf(stderr, "[ERR] staging H2D failed for %s -- "
+                             "SKIPPING\n", rz.name);
+                cudaGetLastError(); cudaFree(dbuf);
+                std::free(rbuf); std::free(hbuf); n_skip++; continue;
+            }
             cudaDeviceSynchronize();
-            std::fprintf(stderr, "[device] %s: %.1f MiB resident on GPU\n",
-                         rz.name, raw / (1024.0 * 1024.0));
+            std::fprintf(stderr, "[device] %s: %.1f MiB resident on GPU (%p)\n",
+                         rz.name, raw / (1024.0 * 1024.0), dbuf);
         }
 
-        if (dev_mode) {
-            wbuf = dbuf;
-            std::fprintf(stderr, "[device] arm=device: VOL receives the device "
-                                 "pointer; no host round trip for the write\n");
-        } else if (host_mode) {
+        if (arm == BENCH_ARM_DEVRES) {
+            ws.wbuf = dbuf;
+            std::fprintf(stderr, "[arm devres] VOL receives the DEVICE pointer; "
+                                 "no input copy, only compressed output crosses "
+                                 "PCIe\n");
+        } else if (arm == BENCH_ARM_RTRIP) {
             sbuf = std::malloc(raw);
             if (!sbuf) {
-                std::fprintf(stderr, "[ERR] OOM staging %zu bytes\n", raw);
-                cudaFree(dbuf); std::free(rbuf); std::free(hbuf); continue;
+                std::fprintf(stderr, "[ERR] OOM rtrip staging %zu bytes\n", raw);
+                cudaFree(dbuf);
+                std::free(rbuf); std::free(hbuf); n_skip++; continue;
             }
-            cudaEvent_t e0, e1; float d2h_ms = 0.0f;
-            cudaEventCreate(&e0); cudaEventCreate(&e1);
-            cudaEventRecord(e0);
-            cudaMemcpy(sbuf, dbuf, raw, cudaMemcpyDeviceToHost);
-            cudaEventRecord(e1); cudaEventSynchronize(e1);
-            cudaEventElapsedTime(&d2h_ms, e0, e1);
-            cudaEventDestroy(e0); cudaEventDestroy(e1);
-            wbuf = sbuf;
-            std::fprintf(stderr,
-                         "[device] arm=host d2h_ms=%.3f pcie_in=%.1f MiB\n",
-                         (double)d2h_ms, raw / (1024.0 * 1024.0));
+            ws.stage_dev  = dbuf;
+            ws.stage_host = sbuf;
+            ws.wbuf       = sbuf;   /* overwritten by the timed D2H each rep */
+            std::fprintf(stderr, "[arm rtrip] D2H happens INSIDE write_ms, then "
+                                 "libpressio moves it back H2D: the array "
+                                 "crosses PCIe twice\n");
+        } else {
+            std::fprintf(stderr, "[arm hostsim] plain host buffer; one H2D "
+                                 "inside the codec\n");
         }
 #endif
 
-        std::printf("\n=== %s (%.1f MiB, %s, %s%s) ===\n", rz.name,
+        std::printf("\n=== %s (%.1f MiB, %s, %s%s) arm=%s ===\n", rz.name,
                     raw / (1024.0 * 1024.0), bench_dtype_name(rz.dtype),
                     bench_src_name(rz.src),
-                    rz.xform != BENCH_XFORM_NONE ? ", transformed" : "");
+                    rz.xform != BENCH_XFORM_NONE ? ", transformed" : "",
+                    bench_arm_name(arm));
 
         for (int ci = 0; ci < BENCH_NUM_COMPRESSORS; ++ci) {
             const bench_compressor_t *c = &BENCH_COMPRESSORS[ci];
             if (!name_selected(only_cmp, c->name)) continue;
-            run_pair(h5base, &rz, c, hbuf, wbuf, rbuf, raw,
+            run_pair(h5base, &rz, c, hbuf, &ws, rbuf, raw,
                      measured_range, csv, xcsv, &acc);
         }
 
 #ifdef USE_CUDA
-        if (dbuf) cudaFree(dbuf);
+        if (dbuf) { cudaFree(dbuf); cudaGetLastError(); }
         if (sbuf) std::free(sbuf);
 #endif
         std::free(rbuf);
@@ -683,11 +836,12 @@ int main(int argc, char **argv) {
     const double file_rtotal = acc.open_ms + acc.read_ms;   /* evict excluded */
     const double file_ratio  = acc.storage ? (double)acc.raw_bytes / (double)acc.storage : 0.0;
 
-    std::printf("\n=== TOTALS over %d measurement files: create=%.2f write=%.2f "
-                "flush=%.2f sync=%.2f close=%.2f csync=%.2f => write_total=%.2f ms | "
-                "evict=%.2f open=%.2f read=%.2f => read_total=%.2f ms | "
-                "ratio=%.2fx ===\n",
-                acc.n, acc.create_ms, acc.write_ms, acc.flush_ms, acc.sync_ms,
+    std::printf("\n=== TOTALS [arm=%s] over %d measurement files: create=%.2f "
+                "write=%.2f (wall %.2f) flush=%.2f sync=%.2f close=%.2f "
+                "csync=%.2f => write_total=%.2f ms | evict=%.2f open=%.2f "
+                "read=%.2f => read_total=%.2f ms | ratio=%.2fx ===\n",
+                bench_arm_name(arm), acc.n, acc.create_ms, acc.write_ms,
+                acc.write_wall_ms, acc.flush_ms, acc.sync_ms,
                 acc.close_ms, acc.csync_ms, file_wtotal,
                 acc.evict_ms, acc.open_ms, acc.read_ms, file_rtotal, file_ratio);
 
@@ -696,7 +850,8 @@ int main(int argc, char **argv) {
 
     std::fclose(csv);
     std::fclose(xcsv);
-    std::fprintf(stderr, "[dbg main] done: %d datasets, %d skipped, "
-                 "%d measurements\n", n_ok, n_skip, acc.n);
+    std::fprintf(stderr, "[dbg main] done: arm=%s, %d datasets, %d skipped, "
+                 "%d measurements\n",
+                 bench_arm_name(arm), n_ok, n_skip, acc.n);
     return 0;
 }

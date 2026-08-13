@@ -1,3 +1,0 @@
-dataset,compressor,op,total_ms,stage_ms,compress_ms,container_ms,io_ms,pressio_call_ms,device_ms,transfer_ms,vol_compress_ms,pressio_host_ms,residual_ms,residual_frac
-miranda_cuszp_1e3,cuszp,write,89.6777,0.0000,80.3999,0.0914,9.1190,65.5069,65.5565,8.1094,6.7836,-0.0496,0.0675,0.000752
-miranda_cuszp_1e3,cuszp,read,65.9077,0.0000,58.2919,0.0000,7.6005,18.3314,18.3789,0.0000,39.9605,-0.0475,0.0154,0.000233

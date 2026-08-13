@@ -68,6 +68,7 @@ typedef struct compression_ctx {
     void *adopted_buf;
     int   codec_ignores_output;
     int observed_gpu;
+    double h2d_ms;
 } compression_ctx;
 
 #ifdef __cplusplus

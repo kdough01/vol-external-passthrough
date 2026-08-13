@@ -1,18 +1,49 @@
 #!/bin/bash
-#PBS -N vol_test_swing
+#PBS -N vol_residency_swing
 #PBS -l select=1:ncpus=16:ngpus=1:mpiprocs=1:mem=256gb
-#PBS -l walltime=04:00:00
+#PBS -l walltime=06:00:00
 #PBS -j oe
 #PBS -A SDR
 #PBS -q gpu
 
+# ===========================================================================
+# THREE-ARM DATA RESIDENCY TEST
+#
+# All three arms run the same GPU compressors over the same six datasets. They
+# differ only in where the write buffer lives and what the connector does with
+# it on the way into the codec.
+#
+#   [A] devres   H5Dwrite gets a cudaMalloc'd pointer. The connector leaves it
+#                on the device. Compress on device, D2H only the compressed
+#                output. THIS IS THE REAL GPU-SIMULATION CASE. The staging
+#                copy that fills the device buffer happens outside every
+#                timer, because a real simulation would already have produced
+#                those bytes there.
+#
+#   [B] rtrip    Same device buffer, but the connector is forced to move it
+#                D2H and then H2D again before compressing. This is what the
+#                VOL would cost if it did NOT keep device-resident data
+#                device-resident. Never happens in production -- it exists to
+#                put a number on what the passthrough saves.
+#
+#   [C] hostsim  H5Dwrite gets a malloc'd pointer, one H2D into the codec,
+#                compress, D2H the compressed output. A CPU simulation using a
+#                GPU compressor. This is what every previous sweep measured,
+#                except the H2D was buried inside pressio_call_ms.
+#
+# Requires:
+#   bench_vol_timing.cpp   BENCH_ARM=devres|rtrip|hostsim (rewritten file)
+#   vol_compression.cpp    vol_stage_input_to_device + VOL_COMP_TIME_H2D
+#   vol_timing_sink.c      h2d_ms as phase-CSV column 15
+#
+# The round trip lives in the BENCHMARK, not the connector: an application
+# without the passthrough would copy D2H itself before calling HDF5, so that
+# is where the cost belongs. No VOL_COMP_FORCE_ROUNDTRIP is needed.
+# ===========================================================================
+
 cd $PBS_O_WORKDIR/..
 WORK="$(pwd)/tests"
 
-# Per-job results directory. A shared $WORK/results accumulates CSVs across
-# jobs, and every summary block at the bottom globs that directory -- so a job
-# that produces nothing still prints a full, plausible-looking set of tables
-# from PREVIOUS runs. Isolate per job; "latest" points at the current one.
 RESULTS="$WORK/results/$(date +%Y%m%d_%H%M%S)_${PBS_JOBID%%.*}"
 mkdir -p "$RESULTS"
 ln -sfn "$RESULTS" "$WORK/results/latest"
@@ -38,7 +69,7 @@ echo "nvcc:    $(which nvcc)"
 echo "gcc:     $(gcc --version | head -1)"
 echo "GCC_LIB: $GCC_LIB"
 
-$SYSTEM_MPICC --version || { echo "mpicc broken — aborting"; exit 1; }
+$SYSTEM_MPICC --version || { echo "mpicc broken - aborting"; exit 1; }
 
 LP_VIEW=/home/kdougherty/libpressio_cuda/.spack-env/view
 
@@ -46,7 +77,6 @@ LP_VIEW=/home/kdougherty/libpressio_cuda/.spack-env/view
 # would leak LD_PRELOAD into every cmake/compiler invocation, and the build's
 # own `env LD_LIBRARY_PATH=...` overrides would fight it.
 
-# Find LibPressio cmake config — check both lib and lib64
 LP_CMAKE_DIR=""
 for candidate in \
     "${LP_VIEW}/lib64/cmake/LibPressio" \
@@ -63,15 +93,11 @@ done
 
 if [ -z "$LP_CMAKE_DIR" ]; then
     echo "ERROR: Cannot find LibPressioConfig.cmake under $LP_VIEW"
-    echo "--- cmake dirs in view ---"
     find "$LP_VIEW" -name "*ressio*onfig.cmake" 2>/dev/null
     exit 1
 fi
 echo "LibPressio cmake dir: $LP_CMAKE_DIR"
 
-# SPERR ships no CMake config -- only share/pkgconfig/SPERR.pc -- so it is
-# located by explicit prefix. Cannot use `spack location` here: this job never
-# activates the env, and CLEAN_PATH strips spack-env from PATH.
 SPERR_PREFIX="${SPERR_PREFIX:-/gpfs/fs1/home/kdougherty/spack/opt/spack/linux-zen2/sperr-0.8.2-qsqz7rfwktbmkju43ucbrmtpiyn6wyb6}"
 [ -d "$SPERR_PREFIX/include" ] || { echo "ERROR: bad SPERR_PREFIX: $SPERR_PREFIX"; exit 1; }
 echo "SPERR prefix: $SPERR_PREFIX"
@@ -79,7 +105,7 @@ echo "SPERR prefix: $SPERR_PREFIX"
 CLEAN_PATH=$(echo "$PATH" | tr ':' '\n' | grep -v spack-env | tr '\n' ':')
 
 echo ""
-echo "=== Building (USE_CUDA=ON -> CUDA-event timing in the connector) ==="
+echo "=== Building (USE_CUDA=ON) ==="
 rm -rf build
 env PATH="$CLEAN_PATH" LD_LIBRARY_PATH="$GCC_LIB" \
 cmake -S . -B build \
@@ -101,14 +127,6 @@ cmake --build build -j16
 echo "--- build/ ---"
 ls build/ || { echo "Build failed"; exit 1; }
 
-# ===========================================================================
-# LOCATE THE BINARIES
-#
-# CMake puts executables in build/bin (RUNTIME_OUTPUT_DIRECTORY), not
-# build/tests -- build/tests holds only Makefiles. Hardcoding build/tests
-# yields rc=127 on every run and a job that "completes" in 20 seconds having
-# measured nothing. Detect, and abort loudly if not found.
-# ===========================================================================
 BIN=""
 for d in build/bin build/tests build; do
     if [ -x "$d/bench_vol_timing" ]; then BIN="$(pwd)/$d"; break; fi
@@ -119,12 +137,7 @@ if [ -z "$BIN" ]; then
     exit 1
 fi
 echo "Binary dir: $BIN"
-for exe in bench_vol_timing bench_filter_timing dump_cuszp_opts; do
-    [ -x "$BIN/$exe" ] || echo "  WARNING: $exe missing from $BIN"
-done
 
-# The VOL connector .so, for HDF5_PLUGIN_PATH. Also lands in build/lib, not
-# build/. HDF5 does not search recursively, so this must be the exact dir.
 PLUGIN_DIR=""
 for d in build/lib build; do
     if [ -e "$d/libhdf5_vol_passthrough.so" ]; then PLUGIN_DIR="$(pwd)/$d"; break; fi
@@ -138,19 +151,9 @@ echo "Plugin dir: $PLUGIN_DIR"
 
 # ===========================================================================
 # RUNTIME ENVIRONMENT
-#
-# zfp64_preamble.sh sets LD_LIBRARY_PATH (and LD_PRELOAD if the binaries carry
-# DT_RPATH rather than DT_RUNPATH) so libpressio binds to zfp@0.5.5 bsws=64
-# instead of the env's bsws=8 build. zfp's CUDA backend requires a 64-bit bit
-# stream word size; with bsws=8 the cuda execution policy is unavailable.
-#
-# It also sets BENCH_FSYNC / BENCH_DROP_CACHE / BENCH_SYNC_DIR so write_ms and
-# read_ms measure the device rather than the page cache.
-#
-# DO NOT export LD_LIBRARY_PATH after this point -- that is what silently
-# reverts the swap.
+# DO NOT export LD_LIBRARY_PATH after this point -- that silently reverts the
+# zfp bsws=64 swap and the CUDA execution policy disappears.
 # ===========================================================================
-# export BENCH_ZFP_SMOKE=1     # uncomment for a standalone GPU zfp check first
 source "$PBS_O_WORKDIR/zfp64_preamble.sh"
 
 export HDF5_USE_FILE_LOCKING=FALSE
@@ -158,275 +161,295 @@ export HDF5_USE_FILE_LOCKING=FALSE
 H5DIR="${VOL_H5DIR:-/lcrc/project/SDR/$USER/vol_bench_h5}"
 mkdir -p "$H5DIR" || { echo "cannot create $H5DIR"; exit 1; }
 
-# ===========================================================================
-# STEP 0 -- Does the cuszp CUDA-stream option key actually exist?
-#
-# If it does not, vol_set_cuda_stream() never applied anything, the codec ran on
-# its own stream, our events bracketed an empty one, and every device_ms in the
-# results is meaningless. This is a ten-second check and it gates everything
-# downstream. (The old script grepped this dump for 'cuszp' but never for
-# 'stream'.)
-# ===========================================================================
-echo ""
-echo "=== [0] cuszp option keys: looking for a cuda_stream knob ==="
-"$BIN"/dump_cuszp_opts | tr ',' '\n' | grep -i cuszp
-echo "--- stream keys ---"
-STREAM_KEYS=$("$BIN"/dump_cuszp_opts | tr ',' '\n' | grep -i stream)
-if [ -z "$STREAM_KEYS" ]; then
-    echo "*** NO STREAM OPTION FOUND for cuszp. ***"
-    echo "*** device_ms from CUDA events will NOT be trustworthy.            ***"
-    echo "*** Report host wall-clock only, and use nsys for device evidence. ***"
-else
-    echo "$STREAM_KEYS"
-fi
+# 22 fields: write_wall_ms appended so existing positional indices are intact.
+# write_ms is CPU time; write_wall_ms is CLOCK_MONOTONIC over the same region.
+# PCIe copies and blocking CUDA syncs spend their time off-CPU, so where the
+# two disagree the wall clock is the honest one for this comparison.
+XCSV_HEADER_22="dataset,compressor,codec_kind,chunk_n,rep,logical_bytes,stored_bytes,ratio,create_ms,write_ms,flush_ms,sync_ms,close_ms,csync_ms,evict_ms,open_ms,read_ms,rmse,abs_thresh,maxae,bound_ok,write_wall_ms"
 
 # ===========================================================================
-# XCSV COLUMN MAP (bench_vol_timing.cpp XCSV_HEADER, 21 fields)
-#
-#   1 dataset        2 compressor    3 codec_kind   4 chunk_n     5 rep
-#   6 logical_bytes  7 stored_bytes  8 ratio
-#   9 create_ms     10 write_ms     11 flush_ms    12 sync_ms
-#  13 close_ms      14 csync_ms     15 evict_ms    16 open_ms     17 read_ms
-#  18 rmse          19 abs_thresh   20 maxae       21 bound_ok
-#
-# bound_ok is -1 for rate-mode entries (lossy, no error bound to check).
-# Filter on $21=="0" for real fidelity failures; -1 rows are not failures.
+# PHASE CSV COLUMN MAP (vol_timing_csv, 15 fields after the h2d_ms patch)
+#   1 dataset  2 compressor  3 op       4 total       5 stage
+#   6 compress 7 container   8 io       9 pressio_call 10 device
+#  11 vol_compress 12 pressio_host 13 residual_ms 14 residual_frac
+#  15 h2d_ms      <-- APPENDED, so every index above is unchanged
 # ===========================================================================
-XCSV_HEADER_21="dataset,compressor,codec_kind,chunk_n,rep,logical_bytes,stored_bytes,ratio,create_ms,write_ms,flush_ms,sync_ms,close_ms,csync_ms,evict_ms,open_ms,read_ms,rmse,abs_thresh,maxae,bound_ok"
+
+# ===========================================================================
+# ARM SELECTION
+#
+# One variable: bench_vol_timing reads BENCH_ARM and does all the staging.
+# VOL_COMP_TIME_H2D is on for every arm -- it is inert in devres (the input is
+# already device-resident, so vol_stage_input_to_device early-returns) and
+# breaks out the H2D half in the other two.
+# ===========================================================================
+set_arm () {
+    case "$1" in
+        devres|rtrip|hostsim) ;;
+        *) echo "set_arm: unknown arm '$1'"; return 1 ;;
+    esac
+    export BENCH_ARM="$1"
+    export VOL_COMP_TIME_H2D=1
+    export VOL_ARM="$1"
+}
 
 # ===========================================================================
 # run_vol_group TAG SEL COMP MODE NCHUNKS
 #   MODE:    "" = native (default), "vol", "pressio"
 #   NCHUNKS: chunk count for vol/pressio; "" = single chunk
-# Env vars override any vol:* keys in opts_json, so the *_?json JSON-path runs
-# must be launched with MODE="" and NCHUNKS="".
+# The arm is taken from $VOL_ARM, set by set_arm, and appended to the label so
+# the three arms never overwrite each other's CSVs.
 # ===========================================================================
 run_vol_group () {
     local tag="$1"; local sel="$2"; local comp="$3"; local mode="$4"; local nchunks="$5"
-    local label="${tag}_${comp}${mode:+_${mode}}${nchunks:+_N${nchunks}}${VOL_COMP_HOST_OUTPUT:+_hostout}"
+    local label="${tag}_${comp}${mode:+_${mode}}${nchunks:+_N${nchunks}}${VOL_ARM:+_${VOL_ARM}}"
     local h5="$H5DIR/bench_${label}.h5"
     local rcsv="$RESULTS/results_vol_${label}.csv"
     local xcsv="$RESULTS/results_ext_${label}.csv"
     local pcsv="$RESULTS/connector_phases_${label}.csv"
 
-    # bench_vol_timing takes ONE measurement per (dataset x compressor) and
-    # writes its own file per compressor, derived from $h5: <base>_<comp>.h5.
-    # It unlinks them itself; this glob only cleans up after a killed run.
-    # (BENCH_REPS / BENCH_WARMUP below are inert in the current source -- there
-    # is no repetition loop and no warmup pass. Left in place for the day one
-    # is reintroduced.)
     rm -f "$H5DIR"/bench_"${label}"*.h5 "$pcsv"
     echo ""
-    echo "=== VOL timing [$label] : $sel (chunking: ${mode:-native}${nchunks:+, N=${nchunks}}) ==="
+    echo "=== [$VOL_ARM] $label : $sel (chunking: ${mode:-native}${nchunks:+, N=${nchunks}}) ==="
     env HDF5_VOL_CONNECTOR="pass_through_ext under_vol=0;under_info={}" \
         HDF5_PLUGIN_PATH="$PLUGIN_DIR" \
-        VOL_COMP_CHUNK_LOG=1 \
         BENCH_CSV="$pcsv" \
         VOL_TIMING_STRICT="${VOL_TIMING_STRICT:-1}" \
-        ${VOL_COMP_GPU_EVENTS:+VOL_COMP_GPU_EVENTS="$VOL_COMP_GPU_EVENTS"} \
-        ${VOL_COMP_HOST_OUTPUT:+VOL_COMP_HOST_OUTPUT="$VOL_COMP_HOST_OUTPUT"} \
+        ${VOL_COMP_COPY_LOG:+VOL_COMP_COPY_LOG="$VOL_COMP_COPY_LOG"} \
+        BENCH_ARM="$BENCH_ARM" \
+        VOL_COMP_TIME_H2D="$VOL_COMP_TIME_H2D" \
         ${mode:+VOL_COMP_CHUNKING="$mode"} \
         ${nchunks:+VOL_COMP_CHUNK_N="$nchunks"} \
         BENCH_ONLY="$sel" \
         BENCH_COMP="$comp" \
-        BENCH_REPS="${BENCH_REPS:-1}" \
-        BENCH_WARMUP="${BENCH_WARMUP:-1}" \
         BENCH_VERIFY="${BENCH_VERIFY:-0}" \
         BENCH_KEEP_H5="${BENCH_KEEP_H5:-0}" \
         timeout --signal=KILL "${VOL_TIMEOUT:-1800}" \
             "$BIN"/bench_vol_timing "$h5" "$rcsv" "$xcsv"
     local rc=$?
-    rm -f "$H5DIR"/bench_"${label}"*.h5           # reclaim space even on failure
+    rm -f "$H5DIR"/bench_"${label}"*.h5
 
     if [ $rc -ne 0 ]; then
-        # Record the failure AS A ROW so a missing run shows up as missing in the
-        # plots rather than silently vanishing. 21 fields, matching XCSV_HEADER.
-        [ -f "$xcsv" ] || printf '%s\n' "$XCSV_HEADER_21" > "$xcsv"
-        printf '%s,%s,NA,0,-1,0,0,0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0\n' "$sel" "$comp" >> "$xcsv"
+        [ -f "$xcsv" ] || printf '%s\n' "$XCSV_HEADER_22" > "$xcsv"
+        printf '%s,%s,NA,0,-1,0,0,0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0,-1\n' "$sel" "$comp" >> "$xcsv"
         if [ $rc -eq 137 ]; then
-            echo "  [FAIL] $label KILLED BY TIMEOUT (${VOL_TIMEOUT:-1800}s) — recorded as rep=-1"
+            echo "  [FAIL] $label KILLED BY TIMEOUT (${VOL_TIMEOUT:-1800}s) - recorded as rep=-1"
         else
-            echo "  [FAIL] $label exited rc=$rc — recorded as rep=-1"
+            echo "  [FAIL] $label exited rc=$rc - recorded as rep=-1"
         fi
     fi
-    return 0                                     # never abort the sweep
+    return 0
 }
 
 declare -A DATASET=(
   [miranda]=miranda   [ocean_temp]=ocean_temp  [qmc]=einspline37
   [scale-T]=scale-T   [s3d]=s3d                [nyx_baryon]=nyx_baryon )
 
-CHUNK_COUNTS="8 16"
+# GPU codecs only. A CPU codec has no residency question -- it would move
+# device data to the host and the three arms would collapse to one.
+GPU_COMPS="${GPU_COMPS:-cuszp_1e3 cuszp_1e6 zfp_gpu_r4 zfp_gpu_r8 zfp_gpu_r12 zfp_gpu_r16}"
+GPU_GROUPS="${GPU_GROUPS:-miranda scale-T s3d nyx_baryon ocean_temp qmc}"
+ARMS="${ARMS:-devres rtrip hostsim}"
 
 # ===========================================================================
-# STEP 3b -- output-residency A/B.
+# STEP 0 -- Does the staging actually take?
 #
-# Baseline (step 3) forces the codec output into the cudamalloc domain from
-# vol_reserve_comp_output, so that cudaMalloc happens BEFORE t0 and is not in
-# pressio_call_ms. VOL_COMP_HOST_OUTPUT=1 skips the forcing; libpressio
-# allocates the device output itself, inside the timed region. The delta is
-# the output-side allocation cost, not a change in transfer volume.
-#
-# Only codecs matching vol_is_gpu_codec() are affected -- cuszp/cusz/nvcomp.
-# zfp_gpu_* is NOT: its compressor_id is "zfp" regardless of execution policy,
-# so is_gpu is already false and those rows take the host path in both arms.
+# Ten seconds, and it gates everything. bench_vol_timing SKIPS a dataset
+# rather than falling back to a host buffer when cudaMalloc fails, so a silent
+# mislabel is not possible -- but a build without USE_CUDA, or a stale binary,
+# would still quietly run three copies of hostsim.
 # ===========================================================================
-AB_COMPS="cuszp_1e3 cuszp_1e6 zfp_gpu_r4 zfp_gpu_r8 zfp_gpu_r12 zfp_gpu_r16"
-AB_GROUPS="miranda scale-T s3d nyx_baryon ocean_temp qmc"
+echo ""
+echo "=== [0] staging validation (miranda x cuszp_1e3, one run per arm) ==="
+for arm in $ARMS; do
+    set_arm "$arm"
+    echo ""
+    echo "--- arm=$arm ---"
+    VOL_COMP_COPY_LOG=1 run_vol_group probe "miranda" cuszp_1e3 "" "" 2>&1 \
+        | grep -E '\[arm |\[device\]|\[stage\]|\[bench\]|FATAL|SKIPPING' \
+        || echo "  (no staging output - is the rebuilt bench_vol_timing in place?)"
+done
+unset VOL_COMP_COPY_LOG
 
 echo ""
-echo "=== [3b] host-output A/B (device-resident output disabled) ==="
-for comp in $AB_COMPS; do
-    for g in $AB_GROUPS; do
-        VOL_COMP_HOST_OUTPUT=1 run_vol_group "$g" "${DATASET[$g]}" "$comp" "" ""
-        for N in $CHUNK_COUNTS; do
-            VOL_COMP_HOST_OUTPUT=1 run_vol_group "$g" "${DATASET[$g]}" "$comp" vol "$N"
+echo "--- expected per arm ---"
+echo "  devres   [arm devres] + [stage] 'input left device-resident'"
+echo "  rtrip    [arm rtrip]  + [stage] 'H2D host->device'  (the D2H is in the"
+echo "           benchmark, inside write_ms, so the connector only sees the H2D)"
+echo "  hostsim  [arm hostsim]+ [stage] 'H2D host->device'"
+
+# ===========================================================================
+# STEPS 1-3 -- the three arms.
+# ===========================================================================
+echo ""
+echo "=== three-arm residency sweep ==="
+echo "    arms:        $ARMS"
+echo "    compressors: $GPU_COMPS"
+echo "    datasets:    $GPU_GROUPS"
+
+for arm in $ARMS; do
+    set_arm "$arm" || continue
+    echo ""
+    echo "###########################################################"
+    case "$arm" in
+      devres)  echo "# [1] devres  - device-resident, no input copy (REAL GPU SIM)" ;;
+      rtrip)   echo "# [2] rtrip   - device->host->device before compress (COUNTERFACTUAL)" ;;
+      hostsim) echo "# [3] hostsim - one host->device copy (CPU SIM, GPU CODEC)" ;;
+    esac
+    echo "###########################################################"
+    for comp in $GPU_COMPS; do
+        for g in $GPU_GROUPS; do
+            run_vol_group "$g" "${DATASET[$g]}" "$comp" "" ""
         done
     done
 done
+unset BENCH_ARM VOL_COMP_TIME_H2D VOL_ARM
 
+# ===========================================================================
+# SUMMARY 1 -- the three arms side by side.
+# ===========================================================================
 echo ""
-echo "--- baseline vs hostout (write rows) ---"
-printf '%-34s %10s %10s %10s\n' label total_ms pressio_ms device_ms
+echo "=== residency comparison (write rows) ==="
+printf '%-14s %-14s %-9s %10s %10s %10s %10s %8s\n' \
+       dataset compressor arm total_ms pressio_ms device_ms h2d_ms 'h2d%'
 for pcsv in "$RESULTS"/connector_phases_*.csv; do
     [ -f "$pcsv" ] || continue
     lbl=$(basename "$pcsv" .csv); lbl=${lbl#connector_phases_}
-    case "$lbl" in *cuszp*) ;; *) continue ;; esac
-    awk -F, -v l="$lbl" 'NR>1 && $3=="write" {
-        printf "%-34s %10.2f %10.2f %10.2f\n", l, $4, $9, $10 }' "$pcsv"
-done | sort
-
-# ---------------------------------------------------------------------------
-# JSON-path validation: chunking selected via opts_json with NO env override.
-# Exercises DCPL JSON -> parse at ctx create -> _VOL_OPTIONS_JSON snapshot ->
-# replay+parse at dataset_open.
-# ---------------------------------------------------------------------------
-echo ""
-echo "=== [4] JSON-path chunking selection (no VOL_COMP_* env set) ==="
-for comp in sz3_1e3_vjson sz3_1e3_pjson cuszp_1e3_vjson cuszp_1e3_pjson; do
-    run_vol_group miranda "miranda" "$comp" "" ""
-done
-
-# ---------------------------------------------------------------------------
-# Optional: device-level ground truth for the stream question. Confirms which
-# stream the cuSZp kernels actually run on, independent of libpressio's option
-# read-back, and gives HtoD/DtoH byte totals to check against dataset size.
-# ---------------------------------------------------------------------------
-if [ -n "${VOL_NSYS:-}" ] && command -v nsys >/dev/null 2>&1; then
-    echo ""
-    echo "=== [5] nsys trace (miranda x cuszp_1e3) ==="
-    env HDF5_VOL_CONNECTOR="pass_through_ext under_vol=0;under_info={}" \
-        HDF5_PLUGIN_PATH="$PLUGIN_DIR" \
-        BENCH_ONLY=miranda BENCH_COMP=cuszp_1e3 \
-        nsys profile --trace=cuda,nvtx -o "$RESULTS/vol_cuszp" --force-overwrite true \
-            "$BIN"/bench_vol_timing "$H5DIR/bench_nsys.h5" \
-                "$RESULTS/results_vol_nsys.csv" "$RESULTS/results_ext_nsys.csv"
-    rm -f "$H5DIR"/bench_nsys*.h5
-    echo "--- kernel/memcpy stream assignment (Strm column) ---"
-    nsys stats --report cuda_gpu_trace "$RESULTS/vol_cuszp.nsys-rep" 2>/dev/null | head -40
-    echo "--- transfer byte totals (HtoD should be ~dataset size, DtoH ~compressed) ---"
-    nsys stats --report cuda_gpu_mem_size_sum "$RESULTS/vol_cuszp.nsys-rep" 2>/dev/null | head -20
-fi
-
-# echo ""
-# echo "=== [6] Filter (deflate) timing ==="
-# "$BIN"/bench_filter_timing --deflate \
-#     --h5 "$WORK/bench_filter.h5" --out "$RESULTS/results_filter.csv"
+    case "$lbl" in probe_*) continue ;; esac
+    arm="${lbl##*_}"
+    case "$arm" in devres|rtrip|hostsim) ;; *) continue ;; esac
+    awk -F, -v a="$arm" 'NR>1 && $3=="write" {
+        h = (NF >= 15) ? $15 : -1
+        printf "%-14s %-14s %-9s %10.2f %10.2f %10.2f %10.2f %7.2f%%\n",
+               $1, $2, a, $4, $9, $10, h, ($4>0 ? 100*h/$4 : 0) }' "$pcsv"
+done | sort -k1,1 -k2,2 -k3,3
 
 # ===========================================================================
-# STEP 7 -- zfp CPU/GPU pair invariant.
+# SUMMARY 2 -- what the passthrough saves.
 #
-# zfp guarantees the compressed stream is independent of execution policy, so
-# for a given rate the serial and CUDA arms must produce byte-identical output.
-# Equal stored_bytes is therefore a hard invariant, and the sharpest available
-# check that the bsws=64 library swap did not corrupt anything. If a pair
-# disagrees, the timings are not a GPU-vs-CPU result -- discard them.
-#
-# The pair key comes from the FILENAME (which carries dataset + chunking mode),
-# with zfp_cpu_/zfp_gpu_ collapsed so the two sides land on the same key.
+# rtrip - devres is the cost of NOT keeping device data device-resident.
+# hostsim - devres is what a CPU simulation pays to feed a GPU codec.
 # ===========================================================================
 echo ""
-echo "=== [7] zfp CPU/GPU pair invariant (stored_bytes must match EXACTLY) ==="
+echo "=== savings vs devres (write_total_ms from xcsv) ==="
 awk -F, '
-FNR==1 { f=FILENAME; sub(/.*results_ext_/,"",f); sub(/\.csv$/,"",f); next }
-$2 ~ /^zfp_(cpu|gpu)_r[0-9]+$/ && $5 != "-1" {
-    side = ($2 ~ /^zfp_cpu_/) ? "cpu" : "gpu"
-    key  = f; gsub(/zfp_(cpu|gpu)_/, "zfp_", key)
-    bytes[key SUBSEP side] = $7
-    rmse[key SUBSEP side]  = $18
+FNR==1 { next }
+$5 == "-1" { next }
+{
+    f = FILENAME
+    sub(/.*results_ext_/, "", f); sub(/\.csv$/, "", f)
+    n = split(f, p, "_"); arm = p[n]
+    if (arm != "devres" && arm != "rtrip" && arm != "hostsim") next
+    key = $1 SUBSEP $2
+    tot = $9 + $10 + $11 + $12 + $13 + $14      # create..csync
+    v[key SUBSEP arm] = tot
+    stored[key SUBSEP arm] = $7
     keys[key] = 1
 }
 END {
-    n = 0; bad = 0
+    printf "%-14s %-14s %10s %10s %10s %9s %9s\n",
+           "dataset","compressor","devres","rtrip","hostsim","rtrip/dev","host/dev"
+    n = 0; badbytes = 0
     for (k in keys) {
-        c = bytes[k SUBSEP "cpu"]; g = bytes[k SUBSEP "gpu"]
-        if (c == "" || g == "") { printf "  [SKIP] %-40s incomplete pair\n", k; continue }
+        split(k, kk, SUBSEP)
+        d = v[k SUBSEP "devres"]; r = v[k SUBSEP "rtrip"]; h = v[k SUBSEP "hostsim"]
+        if (d == "") continue
         n++
-        if (c == g)
-            printf "  [OK]   %-40s stored=%-12s rmse cpu=%s gpu=%s\n",
-                   k, c, rmse[k SUBSEP "cpu"], rmse[k SUBSEP "gpu"]
-        else {
-            bad++
-            printf "  [BAD]  %-40s cpu=%-12s gpu=%-12s <-- ABI swap suspect, DISCARD GPU ROWS\n",
-                   k, c, g
-        }
+        printf "%-14s %-14s %10.2f %10.2f %10.2f %9s %9s\n",
+               kk[1], kk[2], d, (r==""?0:r), (h==""?0:h),
+               (r==""?"-":sprintf("%.2fx", r/d)),
+               (h==""?"-":sprintf("%.2fx", h/d))
+        # Arms differ only in WHERE bytes live, never in WHAT is compressed.
+        sd = stored[k SUBSEP "devres"]
+        for (a in arms) { }
+        if (stored[k SUBSEP "rtrip"]   != "" && stored[k SUBSEP "rtrip"]   != sd) badbytes++
+        if (stored[k SUBSEP "hostsim"] != "" && stored[k SUBSEP "hostsim"] != sd) badbytes++
     }
-    if (n == 0) print "  (no complete zfp pairs found)"
-    printf "  %d pair(s) checked, %d mismatched\n", n, bad
+    printf "\n  %d triple(s); %d stored_bytes mismatch(es)\n", n, badbytes
+    if (badbytes)
+        print "  !! stored_bytes differ across arms -- one arm compressed the wrong data.\n" \
+              "     Check that vol_make_device_readable uses make_readable, not make_writeable."
 }' "$RESULTS"/results_ext_*.csv 2>/dev/null
 
 # ===========================================================================
-# SUMMARIES
+# SUMMARY 3 -- transfer sanity.
 #
-# The old script wrote ignore_connector_phases_*.csv but globbed
-# connector_phases_*.csv, so every summary block below matched nothing. Both
-# now use $RESULTS with no prefix.
+# The D2H half of the round trip happens in the BENCHMARK (inside write_ms),
+# so the connector only ever sees one crossing. Expectations:
+#
+#   devres   h2d_ms == 0 exactly. The input never leaves the device.
+#   hostsim  h2d_ms == one H2D of the full array.
+#   rtrip    h2d_ms ~= hostsim h2d_ms (also one H2D). The extra D2H shows up
+#            as (rtrip write_ms - hostsim write_ms), NOT in h2d_ms.
+#
+# So: rtrip h2d_ms ~= hostsim h2d_ms, and rtrip total ~= hostsim total + one
+# more crossing. Bandwidth near A100 PCIe Gen4 pageable, roughly 20-25 GB/s.
 # ===========================================================================
 echo ""
-echo "=== connector phase breakdown (per label) ==="
-for pcsv in "$RESULTS"/connector_phases_*.csv; do
+echo "=== transfer sanity ==="
+for pcsv in "$RESULTS"/connector_phases_*_hostsim.csv \
+            "$RESULTS"/connector_phases_*_rtrip.csv; do
     [ -f "$pcsv" ] || continue
-    label=$(basename "$pcsv" .csv); label=${label#connector_phases_}
-    echo ""
-    echo "--- [$label] ---"
-    column -t -s, "$pcsv"
-done
+    lbl=$(basename "$pcsv" .csv); lbl=${lbl#connector_phases_}
+    xcsv="$RESULTS/results_ext_${lbl}.csv"
+    [ -f "$xcsv" ] || continue
+    bytes=$(awk -F, 'FNR>1 && $5!="-1" {print $6; exit}' "$xcsv")
+    [ -n "$bytes" ] || continue
+    awk -F, -v l="$lbl" -v b="$bytes" \
+        'NR>1 && $3=="write" && NF>=15 && $15+0 > 0 {
+            printf "  %-46s %8.2f ms  %7.2f GB/s\n", l, $15, b/($15/1000)/1e9 }' "$pcsv"
+done | sort
 
 echo ""
-echo "=== VOL overhead vs libpressio cost (write rows only) ==="
-echo "dataset compressor total_ms compress_ms vol_compress_ms pressio_host_ms device_ms io_ms container_ms residual%"
-for pcsv in "$RESULTS"/connector_phases_*.csv; do
+echo "--- devres must show h2d_ms == 0 everywhere ---"
+for pcsv in "$RESULTS"/connector_phases_*_devres.csv; do
     [ -f "$pcsv" ] || continue
-    awk -F, 'NR>1 && $3=="write" {
-        printf "%-22s %-16s %10.2f %10.2f %10.2f %10.2f %10.2f %10.2f %10.2f %7.2f%%\n",
-               $1,$2,$4,$6,$11,$12,$10,$8,$7,$14*100 }' "$pcsv"
+    lbl=$(basename "$pcsv" .csv); lbl=${lbl#connector_phases_}
+    awk -F, -v l="$lbl" 'NR>1 && $3=="write" && NF>=15 && $15+0 != 0 {
+        printf "  [FAIL] %-46s h2d_ms=%.3f -- BENCH_DEVICE_BUFFER did not take\n", l, $15 }' "$pcsv"
 done
+echo "  (no output above means all devres rows are clean)"
 
-echo ""
-echo "=== durability / cache phases (write path, from xcsv) ==="
-echo "dataset                compressor       create    write    flush     sync    close    csync  |    evict     open     read"
-awk -F, 'FNR==1{next} $5!="-1" {
-    printf "%-22s %-16s %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f  | %8.2f %8.2f %8.2f\n",
-           $1,$2,$9,$10,$11,$12,$13,$14,$15,$16,$17 }' \
-    "$RESULTS"/results_ext_*.csv 2>/dev/null
-
+# ===========================================================================
+# SUMMARY 4 -- failures and fidelity.
+# ===========================================================================
 echo ""
 echo "=== runs that FAILED or TIMED OUT (rep=-1) ==="
 awk -F, 'FNR>1 && $5=="-1" {print FILENAME": "$1" "$2}' \
     "$RESULTS"/results_ext_*.csv 2>/dev/null || echo "(none)"
 
 echo ""
-echo "=== fidelity failures (bound_ok=0; -1 means no bound to check, not a failure) ==="
+echo "=== fidelity failures (bound_ok=0; -1 means no bound to check) ==="
 awk -F, 'FNR>1 && $5!="-1" && $21=="0" {print $1" "$2" maxae="$20" thr="$19}' \
     "$RESULTS"/results_ext_*.csv 2>/dev/null || echo "(none)"
 
 echo ""
-echo "=== FILE-LEVEL summary ==="
-grep -h ',file,' "$RESULTS"/results_vol_*.csv 2>/dev/null | sort || echo "(no file rows)"
+echo "=== durability / cache phases ==="
+echo "dataset                compressor       create    write   wwall    flush     sync    close    csync  |    evict     open     read"
+awk -F, 'FNR==1{next} $5!="-1" {
+    w = (NF >= 22) ? $22 : -1
+    printf "%-22s %-16s %8.2f %8.2f %7.2f %8.2f %8.2f %8.2f %8.2f  | %8.2f %8.2f %8.2f\n",
+           $1,$2,$9,$10,w,$11,$12,$13,$14,$15,$16,$17 }' \
+    "$RESULTS"/results_ext_*.csv 2>/dev/null
+
+# ===========================================================================
+# CPU vs wall clock on the write region.
+#
+# write_ms is CPU time. A PCIe copy and a blocking cudaDeviceSynchronize spend
+# their time off-CPU, so under a blocking sync policy write_ms can miss most
+# of the transfer it is supposed to be measuring. Where these two diverge, the
+# wall clock is the number to report.
+# ===========================================================================
+echo ""
+echo "=== write_ms (CPU) vs write_wall_ms -- divergence means CPU time is blind ==="
+awk -F, 'FNR==1{next} $5!="-1" && NF>=22 && $22+0 > 0 {
+    d = ($22 - $10) / $22
+    if (d > 0.10 || d < -0.10)
+        printf "  %-22s %-16s cpu=%9.2f wall=%9.2f  (%+6.1f%%)\n",
+               $1, $2, $10, $22, d*100 }' \
+    "$RESULTS"/results_ext_*.csv 2>/dev/null
+echo "  (no rows above means CPU and wall agree within 10% everywhere)"
 
 echo ""
-echo "=== results_filter.csv ==="
-column -t -s, "$RESULTS/results_filter.csv"
-
-echo ""
+echo "Results in: $RESULTS"
 echo "Job finished on $(date)"

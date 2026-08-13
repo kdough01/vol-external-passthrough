@@ -310,6 +310,50 @@ vol_make_device_resident(struct pressio_data *data)
             libpressio::domain_plugins().build("cudamalloc"), std::move(*d));
     }
 }
+
+static int
+vol_time_h2d(void)
+{
+    static int v = -1;
+    if (v < 0) {
+        const char *e = getenv("VOL_COMP_TIME_H2D");
+        v = (e && *e && *e != '0') ? 1 : 0;
+    }
+    return v;
+}
+
+static void
+vol_make_device_readable(struct pressio_data *data)
+{
+    if (!data) return;
+    if (strcmp(pressio_data_domain_id(data), "cudamalloc") != 0) {
+        pressio_data *d = data;
+        *d = domain_manager().make_readable(
+            libpressio::domain_plugins().build("cudamalloc"), std::move(*d));
+    }
+}
+
+static int
+vol_stage_input_to_device(compression_ctx *ctx, struct pressio_data *input,
+                          const void *src)
+{
+    double t0;
+
+    if (!vol_time_h2d() || !ctx || !input)      return 0;
+    if (H5VL_pass_through_ext_buf_is_device(src)) return 0;
+
+    t0 = bench_now_ms();
+    vol_make_device_readable(input);
+    /* The migration may be issued async. Without a hard barrier the clock
+     * closes before the DMA finishes and h2d_ms reads near zero. */
+    cudaDeviceSynchronize();
+    ctx->h2d_ms += bench_now_ms() - t0;
+
+    if (getenv("VOL_COMP_COPY_LOG"))
+        fprintf(stderr, "[h2d] '%s' staged input to device, cumulative %.3f ms\n",
+                ctx->compressor_id, ctx->h2d_ms);
+    return 1;
+}
 #endif
 
 /* Allocate a codec output buffer in the domain where the codec will actually
@@ -1257,6 +1301,7 @@ vol_compress_native_impl(compression_ctx *ctx,
     }
 
 #ifdef USE_CUDA
+    (void)vol_stage_input_to_device(ctx, input, data);
     vol_set_cuda_stream(ctx);
     ev = vol_ev_begin(ctx, 1);
 #endif
@@ -1608,6 +1653,7 @@ vol_transfer_compress_chunk_impl(compression_ctx *ctx,
     }
 
 #ifdef USE_CUDA
+    (void)vol_stage_input_to_device(ctx, input, data);
     vol_set_cuda_stream(ctx);
     ev = vol_ev_begin(ctx, 1);
 #endif
@@ -1888,6 +1934,7 @@ H5VL_pass_through_ext_transfer_compress(compression_ctx *ctx, const void *data, 
 
     ctx->device_ms       = 0.0;
     ctx->pressio_call_ms = 0.0;
+    ctx->h2d_ms          = 0.0;
     if (H5VL_pass_through_ext_compress_native(ctx, data, nbytes, 0, &cb, &len) < 0)
         return -1;
 
@@ -2210,6 +2257,7 @@ vol_compress_pressio_impl(compression_ctx *ctx,
         double _t0;
         int _cerr;
         float _ms = 0.f;
+        (void)vol_stage_input_to_device(ctx, input, data);
 
         if (_gpu) {
             cudaEventCreate(&_ev0);

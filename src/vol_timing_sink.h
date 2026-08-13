@@ -59,7 +59,7 @@ static inline FILE *vol_timing_csv(void) {
                 "dataset,compressor,op,total_ms,"
                 "stage_ms,compress_ms,container_ms,io_ms,"
                 "pressio_call_ms,device_ms,transfer_ms,vol_compress_ms,pressio_host_ms,"
-                "residual_ms,residual_frac\n");
+                "residual_ms,residual_frac,h2d_ms\n");
     }
     return f;
 }
@@ -69,7 +69,7 @@ static inline void vol_timing_finalize(vol_write_timing_t *t,
                                        double tol_frac) {
     if (!t) return;
     t->residual_ms = t->total_ms - (t->stage_ms + t->compress_ms
-                                  + t->container_ms + t->io_ms);
+                                  + t->container_ms + t->io_ms + t->h2d_ms);
     if (getenv("VOL_TIMING_STRICT") && t->total_ms > 0.0 &&
         fabs(t->residual_ms) > tol_frac * t->total_ms) {
         fprintf(stderr,
@@ -92,7 +92,7 @@ static inline void vol_timing_emit_ex(const char *dataset, const char *compresso
     double pressio_host = t->pressio_call_ms - t->device_ms;
     double residual_frac = (t->total_ms > 0.0) ? t->residual_ms / t->total_ms : 0.0;
 
-    fprintf(f, "%s,%s,%s,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.6f\n",
+    fprintf(f, "%s,%s,%s,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.6f,%.3f\n",
             dataset ? dataset : "?",
             compressor ? compressor : "none",
             op ? op : "?",
@@ -100,7 +100,7 @@ static inline void vol_timing_emit_ex(const char *dataset, const char *compresso
             t->stage_ms, t->compress_ms, t->container_ms, t->io_ms,
             t->pressio_call_ms, t->device_ms, t->transfer_ms,
             vol_compress, pressio_host,
-            t->residual_ms, residual_frac);
+            t->residual_ms, residual_frac,t->h2d_ms);
     fflush(f);
 }
 

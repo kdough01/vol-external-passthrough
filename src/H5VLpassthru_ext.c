@@ -2369,6 +2369,7 @@ H5VL_pass_through_ext_dataset_read(
             ctx->pressio_call_ms = 0.0;
             ctx->device_ms       = 0.0;
             ctx->transfer_ms     = 0.0;
+            ctx->h2d_ms          = 0.0;
 
             herr_t rc;
             switch (plan.kind) {
@@ -2420,6 +2421,7 @@ H5VL_pass_through_ext_dataset_read(
             rt.pressio_call_ms = ctx->pressio_call_ms;
             rt.device_ms       = ctx->device_ms;
             rt.transfer_ms     = ctx->transfer_ms;
+            rt.h2d_ms          = ctx->h2d_ms;
             vol_timing_finalize(&rt, dset_name, ctx->compressor_id, 0.03);
             vol_timing_emit_ex(dset_name, ctx->compressor_id, "read", &rt);
         }
@@ -2546,6 +2548,7 @@ vol_write_reset_timers(compression_ctx *ctx, vol_write_timing_t *t)
     ctx->device_ms       = 0.0;
     ctx->pressio_call_ms = 0.0;
     ctx->transfer_ms     = 0.0;
+    ctx->h2d_ms          = 0.0;
     (void)t;
 }
 
@@ -2556,6 +2559,7 @@ vol_write_capture_timers(compression_ctx *ctx, vol_write_timing_t *t, double c0)
     t->pressio_call_ms = ctx->pressio_call_ms;
     t->device_ms       = ctx->device_ms;
     t->transfer_ms     = ctx->transfer_ms;
+    t->h2d_ms          = ctx->h2d_ms;
 }
 
 /* =========================================================================
