@@ -1571,7 +1571,7 @@ vol_transfer_compress_chunk_impl(compression_ctx *ctx,
         if (in_ndims == 0) return -1;          /* error already pushed */
     }
 
-    is_gpu      = vol_is_gpu_codec(ctx->compressor_id);
+    is_gpu = vol_codec_is_gpu(ctx);
     cap         = nbytes + nbytes / 8 + (1u << 16);
     out_dims[0] = cap;
 
