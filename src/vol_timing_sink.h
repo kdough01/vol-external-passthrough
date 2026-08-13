@@ -32,6 +32,7 @@ typedef struct {
 
     double total_ms;       /* wall clock, whole per-dataset loop body           */
     double residual_ms;    /* total - (stage+compress+container+io); want ~0    */
+    double h2d_ms;
 } vol_write_timing_t;
 
 static inline double bench_now_ms(void) {
