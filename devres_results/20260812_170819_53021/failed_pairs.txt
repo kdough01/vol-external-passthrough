@@ -1,0 +1,2 @@
+host scale-T zfp_gpu_r4 zfp_gpu_r8 zfp_gpu_r12 zfp_gpu_r16
+device scale-T zfp_gpu_r4 zfp_gpu_r8 zfp_gpu_r12 zfp_gpu_r16

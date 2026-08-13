@@ -1,0 +1,27 @@
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/g2_none_scale-T.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/devres_results/20260812_170819_53021/results_vol_none_scale-T.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/devres_results/20260812_170819_53021/results_vol_ext_none_scale-T.csv only=scale-T comp=zfp_gpu_r4 zfp_gpu_r8 zfp_gpu_r12 zfp_gpu_r16 verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] staging arm=none  ledger=/home/kdougherty/hdf5_projs/vol-external-passthrough/devres_results/20260812_170819_53021/staging_none_scale-T.csv
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 954.5 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE scale-T        min=5.209023e+00 max=5.754571e+00 range=5.455480e-01 xform=log1p
+
+=== scale-T (538.3 MiB, float, raw, transformed) ===
+Info: 0x55c424b86160
+  scale-T_zfp_gpu_r4           C=   1.16 W=    75.61 F=    0.35 S=    94.74 X=    0.21 S2= 105.20 | E=   1.20 O=   0.31 R=   138.65 ms  ratio= 62.72x  RMSE=5.132e+00 maxae=5.706e+00 (log-space)
+Info: 0x55c424c14bc0
+  scale-T_zfp_gpu_r8           C=   0.45 W=   180.74 F=    0.21 S=   138.94 X=    0.14 S2=  54.00 | E=   4.01 O=   0.27 R=   144.47 ms  ratio= 31.36x  RMSE=5.132e+00 maxae=5.706e+00 (log-space)
+Info: 0x55c424c09a90
+  scale-T_zfp_gpu_r12          C=   0.48 W=   296.18 F=    0.22 S=   117.54 X=    0.11 S2= 140.00 | E=   4.22 O=   0.27 R=   146.33 ms  ratio= 20.91x  RMSE=5.132e+00 maxae=5.706e+00 (log-space)
+Info: 0x55c424c15860
+  scale-T_zfp_gpu_r16          C=   0.67 W=   238.66 F=    0.23 S=   125.89 X=    0.15 S2=  67.41 | E=   1.19 O=   0.27 R=   453.36 ms  ratio= 15.68x  RMSE=5.521e+00 maxae=5.755e+00 (log-space)
+[dbg main] done: arm=none, 1 datasets, 0 skipped, 4 measurements
+
+=== TOTALS over 4 measurement files: create=2.77 write=791.19 flush=1.01 sync=477.12 close=0.61 csync=366.61 => write_total=1639.31 ms | evict=10.62 open=1.11 read=882.82 => read_total=883.93 ms | ratio=25.09x ===

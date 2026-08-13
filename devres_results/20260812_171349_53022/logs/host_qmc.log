@@ -1,0 +1,16 @@
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/g2_host_qmc.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/devres_results/20260812_171349_53022/results_vol_host_qmc.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/devres_results/20260812_171349_53022/results_vol_ext_host_qmc.csv only=qmc comp=zfp_gpu_r4 zfp_gpu_r8 zfp_gpu_r12 zfp_gpu_r16 verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] staging arm=host  ledger=/home/kdougherty/hdf5_projs/vol-external-passthrough/devres_results/20260812_171349_53022/staging_host_qmc.csv
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 954.4 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+[dbg main] done: arm=host, 0 datasets, 0 skipped, 0 measurements
+
+=== TOTALS over 0 measurement files: create=0.00 write=0.00 flush=0.00 sync=0.00 close=0.00 csync=0.00 => write_total=0.00 ms | evict=0.00 open=0.00 read=0.00 => read_total=0.00 ms | ratio=0.00x ===

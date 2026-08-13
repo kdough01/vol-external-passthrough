@@ -1,0 +1,27 @@
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/devres_none_miranda.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/devres_results/20260812_172527_53023/results_vol_none_miranda.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/devres_results/20260812_172527_53023/results_vol_ext_none_miranda.csv only=miranda comp=zfp_gpu_r4 zfp_gpu_r8 zfp_gpu_r12 zfp_gpu_r16 verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] staging arm=none  ledger=/home/kdougherty/hdf5_projs/vol-external-passthrough/devres_results/20260812_172527_53023/staging_none_miranda.csv
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 954.4 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE miranda        min=9.999878e-01 max=3.000046e+00 range=2.000058e+00 xform=none
+
+=== miranda (288.0 MiB, double, raw) ===
+Info: 0x55d93f1bbdc0
+  miranda_zfp_gpu_r4           C=   1.07 W=   196.64 F=    0.28 S=   164.83 X=    0.18 S2=  50.35 | E=   4.59 O=   0.31 R=    80.48 ms  ratio= 16.00x  RMSE=1.323e-04 maxae=1.232e-02
+Info: 0x55d93f24a850
+  miranda_zfp_gpu_r8           C=   0.46 W=   257.18 F=    0.23 S=   136.79 X=    0.57 S2=  56.85 | E=   8.13 O=   0.30 R=   115.53 ms  ratio=  8.00x  RMSE=6.719e-06 maxae=6.823e-04
+Info: 0x55d95bdce660
+  miranda_zfp_gpu_r12          C=   0.47 W=   191.37 F=    0.21 S=   135.40 X=    0.11 S2=  57.55 | E=   1.71 O=   0.32 R=    97.20 ms  ratio=  5.33x  RMSE=4.241e-07 maxae=4.203e-05
+Info: 0x55d95aac81d0
+  miranda_zfp_gpu_r16          C=   0.48 W=   197.38 F=    0.23 S=   179.97 X=    0.11 S2= 117.61 | E=   3.83 O=   0.27 R=    91.01 ms  ratio=  4.00x  RMSE=2.650e-08 maxae=2.833e-06
+[dbg main] done: arm=none, 1 datasets, 0 skipped, 4 measurements
+
+=== TOTALS over 4 measurement files: create=2.48 write=842.57 flush=0.95 sync=616.99 close=0.97 csync=282.36 => write_total=1746.31 ms | evict=18.25 open=1.20 read=384.22 => read_total=385.43 ms | ratio=6.40x ===

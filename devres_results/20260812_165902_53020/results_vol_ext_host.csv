@@ -1,0 +1,3 @@
+dataset,compressor,codec_kind,chunk_n,rep,logical_bytes,stored_bytes,ratio,create_ms,write_ms,flush_ms,sync_ms,close_ms,csync_ms,evict_ms,open_ms,read_ms,rmse,abs_thresh,maxae,bound_ok
+miranda,zfp_gpu_r4,gpu,1,0,301989888,2359312,127.9991,4.7907,2031.2366,0.3839,98.9661,0.5873,49.6147,1.0042,0.4646,98.0562,inf,0.000000e+00,inf,-1
+miranda,zfp_gpu_r8,gpu,1,0,301989888,4718608,63.9998,1.2542,112.0610,0.2770,108.8911,0.1316,58.7850,1.1366,0.2681,70.8703,inf,0.000000e+00,inf,-1

@@ -1,0 +1,5 @@
+dataset,compressor,codec_kind,chunk_n,rep,logical_bytes,stored_bytes,ratio,create_ms,write_ms,flush_ms,sync_ms,close_ms,csync_ms,evict_ms,open_ms,read_ms,rmse,abs_thresh,maxae,bound_ok
+ocean_temp,zfp_gpu_r4,gpu,1,0,129123840,2136256,60.4440,0.9419,26.0833,0.3056,103.9221,0.1519,57.8858,1.1864,0.2895,35.1532,inf,0.000000e+00,inf,-1
+ocean_temp,zfp_gpu_r8,gpu,1,0,129123840,4272496,30.2221,0.4660,22.9277,0.2765,96.6709,0.1391,92.7582,1.1861,0.2763,44.5725,inf,0.000000e+00,inf,-1
+ocean_temp,zfp_gpu_r12,gpu,1,0,129123840,6408736,20.1481,0.4832,52.0004,0.2795,107.9740,0.1370,77.4955,1.1852,0.2869,37.7137,inf,0.000000e+00,inf,-1
+ocean_temp,zfp_gpu_r16,gpu,1,0,129123840,8544976,15.1111,0.5019,23.7604,0.2836,118.6838,0.1352,82.0571,1.1706,0.2759,38.1394,inf,0.000000e+00,inf,-1

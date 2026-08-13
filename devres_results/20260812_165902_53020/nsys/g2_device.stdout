@@ -1,0 +1,37 @@
+WARNING: CPU IP/backtrace sampling not supported, disabling.
+Try the 'nsys status --environment' command to learn more.
+
+WARNING: CPU context switch tracing not supported, disabling.
+Try the 'nsys status --environment' command to learn more.
+
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/g2_prof_device.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/devres_results/20260812_165902_53020/nsys/prof_device.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/devres_results/20260812_165902_53020/nsys/prof_ext_device.csv only=miranda comp=zfp_gpu_r8 verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] staging arm=device  ledger=(none -- D2H will not be recorded)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 954.0 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE miranda        min=9.999878e-01 max=3.000046e+00 range=2.000058e+00 xform=none
+[device] miranda: 288.0 MiB resident on GPU (setup h2d=25.690 ms)
+[device] arm=device: VOL receives the device pointer; no host round trip for the write
+[VOL warmup] CUDA context initialized before timing
+[VOL stream] 'zfp' declares no 'zfp:cuda_stream' -- codec manages its own stream. Using the default stream + device barrier. device_ms is NOT reported for this codec, but pressio_call_ms IS now device-synchronized and therefore trustworthy.
+[copy] 'zfp' 4718592 B output adopted (no copy)
+[VOL stream] 'zfp' declares no 'zfp:cuda_stream' -- codec manages its own stream. Using the default stream + device barrier. device_ms is NOT reported for this codec, but pressio_call_ms IS now device-synchronized and therefore trustworthy.
+
+=== miranda (288.0 MiB, double, raw) ===
+Info: 0x5646e1b04e10
+  miranda_zfp_gpu_r8           C=   1.22 W=    20.83 F=    0.34 S=   101.12 X=    0.18 S2=  65.34 | E=   2.51 O=   0.45 R=    77.64 ms  ratio= 64.00x  RMSE=2.127e+00 maxae=3.000e+00
+[dbg main] done: arm=device, 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.22 write=20.83 flush=0.34 sync=101.12 close=0.18 csync=65.34 => write_total=189.03 ms | evict=2.51 open=0.45 read=77.64 => read_total=78.09 ms | ratio=64.00x ===
+Generating '/var/tmp/pbs.53020.gpumgt1/nsys-report-5de7.qdstrm'
+[1/1] [0%                          ] g2_device.nsys-rep[1/1] [0%                          ] g2_device.nsys-rep[1/1] [5%                          ] g2_device.nsys-rep[1/1] [=======38%                  ] g2_device.nsys-rep[1/1] [================70%         ] g2_device.nsys-rep[1/1] [===================82%      ] g2_device.nsys-rep[1/1] [=======================93%  ] g2_device.nsys-rep[1/1] [========================98% ] g2_device.nsys-rep[1/1] [========================100%] g2_device.nsys-rep[1/1] [========================100%] g2_device.nsys-rep
+Generated:
+    /home/kdougherty/hdf5_projs/vol-external-passthrough/devres_results/20260812_165902_53020/nsys/g2_device.nsys-rep

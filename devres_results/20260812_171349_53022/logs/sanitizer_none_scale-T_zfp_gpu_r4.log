@@ -1,0 +1,23 @@
+========= COMPUTE-SANITIZER
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/g2_san.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/devres_results/20260812_171349_53022/logs/san_none_scale-T.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/devres_results/20260812_171349_53022/logs/san_ext_none_scale-T.csv only=scale-T comp=zfp_gpu_r4 verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] staging arm=none  ledger=(none -- D2H will not be recorded)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 954.4 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE scale-T        min=5.209023e+00 max=5.754571e+00 range=5.455480e-01 xform=log1p
+
+=== scale-T (538.3 MiB, float, raw, transformed) ===
+Info: 0x562e39deedd0
+  scale-T_zfp_gpu_r4           C=   1.22 W=   163.72 F=    0.34 S=   107.01 X=    0.23 S2= 104.67 | E=   1.21 O=   0.31 R=   166.26 ms  ratio= 62.72x  RMSE=inf maxae=inf (log-space)
+[dbg main] done: arm=none, 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.22 write=163.72 flush=0.34 sync=107.01 close=0.23 csync=104.67 => write_total=377.20 ms | evict=1.21 open=0.31 read=166.26 => read_total=166.57 ms | ratio=62.72x ===
+========= ERROR SUMMARY: 0 errors

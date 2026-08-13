@@ -1,0 +1,25 @@
+========= COMPUTE-SANITIZER
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/devres_san.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/devres_results/20260812_172527_53023/logs/san_host_scale-T.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/devres_results/20260812_172527_53023/logs/san_ext_host_scale-T.csv only=scale-T comp=zfp_gpu_r4 verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] staging arm=host  ledger=(none -- D2H will not be recorded)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 954.4 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE scale-T        min=5.209023e+00 max=5.754571e+00 range=5.455480e-01 xform=log1p
+[device] scale-T: 538.3 MiB resident on GPU (setup h2d=46.964 ms)
+[device] arm=host d2h_ms=298.235 pcie_in=538.3 MiB (the leg the device arm skips)
+
+=== scale-T (538.3 MiB, float, raw, transformed) ===
+Info: 0x5626fa1f3560
+  scale-T_zfp_gpu_r4           C=   1.12 W=   415.20 F=    0.30 S=   143.85 X=    0.19 S2= 168.91 | E=   3.58 O=   0.32 R=   226.70 ms  ratio=  7.84x  RMSE=2.434e-05 maxae=1.459e-03 (log-space)
+[dbg main] done: arm=host, 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS over 1 measurement files: create=1.12 write=415.20 flush=0.30 sync=143.85 close=0.19 csync=168.91 => write_total=729.58 ms | evict=3.58 open=0.32 read=226.70 => read_total=227.02 ms | ratio=7.84x ===
+========= ERROR SUMMARY: 0 errors

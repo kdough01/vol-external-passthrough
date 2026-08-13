@@ -1,0 +1,29 @@
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/devres_host_nyx_baryon.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/devres_results/20260812_172527_53023/results_vol_host_nyx_baryon.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/devres_results/20260812_172527_53023/results_vol_ext_host_nyx_baryon.csv only=nyx_baryon comp=zfp_gpu_r4 zfp_gpu_r8 zfp_gpu_r12 zfp_gpu_r16 verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] staging arm=host  ledger=/home/kdougherty/hdf5_projs/vol-external-passthrough/devres_results/20260812_172527_53023/staging_host_nyx_baryon.csv
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 954.4 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE nyx_baryon     min=5.637747e-02 max=1.166017e+01 range=1.160379e+01 xform=log1p
+[device] nyx_baryon: 512.0 MiB resident on GPU (setup h2d=44.116 ms)
+[device] arm=host d2h_ms=296.260 pcie_in=512.0 MiB (the leg the device arm skips)
+
+=== nyx_baryon (512.0 MiB, float, hdf5, transformed) ===
+Info: 0x558b13643060
+  nyx_baryon_zfp_gpu_r4        C=   1.06 W=   243.36 F=    0.32 S=   128.41 X=    0.15 S2=  50.48 | E=   3.73 O=   0.38 R=   150.49 ms  ratio=  8.00x  RMSE=3.991e-03 maxae=3.861e-01 (log-space)
+Info: 0x558b135c7cd0
+  nyx_baryon_zfp_gpu_r8        C=   0.51 W=   278.07 F=  113.33 S=   135.19 X=    0.13 S2=  43.91 | E=   1.12 O=   0.26 R=   174.16 ms  ratio=  4.00x  RMSE=2.611e-04 maxae=2.497e-02 (log-space)
+Info: 0x558b3c87b870
+  nyx_baryon_zfp_gpu_r12       C=   0.48 W=   325.36 F=  120.62 S=   137.42 X=    0.12 S2=  48.74 | E=   1.21 O=   0.27 R=   196.72 ms  ratio=  2.67x  RMSE=1.632e-05 maxae=1.528e-03 (log-space)
+Info: 0x558b3c84f6b0
+  nyx_baryon_zfp_gpu_r16       C=   0.53 W=   390.66 F=  133.28 S=   122.97 X=    0.12 S2=  39.31 | E=   0.19 O=   0.27 R=   208.00 ms  ratio=  2.00x  RMSE=1.020e-06 maxae=1.040e-04 (log-space)
+[dbg main] done: arm=host, 1 datasets, 0 skipped, 4 measurements
+
+=== TOTALS over 4 measurement files: create=2.57 write=1237.45 flush=367.55 sync=523.99 close=0.53 csync=182.44 => write_total=2314.53 ms | evict=6.24 open=1.19 read=729.37 => read_total=730.55 ms | ratio=3.20x ===

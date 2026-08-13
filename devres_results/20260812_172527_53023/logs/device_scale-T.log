@@ -1,0 +1,28 @@
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/devres_device_scale-T.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/devres_results/20260812_172527_53023/results_vol_device_scale-T.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/devres_results/20260812_172527_53023/results_vol_ext_device_scale-T.csv only=scale-T comp=zfp_gpu_r4 zfp_gpu_r8 zfp_gpu_r12 zfp_gpu_r16 verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] staging arm=device  ledger=/home/kdougherty/hdf5_projs/vol-external-passthrough/devres_results/20260812_172527_53023/staging_device_scale-T.csv
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 954.4 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE scale-T        min=5.209023e+00 max=5.754571e+00 range=5.455480e-01 xform=log1p
+[device] scale-T: 538.3 MiB resident on GPU (setup h2d=46.479 ms)
+[device] arm=device: VOL receives the device pointer; no host round trip for the write
+
+=== scale-T (538.3 MiB, float, raw, transformed) ===
+Info: 0x562c6e7462a0
+  scale-T_zfp_gpu_r4           C=   1.17 W=   209.06 F=    0.30 S=   182.66 X=    0.21 S2=  51.67 | E=   1.04 O=   0.30 R=   158.56 ms  ratio=  7.84x  RMSE=2.434e-05 maxae=1.459e-03 (log-space)
+Info: 0x562c9c1247a0
+  scale-T_zfp_gpu_r8           C=   0.46 W=   258.60 F=   94.08 S=   117.79 X=    0.11 S2= 152.28 | E=   1.91 O=   0.27 R=   180.70 ms  ratio=  3.92x  RMSE=1.732e-06 maxae=1.001e-04 (log-space)
+Info: 0x562c6e7d5a10
+  scale-T_zfp_gpu_r12          C=   0.52 W=   229.05 F=  123.81 S=   120.72 X=    0.13 S2= 184.89 | E=   1.10 O=   0.27 R=   200.46 ms  ratio=  2.61x  RMSE=1.086e-07 maxae=6.199e-06 (log-space)
+Info: 0x562c9c0ea770
+  scale-T_zfp_gpu_r16          C=   0.52 W=   263.11 F=  160.70 S=   122.09 X=    0.14 S2=  50.29 | E=   4.54 O=   0.27 R=   463.53 ms  ratio=  1.96x  RMSE=5.521e+00 maxae=5.755e+00 (log-space)
+[FATAL] CUDA fault during scale-T / zfp_gpu_r16 (arm=device): an illegal memory access was encountered
+[FATAL] This is the measurement that broke the context. Re-run exactly this pair under compute-sanitizer.

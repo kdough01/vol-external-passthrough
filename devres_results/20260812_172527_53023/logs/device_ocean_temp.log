@@ -1,0 +1,29 @@
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/devres_device_ocean_temp.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/devres_results/20260812_172527_53023/results_vol_device_ocean_temp.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/devres_results/20260812_172527_53023/results_vol_ext_device_ocean_temp.csv only=ocean_temp comp=zfp_gpu_r4 zfp_gpu_r8 zfp_gpu_r12 zfp_gpu_r16 verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] staging arm=device  ledger=/home/kdougherty/hdf5_projs/vol-external-passthrough/devres_results/20260812_172527_53023/staging_device_ocean_temp.csv
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 954.4 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE ocean_temp     min=4.445019e+00 max=1.072704e+01 range=6.282023e+00 xform=none
+[device] ocean_temp: 123.1 MiB resident on GPU (setup h2d=11.473 ms)
+[device] arm=device: VOL receives the device pointer; no host round trip for the write
+
+=== ocean_temp (123.1 MiB, float, hdf5) ===
+Info: 0x556d8bcf8120
+  ocean_temp_zfp_gpu_r4        C=   0.87 W=   153.00 F=    0.25 S=   104.21 X=    0.14 S2=  59.79 | E=   6.79 O=   0.40 R=    41.82 ms  ratio=  7.56x  RMSE=4.110e-03 maxae=3.760e-01
+Info: 0x556d8bd50a50
+  ocean_temp_zfp_gpu_r8        C=   0.46 W=   128.33 F=    0.22 S=   123.23 X=    0.14 S2=  45.06 | E=   1.29 O=   0.27 R=    44.35 ms  ratio=  3.78x  RMSE=2.793e-04 maxae=2.552e-02
+Info: 0x556d8bd10c60
+  ocean_temp_zfp_gpu_r12       C=   0.48 W=   165.67 F=    0.23 S=   189.10 X=    0.11 S2=  54.70 | E=   5.23 O=   0.26 R=    49.33 ms  ratio=  2.52x  RMSE=1.752e-05 maxae=1.611e-03
+Info: 0x556d8bd078e0
+  ocean_temp_zfp_gpu_r16       C=   0.49 W=   160.50 F=    0.23 S=   404.31 X=    0.12 S2=  55.97 | E=   1.10 O=   0.27 R=    55.44 ms  ratio=  1.89x  RMSE=1.114e-06 maxae=1.140e-04
+[dbg main] done: arm=device, 1 datasets, 0 skipped, 4 measurements
+
+=== TOTALS over 4 measurement files: create=2.29 write=607.49 flush=0.93 sync=820.85 close=0.51 csync=215.51 => write_total=1647.59 ms | evict=14.42 open=1.20 read=190.94 => read_total=192.15 ms | ratio=3.02x ===

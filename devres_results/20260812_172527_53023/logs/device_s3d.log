@@ -1,0 +1,29 @@
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/devres_device_s3d.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/devres_results/20260812_172527_53023/results_vol_device_s3d.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/devres_results/20260812_172527_53023/results_vol_ext_device_s3d.csv only=s3d comp=zfp_gpu_r4 zfp_gpu_r8 zfp_gpu_r12 zfp_gpu_r16 verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] staging arm=device  ledger=/home/kdougherty/hdf5_projs/vol-external-passthrough/devres_results/20260812_172527_53023/staging_device_s3d.csv
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 954.4 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE s3d            min=-6.362436e-15 max=3.920002e-02 range=3.920002e-02 xform=none
+[device] s3d: 953.7 MiB resident on GPU (setup h2d=79.811 ms)
+[device] arm=device: VOL receives the device pointer; no host round trip for the write
+
+=== s3d (953.7 MiB, double, raw) ===
+Info: 0x5604fd941250
+  s3d_zfp_gpu_r4               C=   1.12 W=   181.08 F=    0.28 S=   187.59 X=    0.16 S2= 133.17 | E=   3.51 O=   0.43 R=   481.17 ms  ratio= 16.00x  RMSE=5.735e-08 maxae=3.710e-06
+Info: 0x5604fd9cfb60
+  s3d_zfp_gpu_r8               C=   0.50 W=   253.65 F=  102.21 S=   155.09 X=    0.11 S2=  92.70 | E=   8.66 O=   0.27 R=   258.45 ms  ratio=  8.00x  RMSE=1.568e-09 maxae=1.264e-07
+Info: 0x5604fd9c5a60
+  s3d_zfp_gpu_r12              C=   0.78 W=   236.28 F=   95.24 S=   139.07 X=    0.15 S2=  59.91 | E=   1.09 O=   0.27 R=   308.41 ms  ratio=  5.33x  RMSE=8.514e-11 maxae=8.036e-09
+Info: 0x56055df0cb70
+  s3d_zfp_gpu_r16              C=   0.48 W=   302.49 F=  141.64 S=   114.71 X=    0.14 S2= 102.55 | E=   1.12 O=   0.27 R=   392.60 ms  ratio=  4.00x  RMSE=5.312e-12 maxae=6.187e-10
+[dbg main] done: arm=device, 1 datasets, 0 skipped, 4 measurements
+
+=== TOTALS over 4 measurement files: create=2.88 write=973.51 flush=339.37 sync=596.46 close=0.56 csync=388.34 => write_total=2301.13 ms | evict=14.38 open=1.24 read=1440.63 => read_total=1441.87 ms | ratio=6.40x ===

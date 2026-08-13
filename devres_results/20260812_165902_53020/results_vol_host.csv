@@ -1,0 +1,15 @@
+dataset,compressor,path,op,phase,ms,ratio,rmse
+miranda,zfp_gpu_r4,vol,write,total,2031.2366,127.9991,
+miranda,zfp_gpu_r4,vol,write,flush,0.3839,,
+miranda,zfp_gpu_r4,vol,write,sync,98.9661,,
+miranda,zfp_gpu_r4,vol,write,close,0.5873,,
+miranda,zfp_gpu_r4,vol,write,csync,49.6147,,
+miranda,zfp_gpu_r4,vol,read,evict,1.0042,,
+miranda,zfp_gpu_r4,vol,read,total,98.0562,,inf
+miranda,zfp_gpu_r8,vol,write,total,112.0610,63.9998,
+miranda,zfp_gpu_r8,vol,write,flush,0.2770,,
+miranda,zfp_gpu_r8,vol,write,sync,108.8911,,
+miranda,zfp_gpu_r8,vol,write,close,0.1316,,
+miranda,zfp_gpu_r8,vol,write,csync,58.7850,,
+miranda,zfp_gpu_r8,vol,read,evict,1.1366,,
+miranda,zfp_gpu_r8,vol,read,total,70.8703,,inf
