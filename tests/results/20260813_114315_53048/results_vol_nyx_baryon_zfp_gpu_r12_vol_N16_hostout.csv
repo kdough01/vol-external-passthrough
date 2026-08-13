@@ -1,0 +1,10 @@
+dataset,compressor,path,op,phase,ms,ratio,rmse
+nyx_baryon,zfp_gpu_r12,vol,write,total,435.5883,2.6667,
+nyx_baryon,zfp_gpu_r12,vol,write,flush,101.8162,,
+nyx_baryon,zfp_gpu_r12,vol,write,sync,125.5438,,
+nyx_baryon,zfp_gpu_r12,vol,write,close,0.2222,,
+nyx_baryon,zfp_gpu_r12,vol,write,csync,29.2457,,
+nyx_baryon,zfp_gpu_r12,vol,read,evict,1.1795,,
+nyx_baryon,zfp_gpu_r12,vol,read,total,336.7425,,1.632452e-05
+/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_nyx_baryon_zfp_gpu_r12_vol_N16_hostout.h5,ALL,vol,write,file,693.3390,2.6667,
+/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_nyx_baryon_zfp_gpu_r12_vol_N16_hostout.h5,ALL,vol,read,file,337.0133,,

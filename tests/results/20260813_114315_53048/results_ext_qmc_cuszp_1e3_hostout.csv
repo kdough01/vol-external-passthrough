@@ -1,0 +1,2 @@
+dataset,compressor,codec_kind,chunk_n,rep,logical_bytes,stored_bytes,ratio,create_ms,write_ms,flush_ms,sync_ms,close_ms,csync_ms,evict_ms,open_ms,read_ms,rmse,abs_thresh,maxae,bound_ok
+einspline37,cuszp_1e3,gpu,1,0,13560851520,2578978382,5.2582,1.1216,4884.8654,181.7549,172.9511,0.2069,112.7141,0.2113,0.4407,5571.3816,4.629181e-01,1.000000e-03,3.670440e+02,0

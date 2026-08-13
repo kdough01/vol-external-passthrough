@@ -1,0 +1,2 @@
+dataset,compressor,codec_kind,chunk_n,rep,logical_bytes,stored_bytes,ratio,create_ms,write_ms,flush_ms,sync_ms,close_ms,csync_ms,evict_ms,open_ms,read_ms,rmse,abs_thresh,maxae,bound_ok
+nyx_baryon,cuszp_1e3,gpu,8,0,536870912,125071006,4.2925,0.9707,285.2527,85.9379,111.6277,0.1594,97.8082,1.4802,0.2722,173.5107,5.773377e-04,1.000000e-03,1.000166e-03,1

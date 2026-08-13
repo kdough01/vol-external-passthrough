@@ -1,0 +1,10 @@
+dataset,compressor,path,op,phase,ms,ratio,rmse
+scale-T,zfp_gpu_r12,vol,write,total,343.8188,2.6133,
+scale-T,zfp_gpu_r12,vol,write,flush,112.3066,,
+scale-T,zfp_gpu_r12,vol,write,sync,183.2579,,
+scale-T,zfp_gpu_r12,vol,write,close,0.2066,,
+scale-T,zfp_gpu_r12,vol,write,csync,120.1472,,
+scale-T,zfp_gpu_r12,vol,read,evict,1.6979,,
+scale-T,zfp_gpu_r12,vol,read,total,256.1551,,1.085722e-07
+/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_scale-T_zfp_gpu_r12_hostout.h5,ALL,vol,write,file,760.9156,2.6133,
+/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_scale-T_zfp_gpu_r12_hostout.h5,ALL,vol,read,file,256.4618,,
