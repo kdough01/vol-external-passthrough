@@ -1,0 +1,11 @@
+dataset,compressor,path,op,phase,ms,ratio,rmse
+miranda,zfp_gpu_r4,vol,write,total,328.3947,16.0000,
+miranda,zfp_gpu_r4,vol,write,wall,328.3949,,
+miranda,zfp_gpu_r4,vol,write,flush,0.3377,,
+miranda,zfp_gpu_r4,vol,write,sync,128.3467,,
+miranda,zfp_gpu_r4,vol,write,close,0.1775,,
+miranda,zfp_gpu_r4,vol,write,csync,45.7670,,
+miranda,zfp_gpu_r4,vol,read,evict,1.1720,,
+miranda,zfp_gpu_r4,vol,read,total,76.5668,,1.323060e-04
+/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_miranda_zfp_gpu_r4_rtrip.h5,ALL,vol,write,file,504.1476,16.0000,
+/lcrc/project/SDR/kdougherty/vol_bench_h5/bench_miranda_zfp_gpu_r4_rtrip.h5,ALL,vol,read,file,76.8781,,

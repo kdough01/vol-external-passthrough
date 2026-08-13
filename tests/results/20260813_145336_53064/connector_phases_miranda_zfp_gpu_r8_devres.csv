@@ -1,0 +1,3 @@
+dataset,compressor,op,total_ms,stage_ms,compress_ms,container_ms,io_ms,pressio_call_ms,device_ms,transfer_ms,vol_compress_ms,pressio_host_ms,residual_ms,residual_frac,h2d_ms
+miranda_zfp_gpu_r8,zfp,write,152.0215,0.0000,31.5255,0.0509,120.4367,6.7985,8.8812,21.7881,2.9388,-2.0826,0.0085,0.000056,0.000
+miranda_zfp_gpu_r8,zfp,read,157.7955,0.0000,133.3391,0.0000,24.4454,133.1977,133.2132,0.0000,0.1414,-0.0156,0.0111,0.000070,0.000

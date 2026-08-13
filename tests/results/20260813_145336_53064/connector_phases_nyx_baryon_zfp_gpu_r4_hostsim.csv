@@ -1,0 +1,3 @@
+dataset,compressor,op,total_ms,stage_ms,compress_ms,container_ms,io_ms,pressio_call_ms,device_ms,transfer_ms,vol_compress_ms,pressio_host_ms,residual_ms,residual_frac,h2d_ms
+nyx_baryon_zfp_gpu_r4,zfp,write,228.0212,0.0000,96.1339,0.0534,131.8253,9.6823,15.1179,33.6354,52.8163,-5.4356,-45.0789,-0.197696,45.087
+nyx_baryon_zfp_gpu_r4,zfp,read,158.4248,0.0000,117.4166,0.0000,40.9957,117.2675,117.2815,0.0000,0.1491,-0.0140,0.0125,0.000079,0.000
