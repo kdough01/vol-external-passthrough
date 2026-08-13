@@ -230,11 +230,28 @@ vol_is_byte_stream(const char *id)
 
 /* Codecs whose work runs on a CUDA stream and should be timed with events. */
 static int
-vol_is_gpu_codec(const char *id)
+vol_codec_is_gpu(const compression_ctx *ctx)
 {
-    return strncmp(id, "cuszp",  5) == 0 ||
-           strncmp(id, "cusz",   4) == 0 ||
-           strncmp(id, "nvcomp", 6) == 0;
+    return ctx && ctx->observed_gpu > 0;
+}
+
+/* Latch the observation. Idempotent: only the first call decides. */
+static void
+vol_note_output_domain(compression_ctx *ctx, const void *p)
+{
+    int dev;
+
+    if (!ctx || ctx->observed_gpu >= 0)
+        return;
+
+    dev = H5VL_pass_through_ext_buf_is_device(p);
+    ctx->observed_gpu = dev;
+
+    if (getenv("VOL_COMP_COPY_LOG"))
+        fprintf(stderr, "[VOL probe] '%s' produces %s-resident output; "
+                        "device fast path %s\n",
+                ctx->compressor_id, dev ? "device" : "host",
+                dev ? "ENABLED" : "disabled");
 }
 
 /* ------------------------------------------------------------------------
@@ -556,6 +573,8 @@ vol_fetch_result_pooled(compression_ctx *ctx, struct pressio_data *result,
     *out_size = 0;
     if (!src || sz == 0) return -1;
 
+    vol_note_output_domain(ctx, src);
+
     /* ---- CASE 1: codec wrote into the pooled buffer we gave it ---- */
     if (own_base && src == (void *)((char *)own_base + hdr_reserve)) {
         *out_base = own_base;
@@ -634,6 +653,8 @@ vol_fetch_result_owned(compression_ctx *ctx, struct pressio_data *result,
     *out_size = 0;
 
     if (!src || sz == 0) return -1;
+
+    vol_note_output_domain(ctx, src);
 
     /* Device result: let libpressio bring it home. The domain manager knows
      * the source domain, selects the transport, and orders against the
@@ -1205,7 +1226,7 @@ vol_compress_native_impl(compression_ctx *ctx,
         in_dims = rdims;
     }
 
-    is_gpu = vol_is_gpu_codec(ctx->compressor_id);
+    is_gpu = vol_codec_is_gpu(ctx);
 
     if (getenv("VOL_COMP_DUMP_CALL")) {
         struct pressio_options *o = pressio_compressor_get_options(ctx->compressor);
@@ -1237,7 +1258,7 @@ vol_compress_native_impl(compression_ctx *ctx,
 
 #ifdef USE_CUDA
     vol_set_cuda_stream(ctx);
-    ev = vol_ev_begin(ctx, is_gpu);
+    ev = vol_ev_begin(ctx, 1);
 #endif
     t0   = bench_now_ms();
     cerr = pressio_compressor_compress(ctx->compressor, input, output);
@@ -1409,7 +1430,7 @@ vol_decompress_native_impl(compression_ctx *ctx,
         out_dims = rdims;
     }
 
-    is_gpu = vol_is_gpu_codec(ctx->compressor_id);
+    is_gpu = vol_codec_is_gpu(ctx);
 
 #ifdef ENABLE_EXT_PASSTHRU_LOGGING
     printf("------- DECOMPRESS NATIVE: id=%s csize=%zu out_bytes=%zu ndims=%zu\n",
@@ -1435,7 +1456,7 @@ vol_decompress_native_impl(compression_ctx *ctx,
 
 #ifdef USE_CUDA
     vol_set_cuda_stream(ctx);
-    ev = vol_ev_begin(ctx, is_gpu);
+    ev = vol_ev_begin(ctx, 1);
 #endif
     t0   = bench_now_ms();
     derr = pressio_compressor_decompress(ctx->compressor, input, output);
@@ -1588,7 +1609,7 @@ vol_transfer_compress_chunk_impl(compression_ctx *ctx,
 
 #ifdef USE_CUDA
     vol_set_cuda_stream(ctx);
-    ev = vol_ev_begin(ctx, is_gpu);
+    ev = vol_ev_begin(ctx, 1);
 #endif
     t0   = bench_now_ms();
     cerr = pressio_compressor_compress(ctx->compressor, input, output);
@@ -1759,7 +1780,7 @@ vol_transfer_decompress_chunk_impl(compression_ctx *ctx,
             return -1;              /* error already pushed */
     }
 
-    is_gpu = vol_is_gpu_codec(ctx->compressor_id);
+    is_gpu = vol_codec_is_gpu(ctx);
 
 #ifdef ENABLE_EXT_PASSTHRU_LOGGING
     printf("------- DECOMPRESS CHUNK: id=%s csize=%zu out_bytes=%zu rank=%zu "
@@ -1788,7 +1809,7 @@ vol_transfer_decompress_chunk_impl(compression_ctx *ctx,
 
 #ifdef USE_CUDA
     vol_set_cuda_stream(ctx);
-    ev = vol_ev_begin(ctx, is_gpu);
+    ev = vol_ev_begin(ctx, 1);
 #endif
     t0   = bench_now_ms();
     derr = pressio_compressor_decompress(ctx->compressor, input, output);
@@ -2183,7 +2204,7 @@ vol_compress_pressio_impl(compression_ctx *ctx,
 
 #ifdef USE_CUDA
     {
-        int _gpu = vol_is_gpu_codec(ctx->compressor_id);
+        int _gpu = vol_codec_is_gpu(ctx);
         cudaEvent_t _ev0 = NULL, _ev1 = NULL;
         cudaStream_t _stream = (cudaStream_t)ctx->stream;   /* 0 => default */
         double _t0;
@@ -2431,7 +2452,7 @@ vol_decompress_pressio_impl(compression_ctx *ctx,
 
 #ifdef USE_CUDA
     {
-        int _gpu = vol_is_gpu_codec(ctx->compressor_id);
+        int _gpu = vol_codec_is_gpu(ctx);
         cudaEvent_t _ev0 = NULL, _ev1 = NULL;
         cudaStream_t _stream = (cudaStream_t)ctx->stream;   /* 0 => default */
         double _t0;

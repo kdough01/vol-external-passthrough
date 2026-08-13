@@ -66,7 +66,8 @@ typedef struct compression_ctx {
     vol_buf_t decomp;        /* read side: decompressed logical buffer         */
 
     void *adopted_buf;
-    int   codec_ignores_output;    
+    int   codec_ignores_output;
+    int observed_gpu;
 } compression_ctx;
 
 #ifdef __cplusplus

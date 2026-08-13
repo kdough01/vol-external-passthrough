@@ -611,6 +611,7 @@ compression_ctx* compression_ctx_create(int rank, hsize_t *h5dims, enum pressio_
     comp_ctx->stage_buf    = NULL;
     comp_ctx->stage_total  = 0;
     comp_ctx->stage_filled = 0;
+    comp_ctx->observed_gpu = -1;
 
     return comp_ctx;
 }

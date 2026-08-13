@@ -29,3 +29,8 @@ libnew_h5api.a
 libh5passthrough_vol.so
 build/
 spack-env/
+
+*.png
+*.pdf
+/tests/*.png
+/tests/*.pdf
