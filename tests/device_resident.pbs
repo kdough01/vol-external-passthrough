@@ -1,87 +1,28 @@
 #!/bin/bash
-#PBS -N g2_device_resident
+#PBS -N vol_test_swing
 #PBS -l select=1:ncpus=16:ngpus=1:mpiprocs=1:mem=256gb
-#PBS -l walltime=06:00:00
+#PBS -l walltime=04:00:00
 #PBS -j oe
 #PBS -A SDR
 #PBS -q gpu
-#
-# =============================================================================
-# Device-resident vs host-staged write.
-#
-# Built on vol_test_swing.pbs. The environment below is NOT optional garnish --
-# an earlier version of this script reproduced the run commands but not the
-# environment, and every number it produced was wrong in ways that looked like
-# real results. Specifically it omitted:
-#
-#   source zfp64_preamble.sh   libpressio then bound to the env's zfp bsws=8
-#                              build instead of bsws=64. The bit stream word
-#                              size is off by exactly 8x, so stored_bytes came
-#                              out 8x small, every ratio read 8x too high, the
-#                              stream decoded against the wrong word size and
-#                              the field came back mostly zeros (RMSE ~ the RMS
-#                              of the data), and zfp's CUDA policy -- which is
-#                              unavailable at bsws=8 -- ran anyway and took an
-#                              illegal memory access. Four symptoms, one cause.
-#
-#   VOL_COMP_CHUNKING unset    The native baseline sets NO chunking variable.
-#                              Passing the literal string "none" is not the
-#                              same thing.
-#
-#   -DCMAKE_BUILD_TYPE=Release An unoptimised build makes every timing useless
-#                              even when everything else is correct.
-#
-#   HDF5_USE_FILE_LOCKING, BENCH_CSV, VOL_TIMING_STRICT
-#
-# The gate at step [0] exists so that failure mode can never recur silently:
-# it checks a known-analytic compression ratio before the sweep starts and
-# refuses to run if the environment is wrong.
-#
-# WHAT THIS MEASURES. The application's field starts on the GPU. Two arms:
-#
-#   host    the app must hand H5Dwrite a HOST pointer, so the uncompressed
-#           field is copied D2H by the app, then H2D again by the connector so
-#           the GPU compressor can see it. Both legs are pure staging.
-#   device  the app hands H5Dwrite the DEVICE pointer. Neither leg happens.
-#
-# plus a control:
-#
-#   none    neither env var set -- hbuf straight from the loader, no CUDA
-#           allocation in the harness. Identical to the historical path.
-#
-# savings = (host write envelope + app-side D2H) - (device write envelope)
-#
-# All arms run in one job on one node. Do not difference the device arm against
-# GPU numbers from an older job.
-# =============================================================================
 
-DATASETS="miranda scale-T s3d nyx_baryon ocean_temp qmc"
-RATES="zfp_gpu_r4 zfp_gpu_r8 zfp_gpu_r12 zfp_gpu_r16"
-ARMS="${ARMS:-none host device}"
+cd $PBS_O_WORKDIR/..
+WORK="$(pwd)/tests"
 
-# Native baseline: BOTH unset, matching run_vol_group's mode="" nchunks="".
-# Set CHUNK_MODE=vol CHUNK_N=8 to reproduce the qmc vol_N8 configuration.
-CHUNK_MODE="${CHUNK_MODE:-}"
-CHUNK_N="${CHUNK_N:-}"
+# Per-job results directory. A shared $WORK/results accumulates CSVs across
+# jobs, and every summary block at the bottom globs that directory -- so a job
+# that produces nothing still prints a full, plausible-looking set of tables
+# from PREVIOUS runs. Isolate per job; "latest" points at the current one.
+RESULTS="$WORK/results/$(date +%Y%m%d_%H%M%S)_${PBS_JOBID%%.*}"
+mkdir -p "$RESULTS"
+ln -sfn "$RESULTS" "$WORK/results/latest"
 
-PER_RATE="${PER_RATE:-0}"           # 1 => one process per (arm, dataset, rate)
-RUN_SANITIZER="${RUN_SANITIZER:-1}"
-PAIR_TIMEOUT="${PAIR_TIMEOUT:-1800}"
 BUILD_TYPE="${VOL_BUILD_TYPE:-Release}"
 
-cd "$PBS_O_WORKDIR/.." || exit 1
-WORK="$(pwd)"
-
-STAMP="$(date +%Y%m%d_%H%M%S)_${PBS_JOBID%%.*}"
-RES="$WORK/devres_results/$STAMP"
-mkdir -p "$RES/logs" || { echo "ERROR: cannot create $RES"; exit 1; }
-ln -sfn "$RES" "$WORK/devres_results/latest"
-
-echo "Job started on $(date)   host=$(hostname)"
-echo "arms=$ARMS  per_rate=$PER_RATE  build=$BUILD_TYPE"
-echo "chunking: mode='${CHUNK_MODE:-native}' N='${CHUNK_N:-1}'"
-echo "results -> $RES"
-nvidia-smi --query-gpu=name,memory.total --format=csv,noheader
+echo "Job started on $(date)"
+echo "Running on: $(hostname)"
+echo "PWD: $(pwd)"
+echo "BUILD_TYPE: $BUILD_TYPE"
 
 module load gcc/11.4.0
 module load hpcx/2.26-gcc
@@ -91,272 +32,401 @@ SYSTEM_MPICC=$(which mpicc)
 SYSTEM_MPICXX=$(which mpicxx)
 GCC_LIB=$(gcc --print-file-name=libstdc++.so | xargs dirname 2>/dev/null)
 [ "$GCC_LIB" = "." ] && GCC_LIB=/usr/lib/gcc/x86_64-linux-gnu/11
-[ -x "$SYSTEM_MPICC" ] || { echo "ERROR: mpicc not on PATH -- module load hpcx?"; exit 1; }
+
+echo "mpicc:   $SYSTEM_MPICC"
+echo "nvcc:    $(which nvcc)"
+echo "gcc:     $(gcc --version | head -1)"
+echo "GCC_LIB: $GCC_LIB"
+
+$SYSTEM_MPICC --version || { echo "mpicc broken — aborting"; exit 1; }
 
 LP_VIEW=/home/kdougherty/libpressio_cuda/.spack-env/view
-CLEAN_PATH=$(echo "$PATH" | tr ':' '\n' | grep -v spack-env | tr '\n' ':')
 
+# NOTE: zfp64_preamble.sh is sourced AFTER the build, not here. Sourcing it now
+# would leak LD_PRELOAD into every cmake/compiler invocation, and the build's
+# own `env LD_LIBRARY_PATH=...` overrides would fight it.
+
+# Find LibPressio cmake config — check both lib and lib64
 LP_CMAKE_DIR=""
 for candidate in \
-    "${LP_VIEW}/lib64/cmake/LibPressio" "${LP_VIEW}/lib/cmake/LibPressio" \
-    "${LP_VIEW}/lib64/cmake/libpressio" "${LP_VIEW}/lib/cmake/libpressio"; do
+    "${LP_VIEW}/lib64/cmake/LibPressio" \
+    "${LP_VIEW}/lib/cmake/LibPressio" \
+    "${LP_VIEW}/lib64/cmake/libpressio" \
+    "${LP_VIEW}/lib/cmake/libpressio"
+do
     if [ -f "${candidate}/LibPressioConfig.cmake" ] || \
        [ -f "${candidate}/libpressio-config.cmake" ]; then
-        LP_CMAKE_DIR="$candidate"; break
+        LP_CMAKE_DIR="$candidate"
+        break
     fi
 done
-[ -z "$LP_CMAKE_DIR" ] && { echo "ERROR: no LibPressioConfig.cmake under $LP_VIEW"; exit 1; }
 
+if [ -z "$LP_CMAKE_DIR" ]; then
+    echo "ERROR: Cannot find LibPressioConfig.cmake under $LP_VIEW"
+    echo "--- cmake dirs in view ---"
+    find "$LP_VIEW" -name "*ressio*onfig.cmake" 2>/dev/null
+    exit 1
+fi
+echo "LibPressio cmake dir: $LP_CMAKE_DIR"
+
+# SPERR ships no CMake config -- only share/pkgconfig/SPERR.pc -- so it is
+# located by explicit prefix. Cannot use `spack location` here: this job never
+# activates the env, and CLEAN_PATH strips spack-env from PATH.
 SPERR_PREFIX="${SPERR_PREFIX:-/gpfs/fs1/home/kdougherty/spack/opt/spack/linux-zen2/sperr-0.8.2-qsqz7rfwktbmkju43ucbrmtpiyn6wyb6}"
 [ -d "$SPERR_PREFIX/include" ] || { echo "ERROR: bad SPERR_PREFIX: $SPERR_PREFIX"; exit 1; }
+echo "SPERR prefix: $SPERR_PREFIX"
+
+CLEAN_PATH=$(echo "$PATH" | tr ':' '\n' | grep -v spack-env | tr '\n' ':')
 
 echo ""
-echo "=== building (USE_CUDA=ON, $BUILD_TYPE) ==="
+echo "=== Building (USE_CUDA=ON -> CUDA-event timing in the connector) ==="
+rm -rf build
 env PATH="$CLEAN_PATH" LD_LIBRARY_PATH="$GCC_LIB" \
 cmake -S . -B build \
     -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
-    -DCMAKE_C_COMPILER="$SYSTEM_MPICC" -DCMAKE_CXX_COMPILER="$SYSTEM_MPICXX" \
-    -DUSE_CUDA=ON -DCMAKE_PREFIX_PATH="$LP_VIEW" \
-    -DLibPressio_DIR="$LP_CMAKE_DIR" -DSPERR_PREFIX="$SPERR_PREFIX" \
-    -Wno-dev > "$RES/build.log" 2>&1 \
-    || { echo "cmake failed"; tail -30 "$RES/build.log"; exit 1; }
-env PATH="$CLEAN_PATH" LD_LIBRARY_PATH="$GCC_LIB" cmake --build build -j16 \
-    >> "$RES/build.log" 2>&1 \
-    || { echo "build failed"; tail -40 "$RES/build.log"; exit 1; }
+    -DCMAKE_C_COMPILER="$SYSTEM_MPICC" \
+    -DCMAKE_CXX_COMPILER="$SYSTEM_MPICXX" \
+    -DUSE_CUDA=ON \
+    -DCMAKE_PREFIX_PATH="$LP_VIEW" \
+    -DLibPressio_DIR="$LP_CMAKE_DIR" \
+    -DSPERR_PREFIX="$SPERR_PREFIX" \
+    -Wno-dev
 
+echo "=== compiler flags in effect ==="
+grep -E "CMAKE_BUILD_TYPE|CMAKE_(C|CXX|CUDA)_FLAGS(_$(echo "$BUILD_TYPE" | tr '[:lower:]' '[:upper:]'))?:" build/CMakeCache.txt
+
+env PATH="$CLEAN_PATH" LD_LIBRARY_PATH="$GCC_LIB" \
+cmake --build build -j16
+
+echo "--- build/ ---"
+ls build/ || { echo "Build failed"; exit 1; }
+
+# ===========================================================================
+# LOCATE THE BINARIES
+#
+# CMake puts executables in build/bin (RUNTIME_OUTPUT_DIRECTORY), not
+# build/tests -- build/tests holds only Makefiles. Hardcoding build/tests
+# yields rc=127 on every run and a job that "completes" in 20 seconds having
+# measured nothing. Detect, and abort loudly if not found.
+# ===========================================================================
 BIN=""
 for d in build/bin build/tests build; do
-    [ -x "$d/bench_vol_timing" ] && { BIN="$(pwd)/$d"; break; }
+    if [ -x "$d/bench_vol_timing" ]; then BIN="$(pwd)/$d"; break; fi
 done
-[ -z "$BIN" ] && { echo "ERROR: bench_vol_timing not found under build/"; exit 1; }
-
-PLUGIN_DIR=""
-for d in build/lib build; do
-    [ -e "$d/libhdf5_vol_passthrough.so" ] && { PLUGIN_DIR="$(pwd)/$d"; break; }
-done
-[ -z "$PLUGIN_DIR" ] && { echo "ERROR: libhdf5_vol_passthrough.so not found"; exit 1; }
-echo "Binary dir: $BIN"
-echo "Plugin dir: $PLUGIN_DIR"
-
-MISSING=""
-for sym in BENCH_DEVICE_INPUT BENCH_HOST_STAGED BENCH_STAGING_CSV; do
-    strings "$BIN/bench_vol_timing" 2>/dev/null | grep -q "$sym" \
-        || MISSING="$MISSING $sym"
-done
-[ -n "$MISSING" ] && { echo "ERROR: binary missing:$MISSING -- apply the staging block"; exit 1; }
-
-# ===========================================================================
-# RUNTIME ENVIRONMENT -- sourced AFTER the build, exactly as in
-# vol_test_swing.pbs. Sourcing before would leak LD_PRELOAD into cmake, and
-# the build's own `env LD_LIBRARY_PATH=` overrides would fight it.
-#
-# DO NOT export LD_LIBRARY_PATH after this point: that silently reverts the
-# bsws=64 swap and every zfp number in the job becomes wrong by a factor of 8
-# while still looking entirely plausible.
-# ===========================================================================
-source "$PBS_O_WORKDIR/zfp64_preamble.sh"
-export HDF5_USE_FILE_LOCKING=FALSE
-
-if [ "${BENCH_ZFP64:-1}" = "0" ]; then
-    echo ""
-    echo ">>> ERROR: the bsws=64 swap did not take (BENCH_ZFP64=0)."
-    echo ">>> This job runs zfp_gpu_* exclusively and there is nothing left to"
-    echo ">>> measure. vol_test_swing.pbs drops the GPU rows here; aborting."
+if [ -z "$BIN" ]; then
+    echo "ERROR: bench_vol_timing not found. Built executables are at:"
+    find build -type f -perm -u+x -name 'bench_*' -o -type f -perm -u+x -name 'dump_*' 2>/dev/null
     exit 1
 fi
+echo "Binary dir: $BIN"
+for exe in bench_vol_timing bench_filter_timing dump_cuszp_opts; do
+    [ -x "$BIN/$exe" ] || echo "  WARNING: $exe missing from $BIN"
+done
+
+# The VOL connector .so, for HDF5_PLUGIN_PATH. Also lands in build/lib, not
+# build/. HDF5 does not search recursively, so this must be the exact dir.
+PLUGIN_DIR=""
+for d in build/lib build; do
+    if [ -e "$d/libhdf5_vol_passthrough.so" ]; then PLUGIN_DIR="$(pwd)/$d"; break; fi
+done
+if [ -z "$PLUGIN_DIR" ]; then
+    echo "ERROR: libhdf5_vol_passthrough.so not found under build/"
+    find build -name 'libhdf5_vol_passthrough.so*' 2>/dev/null
+    exit 1
+fi
+echo "Plugin dir: $PLUGIN_DIR"
+
+# ===========================================================================
+# RUNTIME ENVIRONMENT
+#
+# zfp64_preamble.sh sets LD_LIBRARY_PATH (and LD_PRELOAD if the binaries carry
+# DT_RPATH rather than DT_RUNPATH) so libpressio binds to zfp@0.5.5 bsws=64
+# instead of the env's bsws=8 build. zfp's CUDA backend requires a 64-bit bit
+# stream word size; with bsws=8 the cuda execution policy is unavailable.
+#
+# It also sets BENCH_FSYNC / BENCH_DROP_CACHE / BENCH_SYNC_DIR so write_ms and
+# read_ms measure the device rather than the page cache.
+#
+# DO NOT export LD_LIBRARY_PATH after this point -- that is what silently
+# reverts the swap.
+# ===========================================================================
+# export BENCH_ZFP_SMOKE=1     # uncomment for a standalone GPU zfp check first
+source "$PBS_O_WORKDIR/zfp64_preamble.sh"
+
+export HDF5_USE_FILE_LOCKING=FALSE
 
 H5DIR="${VOL_H5DIR:-/lcrc/project/SDR/$USER/vol_bench_h5}"
-mkdir -p "$H5DIR" || { echo "ERROR: cannot create $H5DIR"; exit 1; }
+mkdir -p "$H5DIR" || { echo "cannot create $H5DIR"; exit 1; }
 
-MANIFEST="$RES/manifest.csv"
-echo "arm,dataset,rate,exit,signal,note" > "$MANIFEST"
-FAILED="$RES/failed_pairs.txt"; : > "$FAILED"
+# ===========================================================================
+# STEP 0 -- Does the cuszp CUDA-stream option key actually exist?
+#
+# If it does not, vol_set_cuda_stream() never applied anything, the codec ran on
+# its own stream, our events bracketed an empty one, and every device_ms in the
+# results is meaningless. This is a ten-second check and it gates everything
+# downstream. (The old script grepped this dump for 'cuszp' but never for
+# 'stream'.)
+# ===========================================================================
+echo ""
+echo "=== [0] cuszp option keys: looking for a cuda_stream knob ==="
+"$BIN"/dump_cuszp_opts | tr ',' '\n' | grep -i cuszp
+echo "--- stream keys ---"
+STREAM_KEYS=$("$BIN"/dump_cuszp_opts | tr ',' '\n' | grep -i stream)
+if [ -z "$STREAM_KEYS" ]; then
+    echo "*** NO STREAM OPTION FOUND for cuszp. ***"
+    echo "*** device_ms from CUDA events will NOT be trustworthy.            ***"
+    echo "*** Report host wall-clock only, and use nsys for device evidence. ***"
+else
+    echo "$STREAM_KEYS"
+fi
 
-decode_exit () {
-    case "$1" in
-        0)   echo "ok"              ;;
-        2)   echo "BAD_ARM_CONFIG"  ;;
-        3)   echo "CUDA_FAULT"      ;;
-        134) echo "SIGABRT"         ;;
-        137) echo "SIGKILL/timeout" ;;
-        139) echo "SIGSEGV"         ;;
-        *)   echo "exit_$1"         ;;
-    esac
-}
+# ===========================================================================
+# XCSV COLUMN MAP (bench_vol_timing.cpp XCSV_HEADER, 21 fields)
+#
+#   1 dataset        2 compressor    3 codec_kind   4 chunk_n     5 rep
+#   6 logical_bytes  7 stored_bytes  8 ratio
+#   9 create_ms     10 write_ms     11 flush_ms    12 sync_ms
+#  13 close_ms      14 csync_ms     15 evict_ms    16 open_ms     17 read_ms
+#  18 rmse          19 abs_thresh   20 maxae       21 bound_ok
+#
+# bound_ok is -1 for rate-mode entries (lossy, no error bound to check).
+# Filter on $21=="0" for real fidelity failures; -1 rows are not failures.
+# ===========================================================================
+XCSV_HEADER_21="dataset,compressor,codec_kind,chunk_n,rep,logical_bytes,stored_bytes,ratio,create_ms,write_ms,flush_ms,sync_ms,close_ms,csync_ms,evict_ms,open_ms,read_ms,rmse,abs_thresh,maxae,bound_ok"
 
-# ------------------------------------------------------------- one process --
-run_one () {
-    local arm="$1" ds="$2" rates="$3" slug="$4"
-    local dev=""
-    case "$arm" in
-        device) dev="BENCH_DEVICE_INPUT=1" ;;
-        host)   dev="BENCH_HOST_STAGED=1"  ;;
-        none)   dev=""                     ;;
-        *)      echo "run_one: bad arm '$arm'"; return 1 ;;
-    esac
+# ===========================================================================
+# run_vol_group TAG SEL COMP MODE NCHUNKS
+#   MODE:    "" = native (default), "vol", "pressio"
+#   NCHUNKS: chunk count for vol/pressio; "" = single chunk
+# Env vars override any vol:* keys in opts_json, so the *_?json JSON-path runs
+# must be launched with MODE="" and NCHUNKS="".
+# ===========================================================================
+run_vol_group () {
+    local tag="$1"; local sel="$2"; local comp="$3"; local mode="$4"; local nchunks="$5"
+    local label="${tag}_${comp}${mode:+_${mode}}${nchunks:+_N${nchunks}}${VOL_COMP_HOST_OUTPUT:+_hostout}"
+    local h5="$H5DIR/bench_${label}.h5"
+    local rcsv="$RESULTS/results_vol_${label}.csv"
+    local xcsv="$RESULTS/results_ext_${label}.csv"
+    local pcsv="$RESULTS/connector_phases_${label}.csv"
 
-    local label="${arm}_${slug}"
-    local h5="$H5DIR/devres_${label}.h5"
-    local log="$RES/logs/${label}.log"
-    rm -f "$H5DIR"/devres_"${label}"*.h5
-
-    # Distinct filenames from vol_test_swing.pbs (results_ext_*) on purpose:
-    # if load_results.py ever globs recursively, device-arm rows must not be
-    # mistaken for ordinary zfp_gpu rows in `combined`.
+    # bench_vol_timing takes ONE measurement per (dataset x compressor) and
+    # writes its own file per compressor, derived from $h5: <base>_<comp>.h5.
+    # It unlinks them itself; this glob only cleans up after a killed run.
+    # (BENCH_REPS / BENCH_WARMUP below are inert in the current source -- there
+    # is no repetition loop and no warmup pass. Left in place for the day one
+    # is reintroduced.)
+    rm -f "$H5DIR"/bench_"${label}"*.h5 "$pcsv"
+    echo ""
+    echo "=== VOL timing [$label] : $sel (chunking: ${mode:-native}${nchunks:+, N=${nchunks}}) ==="
     env HDF5_VOL_CONNECTOR="pass_through_ext under_vol=0;under_info={}" \
         HDF5_PLUGIN_PATH="$PLUGIN_DIR" \
         VOL_COMP_CHUNK_LOG=1 \
+        BENCH_CSV="$pcsv" \
         VOL_TIMING_STRICT="${VOL_TIMING_STRICT:-1}" \
-        BENCH_CSV="$RES/connector_phases_${label}.csv" \
-        ${CHUNK_MODE:+VOL_COMP_CHUNKING="$CHUNK_MODE"} \
-        ${CHUNK_N:+VOL_COMP_CHUNK_N="$CHUNK_N"} \
         ${VOL_COMP_GPU_EVENTS:+VOL_COMP_GPU_EVENTS="$VOL_COMP_GPU_EVENTS"} \
-        BENCH_ONLY="$ds" BENCH_COMP="$rates" \
+        ${VOL_COMP_HOST_OUTPUT:+VOL_COMP_HOST_OUTPUT="$VOL_COMP_HOST_OUTPUT"} \
+        ${mode:+VOL_COMP_CHUNKING="$mode"} \
+        ${nchunks:+VOL_COMP_CHUNK_N="$nchunks"} \
+        BENCH_ONLY="$sel" \
+        BENCH_COMP="$comp" \
+        BENCH_REPS="${BENCH_REPS:-1}" \
+        BENCH_WARMUP="${BENCH_WARMUP:-1}" \
         BENCH_VERIFY="${BENCH_VERIFY:-0}" \
         BENCH_KEEP_H5="${BENCH_KEEP_H5:-0}" \
-        BENCH_STAGING_CSV="$RES/staging_${label}.csv" \
-        $dev \
-        timeout --signal=KILL "$PAIR_TIMEOUT" \
-        "$BIN"/bench_vol_timing "$h5" \
-               "$RES/results_vol_${label}.csv" \
-               "$RES/results_vol_ext_${label}.csv" \
-        > "$log" 2>&1
+        timeout --signal=KILL "${VOL_TIMEOUT:-1800}" \
+            "$BIN"/bench_vol_timing "$h5" "$rcsv" "$xcsv"
     local rc=$?
-    rm -f "$H5DIR"/devres_"${label}"*.h5
+    rm -f "$H5DIR"/bench_"${label}"*.h5           # reclaim space even on failure
 
-    local what; what=$(decode_exit "$rc")
-    printf '  %-7s %-12s %-30s %s\n' "$arm" "$ds" "$rates" "$what"
-
-    # grep -c prints "0" and exits 1 on no match -- never chain `|| echo 0`.
-    local nfail; nfail=$(grep -c '^\[FAIL\]' "$log"); nfail=${nfail:-0}
-    local note=""; [ "$nfail" -gt 0 ] && note="${nfail}_fidelity_FAIL"
-    printf '%s,%s,%s,%d,%s,%s\n' "$arm" "$ds" "$rates" "$rc" "$what" "$note" >> "$MANIFEST"
-
-    if [ "$rc" != 0 ]; then
-        echo "$arm $ds $rates" >> "$FAILED"
-        tail -12 "$log" | sed 's/^/      /'
-        grep -m2 '^\[FATAL\]' "$log" | sed 's/^/    /'
+    if [ $rc -ne 0 ]; then
+        # Record the failure AS A ROW so a missing run shows up as missing in the
+        # plots rather than silently vanishing. 21 fields, matching XCSV_HEADER.
+        [ -f "$xcsv" ] || printf '%s\n' "$XCSV_HEADER_21" > "$xcsv"
+        printf '%s,%s,NA,0,-1,0,0,0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0\n' "$sel" "$comp" >> "$xcsv"
+        if [ $rc -eq 137 ]; then
+            echo "  [FAIL] $label KILLED BY TIMEOUT (${VOL_TIMEOUT:-1800}s) — recorded as rep=-1"
+        else
+            echo "  [FAIL] $label exited rc=$rc — recorded as rep=-1"
+        fi
     fi
-    [ "$nfail" -gt 0 ] && grep -m3 '^\[FAIL\]' "$log" | sed 's/^/      /'
-    return 0
+    return 0                                     # never abort the sweep
 }
 
+declare -A DATASET=(
+  [miranda]=miranda   [ocean_temp]=ocean_temp  [qmc]=einspline37
+  [scale-T]=scale-T   [s3d]=s3d                [nyx_baryon]=nyx_baryon )
+
+CHUNK_COUNTS="8 16"
+
 # ===========================================================================
-# STEP 0 -- ENVIRONMENT GATE.
+# STEP 3b -- output-residency A/B.
 #
-# miranda is 256x384x384 float64: every dimension is a multiple of 4, so there
-# are no partial zfp blocks and the fixed-rate ratio is exactly 64/rate. At r8
-# that is EXACTLY 8.00. If this reads 64.00, the run is bound against bsws=8
-# and every number the job would go on to produce is wrong by a factor of 8
-# while looking completely plausible. That is precisely how three jobs were
-# lost; the gate costs about thirty seconds.
+# Baseline (step 3) forces the codec output into the cudamalloc domain from
+# vol_reserve_comp_output, so that cudaMalloc happens BEFORE t0 and is not in
+# pressio_call_ms. VOL_COMP_HOST_OUTPUT=1 skips the forcing; libpressio
+# allocates the device output itself, inside the timed region. The delta is
+# the output-side allocation cost, not a change in transfer volume.
+#
+# Only codecs matching vol_is_gpu_codec() are affected -- cuszp/cusz/nvcomp.
+# zfp_gpu_* is NOT: its compressor_id is "zfp" regardless of execution policy,
+# so is_gpu is already false and those rows take the host path in both arms.
 # ===========================================================================
+AB_COMPS="cuszp_1e3 cuszp_1e6 zfp_gpu_r4 zfp_gpu_r8 zfp_gpu_r12 zfp_gpu_r16"
+AB_GROUPS="miranda scale-T s3d nyx_baryon ocean_temp qmc"
+
 echo ""
-echo "=== [0] environment gate: miranda x zfp_gpu_r8, expect ratio = 8.00 ==="
-GATE_EXT="$RES/logs/gate_ext.csv"
-env HDF5_VOL_CONNECTOR="pass_through_ext under_vol=0;under_info={}" \
-    HDF5_PLUGIN_PATH="$PLUGIN_DIR" \
-    ${CHUNK_MODE:+VOL_COMP_CHUNKING="$CHUNK_MODE"} \
-    ${CHUNK_N:+VOL_COMP_CHUNK_N="$CHUNK_N"} \
-    BENCH_ONLY=miranda BENCH_COMP=zfp_gpu_r8 BENCH_VERIFY=1 \
-    timeout --signal=KILL 900 \
-    "$BIN"/bench_vol_timing "$H5DIR/devres_gate.h5" \
-        "$RES/logs/gate.csv" "$GATE_EXT" > "$RES/logs/gate.log" 2>&1
-GATE_RC=$?
-rm -f "$H5DIR"/devres_gate*.h5
-
-GATE_RATIO=$(awk -F, 'NR>1 && $5!="-1" {print $8; exit}' "$GATE_EXT" 2>/dev/null)
-GATE_RMSE=$(awk -F, 'NR>1 && $5!="-1" {print $18; exit}' "$GATE_EXT" 2>/dev/null)
-echo "  exit=$GATE_RC  ratio=${GATE_RATIO:-none}  rmse=${GATE_RMSE:-none}"
-grep -E '^\[(zerorun|FAIL)\]' "$RES/logs/gate.log" | head -5 | sed 's/^/  /'
-
-if [ -z "$GATE_RATIO" ]; then
-    echo ">>> ABORT: gate produced no usable row. See $RES/logs/gate.log"
-    exit 1
-fi
-GATE_OK=$(awk -v r="$GATE_RATIO" 'BEGIN{print (r>7.6 && r<8.4) ? 1 : 0}')
-if [ "$GATE_OK" != "1" ]; then
-    echo ""
-    echo ">>> ABORT: miranda/r8 ratio is $GATE_RATIO, expected 8.00."
-    if awk -v r="$GATE_RATIO" 'BEGIN{exit !(r>60 && r<68)}'; then
-        echo ">>> That is 8x high -- the classic bsws=8 signature. zfp64_preamble.sh"
-        echo ">>> did not take. Check that nothing exported LD_LIBRARY_PATH after"
-        echo ">>> it was sourced, and that BENCH_ZFP64 is not 0."
-    fi
-    echo ">>> Refusing to run the sweep. Every timing would be invalid."
-    exit 1
-fi
-echo "  gate PASSED -- environment is correct, proceeding"
-
-# ===========================================================================
-# STEP 1 -- the arms. One process per (arm, dataset) for fault isolation: a
-# crash costs one dataset instead of the whole arm. The four rates still share
-# a single load, which matters for einspline37 at 12.9 GiB.
-# ===========================================================================
-echo ""
-echo "############ measurement passes ############"
-for arm in $ARMS; do
-    echo ""
-    echo "--- arm=$arm ---"
-    for ds in $DATASETS; do
-        if [ "$PER_RATE" = "1" ]; then
-            for r in $RATES; do run_one "$arm" "$ds" "$r" "${ds}_${r}"; done
-        else
-            run_one "$arm" "$ds" "$RATES" "$ds"
-        fi
+echo "=== [3b] host-output A/B (device-resident output disabled) ==="
+for comp in $AB_COMPS; do
+    for g in $AB_GROUPS; do
+        VOL_COMP_HOST_OUTPUT=1 run_vol_group "$g" "${DATASET[$g]}" "$comp" "" ""
+        for N in $CHUNK_COUNTS; do
+            VOL_COMP_HOST_OUTPUT=1 run_vol_group "$g" "${DATASET[$g]}" "$comp" vol "$N"
+        done
     done
-    if [ "$arm" = "none" ] && [ -s "$FAILED" ]; then
-        echo ""
-        echo ">>> The CONTROL arm failed. It sets no env var and is the historical"
-        echo ">>> path, so the device-resident change is not implicated. The gate"
-        echo ">>> above passed, so this is not the bsws environment either."
-    fi
 done
 
-# ------------------------------------------------------------- sanitizer ----
-if [ "$RUN_SANITIZER" = "1" ] && [ -s "$FAILED" ] \
-   && command -v compute-sanitizer >/dev/null 2>&1; then
 echo ""
-echo "############ compute-sanitizer on failed pairs ############"
-while read -r arm ds rates; do
-    r=$(echo "$rates" | awk '{print $1}')
-    dev=""
-    [ "$arm" = "device" ] && dev="BENCH_DEVICE_INPUT=1"
-    [ "$arm" = "host"   ] && dev="BENCH_HOST_STAGED=1"
-    out="$RES/logs/sanitizer_${arm}_${ds}_${r}.log"
+echo "--- baseline vs hostout (write rows) ---"
+printf '%-34s %10s %10s %10s\n' label total_ms pressio_ms device_ms
+for pcsv in "$RESULTS"/connector_phases_*.csv; do
+    [ -f "$pcsv" ] || continue
+    lbl=$(basename "$pcsv" .csv); lbl=${lbl#connector_phases_}
+    case "$lbl" in *cuszp*) ;; *) continue ;; esac
+    awk -F, -v l="$lbl" 'NR>1 && $3=="write" {
+        printf "%-34s %10.2f %10.2f %10.2f\n", l, $4, $9, $10 }' "$pcsv"
+done | sort
+
+# ---------------------------------------------------------------------------
+# JSON-path validation: chunking selected via opts_json with NO env override.
+# Exercises DCPL JSON -> parse at ctx create -> _VOL_OPTIONS_JSON snapshot ->
+# replay+parse at dataset_open.
+# ---------------------------------------------------------------------------
+echo ""
+echo "=== [4] JSON-path chunking selection (no VOL_COMP_* env set) ==="
+for comp in sz3_1e3_vjson sz3_1e3_pjson cuszp_1e3_vjson cuszp_1e3_pjson; do
+    run_vol_group miranda "miranda" "$comp" "" ""
+done
+
+# ---------------------------------------------------------------------------
+# Optional: device-level ground truth for the stream question. Confirms which
+# stream the cuSZp kernels actually run on, independent of libpressio's option
+# read-back, and gives HtoD/DtoH byte totals to check against dataset size.
+# ---------------------------------------------------------------------------
+if [ -n "${VOL_NSYS:-}" ] && command -v nsys >/dev/null 2>&1; then
     echo ""
-    echo "--- compute-sanitizer $arm / $ds / $r ---"
+    echo "=== [5] nsys trace (miranda x cuszp_1e3) ==="
     env HDF5_VOL_CONNECTOR="pass_through_ext under_vol=0;under_info={}" \
         HDF5_PLUGIN_PATH="$PLUGIN_DIR" \
-        ${CHUNK_MODE:+VOL_COMP_CHUNKING="$CHUNK_MODE"} \
-        ${CHUNK_N:+VOL_COMP_CHUNK_N="$CHUNK_N"} \
-        BENCH_ONLY="$ds" BENCH_COMP="$r" CUDA_LAUNCH_BLOCKING=1 $dev \
-    timeout --signal=KILL 3600 \
-    compute-sanitizer --tool memcheck --leak-check no --print-limit 20 \
-        "$BIN"/bench_vol_timing "$H5DIR/devres_san.h5" \
-            "$RES/logs/san_${arm}_${ds}.csv" "$RES/logs/san_ext_${arm}_${ds}.csv" \
-        > "$out" 2>&1
-    rm -f "$H5DIR"/devres_san*.h5
-    grep -m20 -E '========= (Invalid|Program hit|Address)' "$out" | sed 's/^/    /'
-done < "$FAILED"
+        BENCH_ONLY=miranda BENCH_COMP=cuszp_1e3 \
+        nsys profile --trace=cuda,nvtx -o "$RESULTS/vol_cuszp" --force-overwrite true \
+            "$BIN"/bench_vol_timing "$H5DIR/bench_nsys.h5" \
+                "$RESULTS/results_vol_nsys.csv" "$RESULTS/results_ext_nsys.csv"
+    rm -f "$H5DIR"/bench_nsys*.h5
+    echo "--- kernel/memcpy stream assignment (Strm column) ---"
+    nsys stats --report cuda_gpu_trace "$RESULTS/vol_cuszp.nsys-rep" 2>/dev/null | head -40
+    echo "--- transfer byte totals (HtoD should be ~dataset size, DtoH ~compressed) ---"
+    nsys stats --report cuda_gpu_mem_size_sum "$RESULTS/vol_cuszp.nsys-rep" 2>/dev/null | head -20
 fi
 
-# --------------------------------------------------------------- summary ---
+# echo ""
+# echo "=== [6] Filter (deflate) timing ==="
+# "$BIN"/bench_filter_timing --deflate \
+#     --h5 "$WORK/bench_filter.h5" --out "$RESULTS/results_filter.csv"
+
+# ===========================================================================
+# STEP 7 -- zfp CPU/GPU pair invariant.
+#
+# zfp guarantees the compressed stream is independent of execution policy, so
+# for a given rate the serial and CUDA arms must produce byte-identical output.
+# Equal stored_bytes is therefore a hard invariant, and the sharpest available
+# check that the bsws=64 library swap did not corrupt anything. If a pair
+# disagrees, the timings are not a GPU-vs-CPU result -- discard them.
+#
+# The pair key comes from the FILENAME (which carries dataset + chunking mode),
+# with zfp_cpu_/zfp_gpu_ collapsed so the two sides land on the same key.
+# ===========================================================================
 echo ""
-echo "############ ratio sanity across all arms ############"
-echo "  fixed rate is analytic: for a given dataset x rate, every arm must agree"
-awk -F, 'FNR==1{next} $5!="-1" {printf "  %-14s %-14s ratio=%8.2f rmse=%s\n",$1,$2,$8,$18}' \
-    "$RES"/results_vol_ext_*.csv 2>/dev/null | sort -u
+echo "=== [7] zfp CPU/GPU pair invariant (stored_bytes must match EXACTLY) ==="
+awk -F, '
+FNR==1 { f=FILENAME; sub(/.*results_ext_/,"",f); sub(/\.csv$/,"",f); next }
+$2 ~ /^zfp_(cpu|gpu)_r[0-9]+$/ && $5 != "-1" {
+    side = ($2 ~ /^zfp_cpu_/) ? "cpu" : "gpu"
+    key  = f; gsub(/zfp_(cpu|gpu)_/, "zfp_", key)
+    bytes[key SUBSEP side] = $7
+    rmse[key SUBSEP side]  = $18
+    keys[key] = 1
+}
+END {
+    n = 0; bad = 0
+    for (k in keys) {
+        c = bytes[k SUBSEP "cpu"]; g = bytes[k SUBSEP "gpu"]
+        if (c == "" || g == "") { printf "  [SKIP] %-40s incomplete pair\n", k; continue }
+        n++
+        if (c == g)
+            printf "  [OK]   %-40s stored=%-12s rmse cpu=%s gpu=%s\n",
+                   k, c, rmse[k SUBSEP "cpu"], rmse[k SUBSEP "gpu"]
+        else {
+            bad++
+            printf "  [BAD]  %-40s cpu=%-12s gpu=%-12s <-- ABI swap suspect, DISCARD GPU ROWS\n",
+                   k, c, g
+        }
+    }
+    if (n == 0) print "  (no complete zfp pairs found)"
+    printf "  %d pair(s) checked, %d mismatched\n", n, bad
+}' "$RESULTS"/results_ext_*.csv 2>/dev/null
+
+# ===========================================================================
+# SUMMARIES
+#
+# The old script wrote ignore_connector_phases_*.csv but globbed
+# connector_phases_*.csv, so every summary block below matched nothing. Both
+# now use $RESULTS with no prefix.
+# ===========================================================================
+echo ""
+echo "=== connector phase breakdown (per label) ==="
+for pcsv in "$RESULTS"/connector_phases_*.csv; do
+    [ -f "$pcsv" ] || continue
+    label=$(basename "$pcsv" .csv); label=${label#connector_phases_}
+    echo ""
+    echo "--- [$label] ---"
+    column -t -s, "$pcsv"
+done
 
 echo ""
-echo "############ app-side D2H (host arm) ############"
-head -1 "$RES"/staging_host_*.csv 2>/dev/null | head -1
-awk -F, 'FNR>1 && $2=="host"' "$RES"/staging_host_*.csv 2>/dev/null | sed 's/^/  /'
+echo "=== VOL overhead vs libpressio cost (write rows only) ==="
+echo "dataset compressor total_ms compress_ms vol_compress_ms pressio_host_ms device_ms io_ms container_ms residual%"
+for pcsv in "$RESULTS"/connector_phases_*.csv; do
+    [ -f "$pcsv" ] || continue
+    awk -F, 'NR>1 && $3=="write" {
+        printf "%-22s %-16s %10.2f %10.2f %10.2f %10.2f %10.2f %10.2f %10.2f %7.2f%%\n",
+               $1,$2,$4,$6,$11,$12,$10,$8,$7,$14*100 }' "$pcsv"
+done
 
 echo ""
-echo "############ manifest ############"
-column -s, -t < "$MANIFEST"
+echo "=== durability / cache phases (write path, from xcsv) ==="
+echo "dataset                compressor       create    write    flush     sync    close    csync  |    evict     open     read"
+awk -F, 'FNR==1{next} $5!="-1" {
+    printf "%-22s %-16s %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f  | %8.2f %8.2f %8.2f\n",
+           $1,$2,$9,$10,$11,$12,$13,$14,$15,$16,$17 }' \
+    "$RESULTS"/results_ext_*.csv 2>/dev/null
 
 echo ""
-echo "results in: $RES  (also devres_results/latest)"
+echo "=== runs that FAILED or TIMED OUT (rep=-1) ==="
+awk -F, 'FNR>1 && $5=="-1" {print FILENAME": "$1" "$2}' \
+    "$RESULTS"/results_ext_*.csv 2>/dev/null || echo "(none)"
+
+echo ""
+echo "=== fidelity failures (bound_ok=0; -1 means no bound to check, not a failure) ==="
+awk -F, 'FNR>1 && $5!="-1" && $21=="0" {print $1" "$2" maxae="$20" thr="$19}' \
+    "$RESULTS"/results_ext_*.csv 2>/dev/null || echo "(none)"
+
+echo ""
+echo "=== FILE-LEVEL summary ==="
+grep -h ',file,' "$RESULTS"/results_vol_*.csv 2>/dev/null | sort || echo "(no file rows)"
+
+echo ""
+echo "=== results_filter.csv ==="
+column -t -s, "$RESULTS/results_filter.csv"
+
+echo ""
 echo "Job finished on $(date)"

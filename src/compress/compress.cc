@@ -262,6 +262,17 @@ vol_make_host_resident(struct pressio_data *data)
     }
 }
 
+static int
+vol_force_host_output(void)
+{
+    static int v = -1;
+    if (v < 0) {
+        const char *e = getenv("VOL_COMP_HOST_OUTPUT");
+        v = (e && *e && *e != '0') ? 1 : 0;
+    }
+    return v;
+}
+
 static size_t
 vol_full_dims(const compression_ctx *ctx, size_t *out_dims)
 {
@@ -291,7 +302,7 @@ static struct pressio_data *
 vol_new_output(enum pressio_dtype dt, size_t ndims, size_t *dims, int is_gpu)
 {
 #ifdef USE_CUDA
-    if (is_gpu) {
+    if (is_gpu && !vol_force_host_output()) {
         struct pressio_data *d = pressio_data_new_empty(dt, ndims, dims);
         if (d) vol_make_device_resident(d);
         return d;
@@ -497,7 +508,7 @@ vol_reserve_comp_output(compression_ctx *ctx, size_t cap, int is_gpu,
         return pressio_data_new_empty(pressio_byte_dtype, 0, NULL);
 
 #ifdef USE_CUDA
-    if (is_gpu) {
+    if (is_gpu && !vol_force_host_output()) {
         /* libpressio ALLOCATES AND OWNS the device output. Handing it a
          * nonowning cudamalloc buffer inverts the ownership contract: plugins
          * that call make_writeable() on their output free the pointer we are

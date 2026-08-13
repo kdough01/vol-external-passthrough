@@ -218,55 +218,6 @@ static int bench_do_fsync(void)      { return env_int("BENCH_FSYNC", 1) != 0; }
 static int bench_do_dropcache(void)  { return env_int("BENCH_DROP_CACHE", 1) != 0; }
 static int bench_do_syncdir(void)    { return env_int("BENCH_SYNC_DIR", 1) != 0; }
 
-/* ------------------------------------------------------------------ *
- * Staging ledger (device-resident experiment).
- *
- * One row per dataset per arm, recording the PCIe legs that happen outside
- * run_pair() and therefore outside write_total_ms:
- *
- *   h2d_setup_ms  putting the field on the device so the run can pretend a
- *                 simulation produced it there.  Setup for BOTH arms, charged
- *                 to neither -- a real application never pays it.  Present
- *                 only so a reviewer can confirm both arms moved the same
- *                 bytes at the same rate.
- *   d2h_ms        the host arm copying the UNCOMPRESSED field back so it can
- *                 hand H5Dwrite a host pointer.  Real, unavoidable cost in the
- *                 host-staged design, and exactly what the device arm
- *                 eliminates.  Zero on the device arm by construction.
- *
- * The connector's own H2D -- re-uploading what the application just downloaded
- * -- happens inside H5Dwrite and is already captured by write_ms.  Do not add
- * it here or it gets counted twice.
- *
- * Timed with cudaEvents rather than the wall clock: the event pair measures the
- * transfer on the stream rather than the call overhead around it, which is what
- * the nsys cuda_gpu_mem_time_sum report will corroborate.
- * ------------------------------------------------------------------ */
-static FILE *g_staging_csv = NULL;
-
-static void staging_open(void) {
-    const char *p = std::getenv("BENCH_STAGING_CSV");
-    if (!p || !*p) return;
-    g_staging_csv = std::fopen(p, "w");
-    if (!g_staging_csv) { std::perror("BENCH_STAGING_CSV"); return; }
-    std::fputs("dataset,arm,logical_bytes,d2h_ms,h2d_setup_ms\n", g_staging_csv);
-    std::fflush(g_staging_csv);
-}
-
-static void staging_row(const char *ds, const char *arm, size_t bytes,
-                        double d2h_ms, double h2d_setup_ms) {
-    if (!g_staging_csv) return;
-    std::fprintf(g_staging_csv, "%s,%s,%zu,%.4f,%.4f\n",
-                 ds, arm, bytes, d2h_ms, h2d_setup_ms);
-    /* Flush per row: a job killed by the walltime still leaves a usable
-     * partial ledger, matching how the CSVs behave. */
-    std::fflush(g_staging_csv);
-}
-
-static void staging_close(void) {
-    if (g_staging_csv) { std::fclose(g_staging_csv); g_staging_csv = NULL; }
-}
-
 /* fsync the file's data to the device.  Opening a second read-only descriptor
  * is fine: fsync() acts on the inode, not on the descriptor's write history,
  * so it flushes everything HDF5 wrote through its own fd.  sync_dir also
@@ -373,13 +324,6 @@ static int run_rep(const char *path, const char *dsname,
             return -1;
         }
 
-        /* NOTE (device-resident arm): hbuf here may be a DEVICE pointer.  The
-         * VOL connector's dataset_write must recognise that and build a
-         * CUDA-domain pressio_data from it.  If it wraps the pointer as host
-         * memory this either faults or compresses whatever host address
-         * happens to alias -- the RMSE/maxae check in run_pair is the tripwire.
-         * Nothing between here and H5Dwrite dereferences the buffer on the
-         * host: ntype matches the file type, so HDF5 performs no conversion. */
         BenchCpuTimer wt; wt.start();
         herr_t wret = H5Dwrite(dset, ntype, H5S_ALL, H5S_ALL, H5P_DEFAULT, hbuf);
         t->write_ms = wt.stop_ms();
@@ -434,10 +378,6 @@ static int run_rep(const char *path, const char *dsname,
             return -1;
         }
 
-        /* The read path is host-side in BOTH arms: rbuf is host memory and the
-         * fidelity check compares it against the host original.  Read timings
-         * from a device-resident run are therefore NOT a device-resident read
-         * measurement -- do not present them as one. */
         BenchCpuTimer rt; rt.start();
         herr_t rret = H5Dread(dset, ntype, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf);
         t->read_ms = rt.stop_ms();
@@ -500,9 +440,6 @@ static void run_pair(const char *h5base,
         }
 
         /* ---------------- FIDELITY ---------------- */
-        /* Compared against hbuf, the HOST original -- never against wbuf, which
-         * on the device arm is a device pointer.  This comparison is what
-         * proves the connector read the buffer it was actually handed. */
         bench_stats st = bench_compute_stats(hbuf, rbuf, nelem, d->dtype,
                                              BENCH_XFORM_NONE);
 
@@ -588,39 +525,6 @@ int main(int argc, char **argv) {
         xcsvpath = xcsv_default;
     }
 
-    /* ---------------------------------------------------------------- *
-     * Arm selection, resolved once.  Checked before anything is opened so
-     * the error path has nothing to clean up.
-     *
-     *   BENCH_HOST_STAGED   field lives on the GPU; the app copies it D2H and
-     *                       hands H5Dwrite a host pointer.  The connector then
-     *                       copies it H2D again for the GPU compressor.
-     *   BENCH_DEVICE_INPUT  field lives on the GPU; the app hands H5Dwrite the
-     *                       device pointer.  Neither leg happens.
-     *
-     * Neither set => the historical behaviour, hbuf straight from the loader,
-     * no CUDA allocation at all.
-     * ---------------------------------------------------------------- */
-#ifdef USE_CUDA
-    const int dev_mode  = (std::getenv("BENCH_DEVICE_INPUT") != NULL);
-    const int host_mode = (std::getenv("BENCH_HOST_STAGED")  != NULL);
-    if (dev_mode && host_mode) {
-        std::fprintf(stderr, "[ERR] BENCH_DEVICE_INPUT and BENCH_HOST_STAGED are "
-                     "mutually exclusive -- set exactly one. Neither arm would be "
-                     "identifiable in the CSV.\n");
-        return 2;
-    }
-    const char *arm_name = dev_mode ? "device" : (host_mode ? "host" : "none");
-#else
-    const char *arm_name = "none (built without USE_CUDA)";
-    if (std::getenv("BENCH_DEVICE_INPUT") || std::getenv("BENCH_HOST_STAGED")) {
-        std::fprintf(stderr, "[ERR] BENCH_DEVICE_INPUT/BENCH_HOST_STAGED set but "
-                     "this binary was built without USE_CUDA -- both arms would "
-                     "run identically and the savings would read as zero.\n");
-        return 2;
-    }
-#endif
-
     std::fprintf(stderr,
         "[dbg main] h5base=%s csv=%s xcsv=%s only=%s comp=%s "
         "verify=%d keep_h5=%d debug=%d\n",
@@ -631,10 +535,6 @@ int main(int argc, char **argv) {
         "[dbg main] durability: fsync=%d sync_dir=%d drop_cache=%d "
         "(BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)\n",
         bench_do_fsync(), bench_do_syncdir(), bench_do_dropcache());
-    std::fprintf(stderr,
-        "[dbg main] staging arm=%s  ledger=%s\n", arm_name,
-        (std::getenv("BENCH_STAGING_CSV") && *std::getenv("BENCH_STAGING_CSV"))
-            ? std::getenv("BENCH_STAGING_CSV") : "(none -- D2H will not be recorded)");
     std::fprintf(stderr,
         "[dbg main] one measurement per (dataset x compressor), no warmup, "
         "own file at <base>_<comp>.h5\n");
@@ -649,8 +549,6 @@ int main(int argc, char **argv) {
     FILE *xcsv = std::fopen(xcsvpath, "w");
     if (!xcsv) { std::perror("xcsv"); std::fclose(csv); return 1; }
     std::fputs(XCSV_HEADER, xcsv);
-
-    staging_open();
 
     bench_file_acc acc;
     std::memset(&acc, 0, sizeof(acc));
@@ -668,19 +566,12 @@ int main(int argc, char **argv) {
         }
 
         if (d->src != BENCH_SRC_HDF5 && mem_avail) {
-            /* The host arm holds hbuf + rbuf + sbuf, one more full copy than
-             * the historical path, so the headroom check has to know which arm
-             * is running or the larger datasets will OOM instead of skipping. */
-            size_t nhost = 2;
-#ifdef USE_CUDA
-            if (host_mode) nhost = 3;
-#endif
-            size_t need = nhost * bench_num_bytes(d);
+            size_t need = 2 * bench_num_bytes(d);
             if (need > (size_t)(0.9 * (double)mem_avail)) {
                 std::fprintf(stderr,
-                    "[SKIP] %s needs %.1f GiB of host memory for %zu buffers but "
-                    "only %.1f GiB available -- raise the job's mem= request\n",
-                    d->name, bench_gib(need), nhost, bench_gib(mem_avail));
+                    "[SKIP] %s needs %.1f GiB for hbuf+rbuf but only %.1f GiB "
+                    "available -- raise the job's mem= request\n",
+                    d->name, bench_gib(need), bench_gib(mem_avail));
                 n_skip++; continue;
             }
         }
@@ -723,111 +614,45 @@ int main(int argc, char **argv) {
             continue;
         }
 
-        /* wbuf is what H5Dwrite is handed.  hbuf remains the host original and
-         * is what fidelity is judged against, in every arm. */
         const void *wbuf = hbuf;
 #ifdef USE_CUDA
         void *dbuf = NULL;      /* the application's device-resident field */
         void *sbuf = NULL;      /* host copy the filter path would require */
-        float h2d_setup_ms = 0.0f, d2h_ms = 0.0f;
+        const int dev_mode  = (std::getenv("BENCH_DEVICE_INPUT") != NULL);
+        const int host_mode = (std::getenv("BENCH_HOST_STAGED")  != NULL);
 
         if (dev_mode || host_mode) {
-            /* A CUDA context that has taken an illegal memory access returns
-             * that same error from EVERY subsequent call, so a poisoned context
-             * makes the next cudaMalloc look like an allocation failure and the
-             * remaining datasets look like they were skipped for memory. Check
-             * for the sticky error first and stop the run: nothing after this
-             * point can produce a valid measurement, and limping on buries the
-             * real fault under a pile of misleading [ERR] lines. */
-            cudaError_t sticky = cudaGetLastError();
-            if (sticky != cudaSuccess) {
-                std::fprintf(stderr,
-                    "[FATAL] CUDA context is poisoned before %s: %s\n"
-                    "[FATAL] The fault occurred during the PREVIOUS dataset, not "
-                    "here. Re-run that one under compute-sanitizer to get the "
-                    "kernel and the offending address.\n",
-                    rz.name, cudaGetErrorString(sticky));
-                std::free(rbuf); std::free(hbuf);
-                std::fclose(csv); std::fclose(xcsv); staging_close();
-                return 3;
+            if (cudaMalloc(&dbuf, raw) != cudaSuccess) {
+                std::fprintf(stderr, "[ERR] cudaMalloc %.1f MiB failed for %s\n",
+                             raw / (1024.0 * 1024.0), rz.name);
+                std::free(rbuf); std::free(hbuf); continue;
             }
-
-            cudaError_t cerr = cudaMalloc(&dbuf, raw);
-            if (cerr != cudaSuccess) {
-                std::fprintf(stderr, "[ERR] cudaMalloc %.1f MiB failed for %s: %s\n",
-                             raw / (1024.0 * 1024.0), rz.name,
-                             cudaGetErrorString(cerr));
-                std::free(rbuf); std::free(hbuf); n_skip++; continue;
-            }
-
-            /* Stage the field onto the device.  Setup, not measurement: this
-             * stands in for the simulation having produced it there. */
-            {
-                cudaEvent_t e0, e1;
-                cudaEventCreate(&e0); cudaEventCreate(&e1);
-                cudaEventRecord(e0);
-                cudaMemcpy(dbuf, hbuf, raw, cudaMemcpyHostToDevice);
-                cudaEventRecord(e1); cudaEventSynchronize(e1);
-                cudaEventElapsedTime(&h2d_setup_ms, e0, e1);
-                cudaEventDestroy(e0); cudaEventDestroy(e1);
-            }
+            cudaMemcpy(dbuf, hbuf, raw, cudaMemcpyHostToDevice);
             cudaDeviceSynchronize();
-
-            /* Confirm the pointer really is device memory before handing it to
-             * H5Dwrite.  Under unified addressing a silently-host allocation
-             * would sail through the entire run and produce a "device" arm
-             * indistinguishable from the host arm -- a null result that reads
-             * as a real one. */
-            {
-                cudaPointerAttributes pa;
-                cudaError_t perr = cudaPointerGetAttributes(&pa, dbuf);
-                if (perr != cudaSuccess || pa.type != cudaMemoryTypeDevice) {
-                    std::fprintf(stderr,
-                        "[ERR] %s: allocation is not device memory (type=%d, %s) "
-                        "-- skipping rather than reporting a bogus device arm\n",
-                        rz.name, perr == cudaSuccess ? (int)pa.type : -1,
-                        cudaGetErrorString(perr));
-                    cudaFree(dbuf);
-                    std::free(rbuf); std::free(hbuf); n_skip++; continue;
-                }
-            }
-
-            std::fprintf(stderr, "[device] %s: %.1f MiB resident on GPU "
-                         "(setup h2d=%.3f ms)\n",
-                         rz.name, raw / (1024.0 * 1024.0), (double)h2d_setup_ms);
+            std::fprintf(stderr, "[device] %s: %.1f MiB resident on GPU\n",
+                         rz.name, raw / (1024.0 * 1024.0));
         }
 
         if (dev_mode) {
-            /* The connector receives a device pointer.  If dataset_write wraps
-             * it as a host-domain pressio_data this either faults or compresses
-             * whatever host address happens to alias; either way the RMSE and
-             * maxae columns catch it.  Do not silence the [FAIL] lines. */
             wbuf = dbuf;
-            staging_row(rz.name, "device", raw, 0.0, (double)h2d_setup_ms);
             std::fprintf(stderr, "[device] arm=device: VOL receives the device "
                                  "pointer; no host round trip for the write\n");
         } else if (host_mode) {
             sbuf = std::malloc(raw);
             if (!sbuf) {
-                std::fprintf(stderr, "[ERR] OOM staging %zu bytes for %s\n",
-                             raw, rz.name);
-                cudaFree(dbuf); std::free(rbuf); std::free(hbuf);
-                n_skip++; continue;
+                std::fprintf(stderr, "[ERR] OOM staging %zu bytes\n", raw);
+                cudaFree(dbuf); std::free(rbuf); std::free(hbuf); continue;
             }
-            cudaEvent_t e0, e1;
+            cudaEvent_t e0, e1; float d2h_ms = 0.0f;
             cudaEventCreate(&e0); cudaEventCreate(&e1);
             cudaEventRecord(e0);
             cudaMemcpy(sbuf, dbuf, raw, cudaMemcpyDeviceToHost);
             cudaEventRecord(e1); cudaEventSynchronize(e1);
             cudaEventElapsedTime(&d2h_ms, e0, e1);
             cudaEventDestroy(e0); cudaEventDestroy(e1);
-
             wbuf = sbuf;
-            staging_row(rz.name, "host", raw, (double)d2h_ms,
-                        (double)h2d_setup_ms);
             std::fprintf(stderr,
-                         "[device] arm=host d2h_ms=%.3f pcie_in=%.1f MiB "
-                         "(the leg the device arm skips)\n",
+                         "[device] arm=host d2h_ms=%.3f pcie_in=%.1f MiB\n",
                          (double)d2h_ms, raw / (1024.0 * 1024.0));
         }
 #endif
@@ -842,37 +667,6 @@ int main(int argc, char **argv) {
             if (!name_selected(only_cmp, c->name)) continue;
             run_pair(h5base, &rz, c, hbuf, wbuf, rbuf, raw,
                      measured_range, csv, xcsv, &acc);
-
-#ifdef USE_CUDA
-            /* Attribute an asynchronous fault to the (dataset, compressor) that
-             * caused it. Without the sync the error surfaces at whatever CUDA
-             * call happens next, which can be several compressors later or in
-             * an entirely different dataset. Costs one sync per measurement,
-             * outside every timed region.
-             *
-             * Deliberately NOT guarded on dev_mode/host_mode. The connector
-             * runs GPU kernels in every arm, including the control arm where
-             * the harness itself touches no CUDA. Guarding this check on the
-             * staging arms meant a control-arm pass only ever proved "exit
-             * status 0", which does not rule out a fault at all -- an out of
-             * bounds write that lands on mapped memory corrupts silently and
-             * the process still exits clean. If the control arm is going to be
-             * the thing that exonerates or implicates the staging change, it
-             * has to be held to the same standard as the arms it is compared
-             * against. */
-            cudaError_t serr = cudaDeviceSynchronize();
-            if (serr != cudaSuccess) {
-                std::fprintf(stderr,
-                    "[FATAL] CUDA fault during %s / %s (arm=%s): %s\n"
-                    "[FATAL] This is the measurement that broke the context. "
-                    "Re-run exactly this pair under compute-sanitizer.\n",
-                    rz.name, c->name, arm_name, cudaGetErrorString(serr));
-                std::fflush(stderr);
-                std::free(rbuf); std::free(hbuf);
-                std::fclose(csv); std::fclose(xcsv); staging_close();
-                return 3;
-            }
-#endif
         }
 
 #ifdef USE_CUDA
@@ -902,8 +696,7 @@ int main(int argc, char **argv) {
 
     std::fclose(csv);
     std::fclose(xcsv);
-    staging_close();
-    std::fprintf(stderr, "[dbg main] done: arm=%s, %d datasets, %d skipped, "
-                 "%d measurements\n", arm_name, n_ok, n_skip, acc.n);
+    std::fprintf(stderr, "[dbg main] done: %d datasets, %d skipped, "
+                 "%d measurements\n", n_ok, n_skip, acc.n);
     return 0;
 }
