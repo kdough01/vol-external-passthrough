@@ -3,3 +3,5 @@ payload.bin
 build/
 /h5_outfiles
 
+find_sperr_plugin.sh
+diagnose_sperr_spack.sh
