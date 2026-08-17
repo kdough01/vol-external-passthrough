@@ -572,6 +572,34 @@ static const bench_compressor_t BENCH_COMPRESSORS[] = {
        "\"vol:chunking_mode\":\"pressio\",\"vol:chunk_n\":8}",
       BENCH_GPU_CODEC, 0, BENCH_BOUND_ABS, 1e-6, "cuszp:cuda_stream",
       "cuszp 1e-6, pressio chunking via opts_json." },
+
+    { "sperr_pwe1e3", "sperr",
+      "{\"sperr:mode_str\":\"pwe\",\"sperr:tolerance\":1e-3}",
+      BENCH_CPU_CODEC, 0, BENCH_BOUND_NONE, 0.0, NULL,
+      "SPERR point-wise error 1e-3, native container (one whole-volume "
+      "stream). The uniform-percentage arm." },
+
+    { "sperr_pwe1e6", "sperr",
+      "{\"sperr:mode_str\":\"pwe\",\"sperr:tolerance\":1e-6}",
+      BENCH_CPU_CODEC, 0, BENCH_BOUND_NONE, 0.0, NULL,
+      "SPERR point-wise error 1e-6. Tighter bound => larger stream => more "
+      "absolute bytes saved at a given percentage." },
+
+    { "sperr_pwe1e3_v8", "sperr",
+      "{\"sperr:mode_str\":\"pwe\",\"sperr:tolerance\":1e-3,"
+       "\"vol:chunking_mode\":\"vol\",\"vol:chunk_n\":8}",
+      BENCH_CPU_CODEC, 0, BENCH_BOUND_NONE, 0.0, NULL,
+      "SPERR 1e-3, VOL chunking N=8 via opts_json. The per-chunk-fidelity arm: "
+      "8 independent streams, each truncatable to its own percentage. "
+      "chunk_n must divide dims[0] or vol_slab_dims rejects the write." },
+
+    { "sperr_bpp2_v8", "sperr",
+      "{\"sperr:mode_str\":\"bpp\",\"sperr:tolerance\":2.0,"
+       "\"vol:chunking_mode\":\"vol\",\"vol:chunk_n\":8}",
+      BENCH_CPU_CODEC, 0, BENCH_BOUND_NONE, 0.0, NULL,
+      "SPERR fixed-rate 2 bits/value, VOL chunking N=8. Fixed rate makes every "
+      "chunk's stream a predictable size, so bytes-read scales cleanly with "
+      "percentage -- a cleaner mechanism plot than a bounded mode gives." },
 };
 
 #define BENCH_NUM_COMPRESSORS \

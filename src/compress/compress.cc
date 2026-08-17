@@ -849,6 +849,39 @@ vol_chunk_dims(const compression_ctx *ctx, size_t nbytes, hid_t minor,
     return vol_slab_dims(ctx, nbytes / dsize, minor, out_dims);
 }
 
+static void
+vol_sperr_set_chunks(compression_ctx *ctx, size_t ndims, const size_t *dims)
+{
+    if (!ctx || !ctx->compressor || !ctx->compressor_id) return;
+    if (strcmp(ctx->compressor_id, "sperr") != 0) return;
+    if (ndims != 3 || !dims) return;          /* sperr:chunks is 3D only */
+
+    uint64_t vals[3];
+    size_t   shape[1] = { 3 };
+    vals[0] = (uint64_t)dims[0];
+    vals[1] = (uint64_t)dims[1];
+    vals[2] = (uint64_t)dims[2];
+
+    struct pressio_data *cd =
+        pressio_data_new_copy(pressio_uint64_dtype, vals, 1, shape);
+    if (!cd) return;
+
+    struct pressio_options *o = pressio_options_new();
+    if (o) {
+        pressio_options_set_data(o, "sperr:chunks", cd);
+        if (pressio_compressor_set_options(ctx->compressor, o) != 0)
+            fprintf(stderr, "[VOL WARN] could not set sperr:chunks: %s\n",
+                    pressio_compressor_error_msg(ctx->compressor));
+        else if (getenv("VOL_COMP_CHUNK_LOG"))
+            fprintf(stderr, "[sperr] chunks pinned to %llu x %llu x %llu "
+                            "(one internal chunk)\n",
+                    (unsigned long long)vals[0], (unsigned long long)vals[1],
+                    (unsigned long long)vals[2]);
+        pressio_options_free(o);
+    }
+    pressio_data_free(cd);
+}
+
 static struct pressio_compressor *
 vol_get_chunk_wrapper(compression_ctx *ctx, uint64_t chunk_elems)
 {
@@ -1270,6 +1303,8 @@ vol_compress_native_impl(compression_ctx *ctx,
         in_dims = rdims;
     }
 
+    vol_sperr_set_chunks(ctx, in_ndims, in_dims);
+
     is_gpu = vol_codec_is_gpu(ctx);
 
     if (getenv("VOL_COMP_DUMP_CALL")) {
@@ -1615,6 +1650,8 @@ vol_transfer_compress_chunk_impl(compression_ctx *ctx,
         in_ndims = vol_chunk_dims(ctx, nbytes, min_compress_failed, chunk_dims);
         if (in_ndims == 0) return -1;          /* error already pushed */
     }
+
+    vol_sperr_set_chunks(ctx, in_ndims, chunk_dims);
 
     is_gpu = vol_codec_is_gpu(ctx);
     cap         = nbytes + nbytes / 8 + (1u << 16);
