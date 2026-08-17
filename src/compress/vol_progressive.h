@@ -19,6 +19,14 @@ herr_t   H5Pset_vol_progressive_pct(hid_t dxpl_id, unsigned pct);
 /* Resolve the request off a DXPL. Returns 100 when unset. */
 unsigned H5VL_pass_through_ext_progressive_pct(hid_t dxpl_id);
 
+/* Percentage for chunk k. Returns the uniform want_pct when no per-chunk
+ * vector has been set, pct[k] when one has. */
+unsigned vol_progressive_pct_for_chunk(unsigned want_pct, uint64_t k);
+
+/* Per-chunk fidelity. n is the chunk count; pct[i] is 1..100. */
+herr_t   H5Pset_vol_progressive_pct_v(hid_t dxpl_id, size_t n,
+                                      const unsigned *pct);
+
 /* Rewrite a truncated SPERR bitstream so libpressio can decode it.
  * `stream` need only be long enough for the requested percentage.
  * *out is allocated here and must be free()d by the caller. */

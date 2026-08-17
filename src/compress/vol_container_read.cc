@@ -209,7 +209,11 @@ vol_container_plan(void *under, hid_t under_vol_id, hid_t plist_id,
 
         /* Reduced-fidelity read. Only codecs with an embedded bitstream can
          * do this; for anyone else we silently fetch everything rather than
-         * hand back a field the caller thinks is approximate but is garbage. */
+         * hand back a field the caller thinks is approximate but is garbage.
+         *
+         * NOTE: this is a contiguous front prefix, which SPERR guarantees only
+         * for a SINGLE-CHUNK stream. Use VOL chunking for the multi-chunk case.
+         */
         if (want_pct >= 1 && want_pct < 100 && csize > 0 && ctx &&
             vol_codec_is_progressive(ctx->compressor_id)) {
 
@@ -238,7 +242,6 @@ vol_container_plan(void *under, hid_t under_vol_id, hid_t plist_id,
         ret = rl.add(0, cont_bytes);
 
     } else if (plan->magic == VOL_CHUNK_MAGIC) {
-        /* ---- unchanged from your version ---- */
         plan->kind = VOL_CONT_CHUNKED;
         if (probe < VOL_CHUNK_HDR_WORDS * sizeof(uint64_t)) {
             H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__,
@@ -283,20 +286,39 @@ vol_container_plan(void *under, hid_t under_vol_id, hid_t plist_id,
             uint64_t k1 = (hi + chunk_bytes - 1) / chunk_bytes;
             if (k1 > nchunks) k1 = nchunks;
 
+            /* PROGRESSIVE. Each VOL chunk is its own codec stream, so a prefix
+             * of one chunk is exactly what SPERR's progressive_truncate wants --
+             * the single-chunk case NCAR documents as safe to cut anywhere.
+             * vol_read_vol recomputes this same formula, so nothing extra needs
+             * to be plumbed through the plan. */
+            const int prog = (ctx && vol_codec_is_progressive(ctx->compressor_id));
+            if (prog) plan->want_pct = want_pct;
+
             uint64_t off = payload_off;
             for (uint64_t k = 0; k < nchunks; k++) {
                 uint64_t csz;
                 memcpy(&csz, dir + k * sizeof(uint64_t), sizeof(uint64_t));
                 if (k >= k0 && k < k1) {
-                    if (rl.add(off, csz) < 0) { ret = -1; goto done; }
+                    uint64_t take = csz;
+                    unsigned p    = vol_progressive_pct_for_chunk(want_pct, k);
+                    if (prog && p >= 1 && p < 100) {
+                        take = (csz * (uint64_t)p) / 100 + VOL_SPERR_SLACK;
+                        if (take > csz) take = csz;
+                        plan->partial = 1;
+                    }
+                    if (rl.add(off, take) < 0) { ret = -1; goto done; }
                 }
                 off += csz;
             }
-            plan->partial = (k0 != 0 || k1 != nchunks);
+            /* OR, not assign. The original `plan->partial = (k0 != 0 || ...)`
+             * would clobber the flag the loop just set for fidelity truncation:
+             * a container partial ONLY because of truncation would come back
+             * marked partial=0, vol_container_fetch would skip zeroing the
+             * gaps, and stale heap bytes would reach the decoder. */
+            if (k0 != 0 || k1 != nchunks) plan->partial = 1;
         }
 
     } else if (plan->magic == VOL_SHARED_MAGIC) {
-        /* ---- unchanged from your version ---- */
         plan->kind = VOL_CONT_SHARED;
         const uint64_t nregions = get64(hdr, 2);
         plan->nchunks     = get64(hdr, 3);
@@ -385,6 +407,21 @@ done:
     plan->bytes_needed = 0;
     for (size_t i = 0; i < rl.n; i++) plan->bytes_needed += rl.v[i].len;
 
+    {
+        const char *pcsv = getenv("VOL_PLAN_CSV");
+        if (pcsv && *pcsv) {
+            FILE *pf = fopen(pcsv, "a");
+            if (pf) {
+                /* kind,want_pct,nranges,bytes_needed,cont_bytes,partial */
+                fprintf(pf, "%d,%u,%zu,%llu,%llu,%d\n",
+                        (int)plan->kind, plan->want_pct, plan->nranges,
+                        (unsigned long long)plan->bytes_needed,
+                        (unsigned long long)plan->cont_bytes, plan->partial);
+                fclose(pf);
+            }
+        }
+    }
+
     if (getenv("VOL_READ_PLAN_LOG"))
         fprintf(stderr,
             "[read-plan] kind=%d pct=%u ranges=%zu need=%llu/%llu bytes "
@@ -415,8 +452,28 @@ herr_t vol_container_fetch(void *under, hid_t under_vol_id, hid_t plist_id,
         return -1;
     }
 
-    if (plan->partial)
-        memset(buf, 0, (size_t)plan->cont_bytes);
+    if (plan->partial) {
+        vol_range_t *s = (vol_range_t *)malloc(plan->nranges * sizeof(*s));
+        if (!s) {
+            memset(buf, 0, (size_t)plan->cont_bytes);
+        } else {
+            memcpy(s, plan->ranges, plan->nranges * sizeof(*s));
+            for (size_t i = 1; i < plan->nranges; i++)
+                for (size_t j = i; j && s[j - 1].off > s[j].off; j--) {
+                    vol_range_t tmp = s[j]; s[j] = s[j - 1]; s[j - 1] = tmp;
+                }
+            uint64_t cur = 0;
+            for (size_t i = 0; i < plan->nranges; i++) {
+                if (s[i].off > cur)
+                    memset(buf + cur, 0, (size_t)(s[i].off - cur));
+                if (s[i].off + s[i].len > cur)
+                    cur = s[i].off + s[i].len;
+            }
+            if (cur < plan->cont_bytes)
+                memset(buf + cur, 0, (size_t)(plan->cont_bytes - cur));
+            free(s);
+        }
+    }
 
     for (size_t i = 0; i < plan->nranges; i++) {
         if (vol_container_read_range(under, under_vol_id, plist_id,

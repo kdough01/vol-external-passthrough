@@ -64,6 +64,45 @@ H5VL_pass_through_ext_progressive_pct(hid_t dxpl_id)
     return 100;
 }
 
+static unsigned *g_pct_vec = NULL;
+static size_t    g_pct_n   = 0;
+
+unsigned
+vol_progressive_pct_for_chunk(unsigned want_pct, uint64_t k)
+{
+    if (g_pct_vec && k < (uint64_t)g_pct_n) {
+        unsigned p = g_pct_vec[k];
+        if (p >= 1 && p <= 100) return p;
+    }
+    return want_pct;
+}
+
+herr_t
+H5Pset_vol_progressive_pct_v(hid_t dxpl_id, size_t n, const unsigned *pct)
+{
+    unsigned *v;
+
+    (void)dxpl_id;
+    if (n == 0 || !pct) {
+        free(g_pct_vec);
+        g_pct_vec = NULL;
+        g_pct_n   = 0;
+        return 0;
+    }
+    v = (unsigned *)malloc(n * sizeof(unsigned));
+    if (!v) return -1;
+    for (size_t i = 0; i < n; i++) {
+        unsigned p = pct[i];
+        if (p < 1)   p = 1;
+        if (p > 100) p = 100;
+        v[i] = p;
+    }
+    free(g_pct_vec);
+    g_pct_vec = v;
+    g_pct_n   = n;
+    return 0;
+}
+
 herr_t
 vol_sperr_truncate(const void *stream, size_t stream_len, unsigned pct,
                    void **out, size_t *out_len)

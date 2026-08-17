@@ -2128,6 +2128,9 @@ vol_read_vol(const vol_read_req_t *req, vol_read_timing_t *t)
         return -1;
     }
 
+    const int prog = vol_codec_is_progressive(req->ctx->compressor_id);
+    const int plog = (getenv("VOL_PROGRESSIVE_LOG") != NULL);
+
     double _c0 = bench_now_ms();
     herr_t rc  = 0;
     size_t poff = payload_off;
@@ -2150,9 +2153,40 @@ vol_read_vol(const vol_read_req_t *req, vol_read_timing_t *t)
         size_t dlen = (req->total_bytes - doff < chunk_bytes)
                           ? (req->total_bytes - doff) : chunk_bytes;
 
-        rc = H5VL_pass_through_ext_transfer_decompress_chunk(
-                 req->ctx, req->cbuf + poff, (size_t)csize_k,
-                 (char *)req->dst + doff, dlen);
+        /* PROGRESSIVE. Only a prefix of this chunk is resident; recompute how
+         * much using the SAME formula vol_container_plan used. poff still
+         * advances by the full on-disk csize_k -- that is the file layout, not
+         * what we fetched. */
+        unsigned p = vol_progressive_pct_for_chunk(req->want_pct, (uint64_t)k);
+
+        if (prog && p >= 1 && p < 100) {
+            size_t avail_k =
+                (size_t)(((uint64_t)csize_k * (uint64_t)p) / 100)
+                + VOL_SPERR_SLACK;
+            if (avail_k > (size_t)csize_k) avail_k = (size_t)csize_k;
+
+            void  *ts   = NULL;
+            size_t tlen = 0;
+
+            if (vol_sperr_truncate(req->cbuf + poff, avail_k, p,
+                                   &ts, &tlen) < 0) {
+                rc = -1;                 /* error already pushed */
+            } else {
+                if (plog)
+                    fprintf(stderr, "[prog] chunk %zu/%zu: %u%% -> %zu of "
+                            "%llu B, decoded stream %zu B\n",
+                            k, nchunks, p, avail_k,
+                            (unsigned long long)csize_k, tlen);
+                rc = H5VL_pass_through_ext_transfer_decompress_chunk(
+                         req->ctx, ts, tlen,
+                         (char *)req->dst + doff, dlen);
+                free(ts);
+            }
+        } else {
+            rc = H5VL_pass_through_ext_transfer_decompress_chunk(
+                     req->ctx, req->cbuf + poff, (size_t)csize_k,
+                     (char *)req->dst + doff, dlen);
+        }
 
         poff += (size_t)csize_k;
     }
@@ -3038,6 +3072,7 @@ H5VL_pass_through_ext_dataset_write(
         switch (H5VL_pass_through_ext_chunking_mode(ctx)) {
         case VOL_CHUNKING_PRESSIO:     rc = vol_write_pressio(&wreq, &t);     break;
         case VOL_CHUNKING_VOL:         rc = vol_write_vol(&wreq, &t);         break;
+        case VOL_CHUNKING_PROGRESSIVE: rc = vol_write_progressive(&wreq, &t); break;
         case VOL_CHUNKING_SHARED:      rc = vol_write_shared(&wreq, &t);      break;
         case VOL_CHUNKING_NONE:
         default:                       rc = vol_write_native(&wreq, &t);      break;

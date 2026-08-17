@@ -109,15 +109,16 @@ static const char *XCSV_HEADER =
     "logical_bytes,stored_bytes,ratio,"
     "create_ms,write_ms,flush_ms,sync_ms,close_ms,csync_ms,"
     "evict_ms,open_ms,read_ms,"
-    "rmse,abs_thresh,maxae,bound_ok,write_wall_ms,d2h_ms\n";
+    "rmse,abs_thresh,maxae,bound_ok,write_wall_ms,d2h_ms,read_wall_ms\n";
 
 typedef struct {
-    double create_ms, write_ms, flush_ms, sync_ms, close_ms, csync_ms;
-    double evict_ms, open_ms, read_ms;
-    double write_wall_ms;
-    double d2h_ms;          /* rtrip only; subset of write_ms */
-    unsigned long long stored;
-} rep_timing;
+     double create_ms, write_ms, flush_ms, sync_ms, close_ms, csync_ms;
+     double evict_ms, open_ms, read_ms;
+     double write_wall_ms;
+     double read_wall_ms;
+     double d2h_ms;
+     unsigned long long stored;
+ } rep_timing;
 
 /* ------------------------------------------------------------------ *
  * Wall-clock timer.  fsync() spends its time blocked in the kernel on
@@ -152,13 +153,13 @@ static void xcsv_row(FILE *fp, const char *dset, const bench_compressor_t *c,
         "%s,%s,%s,%d,%d,%llu,%llu,%.4f,"
         "%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,"
         "%.4f,%.4f,%.4f,"
-        "%.6e,%.6e,%.6e,%d,%.4f,%.4f\n",
+        "%.6e,%.6e,%.6e,%d,%.4f,%.4f,%.4f\n",
         dset, c->name, bench_codec_kind_name(c->kind), chunk_n, rep,
         logical, t->stored, ratio,
         t->create_ms, t->write_ms, t->flush_ms, t->sync_ms,
         t->close_ms, t->csync_ms,
         t->evict_ms, t->open_ms, t->read_ms,
-        rmse, abs_thresh, maxae, bound_ok, t->write_wall_ms, t->d2h_ms);
+        rmse, abs_thresh, maxae, bound_ok, t->write_wall_ms, t->d2h_ms, t->read_wall_ms);
     std::fflush(fp);
 }
 
@@ -380,6 +381,7 @@ typedef struct {
     size_t             raw_bytes;
     unsigned long long storage;
     int                n;
+    double read_wall_ms;
 } bench_file_acc;
 
 /* NOTE: ws->wbuf may be a DEVICE pointer in the devres arm. Nothing in this
@@ -511,8 +513,10 @@ static int run_rep(const char *path, const char *dsname,
         }
 
         BenchCpuTimer rt; rt.start();
+        BenchWallTimer rwt; rwt.start();
         herr_t rret = H5Dread(dset, ntype, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf);
         t->read_ms = rt.stop_ms();
+        t->read_wall_ms = rwt.stop_ms();
 
         H5Dclose(dset);
         H5Fclose(file);
@@ -576,6 +580,7 @@ static void run_pair(const char *h5base,
          * Always against hbuf. ws->wbuf may be device memory. */
         bench_stats st = bench_compute_stats(hbuf, rbuf, nelem, d->dtype,
                                              BENCH_XFORM_NONE);
+                                             
 
         if (verify) {
             bench_zero_run(hbuf, rbuf, nelem, d->dtype, dsname);
@@ -619,6 +624,7 @@ static void run_pair(const char *h5base,
             acc->evict_ms  += t.evict_ms;
             acc->open_ms   += t.open_ms;   acc->read_ms  += t.read_ms;
             acc->write_wall_ms += t.write_wall_ms;
+            acc->read_wall_ms  += t.read_wall_ms;
             acc->d2h_ms        += t.d2h_ms;
             acc->raw_bytes += raw_bytes;   acc->storage  += t.stored;
             acc->n         += 1;
@@ -860,8 +866,9 @@ int main(int argc, char **argv) {
                 acc.close_ms, acc.csync_ms, file_wtotal,
                 acc.evict_ms, acc.open_ms, acc.read_ms, file_rtotal, file_ratio);
 
-    bench_csv_row(csv, h5base, "ALL", "vol", "write", "file", file_wtotal, file_ratio, -1.0);
-    bench_csv_row(csv, h5base, "ALL", "vol", "read",  "file", file_rtotal, -1.0,       -1.0);
+    bench_csv_row(csv, d->name, c->name, "vol", "read",  "evict", t.evict_ms, -1.0, -1.0);
+    bench_csv_row(csv, d->name, c->name, "vol", "read",  "total", t.read_ms, -1.0, st.rmse);
+    bench_csv_row(csv, d->name, c->name, "vol", "read",  "wall",  t.read_wall_ms, -1.0, -1.0);
 
     std::fclose(csv);
     std::fclose(xcsv);
