@@ -78,8 +78,8 @@ set_property(TARGET bench_filter_timing PROPERTY CXX_STANDARD 17)
 set_property(TARGET bench_filter_timing PROPERTY CXX_STANDARD_REQUIRED ON)
 target_link_options(bench_filter_timing PRIVATE -rdynamic)
 
-add_executable(dump_cuszp_opts dump_cuszp_opts.cc)
-target_link_libraries(dump_cuszp_opts PRIVATE LibPressio::libpressio)
+add_executable(dump_opts dump_opts.cc)
+target_link_libraries(dump_opts PRIVATE LibPressio::libpressio)
 
 if(USE_CUDA)
     foreach(cuda_target bench_pressio_timing bench_vol_timing)
