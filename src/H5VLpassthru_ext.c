@@ -3070,10 +3070,10 @@ H5VL_pass_through_ext_dataset_write(
 
         herr_t rc;
         switch (H5VL_pass_through_ext_chunking_mode(ctx)) {
+        case VOL_CHUNKING_SHARED:      rc = vol_write_shared(&wreq, &t);      break;
         case VOL_CHUNKING_PRESSIO:     rc = vol_write_pressio(&wreq, &t);     break;
         case VOL_CHUNKING_VOL:         rc = vol_write_vol(&wreq, &t);         break;
-        case VOL_CHUNKING_PROGRESSIVE: rc = vol_write_progressive(&wreq, &t); break;
-        case VOL_CHUNKING_SHARED:      rc = vol_write_shared(&wreq, &t);      break;
+        case VOL_CHUNKING_PROGRESSIVE:
         case VOL_CHUNKING_NONE:
         default:                       rc = vol_write_native(&wreq, &t);      break;
         }

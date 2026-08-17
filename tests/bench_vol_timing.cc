@@ -866,10 +866,6 @@ int main(int argc, char **argv) {
                 acc.close_ms, acc.csync_ms, file_wtotal,
                 acc.evict_ms, acc.open_ms, acc.read_ms, file_rtotal, file_ratio);
 
-    bench_csv_row(csv, d->name, c->name, "vol", "read",  "evict", t.evict_ms, -1.0, -1.0);
-    bench_csv_row(csv, d->name, c->name, "vol", "read",  "total", t.read_ms, -1.0, st.rmse);
-    bench_csv_row(csv, d->name, c->name, "vol", "read",  "wall",  t.read_wall_ms, -1.0, -1.0);
-
     std::fclose(csv);
     std::fclose(xcsv);
     std::fprintf(stderr, "[dbg main] done: arm=%s, %d datasets, %d skipped, "
