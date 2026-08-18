@@ -83,8 +83,8 @@ export HDF5_USE_FILE_LOCKING=FALSE
 H5DIR="${VOL_H5DIR:-/lcrc/project/SDR/$USER/vol_bench_h5}"
 mkdir -p "$H5DIR" || { echo "cannot create $H5DIR"; exit 1; }
 
-PROG_DSET="${PROG_DSET:-miranda}"
-PROG_SEL="${PROG_SEL:-miranda}"
+PROG_DSET="${PROG_DSET:-s3d}"
+PROG_SEL="${PROG_SEL:-s3d}"
 PROG_COMPS="${PROG_COMPS:- sperr_pwe1e6}"
 PROG_CHUNKING="${PROG_CHUNKING:-}"
 PROG_CHUNK_N="${PROG_CHUNK_N:-}"

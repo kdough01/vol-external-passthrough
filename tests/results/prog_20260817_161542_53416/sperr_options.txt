@@ -1,4 +1,0 @@
-compressor 'sperr' is NOT available in this libpressio build: invalid compressor id sperr
-
-Compressors that ARE available:
-  binning blosc bzip2 cast chunking cuda_device_selector cusz cuszp delta_encoding external_compressor fpzip lambda_fn linear_quantizer log_transform manifest many_independent_threaded mask_binning mask_interpolation mgard noop pipeline pressio pw_rel remove_background repeat resize roibin sample switch sz3 szx threshold_small transpose zfp 

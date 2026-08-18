@@ -1,2 +1,0 @@
-dataset,compressor,codec_kind,chunk_n,rep,logical_bytes,stored_bytes,ratio,create_ms,write_ms,flush_ms,sync_ms,close_ms,csync_ms,evict_ms,open_ms,read_ms,rmse,abs_thresh,maxae,bound_ok,write_wall_ms,d2h_ms,read_wall_ms
-miranda,sperr_pwe1e6,cpu,1,0,301989888,9432372,32.0163,1.1888,4924.6332,0.3487,119.9610,0.2610,101.7304,1.2085,0.4469,1931.4666,4.615599e-06,0.000000e+00,6.528949e-05,-1,4924.6337,0.0000,1931.4682

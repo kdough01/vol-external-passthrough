@@ -1,3 +1,0 @@
-dataset,compressor,op,total_ms,stage_ms,compress_ms,container_ms,io_ms,pressio_call_ms,device_ms,transfer_ms,vol_compress_ms,pressio_host_ms,residual_ms,residual_frac,h2d_ms
-miranda_sperr_pwe1e3,sperr,write,9255.3355,0.0000,9252.9501,0.0798,2.3013,9251.9335,9252.1016,0.0000,1.0166,-0.1681,0.0043,0.000000,0.000
-miranda_sperr_pwe1e3,sperr,read,4042.3076,0.0000,4039.8395,0.0000,2.3596,3957.9897,3958.0732,0.0000,81.8498,-0.0836,0.1085,0.000027,0.000
