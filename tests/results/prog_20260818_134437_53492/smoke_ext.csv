@@ -1,0 +1,2 @@
+dataset,compressor,codec_kind,chunk_n,rep,logical_bytes,stored_bytes,ratio,create_ms,write_ms,flush_ms,sync_ms,close_ms,csync_ms,evict_ms,open_ms,read_ms,rmse,abs_thresh,maxae,bound_ok,write_wall_ms,d2h_ms,read_wall_ms
+s3d,sperr_pwe1e3,cpu,1,0,1000000000,73784,13553.0738,8.9935,6723.6939,3.2524,146.8441,0.2586,34.6705,1.2791,0.4537,2948.6931,8.798500e-05,0.000000e+00,3.087042e-03,-1,6723.6940,0.0000,2948.6933

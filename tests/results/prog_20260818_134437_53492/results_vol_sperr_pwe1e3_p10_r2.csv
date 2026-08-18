@@ -1,0 +1,10 @@
+dataset,compressor,path,op,phase,ms,ratio,rmse
+s3d,sperr_pwe1e3,vol,write,total,6656.8698,13553.0738,
+s3d,sperr_pwe1e3,vol,write,wall,6656.8700,,
+s3d,sperr_pwe1e3,vol,write,d2h,0.0000,,
+s3d,sperr_pwe1e3,vol,write,flush,2.7765,,
+s3d,sperr_pwe1e3,vol,write,sync,153.9691,,
+s3d,sperr_pwe1e3,vol,write,close,0.2177,,
+s3d,sperr_pwe1e3,vol,write,csync,38.1452,,
+s3d,sperr_pwe1e3,vol,read,evict,2.9149,,
+s3d,sperr_pwe1e3,vol,read,total,2920.7143,,2.281053e-04

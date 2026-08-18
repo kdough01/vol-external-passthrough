@@ -1,0 +1,963 @@
+Job started on Tue Aug 18 13:44:37 CDT 2026 / gpu3
+Results: /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/prog_20260818_134437_53492
+
+=== Building ===
+-- The C compiler identification is GNU 11.4.0
+-- The CXX compiler identification is GNU 11.4.0
+-- The CUDA compiler identification is NVIDIA 12.9.86
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /gpfs/fs1/home/software/swing/HPCX/hpcx-v2.26-gcc-doca_ofed-ubuntu22.04-cuda13-x86_64/ompi4/bin/mpicc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /gpfs/fs1/home/software/swing/HPCX/hpcx-v2.26-gcc-doca_ofed-ubuntu22.04-cuda13-x86_64/ompi4/bin/mpicxx - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Detecting CUDA compiler ABI info
+-- Detecting CUDA compiler ABI info - done
+-- Check for working CUDA compiler: /home/kdougherty/libpressio_cuda/.spack-env/view/bin/nvcc - skipped
+-- Detecting CUDA compile features
+-- Detecting CUDA compile features - done
+-- Found HDF5: hdf5-shared (found version "1.14.6")  
+-- Found OpenMP_C: -fopenmp (found version "4.5") 
+-- Found OpenMP_CXX: -fopenmp (found version "4.5") 
+-- Found OpenMP: TRUE (found version "4.5")  
+-- Found BZip2: /home/kdougherty/libpressio_cuda/.spack-env/view/lib/libbz2.so (found version "1.0.8") 
+-- Looking for BZ2_bzCompressInit
+-- Looking for BZ2_bzCompressInit - found
+-- Found OpenMP_C: -fopenmp (found version "4.5") 
+-- Found OpenMP_CXX: -fopenmp (found version "4.5") 
+-- Found ZLIB: /home/kdougherty/libpressio_cuda/.spack-env/view/lib/libz.so (found version "1.3.1") 
+-- Found PkgConfig: /home/kdougherty/libpressio_cuda/.spack-env/view/bin/pkg-config (found version "2.5.1") 
+-- Checking for one of the modules 'libzstd'
+-- Found CUDAToolkit: /home/kdougherty/libpressio_cuda/.spack-env/view/include (found version "12.9.86") 
+-- Looking for pthread.h
+-- Looking for pthread.h - found
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE  
+-- Found nvcomp: /home/kdougherty/libpressio_cuda/.spack-env/view/lib/cmake/nvcomp/nvcomp-config.cmake  
+-- Checking for one of the modules 'protobuf>=3.0.0'
+-- Found OpenMP_C: -fopenmp (found version "4.5") 
+-- Found OpenMP_CXX: -fopenmp (found version "4.5") 
+-- Found mgard: /home/kdougherty/libpressio_cuda/.spack-env/view/lib/cmake/mgard/mgard-config.cmake (found version "1.5.2") 
+-- Found ZFP: /home/kdougherty/libpressio_cuda/.spack-env/view/lib/cmake/zfp/zfp-config.cmake (found version "0.5.5") 
+-- Found HDF5: hdf5-shared (found version "1.14.6") found components: C 
+-- Found OpenMP_C: -fopenmp (found version "4.5") 
+-- Found OpenMP_CXX: -fopenmp (found version "4.5") 
+-- Found GSL: /home/kdougherty/libpressio_cuda/.spack-env/view/include (found version "2.8") 
+-- Checking for one of the modules 'blosc'
+-- Found MPI_C: /gpfs/fs1/home/software/swing/HPCX/hpcx-v2.26-gcc-doca_ofed-ubuntu22.04-cuda13-x86_64/ompi4/bin/mpicc (found version "3.1") 
+-- Found MPI_CXX: /gpfs/fs1/home/software/swing/HPCX/hpcx-v2.26-gcc-doca_ofed-ubuntu22.04-cuda13-x86_64/ompi4/bin/mpicxx (found version "3.1") 
+-- Found MPI: TRUE (found version "3.1")  
+-- Found fpzip: /home/kdougherty/libpressio_cuda/.spack-env/view/lib/cmake/fpzip/fpzip-config.cmake (found version "1.3.0") 
+-- Found MPI: TRUE (found version "3.1") found components: CXX 
+-- Checking for one of the modules 'lua;luajit'
+-- Found nlohmann_json: /home/kdougherty/libpressio_cuda/.spack-env/view/share/cmake/nlohmann_json/nlohmann_jsonConfig.cmake (found version "3.12.0") 
+-- Found Python3: /home/kdougherty/libpressio_cuda/.spack-env/view/bin/python3 (found version "3.14.5") found components: Interpreter Development NumPy Development.Module Development.Embed 
+-- Found SWIG: /home/kdougherty/libpressio_cuda/.spack-env/view/bin/swig4.0 (found version "4.1.1")  
+-- Found MPI: TRUE (found version "3.1")  
+-- Checking for module 'SPERR'
+--   Found SPERR, version 0.8.2
+-- H5Z-SZ3 headers: /home/kdougherty/libpressio_cuda/.spack-env/view/include
+-- H5Z-SZ3 library: /home/kdougherty/libpressio_cuda/.spack-env/view/lib/libhdf5sz3.so
+-- H5Z-ZFP headers: /home/kdougherty/libpressio_cuda/.spack-env/view/include
+-- Configuring done
+CMake Warning at src/CMakeLists.txt:14 (add_library):
+  Cannot generate a safe runtime search path for target hdf5_vol_passthrough
+  because files in some directories may conflict with libraries in implicit
+  directories:
+
+    runtime library [libgomp.so.1] in /usr/lib/gcc/x86_64-linux-gnu/11 may be hidden by files in:
+      /home/kdougherty/libpressio_cuda/.spack-env/view/lib
+
+  Some of these libraries may not be found correctly.
+
+
+CMake Warning at src/CMakeLists.txt:14 (add_library):
+  Cannot generate a safe dependent library path for target
+  hdf5_vol_passthrough because files in some directories may conflict with
+  libraries in implicit directories:
+
+    runtime library [libgomp.so.1] in /usr/lib/gcc/x86_64-linux-gnu/11 may be hidden by files in:
+      /home/kdougherty/libpressio_cuda/.spack-env/view/lib
+
+  Some of these libraries may not be found correctly.
+
+
+CMake Warning at tests/CMakeLists.txt:19 (add_executable):
+  Cannot generate a safe runtime search path for target test_cpu_write
+  because files in some directories may conflict with libraries in implicit
+  directories:
+
+    runtime library [libgomp.so.1] in /usr/lib/gcc/x86_64-linux-gnu/11 may be hidden by files in:
+      /home/kdougherty/libpressio_cuda/.spack-env/view/lib
+
+  Some of these libraries may not be found correctly.
+
+
+CMake Warning at tests/CMakeLists.txt:19 (add_executable):
+  Cannot generate a safe dependent library path for target test_cpu_write
+  because files in some directories may conflict with libraries in implicit
+  directories:
+
+    runtime library [libgomp.so.1] in /usr/lib/gcc/x86_64-linux-gnu/11 may be hidden by files in:
+      /home/kdougherty/libpressio_cuda/.spack-env/view/lib
+
+  Some of these libraries may not be found correctly.
+
+
+CMake Warning at tests/CMakeLists.txt:19 (add_executable):
+  Cannot generate a safe runtime search path for target test_time_hurricane
+  because files in some directories may conflict with libraries in implicit
+  directories:
+
+    runtime library [libgomp.so.1] in /usr/lib/gcc/x86_64-linux-gnu/11 may be hidden by files in:
+      /home/kdougherty/libpressio_cuda/.spack-env/view/lib
+
+  Some of these libraries may not be found correctly.
+
+
+CMake Warning at tests/CMakeLists.txt:19 (add_executable):
+  Cannot generate a safe dependent library path for target
+  test_time_hurricane because files in some directories may conflict with
+  libraries in implicit directories:
+
+    runtime library [libgomp.so.1] in /usr/lib/gcc/x86_64-linux-gnu/11 may be hidden by files in:
+      /home/kdougherty/libpressio_cuda/.spack-env/view/lib
+
+  Some of these libraries may not be found correctly.
+
+
+CMake Warning at tests/CMakeLists.txt:19 (add_executable):
+  Cannot generate a safe runtime search path for target test_time_miranda
+  because files in some directories may conflict with libraries in implicit
+  directories:
+
+    runtime library [libgomp.so.1] in /usr/lib/gcc/x86_64-linux-gnu/11 may be hidden by files in:
+      /home/kdougherty/libpressio_cuda/.spack-env/view/lib
+
+  Some of these libraries may not be found correctly.
+
+
+CMake Warning at tests/CMakeLists.txt:19 (add_executable):
+  Cannot generate a safe dependent library path for target test_time_miranda
+  because files in some directories may conflict with libraries in implicit
+  directories:
+
+    runtime library [libgomp.so.1] in /usr/lib/gcc/x86_64-linux-gnu/11 may be hidden by files in:
+      /home/kdougherty/libpressio_cuda/.spack-env/view/lib
+
+  Some of these libraries may not be found correctly.
+
+
+CMake Warning at tests/CMakeLists.txt:19 (add_executable):
+  Cannot generate a safe runtime search path for target test_ci because files
+  in some directories may conflict with libraries in implicit directories:
+
+    runtime library [libgomp.so.1] in /usr/lib/gcc/x86_64-linux-gnu/11 may be hidden by files in:
+      /home/kdougherty/libpressio_cuda/.spack-env/view/lib
+
+  Some of these libraries may not be found correctly.
+
+
+CMake Warning at tests/CMakeLists.txt:19 (add_executable):
+  Cannot generate a safe dependent library path for target test_ci because
+  files in some directories may conflict with libraries in implicit
+  directories:
+
+    runtime library [libgomp.so.1] in /usr/lib/gcc/x86_64-linux-gnu/11 may be hidden by files in:
+      /home/kdougherty/libpressio_cuda/.spack-env/view/lib
+
+  Some of these libraries may not be found correctly.
+
+
+CMake Warning at tests/CMakeLists.txt:19 (add_executable):
+  Cannot generate a safe runtime search path for target test_error_miranda
+  because files in some directories may conflict with libraries in implicit
+  directories:
+
+    runtime library [libgomp.so.1] in /usr/lib/gcc/x86_64-linux-gnu/11 may be hidden by files in:
+      /home/kdougherty/libpressio_cuda/.spack-env/view/lib
+
+  Some of these libraries may not be found correctly.
+
+
+CMake Warning at tests/CMakeLists.txt:19 (add_executable):
+  Cannot generate a safe dependent library path for target test_error_miranda
+  because files in some directories may conflict with libraries in implicit
+  directories:
+
+    runtime library [libgomp.so.1] in /usr/lib/gcc/x86_64-linux-gnu/11 may be hidden by files in:
+      /home/kdougherty/libpressio_cuda/.spack-env/view/lib
+
+  Some of these libraries may not be found correctly.
+
+
+CMake Warning at tests/CMakeLists.txt:19 (add_executable):
+  Cannot generate a safe runtime search path for target bench_vol_timing
+  because files in some directories may conflict with libraries in implicit
+  directories:
+
+    runtime library [libgomp.so.1] in /usr/lib/gcc/x86_64-linux-gnu/11 may be hidden by files in:
+      /home/kdougherty/libpressio_cuda/.spack-env/view/lib
+
+  Some of these libraries may not be found correctly.
+
+
+CMake Warning at tests/CMakeLists.txt:19 (add_executable):
+  Cannot generate a safe dependent library path for target bench_vol_timing
+  because files in some directories may conflict with libraries in implicit
+  directories:
+
+    runtime library [libgomp.so.1] in /usr/lib/gcc/x86_64-linux-gnu/11 may be hidden by files in:
+      /home/kdougherty/libpressio_cuda/.spack-env/view/lib
+
+  Some of these libraries may not be found correctly.
+
+
+CMake Warning at tests/CMakeLists.txt:19 (add_executable):
+  Cannot generate a safe runtime search path for target bench_pressio_timing
+  because files in some directories may conflict with libraries in implicit
+  directories:
+
+    runtime library [libgomp.so.1] in /usr/lib/gcc/x86_64-linux-gnu/11 may be hidden by files in:
+      /home/kdougherty/libpressio_cuda/.spack-env/view/lib
+
+  Some of these libraries may not be found correctly.
+
+
+CMake Warning at tests/CMakeLists.txt:19 (add_executable):
+  Cannot generate a safe dependent library path for target
+  bench_pressio_timing because files in some directories may conflict with
+  libraries in implicit directories:
+
+    runtime library [libgomp.so.1] in /usr/lib/gcc/x86_64-linux-gnu/11 may be hidden by files in:
+      /home/kdougherty/libpressio_cuda/.spack-env/view/lib
+
+  Some of these libraries may not be found correctly.
+
+
+CMake Warning at tests/CMakeLists.txt:19 (add_executable):
+  Cannot generate a safe runtime search path for target bench_filter_timing
+  because files in some directories may conflict with libraries in implicit
+  directories:
+
+    runtime library [libgomp.so.1] in /usr/lib/gcc/x86_64-linux-gnu/11 may be hidden by files in:
+      /home/kdougherty/libpressio_cuda/.spack-env/view/lib
+
+  Some of these libraries may not be found correctly.
+
+
+CMake Warning at tests/CMakeLists.txt:19 (add_executable):
+  Cannot generate a safe dependent library path for target
+  bench_filter_timing because files in some directories may conflict with
+  libraries in implicit directories:
+
+    runtime library [libgomp.so.1] in /usr/lib/gcc/x86_64-linux-gnu/11 may be hidden by files in:
+      /home/kdougherty/libpressio_cuda/.spack-env/view/lib
+
+  Some of these libraries may not be found correctly.
+
+
+CMake Warning at tests/CMakeLists.txt:81 (add_executable):
+  Cannot generate a safe runtime search path for target dump_opts because
+  files in some directories may conflict with libraries in implicit
+  directories:
+
+    runtime library [libgomp.so.1] in /usr/lib/gcc/x86_64-linux-gnu/11 may be hidden by files in:
+      /home/kdougherty/libpressio_cuda/.spack-env/view/lib
+
+  Some of these libraries may not be found correctly.
+
+
+CMake Warning at tests/CMakeLists.txt:81 (add_executable):
+  Cannot generate a safe dependent library path for target dump_opts because
+  files in some directories may conflict with libraries in implicit
+  directories:
+
+    runtime library [libgomp.so.1] in /usr/lib/gcc/x86_64-linux-gnu/11 may be hidden by files in:
+      /home/kdougherty/libpressio_cuda/.spack-env/view/lib
+
+  Some of these libraries may not be found correctly.
+
+
+CMake Warning at examples/CMakeLists.txt:12 (add_executable):
+  Cannot generate a safe runtime search path for target new_h5api_ex because
+  files in some directories may conflict with libraries in implicit
+  directories:
+
+    runtime library [libgomp.so.1] in /usr/lib/gcc/x86_64-linux-gnu/11 may be hidden by files in:
+      /home/kdougherty/libpressio_cuda/.spack-env/view/lib
+
+  Some of these libraries may not be found correctly.
+
+
+CMake Warning at examples/CMakeLists.txt:12 (add_executable):
+  Cannot generate a safe dependent library path for target new_h5api_ex
+  because files in some directories may conflict with libraries in implicit
+  directories:
+
+    runtime library [libgomp.so.1] in /usr/lib/gcc/x86_64-linux-gnu/11 may be hidden by files in:
+      /home/kdougherty/libpressio_cuda/.spack-env/view/lib
+
+  Some of these libraries may not be found correctly.
+
+
+CMake Warning at examples/CMakeLists.txt:12 (add_executable):
+  Cannot generate a safe runtime search path for target async_new_h5api_ex
+  because files in some directories may conflict with libraries in implicit
+  directories:
+
+    runtime library [libgomp.so.1] in /usr/lib/gcc/x86_64-linux-gnu/11 may be hidden by files in:
+      /home/kdougherty/libpressio_cuda/.spack-env/view/lib
+
+  Some of these libraries may not be found correctly.
+
+
+CMake Warning at examples/CMakeLists.txt:12 (add_executable):
+  Cannot generate a safe dependent library path for target async_new_h5api_ex
+  because files in some directories may conflict with libraries in implicit
+  directories:
+
+    runtime library [libgomp.so.1] in /usr/lib/gcc/x86_64-linux-gnu/11 may be hidden by files in:
+      /home/kdougherty/libpressio_cuda/.spack-env/view/lib
+
+  Some of these libraries may not be found correctly.
+
+
+-- Generating done
+-- Build files have been written to: /home/kdougherty/hdf5_projs/vol-external-passthrough/build
+[  3%] Building CXX object tests/CMakeFiles/dump_opts.dir/dump_opts.cc.o
+[  6%] Building C object src/CMakeFiles/hdf5_vol_passthrough.dir/H5VLpassthru_ext.c.o
+[ 10%] Building C object src/CMakeFiles/hdf5_vol_passthrough.dir/new_h5api.c.o
+[ 20%] Building CXX object src/CMakeFiles/hdf5_vol_passthrough.dir/compress/compress.cc.o
+[ 20%] Building CXX object src/CMakeFiles/hdf5_vol_passthrough.dir/compress/vol_shared_meta.cc.o
+[ 20%] Building CXX object src/CMakeFiles/hdf5_vol_passthrough.dir/compress/vol_progressive.cc.o
+[ 24%] Building CXX object src/CMakeFiles/hdf5_vol_passthrough.dir/compress/vol_container_read.cc.o
+[ 27%] Linking CXX executable ../bin/dump_opts
+[ 27%] Built target dump_opts
+[ 31%] Linking CXX shared library ../lib/libhdf5_vol_passthrough.so
+[ 31%] Built target hdf5_vol_passthrough
+[ 37%] Building C object tests/CMakeFiles/test_time_hurricane.dir/test_time_hurricane.c.o
+[ 41%] Building C object tests/CMakeFiles/test_error_miranda.dir/test_error_miranda.c.o
+[ 44%] Building C object tests/CMakeFiles/test_time_miranda.dir/test_time_miranda.c.o
+[ 48%] Building C object tests/CMakeFiles/test_cpu_write.dir/test_cpu_write.c.o
+[ 51%] Building CXX object tests/CMakeFiles/bench_filter_timing.dir/bench_filter_timing.cc.o
+[ 55%] Building CXX object tests/CMakeFiles/bench_pressio_timing.dir/bench_pressio_timing.cc.o
+[ 58%] Building C object tests/CMakeFiles/test_ci.dir/test_ci.c.o
+[ 62%] Building CXX object tests/CMakeFiles/bench_vol_timing.dir/bench_vol_timing.cc.o
+[ 65%] Building C object examples/CMakeFiles/new_h5api_ex.dir/new_h5api_ex.c.o
+[ 65%] Building C object examples/CMakeFiles/async_new_h5api_ex.dir/async_new_h5api_ex.c.o
+[ 68%] Linking C executable ../bin/new_h5api_ex
+[ 72%] Linking C executable ../bin/async_new_h5api_ex
+[ 75%] Linking C executable ../bin/test_cpu_write
+[ 79%] Linking C executable ../bin/test_time_hurricane
+[ 82%] Linking C executable ../bin/test_error_miranda
+[ 86%] Linking C executable ../bin/test_ci
+[ 86%] Built target async_new_h5api_ex
+[ 86%] Built target new_h5api_ex
+[ 89%] Linking C executable ../bin/test_time_miranda
+[ 89%] Built target test_cpu_write
+[ 89%] Built target test_time_hurricane
+[ 89%] Built target test_error_miranda
+[ 89%] Built target test_ci
+[ 89%] Built target test_time_miranda
+[ 93%] Linking CXX executable ../bin/bench_pressio_timing
+[ 93%] Built target bench_pressio_timing
+[ 96%] Linking CXX executable ../bin/bench_vol_timing
+[ 96%] Built target bench_vol_timing
+[100%] Linking CXX executable ../bin/bench_filter_timing
+[100%] Built target bench_filter_timing
+Binary dir: /home/kdougherty/hdf5_projs/vol-external-passthrough/build/bin
+Plugin dir: /home/kdougherty/hdf5_projs/vol-external-passthrough/build/lib
+[zfp64] probe target: /home/kdougherty/hdf5_projs/vol-external-passthrough/build/lib/libhdf5_vol_passthrough.so
+[zfp64] LD_LIBRARY_PATH insufficient (got: /gpfs/fs1/home/kdougherty/spack/opt/spack/linux-zen2/zfp-0.5.5-vxzs7uhsw5mqg4tuqr47hztf75snu2qc/lib/libzfp.so.0); using LD_PRELOAD
+[zfp64] -------- zfp binding --------
+[zfp64]   probe target     : /home/kdougherty/hdf5_projs/vol-external-passthrough/build/lib/libhdf5_vol_passthrough.so
+[zfp64]   env zfp (stock)  : /gpfs/fs1/home/kdougherty/spack/opt/spack/linux-zen2/zfp-0.5.5-vxzs7uhsw5mqg4tuqr47hztf75snu2qc/lib/libzfp.so.0.5.5
+[zfp64]   active zfp       : /gpfs/fs1/home/kdougherty/spack/opt/spack/linux-zen2/zfp-0.5.5-e6nrl7coy6muddatslhbbmjm3uphjrg6/lib/libzfp.so.0.5.5
+[zfp64]   LD_PRELOAD       : /gpfs/fs1/home/kdougherty/spack/opt/spack/linux-zen2/zfp-0.5.5-e6nrl7coy6muddatslhbbmjm3uphjrg6/lib/libzfp.so.0
+[zfp64]   DT tags on libpressio: RUNPATH 
+[zfp64] -----------------------------
+[preamble] sperr plugin preloaded: /home/kdougherty/libpressio_cuda/.spack-env/view/lib/liblibpressio_sperr.so
+
+###########################################################
+# PREFLIGHT
+###########################################################
+
+=== [P1] libpressio-sperr preload ===
+  LD_PRELOAD:
+    /gpfs/fs1/home/kdougherty/spack/opt/spack/linux-zen2/zfp-0.5.5-e6nrl7coy6muddatslhbbmjm3uphjrg6/lib/libzfp.so.0
+    /home/kdougherty/libpressio_cuda/.spack-env/view/lib/liblibpressio_sperr.so
+  [ OK ] sperr plugin is in LD_PRELOAD
+  [ OK ] zfp bsws=64 preload still present (not clobbered)
+
+=== [P2] sperr registered with libpressio ===
+  [ OK ] compressor 'sperr' resolves
+         sperr:chunks default -> has_data=[256, 256, 256, ]
+
+=== [P3] SPERR prefix-truncation invariant ===
+  --- default 256^3 chunking (EXPECTED TO FAIL) ---
+    
+    VERDICT: multi-chunk but zero-tail happened to match. Do not rely on
+             this -- it is not a guarantee SPERR makes. Re-run with other
+             dims/quality before trusting it.
+  --- pinned to the volume (MUST PASS) ---
+     100 |  144.32 dB   6744156 B       |  144.32 dB   6744156 B       |  144.32 dB   6744156 B      
+    
+    VERDICT: single chunk, and the zero-tail read matches the reference.
+             The current VOL prefix plan is correct FOR THIS CONFIG ONLY.
+  [ OK ] pinned: single chunk, prefix truncation valid
+  [WARN] default chunking ALSO passed. For 384 384 256 that is unexpected --
+  [WARN] it means the pinning is not being exercised, so a regression in
+  [WARN] vol_sperr_set_chunks would go unnoticed. Not fatal.
+
+=== [P4] smoke run (one pct, one rep, full VOL path) ===
+  compressor: sperr_pwe1e3   pct: 25
+  --- connector chatter ---
+    [sperr] chunks pinned to 500 x 500 x 500 (one internal chunk)
+    [read-plan] kind=1 pct=25 ranges=1 need=22554/73784 bytes (30.6%)  PARTIAL
+    [VOL] partial container read: 22554 of 73784 bytes (30.6%)
+    [prog] sperr_trunc_3d: 22538 B in, 25% -> 18455 B out
+    [VOL] dataset 's3d_sperr_pwe1e3' read at REDUCED fidelity: 25% requested, 22538 of 73768 payload bytes read, 18455 byte stream decoded
+  [ OK ] smoke run completed
+  [ OK ] vol_sperr_set_chunks fired (1 call(s))
+  [ OK ] progressive truncation ran (1 chunk(s))
+
+=== [P5] did the measurement come out measurable? ===
+  [ OK ] xcsv has 24 fields (read_wall_ms present)
+  [ OK ] xcsv has 1 data row(s)
+         read_ms(cpu)=2948.6931  read_wall_ms=2948.6933
+  [ OK ] wall > cpu -- the read really is blocking on I/O
+  --- plan rows (kind,pct,nranges,needed,cont,partial) ---
+    1,25,1,22554,73784,1
+         bytes_needed/cont_bytes = 30.6% (requested 25%)
+  [ OK ] the read really was partial
+
+###########################################################
+# PREFLIGHT: all checks passed
+###########################################################
+
+=== progressive sweep ===
+    dataset:     s3d (s3d)
+    compressors:  sperr_pwe1e3
+    pcts:        5 10 25 50 75 100
+    reps:        3
+    runs:        1 x 6 x 3
+
+    NOTE: each run rewrites the dataset. Pinning SPERR to one internal
+    chunk removes its cross-chunk threading, so the native arm's writes
+    are slow by design. If walltime looks tight, drop PROG_REPS to 1 for
+    a first pass -- the read numbers are what matter.
+
+#### compressor: sperr_pwe1e3 ####
+
+--- sperr_pwe1e3 pct=5 rep=0 ---
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/prog_sperr_pwe1e3_p5_r0.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/prog_20260818_134437_53492/results_vol_sperr_pwe1e3_p5_r0.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/prog_20260818_134437_53492/results_ext_sperr_pwe1e3_p5_r0.csv only=s3d comp=sperr_pwe1e3 arm=hostsim verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 974.4 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE s3d            min=-6.362436e-15 max=3.920002e-02 range=3.920002e-02 xform=none
+[arm hostsim] plain host buffer; one H2D inside the codec
+[read-plan] kind=1 pct=5 ranges=1 need=7800/73784 bytes (10.6%)  PARTIAL
+[VOL] partial container read: 7800 of 73784 bytes (10.6%)
+[prog] sperr_trunc_3d: 7784 B in, 5% -> 3705 B out
+[VOL] dataset 's3d_sperr_pwe1e3' read at REDUCED fidelity: 5% requested, 7784 of 73768 payload bytes read, 3705 byte stream decoded
+
+=== s3d (953.7 MiB, double, raw) arm=hostsim ===
+Info: 0x557f9c29eff0
+  s3d_sperr_pwe1e3             [hostsim] C=   1.07 W=  6771.15 (wall   6771.15) F=    2.57 S=   132.86 X=    0.23 S2= 112.42 | E=   1.26 O=   0.43 R=  2936.30 ms  ratio=13553.07x  RMSE=4.157e-04 maxae=7.150e-03
+[dbg main] done: arm=hostsim, 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS [arm=hostsim] over 1 measurement files: create=1.07 write=6771.15 (wall 6771.15) flush=2.57 sync=132.86 close=0.23 csync=112.42 => write_total=7020.29 ms | evict=1.26 open=0.43 read=2936.30 => read_total=2936.73 ms | ratio=13553.07x ===
+
+--- sperr_pwe1e3 pct=5 rep=1 ---
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/prog_sperr_pwe1e3_p5_r1.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/prog_20260818_134437_53492/results_vol_sperr_pwe1e3_p5_r1.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/prog_20260818_134437_53492/results_ext_sperr_pwe1e3_p5_r1.csv only=s3d comp=sperr_pwe1e3 arm=hostsim verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 975.5 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE s3d            min=-6.362436e-15 max=3.920002e-02 range=3.920002e-02 xform=none
+[arm hostsim] plain host buffer; one H2D inside the codec
+[read-plan] kind=1 pct=5 ranges=1 need=7800/73784 bytes (10.6%)  PARTIAL
+[VOL] partial container read: 7800 of 73784 bytes (10.6%)
+[prog] sperr_trunc_3d: 7784 B in, 5% -> 3705 B out
+[VOL] dataset 's3d_sperr_pwe1e3' read at REDUCED fidelity: 5% requested, 7784 of 73768 payload bytes read, 3705 byte stream decoded
+
+=== s3d (953.7 MiB, double, raw) arm=hostsim ===
+Info: 0x555e23488f80
+  s3d_sperr_pwe1e3             [hostsim] C=   1.07 W=  6719.21 (wall   6719.21) F=    2.91 S=   126.42 X=    0.22 S2=  50.89 | E=   1.28 O=   0.42 R=  2880.40 ms  ratio=13553.07x  RMSE=4.157e-04 maxae=7.150e-03
+[dbg main] done: arm=hostsim, 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS [arm=hostsim] over 1 measurement files: create=1.07 write=6719.21 (wall 6719.21) flush=2.91 sync=126.42 close=0.22 csync=50.89 => write_total=6900.73 ms | evict=1.28 open=0.42 read=2880.40 => read_total=2880.82 ms | ratio=13553.07x ===
+
+--- sperr_pwe1e3 pct=5 rep=2 ---
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/prog_sperr_pwe1e3_p5_r2.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/prog_20260818_134437_53492/results_vol_sperr_pwe1e3_p5_r2.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/prog_20260818_134437_53492/results_ext_sperr_pwe1e3_p5_r2.csv only=s3d comp=sperr_pwe1e3 arm=hostsim verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 975.5 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE s3d            min=-6.362436e-15 max=3.920002e-02 range=3.920002e-02 xform=none
+[arm hostsim] plain host buffer; one H2D inside the codec
+[read-plan] kind=1 pct=5 ranges=1 need=7800/73784 bytes (10.6%)  PARTIAL
+[VOL] partial container read: 7800 of 73784 bytes (10.6%)
+[prog] sperr_trunc_3d: 7784 B in, 5% -> 3705 B out
+[VOL] dataset 's3d_sperr_pwe1e3' read at REDUCED fidelity: 5% requested, 7784 of 73768 payload bytes read, 3705 byte stream decoded
+
+=== s3d (953.7 MiB, double, raw) arm=hostsim ===
+Info: 0x5641760c4cf0
+  s3d_sperr_pwe1e3             [hostsim] C=   1.11 W=  6725.72 (wall   6725.72) F=    2.82 S=   153.37 X=    0.22 S2=  40.61 | E=   0.20 O=   0.42 R=  2886.61 ms  ratio=13553.07x  RMSE=4.157e-04 maxae=7.150e-03
+[dbg main] done: arm=hostsim, 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS [arm=hostsim] over 1 measurement files: create=1.11 write=6725.72 (wall 6725.72) flush=2.82 sync=153.37 close=0.22 csync=40.61 => write_total=6923.86 ms | evict=0.20 open=0.42 read=2886.61 => read_total=2887.03 ms | ratio=13553.07x ===
+
+--- sperr_pwe1e3 pct=10 rep=0 ---
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/prog_sperr_pwe1e3_p10_r0.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/prog_20260818_134437_53492/results_vol_sperr_pwe1e3_p10_r0.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/prog_20260818_134437_53492/results_ext_sperr_pwe1e3_p10_r0.csv only=s3d comp=sperr_pwe1e3 arm=hostsim verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 975.2 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE s3d            min=-6.362436e-15 max=3.920002e-02 range=3.920002e-02 xform=none
+[arm hostsim] plain host buffer; one H2D inside the codec
+[read-plan] kind=1 pct=10 ranges=1 need=11488/73784 bytes (15.6%)  PARTIAL
+[VOL] partial container read: 11488 of 73784 bytes (15.6%)
+[prog] sperr_trunc_3d: 11472 B in, 10% -> 7393 B out
+[VOL] dataset 's3d_sperr_pwe1e3' read at REDUCED fidelity: 10% requested, 11472 of 73768 payload bytes read, 7393 byte stream decoded
+
+=== s3d (953.7 MiB, double, raw) arm=hostsim ===
+Info: 0x558568a5ddb0
+  s3d_sperr_pwe1e3             [hostsim] C=   1.06 W=  6711.68 (wall   6711.68) F=    2.83 S=   131.25 X=    0.22 S2=  39.88 | E=   1.65 O=   0.42 R=  2949.90 ms  ratio=13553.07x  RMSE=2.281e-04 maxae=4.952e-03
+[dbg main] done: arm=hostsim, 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS [arm=hostsim] over 1 measurement files: create=1.06 write=6711.68 (wall 6711.68) flush=2.83 sync=131.25 close=0.22 csync=39.88 => write_total=6886.93 ms | evict=1.65 open=0.42 read=2949.90 => read_total=2950.32 ms | ratio=13553.07x ===
+
+--- sperr_pwe1e3 pct=10 rep=1 ---
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/prog_sperr_pwe1e3_p10_r1.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/prog_20260818_134437_53492/results_vol_sperr_pwe1e3_p10_r1.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/prog_20260818_134437_53492/results_ext_sperr_pwe1e3_p10_r1.csv only=s3d comp=sperr_pwe1e3 arm=hostsim verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 975.5 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE s3d            min=-6.362436e-15 max=3.920002e-02 range=3.920002e-02 xform=none
+[arm hostsim] plain host buffer; one H2D inside the codec
+[read-plan] kind=1 pct=10 ranges=1 need=11488/73784 bytes (15.6%)  PARTIAL
+[VOL] partial container read: 11488 of 73784 bytes (15.6%)
+[prog] sperr_trunc_3d: 11472 B in, 10% -> 7393 B out
+[VOL] dataset 's3d_sperr_pwe1e3' read at REDUCED fidelity: 10% requested, 11472 of 73768 payload bytes read, 7393 byte stream decoded
+
+=== s3d (953.7 MiB, double, raw) arm=hostsim ===
+Info: 0x5639a3ef3f10
+  s3d_sperr_pwe1e3             [hostsim] C=   1.48 W=  6809.19 (wall   6809.19) F=    2.73 S=   129.60 X=    0.25 S2=  55.91 | E=   2.41 O=   0.43 R=  2902.47 ms  ratio=13553.07x  RMSE=2.281e-04 maxae=4.952e-03
+[dbg main] done: arm=hostsim, 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS [arm=hostsim] over 1 measurement files: create=1.48 write=6809.19 (wall 6809.19) flush=2.73 sync=129.60 close=0.25 csync=55.91 => write_total=6999.15 ms | evict=2.41 open=0.43 read=2902.47 => read_total=2902.90 ms | ratio=13553.07x ===
+
+--- sperr_pwe1e3 pct=10 rep=2 ---
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/prog_sperr_pwe1e3_p10_r2.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/prog_20260818_134437_53492/results_vol_sperr_pwe1e3_p10_r2.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/prog_20260818_134437_53492/results_ext_sperr_pwe1e3_p10_r2.csv only=s3d comp=sperr_pwe1e3 arm=hostsim verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 975.5 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE s3d            min=-6.362436e-15 max=3.920002e-02 range=3.920002e-02 xform=none
+[arm hostsim] plain host buffer; one H2D inside the codec
+[read-plan] kind=1 pct=10 ranges=1 need=11488/73784 bytes (15.6%)  PARTIAL
+[VOL] partial container read: 11488 of 73784 bytes (15.6%)
+[prog] sperr_trunc_3d: 11472 B in, 10% -> 7393 B out
+[VOL] dataset 's3d_sperr_pwe1e3' read at REDUCED fidelity: 10% requested, 11472 of 73768 payload bytes read, 7393 byte stream decoded
+
+=== s3d (953.7 MiB, double, raw) arm=hostsim ===
+Info: 0x5557d4ac6eb0
+  s3d_sperr_pwe1e3             [hostsim] C=   1.12 W=  6656.87 (wall   6656.87) F=    2.78 S=   153.97 X=    0.22 S2=  38.15 | E=   2.91 O=   0.67 R=  2920.71 ms  ratio=13553.07x  RMSE=2.281e-04 maxae=4.952e-03
+[dbg main] done: arm=hostsim, 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS [arm=hostsim] over 1 measurement files: create=1.12 write=6656.87 (wall 6656.87) flush=2.78 sync=153.97 close=0.22 csync=38.15 => write_total=6853.10 ms | evict=2.91 open=0.67 read=2920.71 => read_total=2921.39 ms | ratio=13553.07x ===
+
+--- sperr_pwe1e3 pct=25 rep=0 ---
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/prog_sperr_pwe1e3_p25_r0.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/prog_20260818_134437_53492/results_vol_sperr_pwe1e3_p25_r0.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/prog_20260818_134437_53492/results_ext_sperr_pwe1e3_p25_r0.csv only=s3d comp=sperr_pwe1e3 arm=hostsim verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 975.5 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE s3d            min=-6.362436e-15 max=3.920002e-02 range=3.920002e-02 xform=none
+[arm hostsim] plain host buffer; one H2D inside the codec
+[read-plan] kind=1 pct=25 ranges=1 need=22554/73784 bytes (30.6%)  PARTIAL
+[VOL] partial container read: 22554 of 73784 bytes (30.6%)
+[prog] sperr_trunc_3d: 22538 B in, 25% -> 18455 B out
+[VOL] dataset 's3d_sperr_pwe1e3' read at REDUCED fidelity: 25% requested, 22538 of 73768 payload bytes read, 18455 byte stream decoded
+
+=== s3d (953.7 MiB, double, raw) arm=hostsim ===
+Info: 0x55bad13f5dc0
+  s3d_sperr_pwe1e3             [hostsim] C=   1.09 W=  6620.88 (wall   6620.88) F=    2.98 S=   137.18 X=    0.22 S2=  34.89 | E=   1.15 O=   0.42 R=  2934.97 ms  ratio=13553.07x  RMSE=8.799e-05 maxae=3.087e-03
+[dbg main] done: arm=hostsim, 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS [arm=hostsim] over 1 measurement files: create=1.09 write=6620.88 (wall 6620.88) flush=2.98 sync=137.18 close=0.22 csync=34.89 => write_total=6797.24 ms | evict=1.15 open=0.42 read=2934.97 => read_total=2935.39 ms | ratio=13553.07x ===
+
+--- sperr_pwe1e3 pct=25 rep=1 ---
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/prog_sperr_pwe1e3_p25_r1.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/prog_20260818_134437_53492/results_vol_sperr_pwe1e3_p25_r1.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/prog_20260818_134437_53492/results_ext_sperr_pwe1e3_p25_r1.csv only=s3d comp=sperr_pwe1e3 arm=hostsim verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 975.5 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE s3d            min=-6.362436e-15 max=3.920002e-02 range=3.920002e-02 xform=none
+[arm hostsim] plain host buffer; one H2D inside the codec
+[read-plan] kind=1 pct=25 ranges=1 need=22554/73784 bytes (30.6%)  PARTIAL
+[VOL] partial container read: 22554 of 73784 bytes (30.6%)
+[prog] sperr_trunc_3d: 22538 B in, 25% -> 18455 B out
+[VOL] dataset 's3d_sperr_pwe1e3' read at REDUCED fidelity: 25% requested, 22538 of 73768 payload bytes read, 18455 byte stream decoded
+
+=== s3d (953.7 MiB, double, raw) arm=hostsim ===
+Info: 0x56133211aec0
+  s3d_sperr_pwe1e3             [hostsim] C=   1.08 W=  6610.58 (wall   6610.58) F=    2.60 S=   111.22 X=    0.22 S2=  58.11 | E=   1.13 O=   0.42 R=  2942.23 ms  ratio=13553.07x  RMSE=8.799e-05 maxae=3.087e-03
+[dbg main] done: arm=hostsim, 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS [arm=hostsim] over 1 measurement files: create=1.08 write=6610.58 (wall 6610.58) flush=2.60 sync=111.22 close=0.22 csync=58.11 => write_total=6783.81 ms | evict=1.13 open=0.42 read=2942.23 => read_total=2942.65 ms | ratio=13553.07x ===
+
+--- sperr_pwe1e3 pct=25 rep=2 ---
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/prog_sperr_pwe1e3_p25_r2.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/prog_20260818_134437_53492/results_vol_sperr_pwe1e3_p25_r2.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/prog_20260818_134437_53492/results_ext_sperr_pwe1e3_p25_r2.csv only=s3d comp=sperr_pwe1e3 arm=hostsim verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 975.5 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE s3d            min=-6.362436e-15 max=3.920002e-02 range=3.920002e-02 xform=none
+[arm hostsim] plain host buffer; one H2D inside the codec
+[read-plan] kind=1 pct=25 ranges=1 need=22554/73784 bytes (30.6%)  PARTIAL
+[VOL] partial container read: 22554 of 73784 bytes (30.6%)
+[prog] sperr_trunc_3d: 22538 B in, 25% -> 18455 B out
+[VOL] dataset 's3d_sperr_pwe1e3' read at REDUCED fidelity: 25% requested, 22538 of 73768 payload bytes read, 18455 byte stream decoded
+
+=== s3d (953.7 MiB, double, raw) arm=hostsim ===
+Info: 0x557f06fdaee0
+  s3d_sperr_pwe1e3             [hostsim] C=   1.13 W=  6651.32 (wall   6651.32) F=    2.84 S=   118.40 X=    0.22 S2=  39.66 | E=   1.22 O=   0.42 R=  2945.00 ms  ratio=13553.07x  RMSE=8.799e-05 maxae=3.087e-03
+[dbg main] done: arm=hostsim, 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS [arm=hostsim] over 1 measurement files: create=1.13 write=6651.32 (wall 6651.32) flush=2.84 sync=118.40 close=0.22 csync=39.66 => write_total=6813.57 ms | evict=1.22 open=0.42 read=2945.00 => read_total=2945.42 ms | ratio=13553.07x ===
+
+--- sperr_pwe1e3 pct=50 rep=0 ---
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/prog_sperr_pwe1e3_p50_r0.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/prog_20260818_134437_53492/results_vol_sperr_pwe1e3_p50_r0.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/prog_20260818_134437_53492/results_ext_sperr_pwe1e3_p50_r0.csv only=s3d comp=sperr_pwe1e3 arm=hostsim verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 975.5 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE s3d            min=-6.362436e-15 max=3.920002e-02 range=3.920002e-02 xform=none
+[arm hostsim] plain host buffer; one H2D inside the codec
+[read-plan] kind=1 pct=50 ranges=1 need=40996/73784 bytes (55.6%)  PARTIAL
+[VOL] partial container read: 40996 of 73784 bytes (55.6%)
+[prog] sperr_trunc_3d: 40980 B in, 50% -> 36893 B out
+[VOL] dataset 's3d_sperr_pwe1e3' read at REDUCED fidelity: 50% requested, 40980 of 73768 payload bytes read, 36893 byte stream decoded
+
+=== s3d (953.7 MiB, double, raw) arm=hostsim ===
+Info: 0x56303be45f00
+  s3d_sperr_pwe1e3             [hostsim] C=   1.11 W=  6740.45 (wall   6740.45) F=    2.62 S=   129.81 X=    0.23 S2=  40.35 | E=  19.39 O=   0.41 R=  2944.92 ms  ratio=13553.07x  RMSE=4.638e-05 maxae=1.721e-03
+[dbg main] done: arm=hostsim, 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS [arm=hostsim] over 1 measurement files: create=1.11 write=6740.45 (wall 6740.45) flush=2.62 sync=129.81 close=0.23 csync=40.35 => write_total=6914.56 ms | evict=19.39 open=0.41 read=2944.92 => read_total=2945.34 ms | ratio=13553.07x ===
+
+--- sperr_pwe1e3 pct=50 rep=1 ---
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/prog_sperr_pwe1e3_p50_r1.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/prog_20260818_134437_53492/results_vol_sperr_pwe1e3_p50_r1.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/prog_20260818_134437_53492/results_ext_sperr_pwe1e3_p50_r1.csv only=s3d comp=sperr_pwe1e3 arm=hostsim verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 975.2 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE s3d            min=-6.362436e-15 max=3.920002e-02 range=3.920002e-02 xform=none
+[arm hostsim] plain host buffer; one H2D inside the codec
+[read-plan] kind=1 pct=50 ranges=1 need=40996/73784 bytes (55.6%)  PARTIAL
+[VOL] partial container read: 40996 of 73784 bytes (55.6%)
+[prog] sperr_trunc_3d: 40980 B in, 50% -> 36893 B out
+[VOL] dataset 's3d_sperr_pwe1e3' read at REDUCED fidelity: 50% requested, 40980 of 73768 payload bytes read, 36893 byte stream decoded
+
+=== s3d (953.7 MiB, double, raw) arm=hostsim ===
+Info: 0x559e31184ef0
+  s3d_sperr_pwe1e3             [hostsim] C=   1.15 W=  6663.99 (wall   6663.99) F=    2.55 S=   139.31 X=    0.27 S2=  37.20 | E=   1.07 O=   0.42 R=  2943.70 ms  ratio=13553.07x  RMSE=4.638e-05 maxae=1.721e-03
+[dbg main] done: arm=hostsim, 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS [arm=hostsim] over 1 measurement files: create=1.15 write=6663.99 (wall 6663.99) flush=2.55 sync=139.31 close=0.27 csync=37.20 => write_total=6844.48 ms | evict=1.07 open=0.42 read=2943.70 => read_total=2944.12 ms | ratio=13553.07x ===
+
+--- sperr_pwe1e3 pct=50 rep=2 ---
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/prog_sperr_pwe1e3_p50_r2.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/prog_20260818_134437_53492/results_vol_sperr_pwe1e3_p50_r2.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/prog_20260818_134437_53492/results_ext_sperr_pwe1e3_p50_r2.csv only=s3d comp=sperr_pwe1e3 arm=hostsim verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 975.5 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE s3d            min=-6.362436e-15 max=3.920002e-02 range=3.920002e-02 xform=none
+[arm hostsim] plain host buffer; one H2D inside the codec
+[read-plan] kind=1 pct=50 ranges=1 need=40996/73784 bytes (55.6%)  PARTIAL
+[VOL] partial container read: 40996 of 73784 bytes (55.6%)
+[prog] sperr_trunc_3d: 40980 B in, 50% -> 36893 B out
+[VOL] dataset 's3d_sperr_pwe1e3' read at REDUCED fidelity: 50% requested, 40980 of 73768 payload bytes read, 36893 byte stream decoded
+
+=== s3d (953.7 MiB, double, raw) arm=hostsim ===
+Info: 0x55cf4da50f00
+  s3d_sperr_pwe1e3             [hostsim] C=   1.09 W=  6770.80 (wall   6770.81) F=    2.80 S=   122.67 X=    0.21 S2=  43.97 | E=   1.24 O=   0.42 R=  2949.85 ms  ratio=13553.07x  RMSE=4.638e-05 maxae=1.721e-03
+[dbg main] done: arm=hostsim, 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS [arm=hostsim] over 1 measurement files: create=1.09 write=6770.80 (wall 6770.81) flush=2.80 sync=122.67 close=0.21 csync=43.97 => write_total=6941.55 ms | evict=1.24 open=0.42 read=2949.85 => read_total=2950.28 ms | ratio=13553.07x ===
+
+--- sperr_pwe1e3 pct=75 rep=0 ---
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/prog_sperr_pwe1e3_p75_r0.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/prog_20260818_134437_53492/results_vol_sperr_pwe1e3_p75_r0.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/prog_20260818_134437_53492/results_ext_sperr_pwe1e3_p75_r0.csv only=s3d comp=sperr_pwe1e3 arm=hostsim verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 975.5 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE s3d            min=-6.362436e-15 max=3.920002e-02 range=3.920002e-02 xform=none
+[arm hostsim] plain host buffer; one H2D inside the codec
+[read-plan] kind=1 pct=75 ranges=1 need=59438/73784 bytes (80.6%)  PARTIAL
+[VOL] partial container read: 59438 of 73784 bytes (80.6%)
+[prog] sperr_trunc_3d: 59422 B in, 75% -> 55330 B out
+[VOL] dataset 's3d_sperr_pwe1e3' read at REDUCED fidelity: 75% requested, 59422 of 73768 payload bytes read, 55330 byte stream decoded
+
+=== s3d (953.7 MiB, double, raw) arm=hostsim ===
+Info: 0x55f8019ecee0
+  s3d_sperr_pwe1e3             [hostsim] C=   1.08 W=  6558.71 (wall   6558.72) F=    2.71 S=   113.55 X=    0.31 S2=  32.23 | E=   1.28 O=   0.43 R=  2953.09 ms  ratio=13553.07x  RMSE=3.314e-05 maxae=1.321e-03
+[dbg main] done: arm=hostsim, 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS [arm=hostsim] over 1 measurement files: create=1.08 write=6558.71 (wall 6558.72) flush=2.71 sync=113.55 close=0.31 csync=32.23 => write_total=6708.60 ms | evict=1.28 open=0.43 read=2953.09 => read_total=2953.51 ms | ratio=13553.07x ===
+
+--- sperr_pwe1e3 pct=75 rep=1 ---
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/prog_sperr_pwe1e3_p75_r1.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/prog_20260818_134437_53492/results_vol_sperr_pwe1e3_p75_r1.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/prog_20260818_134437_53492/results_ext_sperr_pwe1e3_p75_r1.csv only=s3d comp=sperr_pwe1e3 arm=hostsim verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 975.4 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE s3d            min=-6.362436e-15 max=3.920002e-02 range=3.920002e-02 xform=none
+[arm hostsim] plain host buffer; one H2D inside the codec
+[read-plan] kind=1 pct=75 ranges=1 need=59438/73784 bytes (80.6%)  PARTIAL
+[VOL] partial container read: 59438 of 73784 bytes (80.6%)
+[prog] sperr_trunc_3d: 59422 B in, 75% -> 55330 B out
+[VOL] dataset 's3d_sperr_pwe1e3' read at REDUCED fidelity: 75% requested, 59422 of 73768 payload bytes read, 55330 byte stream decoded
+
+=== s3d (953.7 MiB, double, raw) arm=hostsim ===
+Info: 0x56390d209db0
+  s3d_sperr_pwe1e3             [hostsim] C=   1.10 W=  6733.82 (wall   6733.82) F=    2.78 S=   119.35 X=    0.22 S2=  37.23 | E=   1.26 O=   0.43 R=  2980.59 ms  ratio=13553.07x  RMSE=3.314e-05 maxae=1.321e-03
+[dbg main] done: arm=hostsim, 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS [arm=hostsim] over 1 measurement files: create=1.10 write=6733.82 (wall 6733.82) flush=2.78 sync=119.35 close=0.22 csync=37.23 => write_total=6894.51 ms | evict=1.26 open=0.43 read=2980.59 => read_total=2981.01 ms | ratio=13553.07x ===
+
+--- sperr_pwe1e3 pct=75 rep=2 ---
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/prog_sperr_pwe1e3_p75_r2.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/prog_20260818_134437_53492/results_vol_sperr_pwe1e3_p75_r2.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/prog_20260818_134437_53492/results_ext_sperr_pwe1e3_p75_r2.csv only=s3d comp=sperr_pwe1e3 arm=hostsim verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 975.4 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE s3d            min=-6.362436e-15 max=3.920002e-02 range=3.920002e-02 xform=none
+[arm hostsim] plain host buffer; one H2D inside the codec
+[read-plan] kind=1 pct=75 ranges=1 need=59438/73784 bytes (80.6%)  PARTIAL
+[VOL] partial container read: 59438 of 73784 bytes (80.6%)
+[prog] sperr_trunc_3d: 59422 B in, 75% -> 55330 B out
+[VOL] dataset 's3d_sperr_pwe1e3' read at REDUCED fidelity: 75% requested, 59422 of 73768 payload bytes read, 55330 byte stream decoded
+
+=== s3d (953.7 MiB, double, raw) arm=hostsim ===
+Info: 0x56343cb42ee0
+  s3d_sperr_pwe1e3             [hostsim] C=   1.25 W=  6651.91 (wall   6651.91) F=    2.48 S=   111.50 X=    0.22 S2=  37.60 | E=   1.26 O=   0.42 R=  2964.50 ms  ratio=13553.07x  RMSE=3.314e-05 maxae=1.321e-03
+[dbg main] done: arm=hostsim, 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS [arm=hostsim] over 1 measurement files: create=1.25 write=6651.91 (wall 6651.91) flush=2.48 sync=111.50 close=0.22 csync=37.60 => write_total=6804.95 ms | evict=1.26 open=0.42 read=2964.50 => read_total=2964.93 ms | ratio=13553.07x ===
+
+--- sperr_pwe1e3 pct=100 rep=0 ---
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/prog_sperr_pwe1e3_p100_r0.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/prog_20260818_134437_53492/results_vol_sperr_pwe1e3_p100_r0.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/prog_20260818_134437_53492/results_ext_sperr_pwe1e3_p100_r0.csv only=s3d comp=sperr_pwe1e3 arm=hostsim verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 975.3 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE s3d            min=-6.362436e-15 max=3.920002e-02 range=3.920002e-02 xform=none
+[arm hostsim] plain host buffer; one H2D inside the codec
+[read-plan] kind=1 pct=100 ranges=1 need=73784/73784 bytes (100.0%)
+
+=== s3d (953.7 MiB, double, raw) arm=hostsim ===
+Info: 0x55b31111ef10
+  s3d_sperr_pwe1e3             [hostsim] C=   1.06 W=  6612.48 (wall   6612.48) F=    2.75 S=   128.28 X=    0.22 S2=  34.21 | E=   1.21 O=   0.42 R=  2970.05 ms  ratio=13553.07x  RMSE=2.036e-05 maxae=7.135e-04
+[dbg main] done: arm=hostsim, 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS [arm=hostsim] over 1 measurement files: create=1.06 write=6612.48 (wall 6612.48) flush=2.75 sync=128.28 close=0.22 csync=34.21 => write_total=6779.00 ms | evict=1.21 open=0.42 read=2970.05 => read_total=2970.47 ms | ratio=13553.07x ===
+
+--- sperr_pwe1e3 pct=100 rep=1 ---
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/prog_sperr_pwe1e3_p100_r1.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/prog_20260818_134437_53492/results_vol_sperr_pwe1e3_p100_r1.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/prog_20260818_134437_53492/results_ext_sperr_pwe1e3_p100_r1.csv only=s3d comp=sperr_pwe1e3 arm=hostsim verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 975.1 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE s3d            min=-6.362436e-15 max=3.920002e-02 range=3.920002e-02 xform=none
+[arm hostsim] plain host buffer; one H2D inside the codec
+[read-plan] kind=1 pct=100 ranges=1 need=73784/73784 bytes (100.0%)
+
+=== s3d (953.7 MiB, double, raw) arm=hostsim ===
+Info: 0x55dc68c4bdb0
+  s3d_sperr_pwe1e3             [hostsim] C=   1.32 W=  7353.16 (wall   7353.16) F=    2.80 S=   113.37 X=    0.22 S2=  57.43 | E=   1.22 O=   0.43 R=  2982.71 ms  ratio=13553.07x  RMSE=2.036e-05 maxae=7.135e-04
+[dbg main] done: arm=hostsim, 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS [arm=hostsim] over 1 measurement files: create=1.32 write=7353.16 (wall 7353.16) flush=2.80 sync=113.37 close=0.22 csync=57.43 => write_total=7528.31 ms | evict=1.22 open=0.43 read=2982.71 => read_total=2983.14 ms | ratio=13553.07x ===
+
+--- sperr_pwe1e3 pct=100 rep=2 ---
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/prog_sperr_pwe1e3_p100_r2.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/prog_20260818_134437_53492/results_vol_sperr_pwe1e3_p100_r2.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/prog_20260818_134437_53492/results_ext_sperr_pwe1e3_p100_r2.csv only=s3d comp=sperr_pwe1e3 arm=hostsim verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 974.8 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE s3d            min=-6.362436e-15 max=3.920002e-02 range=3.920002e-02 xform=none
+[arm hostsim] plain host buffer; one H2D inside the codec
+[read-plan] kind=1 pct=100 ranges=1 need=73784/73784 bytes (100.0%)
+
+=== s3d (953.7 MiB, double, raw) arm=hostsim ===
+Info: 0x555e193ebda0
+  s3d_sperr_pwe1e3             [hostsim] C=   1.10 W=  6745.99 (wall   6745.99) F=    2.78 S=   120.92 X=    0.23 S2=  39.50 | E=   1.54 O=   0.44 R=  2999.06 ms  ratio=13553.07x  RMSE=2.036e-05 maxae=7.135e-04
+[dbg main] done: arm=hostsim, 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS [arm=hostsim] over 1 measurement files: create=1.10 write=6745.99 (wall 6745.99) flush=2.78 sync=120.92 close=0.23 csync=39.50 => write_total=6910.51 ms | evict=1.54 open=0.44 read=2999.06 => read_total=2999.50 ms | ratio=13553.07x ===
+
+=== joined: sperr_pwe1e3 ===
+pct  rep  logical_bytes  stored_bytes  bytes_read  cont_bytes  read_wall_ms  read_cpu_ms  open_ms  evict_ms  rmse          maxae         ratio
+5    0    1000000000     73784         7800        73784       2936.3023     2936.3021    0.4308   1.2563    4.156517e-04  7.149953e-03  13553.0738
+5    1    1000000000     73784         7800        73784       2880.4032     2880.4029    0.4189   1.2798    4.156517e-04  7.149953e-03  13553.0738
+5    2    1000000000     73784         7800        73784       2886.6059     2886.6056    0.4234   0.1994    4.156517e-04  7.149953e-03  13553.0738
+10   0    1000000000     73784         11488       73784       2949.8984     2949.8982    0.4231   1.6537    2.281053e-04  4.952471e-03  13553.0738
+10   1    1000000000     73784         11488       73784       2902.4699     2902.4696    0.4264   2.4070    2.281053e-04  4.952471e-03  13553.0738
+10   2    1000000000     73784         11488       73784       2920.7145     2920.7143    0.6734   2.9149    2.281053e-04  4.952471e-03  13553.0738
+25   0    1000000000     73784         22554       73784       2934.9696     2934.9694    0.4192   1.1467    8.798500e-05  3.087042e-03  13553.0738
+25   1    1000000000     73784         22554       73784       2942.2295     2942.2293    0.4229   1.1310    8.798500e-05  3.087042e-03  13553.0738
+25   2    1000000000     73784         22554       73784       2945.0033     2945.0029    0.4184   1.2177    8.798500e-05  3.087042e-03  13553.0738
+50   0    1000000000     73784         40996       73784       2944.9239     2944.9235    0.4148   19.3913   4.638437e-05  1.720952e-03  13553.0738
+50   1    1000000000     73784         40996       73784       2943.6959     2943.6958    0.4211   1.0715    4.638437e-05  1.720952e-03  13553.0738
+50   2    1000000000     73784         40996       73784       2949.8541     2949.8539    0.4221   1.2365    4.638437e-05  1.720952e-03  13553.0738
+75   0    1000000000     73784         59438       73784       2953.0865     2953.0863    0.4275   1.2845    3.313635e-05  1.321090e-03  13553.0738
+75   1    1000000000     73784         59438       73784       2980.5858     2980.5856    0.4262   1.2640    3.313635e-05  1.321090e-03  13553.0738
+75   2    1000000000     73784         59438       73784       2964.5047     2964.5045    0.4206   1.2604    3.313635e-05  1.321090e-03  13553.0738
+100  0    1000000000     73784         73784       73784       2970.0470     2970.0468    0.4193   1.2122    2.035617e-05  7.134692e-04  13553.0738
+100  1    1000000000     73784         73784       73784       2982.7100     2982.7098    0.4314   1.2168    2.035617e-05  7.134692e-04  13553.0738
+100  2    1000000000     73784         73784       73784       2999.0580     2999.0578    0.4413   1.5394    2.035617e-05  7.134692e-04  13553.0738
+
+=== runs that FAILED (rep=-1) ===
+
+=== next ===
+  python3 plot_progressive.py /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/prog_20260818_134437_53492/progressive_sperr_pwe1e3.csv \
+      -o /home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/prog_20260818_134437_53492/progressive_sperr_pwe1e3.png --cpu-clock \
+      --subtitle 's3d, SPERR sperr_pwe1e3, GPFS cold cache, 3 reps'
+
+Job finished on Tue Aug 18 13:55:31 CDT 2026
