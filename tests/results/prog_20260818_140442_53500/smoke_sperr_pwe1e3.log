@@ -1,0 +1,26 @@
+[dbg main] h5base=/lcrc/project/SDR/kdougherty/vol_bench_h5/smoke.h5 csv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/prog_20260818_140442_53500/smoke_vol.csv xcsv=/home/kdougherty/hdf5_projs/vol-external-passthrough/tests/results/prog_20260818_140442_53500/smoke_ext.csv only=scale-T comp=sperr_pwe1e3 arm=hostsim verify=0 keep_h5=0 debug=0
+[dbg main] durability: fsync=1 sync_dir=1 drop_cache=1 (BENCH_FSYNC / BENCH_SYNC_DIR / BENCH_DROP_CACHE)
+[dbg main] one measurement per (dataset x compressor), no warmup, own file at <base>_<comp>.h5
+name           dtype  rank src    dims                   MiB        needGiB    exists
+miranda        double 3    raw    256x384x384            288.0      0.6        yes
+ocean_temp     float  0    hdf5   (from file)            0.0        0.0        yes
+einspline37    float  1    raw    3390212880             12932.6    25.3       yes
+scale-T        float  3    raw    98x1200x1200           538.3      1.1        yes
+s3d            double 3    raw    500x500x500            953.7      1.9        yes
+nyx_baryon     float  0    hdf5   (from file)            0.0        0.0        yes
+MemAvailable: 975.4 GiB (needGiB is hbuf+rbuf only; the connector needs more)
+6/6 dataset paths readable
+RANGE scale-T        min=5.209023e+00 max=5.754571e+00 range=5.455480e-01 xform=log1p
+[arm hostsim] plain host buffer; one H2D inside the codec
+[sperr] chunks pinned to 1200 x 1200 x 98 (one internal chunk)
+[read-plan] kind=1 pct=25 ranges=1 need=398765/1578630 bytes (25.3%)  PARTIAL
+[VOL] partial container read: 398765 of 1578630 bytes (25.3%)
+[prog] sperr_trunc_3d: 398749 B in, 25% -> 394667 B out
+[VOL] dataset 'scale-T_sperr_pwe1e3' read at REDUCED fidelity: 25% requested, 398749 of 1578614 payload bytes read, 394667 byte stream decoded
+
+=== scale-T (538.3 MiB, float, raw, transformed) arm=hostsim ===
+Info: 0x55836dac1dc0
+  scale-T_sperr_pwe1e3         [hostsim] C=   3.81 W= 10488.61 (wall  10488.61) F=    0.44 S=   126.12 X=    0.26 S2= 114.15 | E=   1.11 O=   0.46 R=  3676.33 ms  ratio=357.58x  RMSE=2.602e-04 maxae=8.203e-03 (log-space)
+[dbg main] done: arm=hostsim, 1 datasets, 0 skipped, 1 measurements
+
+=== TOTALS [arm=hostsim] over 1 measurement files: create=3.81 write=10488.61 (wall 10488.61) flush=0.44 sync=126.12 close=0.26 csync=114.15 => write_total=10733.39 ms | evict=1.11 open=0.46 read=3676.33 => read_total=3676.79 ms | ratio=357.58x ===

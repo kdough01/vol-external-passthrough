@@ -1,0 +1,3 @@
+dataset,compressor,op,total_ms,stage_ms,compress_ms,container_ms,io_ms,pressio_call_ms,device_ms,transfer_ms,vol_compress_ms,pressio_host_ms,residual_ms,residual_frac,h2d_ms
+scale-T_sperr_pwe1e3,sperr,write,10668.5108,0.0000,10665.1933,0.0762,3.2371,10642.1293,10642.3301,0.0000,23.0641,-0.2008,0.0042,0.000000,0.000
+scale-T_sperr_pwe1e3,sperr,read,3621.7285,0.0000,3619.6285,0.0000,1.9365,3504.6580,3504.7290,0.0000,114.9705,-0.0710,0.1636,0.000045,0.000

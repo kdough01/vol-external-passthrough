@@ -1,0 +1,10 @@
+dataset,compressor,path,op,phase,ms,ratio,rmse
+scale-T,sperr_pwe1e3,vol,write,total,10672.0273,357.5759,
+scale-T,sperr_pwe1e3,vol,write,wall,10672.0275,,
+scale-T,sperr_pwe1e3,vol,write,d2h,0.0000,,
+scale-T,sperr_pwe1e3,vol,write,flush,0.3591,,
+scale-T,sperr_pwe1e3,vol,write,sync,143.4166,,
+scale-T,sperr_pwe1e3,vol,write,close,0.2365,,
+scale-T,sperr_pwe1e3,vol,write,csync,41.8879,,
+scale-T,sperr_pwe1e3,vol,read,evict,1.1155,,
+scale-T,sperr_pwe1e3,vol,read,total,4141.5443,,1.085203e-04

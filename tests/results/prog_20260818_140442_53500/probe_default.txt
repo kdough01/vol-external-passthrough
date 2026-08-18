@@ -1,0 +1,18 @@
+volume      : 384 x 384 x 256  (37748736 elems, 144.0 MiB raw f32)
+chunk dims  : 256 x 256 x 256
+chunk grid  : 2 x 2 x 1 = 4 chunk(s)   <- prefix truncation is NOT legal here
+stream      : 6744156 bytes (22.39x)
+slack       : 4096 bytes
+
+ pct | A reference (full stream)    | B short prefix (naive)       | C zero-tail (YOUR VOL)      
+-----+------------------------------+------------------------------+-----------------------------
+   5 |   89.07 dB    337224 B       |   89.07 dB    337224 B       |   89.07 dB    337224 B      
+  10 |  101.77 dB    674431 B       |  101.77 dB    674431 B       |  101.77 dB    674431 B      
+  25 |  116.88 dB   1686052 B       |  116.88 dB   1686052 B       |  116.88 dB   1686052 B      
+  50 |  129.27 dB   3372087 B       |  129.27 dB   3372087 B       |  129.27 dB   3372087 B      
+  75 |  136.84 dB   5058121 B       |  136.84 dB   5058121 B       |  136.84 dB   5058121 B      
+ 100 |  144.32 dB   6744156 B       |  144.32 dB   6744156 B       |  144.32 dB   6744156 B      
+
+VERDICT: multi-chunk but zero-tail happened to match. Do not rely on
+         this -- it is not a guarantee SPERR makes. Re-run with other
+         dims/quality before trusting it.
