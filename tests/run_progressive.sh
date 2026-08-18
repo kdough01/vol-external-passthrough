@@ -253,6 +253,19 @@ if [ -f "$SMOKE_X" ]; then
         pf_bad "xcsv has $NF fields, expected 24 -- the read_wall_ms patch is missing."
         echo "         The join below reads \$24 and would produce empty throughput."
     fi
+
+    # A header with no rows means the run measured NOTHING. Checking the header
+    # alone is a false green light -- it is what let a zero-measurement run look
+    # healthy the first time.
+    NROWS=$(awk 'END{print NR-1}' "$SMOKE_X")
+    if [ "${NROWS:-0}" -ge 1 ] 2>/dev/null; then
+        pf_ok "xcsv has $NROWS data row(s)"
+    else
+        pf_bad "xcsv has a header but ZERO data rows -- nothing was measured."
+        echo "         Either BENCH_COMP='$SMOKE_COMP' matches no entry in"
+        echo "         BENCH_COMPRESSORS (check: grep -n sperr tests/bench_config.h),"
+        echo "         or run_rep failed before writing a row (check $SMOKE_LOG)."
+    fi
     # wall vs cpu: a cold read should spend real time blocked on GPFS
     read RCPU RWALL <<<"$(awk -F, 'NR==2 {print $17, $24}' "$SMOKE_X")"
     echo "         read_ms(cpu)=${RCPU:-?}  read_wall_ms=${RWALL:-?}"

@@ -225,3 +225,21 @@ fi
 # will now be running against bsws=64 and will produce streams incompatible
 # with your stock env.  Keep h5z-zfp work in a separate job.
 # ---------------------------------------------------------------------------
+
+# ---------------------------------------------------------------------------
+# libpressio-sperr is a SEPARATE spack package, not a +sperr variant of
+# libpressio, so it builds its own shared object whose registration
+# constructor only runs if something loads it. Without this, anything asking
+# libpressio for "sperr" gets 'invalid compressor id sperr' -- dump_opts on
+# the login node, and the VOL connector mid-sweep.
+#
+# Appended, never assigned: the zfp bsws=64 swap above already owns LD_PRELOAD.
+# ---------------------------------------------------------------------------
+: "${LP_VIEW:=/home/kdougherty/libpressio_cuda/.spack-env/view}"
+SPERR_PLUGIN="${LP_VIEW}/lib/liblibpressio_sperr.so"
+if [ -e "$SPERR_PLUGIN" ]; then
+    export LD_PRELOAD="${LD_PRELOAD:+$LD_PRELOAD:}$SPERR_PLUGIN"
+    echo "[preamble] sperr plugin preloaded: $SPERR_PLUGIN"
+else
+    echo "[preamble] WARNING: $SPERR_PLUGIN missing -- sperr runs will fail" >&2
+fi

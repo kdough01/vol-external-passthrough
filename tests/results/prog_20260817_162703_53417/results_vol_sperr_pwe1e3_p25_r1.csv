@@ -1,0 +1,10 @@
+dataset,compressor,path,op,phase,ms,ratio,rmse
+miranda,sperr_pwe1e3,vol,write,total,9182.5724,207.5897,
+miranda,sperr_pwe1e3,vol,write,wall,9182.5726,,
+miranda,sperr_pwe1e3,vol,write,d2h,0.0000,,
+miranda,sperr_pwe1e3,vol,write,flush,0.2992,,
+miranda,sperr_pwe1e3,vol,write,sync,95.7323,,
+miranda,sperr_pwe1e3,vol,write,close,0.2202,,
+miranda,sperr_pwe1e3,vol,write,csync,50.5350,,
+miranda,sperr_pwe1e3,vol,read,evict,1.1813,,
+miranda,sperr_pwe1e3,vol,read,total,3987.8105,,1.041789e-03
