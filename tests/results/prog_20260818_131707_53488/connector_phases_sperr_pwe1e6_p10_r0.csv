@@ -1,0 +1,3 @@
+dataset,compressor,op,total_ms,stage_ms,compress_ms,container_ms,io_ms,pressio_call_ms,device_ms,transfer_ms,vol_compress_ms,pressio_host_ms,residual_ms,residual_frac,h2d_ms
+s3d_sperr_pwe1e6,sperr,write,8655.6822,0.0000,8651.7038,0.0738,3.8998,8650.6589,8650.7441,0.0000,1.0449,-0.0852,0.0047,0.000001,0.000
+s3d_sperr_pwe1e6,sperr,read,3355.7940,0.0000,3353.5005,0.0000,2.1204,3063.5335,3063.6023,0.0000,289.9670,-0.0688,0.1731,0.000052,0.000
