@@ -1,4 +1,4 @@
-# HDF5 Compression VOL
+# CompVOL: HDF5 Compression VOL
 
 This repository contains an HDF5 Virtual Object Layer (VOL) connector that stores HDF5 datasets as LibPressio-compressed byte streams. It is designed for compressor-agnostic CPU compression and optional CUDA-aware compression, with support for connector-managed chunking, timing/metrics output, and progressive reads for SPERR.
 
@@ -11,7 +11,7 @@ The [project wiki](https://github.com/kdough01/vol-external-passthrough/wiki) co
 - CPU compression through any compatible LibPressio compressor registered in the installation.
 - Optional CUDA builds for device-resident compression paths (`-DUSE_CUDA=ON`).
 - Dataset-level compressor selection and JSON options.
-- Several storage strategies: native whole-dataset streams, VOL chunking, LibPressio chunking, shared metadata, and progressive SPERR storage.
+- Several storage strategies: native whole-dataset streams, VOL chunking, LibPressio chunking, and progressive SPERR storage.
 - Full-fidelity round trips through standard HDF5 reads and writes.
 - Progressive reads for the `sperr` compressor using a requested fidelity percentage.
 - Optional LibPressio size/time metrics and connector timing CSV output.
@@ -196,4 +196,4 @@ The example READMEs use `h5cc` and the built connector library. If your HDF5 ins
 
 ## Citation
 
-Add the project paper citation here when it is published. Until then, cite this repository and include the commit used for your experiment.
+Pending
